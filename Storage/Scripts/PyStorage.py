@@ -69,9 +69,6 @@ class PyStorage:
             raise TypeError("async_mode must be a boolean")
 
         # Get tags asynchronously or synchronously based on async_mode
-        if async_mode:
-            tags =self.metadata_manager.get_tags(file_path, version_id)
-            return tags
-        else:
-            tags = self.metadata_manager.get_tags(file_path, version_id)
-            return tags
+        tags =self.metadata_manager.get_tags(file_path, version_id)
+        return tags
+
