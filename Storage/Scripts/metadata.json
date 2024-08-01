@@ -1,0 +1,96 @@
+{
+    "C:/Users/shana/Desktop/ניסיון חדש/file.txt": {
+        "versions": {
+            "123": {
+                "LegalHold": {
+                    "Status": "ON"
+                },
+                "acl": {
+                    "owner": "user1",
+                    "permissions": {
+                        "read": [
+                            "user1",
+                            "user2"
+                        ],
+                        "write": [
+                            "user1"
+                        ]
+                    }
+                },
+                "TagSet": [
+                    {
+                        "Key": "Key1",
+                        "Value": "Value1"
+                    },
+                    {
+                        "Key": "Key2",
+                        "Value": "Value2"
+                    }
+                ],
+                "ObjectLockConfiguration": {
+                    "ObjectLockEnabled": "Enabled",
+                    "Rule": {
+                        "DefaultRetention": {
+                            "Mode": "GOVERNANCE",
+                            "Days": 30
+                        }
+                    }
+                },
+                "LastModified": "2024-07-31T12:00:00Z",
+                "ContentLength": 1024,
+                "ETag": "1234567890abcdef",
+                "ContentType": "text/plain",
+                "Metadata": {},
+                "checksum": "abc124",
+                "ObjectParts": "None",
+                "ObjectSize": 67890,
+                "StorageClass": "STANDARD"
+            },
+            "12554": {
+                "LegalHold": {
+                    "Status": "ON"
+                },
+                "acl": {
+                    "owner": "user1",
+                    "permissions": {
+                        "read": [
+                            "user1",
+                            "user2"
+                        ],
+                        "write": [
+                            "user1"
+                        ]
+                    }
+                },
+                "TagSet": [
+                    {
+                        "Key": "Key1",
+                        "Value": "Value1"
+                    },
+                    {
+                        "Key": "Key2",
+                        "Value": "Value2"
+                    }
+                ],
+                "ObjectLockConfiguration": {
+                    "ObjectLockEnabled": "Disabled",
+                    "Rule": {
+                        "DefaultRetention": {
+                            "Mode": "COMPLIANCE",
+                            "Days": 60
+                        }
+                    }
+                },
+                "LastModified": "2024-07-25T09:00:00Z",
+                "ContentLength": 2048,
+                "ETag": "abcdef1234567890",
+                "ContentType": "application/octet-stream",
+                "Metadata": {},
+                "checksum": "abc124",
+                "ObjectParts": "None",
+                "ObjectSize": 67890,
+                "StorageClass": "STANDARD"
+            }
+        }
+    }
+}
