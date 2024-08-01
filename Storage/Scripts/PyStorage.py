@@ -13,9 +13,13 @@ class PyStorage:
         attributes = asyncio.run(self.get_object_attributes(file_path))
         return attributes
 
-    async def get_object_attributes(self, key, version_id=None, is_sync=True):  
+    async def get_object_attributes(self, key, version_id=None,  async_mode=False):  
         # Get the metadata for the given key
-        metadata = self.metadata_manager.metadata.get(key, None)
+        if async_mode:
+            metadata=await asyncio.to_thread(self.metadata_manager.get_metadata, key)
+        else:
+            metadata = self.metadata_manager.get_metadata(key)   
+              
         if metadata is None:
             raise FileNotFoundError(f"No metadata found for object {key}")
 
@@ -69,6 +73,9 @@ class PyStorage:
             raise TypeError("async_mode must be a boolean")
 
         # Get tags asynchronously or synchronously based on async_mode
-        tags =self.metadata_manager.get_tags(file_path, version_id)
+        if async_mode:            
+            tags=await asyncio.to_thread(self.metadata_manager.get_tags, file_path, version_id)
+        else:
+            tags =self.metadata_manager.get_tags(file_path, version_id)
         return tags
 

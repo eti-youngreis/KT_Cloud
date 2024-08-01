@@ -137,7 +137,7 @@ async def test_get_object_attributes_async_specific_version(create_test_file, cr
     load_test_metadata()
     key = str(create_test_file)
     version_id = "12554"
-    attributes = await functions.get_object_attributes(key, version_id=version_id, is_sync=False)
+    attributes = await functions.get_object_attributes(key, version_id=version_id, async_mode=True)
     assert attributes["checksum"] == "abc124"
     assert attributes["ETag"] == "abcdef1234567890"
     assert attributes["ObjectParts"] == "None"
@@ -157,7 +157,7 @@ async def test_get_object_attributes_async_invalid_key(create_test_file, create_
     load_test_metadata()
     key = "C:/Users/shana/Desktop/ניסיון חדש/non_existent_file.txt"
     with pytest.raises(FileNotFoundError):
-        await functions.get_object_attributes(key, is_sync=False)
+        await functions.get_object_attributes(key, async_mode=True)
 
 def test_get_object_attributes_no_version_specified(create_test_file, create_test_metadata):
     # Test to get the latest version attributes synchronously without specifying version
@@ -175,7 +175,7 @@ async def test_get_object_attributes_async_no_version_specified(create_test_file
     # Test to get the latest version attributes asynchronously without specifying version
     load_test_metadata()
     key = str(create_test_file)
-    attributes = await functions.get_object_attributes(key, is_sync=False)
+    attributes = await functions.get_object_attributes(key, async_mode=True)
     assert attributes["checksum"] == "abc124"
     assert attributes["ETag"] == "abcdef1234567890"
     assert attributes["ObjectParts"] == "None"

@@ -18,6 +18,22 @@ class MetadataManager:
         else:
             return {}
 
+    # async def load_metadata(self, is_sync=True):
+    # # Load metadata from the file either synchronously or asynchronously
+    #     if is_sync:
+    #         if os.path.exists(self.metadata_file):
+    #             with open(self.metadata_file, 'r', encoding='utf-8') as f:
+    #                 return json.load(f)
+    #         else:
+    #             return {}
+    #     else:
+    #         if os.path.exists(self.metadata_file):
+    #             async with aiofiles.open(self.metadata_file, 'r', encoding='utf-8') as f:
+    #                 content = await f.read()
+    #                 return json.loads(content)
+    #         else:
+    #             return {}
+
     async def save_metadata(self, is_sync=True):
         # Save metadata to the file either synchronously or asynchronously
         if is_sync:
