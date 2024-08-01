@@ -70,7 +70,7 @@ class PyStorage:
 
         # Get tags asynchronously or synchronously based on async_mode
         if async_mode:
-            tags = await asyncio.to_thread(self.metadata_manager.get_tags, file_path, version_id)
+            tags =self.metadata_manager.get_tags(file_path, version_id)
             return tags
         else:
             tags = self.metadata_manager.get_tags(file_path, version_id)

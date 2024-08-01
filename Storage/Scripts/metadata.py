@@ -63,8 +63,6 @@ class MetadataManager:
             else:
                 versions['0']=data
                 
-
-
         # Save metadata either synchronously or asynchronously
         if is_sync:
             await self.save_metadata(True)
