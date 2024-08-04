@@ -33,7 +33,7 @@ def test_load_metadata_file_not_exist(temp_metadata_file):
 async def test_save_metadata_sync(temp_metadata_file):
     # Test saving metadata synchronously
     metadata_manager = MetadataManager(metadata_file=temp_metadata_file)
-    await metadata_manager.save_metadata(is_sync=True)
+    await metadata_manager.save_metadata(sync_flag=True)
     with open(temp_metadata_file, 'r') as f:
         metadata = json.load(f)
     assert metadata == {}
@@ -42,7 +42,7 @@ async def test_save_metadata_sync(temp_metadata_file):
 async def test_save_metadata_async(temp_metadata_file):
     # Test saving metadata asynchronously
     metadata_manager = MetadataManager(metadata_file=temp_metadata_file)
-    await metadata_manager.save_metadata(is_sync=False)
+    await metadata_manager.save_metadata(sync_flag=False)
     with open(temp_metadata_file, 'r') as f:
         metadata = json.load(f)
     assert metadata == {}

@@ -2,7 +2,11 @@ import os
 import pytest
 import asyncio
 import json
-from PyStorage import PyStorage  # Ensure this is the correct import path
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from PyStorage import PyStorage
 
 functions = PyStorage()
 
@@ -120,7 +124,7 @@ async def test_get_object_attributes_async_specific_version(create_test_file, cr
     # Test to get attributes for a specific version asynchronously
     key = str(create_test_file)
     version_id = "12554"
-    attributes = await functions.get_object_attributes(key, version_id=version_id, async_mode=True)
+    attributes = await functions.get_object_attributes(key, version_id=version_id, async_flag=True)
     assert attributes["checksum"] == "abc124"
     assert attributes["ETag"] == "abcdef1234567890"
     assert attributes["ObjectParts"] == "None"
@@ -138,7 +142,7 @@ async def test_get_object_attributes_async_invalid_key( create_test_metadata):
     # Test to ensure FileNotFoundError is raised for an invalid key asynchronously
     key = "C:/Users/shana/Desktop/ניסיון חדש/non_existent_file.txt"
     with pytest.raises(FileNotFoundError):
-        await functions.get_object_attributes(key, async_mode=True)
+        await functions.get_object_attributes(key, async_flag=True)
 
 def test_get_object_attributes_no_version_specified(create_test_file, create_test_metadata):
     # Test to get the latest version attributes synchronously without specifying version
@@ -154,7 +158,7 @@ def test_get_object_attributes_no_version_specified(create_test_file, create_tes
 async def test_get_object_attributes_async_no_version_specified(create_test_file, create_test_metadata):
     # Test to get the latest version attributes asynchronously without specifying version
     key = str(create_test_file)
-    attributes = await functions.get_object_attributes(key, async_mode=True)
+    attributes = await functions.get_object_attributes(key, async_flag=True)
     assert attributes["checksum"] == "abc124"
     assert attributes["ETag"] == "abcdef1234567890"
     assert attributes["ObjectParts"] == "None"

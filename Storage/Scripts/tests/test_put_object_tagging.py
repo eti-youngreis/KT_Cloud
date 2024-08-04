@@ -31,8 +31,9 @@ def test_put_object_tagging(create_test_file, setup_metadata_manager):
     file_path = str(create_test_file)
     tags = [{'Key': 'Project', 'Value': 'Test'}]
 
-    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_mode=False))
-    
+    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=False))
+    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=True))
+
     metadata_file = functions.metadata_manager.get_metadata(file_path)
     assert metadata_file.get('versions', {}).get(str(123), {}).get('TagSet') == tags
 
@@ -41,8 +42,9 @@ def test_put_object_tagging_file_without_tags(create_test_file, setup_metadata_m
     file_path = str(create_test_file)
     tags = []
 
-    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_mode=False))
-    
+    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=False))
+    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=True))
+
     metadata_file = setup_metadata_manager.get_metadata(file_path)
     assert metadata_file.get('versions', {}).get(str(123), {}).get('TagSet') == tags
 
@@ -51,7 +53,8 @@ def test_put_object_tagging_empty_values_sync(create_test_file, setup_metadata_m
     file_path = str(create_test_file)
     tags = [{"Key": "", "Value": ""}]
 
-    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_mode=False))
+    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=False))
+    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=True))
 
     metadata_file = setup_metadata_manager.get_metadata(file_path)
     assert metadata_file.get('versions', {}).get(str(123), {}).get('TagSet') == tags
@@ -61,7 +64,8 @@ def test_put_object_tagging_single_key_empty_value(create_test_file, setup_metad
     file_path = str(create_test_file)
     tags = [{"Key": "SingleKey", "Value": ""}]
 
-    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_mode=False))
+    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=False))
+    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=True))
 
     metadata_file = setup_metadata_manager.get_metadata(file_path)
     assert metadata_file.get('versions', {}).get(str(123), {}).get('TagSet') == tags
@@ -71,24 +75,26 @@ def test_put_object_tagging_multiple_keys(create_test_file, setup_metadata_manag
     file_path = str(create_test_file)
     tags = [{"Key": "Key1", "Value": "Value1"}, {"Key": "Key2", "Value": "Value2"}]
 
-    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_mode=False))
+    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=False))
+    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=True))
 
     metadata_file = setup_metadata_manager.get_metadata(file_path)
     assert metadata_file.get('versions', {}).get(str(123), {}).get('TagSet') == tags
 
 def test_put_object_tagging_invalid_arguments(create_test_file, setup_metadata_manager):
-    # Test putting object tagging with invalid async_mode argument
+    # Test putting object tagging with invalid async_flag argument
     file_path = str(create_test_file)
 
     with pytest.raises(TypeError):
-        asyncio.run(functions.put_object_tagging(file_path, tags=[], version_id=123, async_mode="a"))
-        asyncio.run(functions.put_object_tagging(file_path, tags=[], version_id=123, async_mode="m"))
+        asyncio.run(functions.put_object_tagging(file_path, tags=[], version_id=123, async_flag="a"))
+        asyncio.run(functions.put_object_tagging(file_path, tags=[], version_id=123, async_flag="m"))
 
 def test_put_object_tagging_empty_file_path(create_test_file, setup_metadata_manager):
     # Test putting object tagging with an empty file path and valid version ID
     file_path = str(create_test_file)
 
-    asyncio.run(functions.put_object_tagging(file_path, tags=[], version_id=123, async_mode=False))
+    asyncio.run(functions.put_object_tagging(file_path, tags=[], version_id=123, async_flag=False))
+    asyncio.run(functions.put_object_tagging(file_path, tags=[], version_id=123, async_flag=True))
 
     metadata_file = setup_metadata_manager.get_metadata(file_path)
     assert metadata_file.get('versions', {}).get(str(123), {}).get('TagSet') == []
@@ -98,7 +104,8 @@ def test_put_object_tagging_large_metadata(create_test_file, setup_metadata_mana
     file_path = str(create_test_file)
     large_tags = [{"Key": f"Key{i}", "Value": f"Value{i}"} for i in range(1000)]
 
-    asyncio.run(functions.put_object_tagging(file_path, large_tags, version_id=123, async_mode=False))
+    asyncio.run(functions.put_object_tagging(file_path, large_tags, version_id=123, async_flag=False))
+    asyncio.run(functions.put_object_tagging(file_path, large_tags, version_id=123, async_flag=True))
 
     metadata_file = setup_metadata_manager.get_metadata(file_path)
     assert metadata_file.get('versions', {}).get(str(123), {}).get('TagSet') == large_tags
@@ -108,7 +115,8 @@ def test_put_object_tagging_special_characters(create_test_file, setup_metadata_
     file_path = str(create_test_file)
     tags = [{"Key": "Key!@#$%^&*()", "Value": "Value!@#$%^&*()"}]
 
-    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_mode=False))
+    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=False))
+    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=True))
 
     metadata_file = setup_metadata_manager.get_metadata(file_path)
     assert metadata_file.get('versions', {}).get(str(123), {}).get('TagSet') == tags
@@ -118,27 +126,21 @@ def test_put_object_tagging_duplicate_keys(create_test_file, setup_metadata_mana
     file_path = str(create_test_file)
     tags = [{"Key": "DuplicateKey", "Value": "Value1"}, {"Key": "DuplicateKey", "Value": "Value2"}]
 
-    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_mode=False))
+    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=False))
+    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=True))
 
     metadata_file = setup_metadata_manager.get_metadata(file_path)
     assert metadata_file.get('versions', {}).get(str(123), {}).get('TagSet') == tags
 
-def test_put_object_tagging_empty_tags_async(create_test_file, setup_metadata_manager):
-    # Test putting object tagging with an empty tags list in async mode
-    file_path = str(create_test_file)
-    tags = []
 
-    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_mode=True))
-
-    metadata_file = setup_metadata_manager.get_metadata(file_path)
-    assert metadata_file.get('versions', {}).get(str(123), {}).get('TagSet') == tags
 
 def test_put_object_tagging_no_version_id(create_test_file, setup_metadata_manager):
     # Test putting object tagging without specifying a version ID
     file_path = str(create_test_file)
     tags = [{"Key": "Project", "Value": "Test"}]
 
-    asyncio.run(functions.put_object_tagging(file_path, tags, async_mode=False))
+    asyncio.run(functions.put_object_tagging(file_path, tags, async_flag=False))
+    asyncio.run(functions.put_object_tagging(file_path, tags, async_flag=True))
 
     metadata_file = setup_metadata_manager.get_metadata(file_path)
     latest_version = setup_metadata_manager.get_latest_version(file_path)
