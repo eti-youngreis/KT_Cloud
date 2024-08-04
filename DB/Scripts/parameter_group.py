@@ -1,12 +1,13 @@
 import json
 
 from Management import insert_into_management_table, delete_from_Management
+from abc import abstractmethod
 
 
 class ParameterGroup:
     default_parameter_group = None
 
-    def __init__(self, db_cluster_parameter_group_name, db_parameter_group_family, description, tags, parameters=None):
+    def __init__(self, db_cluster_parameter_group_name, db_parameter_group_family, description, tags):
         """
         Initializes a ParameterGroup instance.
 
@@ -15,13 +16,17 @@ class ParameterGroup:
         db_parameter_group_family (str): The family of the parameter group
         description (str): Description of the parameter group
         tags (list): Tags associated with the parameter group
-        parameters (dict, optional): Parameters for the parameter group (default: None)
+        # parameters (dict, optional): Parameters for the parameter group (default: None)
         """
         self.parameter_group_name = db_cluster_parameter_group_name
         self.db_parameter_group_family = db_parameter_group_family
         self.description = description
         self.tags = tags
-        self.parameters = parameters
+        self.parameters = self.load_default_parameters()
+
+    @abstractmethod
+    def load_default_parameters(self):
+        pass
 
     def get_metadata(self):
         """

@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9223bc00-e014-47fb-b764-eaef789e73a0" name="Changes" comment="">
+<<<<<<< HEAD
       <change afterPath="$PROJECT_DIR$/DB/Scripts/database.db" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/DB/Scripts/db_instance.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/DB/Scripts/endpoint.py" afterDir="false" />
@@ -15,6 +16,12 @@
       <change beforePath="$PROJECT_DIR$/DB/Scripts/db_cluster" beforeDir="false" afterPath="$PROJECT_DIR$/DB/Scripts/db_cluster_parameter_group.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DB/Scripts/db_cluster.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB/Scripts/db_cluster.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DB/Scripts/instance.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB/Scripts/db_parameter_group.py" afterDir="false" />
+=======
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DB/Scripts/db_cluster_parameter_group.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB/Scripts/db_cluster_parameter_group.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DB/Scripts/db_parameter_group.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB/Scripts/db_parameter_group.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DB/Scripts/parameter_group.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB/Scripts/parameter_group.py" afterDir="false" />
+>>>>>>> e9ad8e4 (Commit local changes before cherry-pick)
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

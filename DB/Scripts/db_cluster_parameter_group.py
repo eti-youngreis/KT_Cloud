@@ -13,7 +13,7 @@ class DBClusterParameterGroup(ParameterGroup):
         tags (list): Tags associated with the parameter group
         """
         super(ParameterGroup, self).__init__(db_cluster_parameter_group_name, db_parameter_group_family, description,
-                                             tags, self.load_default_parameters())
+                                             tags)
 
     def describe(self, with_title=True):
         """
@@ -37,8 +37,7 @@ class DBClusterParameterGroup(ParameterGroup):
         """
         super().save_to_db(self.__class__.__name__)
 
-    @staticmethod
-    def load_default_parameters():
+    def load_default_parameters(self):
         """
         Loads default parameters for the DB cluster parameter group.
 
