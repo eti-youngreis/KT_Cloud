@@ -68,6 +68,8 @@ class S3ClientSimulator:
         # Retrieve the object metadata
         metadata = self.metadata_manager.get_bucket_metadata(bucket, key)
 
+        print(f"Retrieved metadata for bucket '{bucket}' and key '{key}': {metadata}")
+
         if not metadata:
             raise FileNotFoundError(f"Object {key} not found in bucket {bucket}")
 
@@ -79,7 +81,13 @@ class S3ClientSimulator:
         else:
             # If no version_id is provided, get the latest version
             version_id = self.metadata_manager.get_latest_version(bucket, key)
+            print(f"Latest version ID for object '{key}': {version_id}")
             version_metadata = metadata.get('versions', {}).get(version_id)
+
+        print(f"Version metadata: {version_metadata}")
+
+        if not version_metadata:
+            raise FileNotFoundError(f"No version metadata found for object {key} with version {version_id}")
 
         # Prepare the response metadata
         response_metadata = {
@@ -91,6 +99,8 @@ class S3ClientSimulator:
             "VersionId": version_id,
             "ObjectLock": metadata.get('objectLock', {})
         }
+
+        return response_metadata
     async def put_object(self, bucket, key, body, acl=None, metadata=None,
     content_type=None, sse_customer_algorithm=None,sse_customer_key=None, sse_customer_key_md5=None):
 
@@ -201,12 +211,12 @@ async def main():
         print("Torrent Info for version 1:", torrent_info)
     except FileNotFoundError as e:
         print(e)
-    head_object = await s3_client.head_object('bucket1', 'file.txt', version_id='1')
-    print("meta data for version 1:", head_object)
+    head_object = await s3_client.head_object('bucket1', 'file2.txt')
+    print("meta data is:", head_object)
     try:
         # Example body as bytes
         body = b"Hello, World!"
-        result = await s3_client.put_object('bucket1', 'file2.txt', body)
+        result = await s3_client.put_object('bucket1', 'file3.txt', body)
         print("PutObject result:", result)
     except Exception as e:
         print(e)
