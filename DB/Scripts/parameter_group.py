@@ -80,6 +80,13 @@ class ParameterGroup:
         """
         delete_from_Management(class_name, self.parameter_group_name)
 
+    def modify_parameters(self, parameters):
+        for new_parameter in parameters:
+            for old_parameter in self.parameters:
+                if old_parameter.parameter_name == new_parameter['ParameterName']:
+                    old_parameter.update(new_parameter)
+
+
     @staticmethod
     def create_parameter_group(module_name, class_name, db_cluster_parameter_group_name, db_parameter_group_family,
                                description, tags):

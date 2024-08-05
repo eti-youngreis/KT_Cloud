@@ -1,3 +1,4 @@
+from parameter import Parameter
 from parameter_group import ParameterGroup
 
 
@@ -43,12 +44,13 @@ class DBParameterGroup(ParameterGroup):
         Loads default parameters for the DB parameter group.
 
         Returns:
-        dict: Default parameters for the DB parameter group
+        list: Default parameters for the DB parameter group
         """
         # Loading default parameters - can be replaced with actual parameters
-        return {
-            'max_connections': 100,
-            'innodb_buffer_pool_size': '128M',
-            'character_set_server': 'utf8',
-            'time_zone': 'UTC'
-        }
+        parameters=[]
+        parameters.append(Parameter('max_connections',100))
+        parameters.append(Parameter('innodb_buffer_pool_size','128M'))
+        parameters.append(Parameter('character_set_server','utf8'))
+        parameters.append(Parameter('time_zone','UTC'))
+        return parameters
+

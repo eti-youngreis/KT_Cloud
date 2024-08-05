@@ -1,3 +1,4 @@
+from parameter import Parameter
 from parameter_group import ParameterGroup
 
 
@@ -46,11 +47,12 @@ class DBClusterParameterGroup(ParameterGroup):
         Loads default parameters for the DB cluster parameter group.
 
         Returns:
-        dict: A dictionary containing default parameters
+        list: A dictionary containing default parameters
         """
         # Example of default parameters; can be replaced with actual defaults
-        return {
-            'backup_retention_period': 7,
-            'preferred_backup_window': '03:00-03:30',
-            'preferred_maintenance_window': 'Mon:00:00-Mon:00:30'
-        }
+        parameters=[]
+        parameters.append(Parameter('backup_retention_period',7))
+        parameters.append(Parameter('preferred_backup_window','03:00-03:30'))
+        parameters.append(Parameter('preferred_maintenance_window','Mon:00:00-Mon:00:30'))
+        return parameters
+       

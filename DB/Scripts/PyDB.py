@@ -143,6 +143,69 @@ def describe_parameter_groups(parameter_groups, title, parameter_group_name, max
     return {'Marker': marker, title: parameter_groups_local}
 
 
+def describe_parameters(parameter_groups, parameter_group_name, source, max_records, marker):
+    """
+    Retrieves a list of parameters from a specific parameter group, filtered by source and limited by max_records.
+
+    Args:
+        parameter_groups (list): A list of parameter groups to search through.
+        parameter_group_name (str): The name of the parameter group to retrieve parameters from.
+        source (str): The source of the parameters to return (e.g., 'user', 'system', 'engine-default').
+        max_records (int): The maximum number of records to return in the response.
+        marker (str, optional): The marker to use for pagination. If None, starts from the beginning.
+
+    Returns:
+        dict: A dictionary containing:
+            - 'Parameters': A list of parameters matching the criteria.
+            - 'Marker' (optional): A marker indicating the position to resume pagination if there are more records.
+    """
+    parameter_group = next((p for p in parameter_groups if p.parameter_group_name == parameter_group_name), None)
+    if parameter_group is None:
+        raise ValueError(f"The parameter group does not exist")
+    
+    parameters_local = []
+    count = 0
+    for p in parameter_group:
+        if p.parameter_name == marker or marker is None:
+            marker = None
+            if p.source == source:
+                count += 1
+                if count <= max_records:
+                    parameters_local.append(p.describe())
+                else:
+                    marker = p.parameter_name
+                    break
+    
+    result = {'Parameters': parameters_local}
+    if marker is not None:
+        result['Marker'] = marker
+
+    return result
+
+
+def modify_parameter_group(title, parameter_groups, parameter_group_name, parameters):
+    """
+    Modifies parameters in a parameter group.
+
+    Args:
+        title (str): The title key for the returned dictionary.
+        parameter_groups (list): List of parameter group objects.
+        parameter_group_name (str): The name of the parameter group to be modified.
+        parameters (list): List of parameters to modify in the parameter group.
+
+    Returns:
+        dict: A dictionary with the title key and the modified parameter group name.
+
+    Raises:
+        ValueError: If the specified parameter group does not exist.
+    """
+    parameter_group = next((p for p in parameter_groups if p.parameter_group_name == parameter_group_name), None)
+    if parameter_group is None:
+        raise ValueError(f"The parameter group does not exist")
+    parameter_group.modify_parameters(parameters)
+    return {title: parameter_group_name}
+
+
 def delete_parameter_group(parameter_groups, parameter_group_name):
     """
     Function to delete a parameter group
@@ -225,6 +288,38 @@ def describe_db_cluster_parameter_groups(db_cluster_parameter_group_name=None, m
                                      max_records, marker)
 
 
+def modify_db_cluster_parameter_group(db_cluster_parameter_group_name, parameters):
+    """
+    Modifies a DB cluster parameter group.
+
+    Args:
+        db_cluster_parameter_group_name (str): The name of the DB cluster parameter group to be modified.
+        parameters (list): List of parameters to modify in the DB cluster parameter group.
+
+    Returns:
+        dict: A dictionary with the key 'DBClusterParameterGroupName' and the modified parameter group name.
+    """
+    return modify_parameter_group('DBClusterParameterGroupName', db_cluster_parameter_groups, db_cluster_parameter_group_name, parameters)
+
+
+def describe_cluster_db_parameters(db_cluster_parameter_group_name, source='user', max_records=100, marker=None):
+    """
+    Retrieves a list of parameters for a specific DB cluster parameter group, filtered by source and limited by max_records.
+
+    Args:
+        db_cluster_parameter_group_name (str): The name of the DB cluster parameter group to retrieve parameters from.
+        source (str, optional): The source of the parameters to return (default is 'user').
+        max_records (int, optional): The maximum number of records to return in the response (default is 100).
+        marker (str, optional): The marker to use for pagination. If None, starts from the beginning.
+
+    Returns:
+        dict: A dictionary containing:
+            - 'Parameters': A list of parameters matching the criteria.
+            - 'Marker' (optional): A marker indicating the position to resume pagination if there are more records.
+    """
+    return describe_parameters(db_cluster_parameter_groups, db_cluster_parameter_group_name, source, max_records, marker)
+
+
 def create_db_parameter_group(db_parameter_group_family, db_parameter_group_name, description, tags=None):
     """
     Function to create a DB parameter group
@@ -277,6 +372,38 @@ def describe_db_parameter_groups(db_parameter_group_name=None, max_records=100, 
     return describe_parameter_groups(db_parameter_groups, 'DBParameterGroups',
                                      db_parameter_group_name,
                                      max_records, marker)
+
+
+def modify_db_parameter_group(db_parameter_group_name, parameters):
+    """
+    Modifies a DB parameter group.
+
+    Args:
+        db_parameter_group_name (str): The name of the DB parameter group to be modified.
+        parameters (list): List of parameters to modify in the DB parameter group.
+
+    Returns:
+        dict: A dictionary with the key 'DBParameterGroupName' and the modified parameter group name.
+    """
+    return modify_parameter_group('DBParameterGroupName', db_parameter_groups, db_parameter_group_name, parameters)
+
+
+def describe_db_parameters(db_parameter_group_name, source='user', max_records=100, marker=None):
+    """
+    Retrieves a list of parameters for a specific DB parameter group, filtered by source and limited by max_records.
+
+    Args:
+        db_parameter_group_name (str): The name of the DB parameter group to retrieve parameters from.
+        source (str, optional): The source of the parameters to return (default is 'user').
+        max_records (int, optional): The maximum number of records to return in the response (default is 100).
+        marker (str, optional): The marker to use for pagination. If None, starts from the beginning.
+
+    Returns:
+        dict: A dictionary containing:
+            - 'Parameters': A list of parameters matching the criteria.
+            - 'Marker' (optional): A marker indicating the position to resume pagination if there are more records.
+    """
+    return describe_parameters(db_parameter_groups, db_parameter_group_name, source, max_records, marker)
 
 
 def delete_db_cluster(clusters_in_func, cluster_identifier, delete_instances=True, backup=True):
@@ -364,6 +491,21 @@ def describe_db_cluster_endpoints(endpoint_identifier):
     _, endpoint = find_cluster_and_endpoint_by_endpoint_identifier(endpoint_identifier, clusters)
     return endpoint.describe()
 
+
 def modify_db_cluster_endpoint(endpoint_identifier, endpoint_type='', static_members=None, excluded_members=None):
+    """
+    Modifies a DB cluster endpoint.
+
+    Args:
+        endpoint_identifier (str): The identifier of the endpoint to be modified.
+        endpoint_type (str, optional): The type of the endpoint (e.g., 'READER', 'WRITER'). Default is ''.
+        static_members (list, optional): List of static members to be associated with the endpoint. Default is None.
+        excluded_members (list, optional): List of members to be excluded from the endpoint. Default is None.
+
+    Returns:
+        dict: The modified endpoint details.
+    """
     cluster, endpoint = find_cluster_and_endpoint_by_endpoint_identifier(endpoint_identifier)
     return endpoint.modify(endpoint_type, static_members, excluded_members)
+
+   
