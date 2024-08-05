@@ -413,6 +413,8 @@ def DescribeOptionGroups(
     :param option_group_name: Name of the option group to describe
     :return: Dictionary containing the list of option groups and an optional pagination marker
     """
+    if not is_valid_engineName(engine_name):
+        raise ValueError(f"Invalid engineName: {engine_name}")
     if not validations.is_valid_number(max_records, 20, 100):
         raise ValueError(f"Invalid max_records: {max_records}. max_records must be between 20 to 100.")
         # return {
@@ -459,6 +461,9 @@ def DescribeOptionGroups(
 
         return {
             "DescribeOptionGroupsResponse": {
+                "ResponseMetadata": {
+                    "HTTPStatusCode": 200
+                },
                 "OptionGroupsList": option_groups_list,
                 "Marker": next_marker
             }
@@ -480,7 +485,8 @@ def DescribeOptionGroupOptions(
     max_records: int = 100
 ) -> dict:
     """Describes all available options for the specified engine."""
-    
+    if not engine_name:
+        raise ValueError("Engine name is required.")
     if not is_valid_engineName(engine_name):
         raise ValueError(f"Invalid engineName: {engine_name}")
     
