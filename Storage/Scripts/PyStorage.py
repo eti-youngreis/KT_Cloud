@@ -5,6 +5,7 @@ from datetime import datetime
 import aiofiles
 from metaDataManeger import MetadataManager
 
+URL_SERVER = 'D:\\בוטקמפ\\server'
 class S3ClientSimulator:
     def __init__(self, metadata_file):
         self.metadata_manager = MetadataManager(metadata_file)
@@ -119,7 +120,7 @@ class S3ClientSimulator:
         # Create the file path with the new version ID before the extension
         file_name, file_extension = os.path.splitext(key)
         versioned_file_name = f"{file_name}.v{version_id}{file_extension}"
-        file_path = os.path.join('D:\\בוטקמפ\\server', bucket, versioned_file_name)
+        file_path = os.path.join(URL_SERVER, bucket, versioned_file_name)
 
         # Create the directory structure if it doesn't exist
         if '/' in key:
@@ -193,7 +194,7 @@ class S3ClientSimulator:
         return hashlib.md5(content).hexdigest()
 # Example usage:
 async def main():
-    s3_client = S3ClientSimulator('D:\\בוטקמפ\\server\\metadata.json')
+    s3_client = S3ClientSimulator(f'{URL_SERVER}\\metadata.json')
     try:
         lock_config = await s3_client.get_object_lock_configuration('bucket1')
         print(lock_config)
