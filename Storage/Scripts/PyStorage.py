@@ -64,6 +64,7 @@ class S3ClientSimulator:
 
     async def head_object(self, bucket, key, version_id=None,is_async=True,IfMatch=None, IfModifiedSince=None,IfNoneMatch=None,IfUnmodifiedSince=None,
     Range=None,VersionId=None,SSECustomerAlgorithm=None,SSECustomerKey=None,SSECustomerKeyMD5=None,RequestPayer=None):
+
         # Retrieve the object metadata
         metadata = self.metadata_manager.get_bucket_metadata(bucket, key)
 
@@ -91,8 +92,8 @@ class S3ClientSimulator:
             "ObjectLock": metadata.get('objectLock', {})
         }
     async def put_object(self, bucket, key, body, acl=None, metadata=None,
-                         content_type=None, sse_customer_algorithm=None,
-                         sse_customer_key=None, sse_customer_key_md5=None):
+    content_type=None, sse_customer_algorithm=None,sse_customer_key=None, sse_customer_key_md5=None):
+
         # Check if the bucket exists
         bucket_metadata = self.metadata_manager.metadata["server"]["buckets"].get(bucket)
 
@@ -179,7 +180,6 @@ class S3ClientSimulator:
             "ACL": acl
         }
     def generate_etag(self, content):
-        # Generate a simple ETag based on content (here we just return a placeholder)
         return hashlib.md5(content).hexdigest()
 # Example usage:
 async def main():
@@ -203,19 +203,19 @@ async def main():
         print(e)
     head_object = await s3_client.head_object('bucket1', 'file.txt', version_id='1')
     print("meta data for version 1:", head_object)
-    # try:
-    #     # Example body as bytes
-    #     body = b"Hello, World!"
-    #     result = await s3_client.put_object('bucket1', 'file2.txt', body)
-    #     print("PutObject result:", result)
-    # except Exception as e:
-    #     print(e)
+    try:
+        # Example body as bytes
+        body = b"Hello, World!"
+        result = await s3_client.put_object('bucket1', 'file2.txt', body)
+        print("PutObject result:", result)
+    except Exception as e:
+        print(e)
     try:
         response = await s3_client.put_object_acl('bucket1', 'file2.txt', {"owner": "default_owner", "permissions": ["READ", "WRITE"]},version_id="3")
         print(response)
     except Exception as e:
         print(e)
-# Run the example
+
 if __name__ == "__main__":
     asyncio.run(main())
 
