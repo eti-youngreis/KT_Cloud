@@ -16,7 +16,7 @@ def CopyDBClusterSnapshot(KmsKeyId, TargetDBClusterSnapshotIdentifier, SourceDBC
         cluster_snapshots.c.db_cluster_snapshot_identifier == SourceDBClusterSnapshotIdentifier
     )
     
-    result = []
+    result = None
     
     with engine.connect() as conn:
         result = conn.execute(select_stmt)
@@ -25,25 +25,29 @@ def CopyDBClusterSnapshot(KmsKeyId, TargetDBClusterSnapshotIdentifier, SourceDBC
         raise Exception("cluster snapshot doesn't exist")
     
     result = result.mappings().fetchone()
-    print(result)
+    
+    cluster_id = result['db_cluster_identifier']
+    data = result['other_data']
+    file_key = result['snapshot_file_key']
+    bucket = result['bucket']
 
     # duplicate snapshot in s3
-    # when infustrcture is ready replace with storage team implementation of s3
+    # when infrastructure is ready replace with storage team implementation of s3
     # s3 = boto3.client(s3)
-    new_path = result['snapshot_file_key']+ '_' + TargetDBClusterSnapshotIdentifier
+    new_path = file_key + '_' + TargetDBClusterSnapshotIdentifier
     # copy_source = {
-    #     'Bucket': result['bucket'],
-    #     'Key': result['snapshot_file_key']
+    #     'Bucket': bucket,
+    #     'Key': file_key
     # }
-    # s3.copy(copy_source, result['bucket'], new_path)
-
+    # s3.copy(copy_source, bucket, new_path)
+    
     insert_stmt = sqlalchemy.insert(
         table=cluster_snapshots
     ).values(db_cluster_snapshot_identifier = TargetDBClusterSnapshotIdentifier,
-            db_cluster_identifier = result['db_cluster_identifier'], 
-            other_data = result['other_data'], 
+            db_cluster_identifier = cluster_id, 
+            other_data = file_key, 
             snapshot_file_key = new_path, 
-            bucket = result['bucket'])
+            bucket = bucket)
 
     with engine.connect() as conn:
         try:
