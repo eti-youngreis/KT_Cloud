@@ -1,7 +1,9 @@
 import sqlalchemy
 import boto3
 
-def CopyDBClusterSnapshot(KmsKeyId, TargetDBClusterSnapshotIdentifier, SourceDBClusterSnapshotIdentifier):
+from DB.Scripts import DBClusterSnapshotAlreadyExistsFault, DBClusterSnapshotNotFoundFault
+
+def CopyDBClusterSnapshot(KmsKeyId, TargetDBClusterSnapshotIdentifier, SourceDBClusterSnapshotIdentifier, CopyTags=None, PreSignedUrl=None, Tags = None):
     engine = sqlalchemy.create_engine('sqlite:///object_database.db')
     metadata = sqlalchemy.MetaData()
     metadata.reflect(bind=engine)
@@ -22,7 +24,7 @@ def CopyDBClusterSnapshot(KmsKeyId, TargetDBClusterSnapshotIdentifier, SourceDBC
         result = conn.execute(select_stmt)
 
     if not result:
-        raise Exception("cluster snapshot doesn't exist")
+        raise DBClusterSnapshotNotFoundFault("cluster snapshot doesn't exist")
     
     result = result.mappings().fetchone()
     
@@ -54,11 +56,19 @@ def CopyDBClusterSnapshot(KmsKeyId, TargetDBClusterSnapshotIdentifier, SourceDBC
             conn.execute(insert_stmt)
             conn.commit()
         except sqlalchemy.exc.IntegrityError as ex:
-            raise Exception("looks like the cluster snapshot identifier you are trying to save to already exists")
+            raise DBClusterSnapshotAlreadyExistsFault("looks like the cluster snapshot identifier you are trying to save to already exists")
 
     
 
     engine.dispose()
+
+    # should return snapshot object
+
+    # Faults to deal with:
+    # InvalidDBClusterSnapshotStateFault
+    # InvalidDBClusterStateFault
+    # KMSKeyNotAccessibleFault
+    # SnapshotQuotaExceeded
 
 # for dev
 if __name__ == "__main__":
