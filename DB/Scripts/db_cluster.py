@@ -49,8 +49,7 @@ class DBCluster:
             endpoint.delete()
             # delete_db_endpoint(endpoint.endpoint_id)
 
-    def add_endpoint(self, cluster_identifier, endpoint_identifier, endpoint_type, static_members=None,
-                     excluded_members=None):
+    def add_endpoint(self, cluster_identifier, endpoint_identifier, endpoint_type, static_members, excluded_members):
         """
         Adds a new endpoint to the DB cluster.
 
@@ -74,7 +73,7 @@ class DBCluster:
         endpoint.save_to_db()
         self.endpoints.append(endpoint)
         print(f"Custom endpoint {endpoint_identifier} created successfully.")
-        return endpoint.describe()
+        return endpoint.describe('creating')
 
     # def delete_all_snapshots(self):
     #     """
@@ -102,6 +101,6 @@ class DBCluster:
         if endpoint.counter > 0:
             raise RuntimeError(f"the endpoint is in use")
         endpoint.delete()
-        response = endpoint.describe('delete')
+        response = endpoint.describe('deleting')
         self.endpoints.remove(endpoint)
         return response

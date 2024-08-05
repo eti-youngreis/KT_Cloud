@@ -317,7 +317,7 @@ def delete_db_cluster(clusters_in_func, cluster_identifier, delete_instances=Tru
         raise RuntimeError(f"Error deleting cluster: {e}")
 
 
-def create_db_cluster_endpoint(cluster_identifier, endpoint_identifier, endpoint_type, static_members,
+def create_db_cluster_endpoint(cluster_identifier, endpoint_identifier, endpoint_type='READER', static_members=None,
                                excluded_members=None):
     """
     Function to create a DB cluster endpoint
@@ -363,3 +363,7 @@ def describe_db_cluster_endpoints(endpoint_identifier):
     """
     _, endpoint = find_cluster_and_endpoint_by_endpoint_identifier(endpoint_identifier, clusters)
     return endpoint.describe()
+
+def modify_db_cluster_endpoint(endpoint_identifier, endpoint_type='', static_members=None, excluded_members=None):
+    cluster, endpoint = find_cluster_and_endpoint_by_endpoint_identifier(endpoint_identifier)
+    return endpoint.modify(endpoint_type, static_members, excluded_members)
