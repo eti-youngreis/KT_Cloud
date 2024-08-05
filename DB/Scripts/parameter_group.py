@@ -69,11 +69,11 @@ class ParameterGroup:
         }
         return data
 
-    def delete(self):
+    def delete(self, class_name):
         """
         Deletes the parameter group from the management table.
         """
-        delete_from_Management(self.__class__.__name__, self.parameter_group_name)
+        delete_from_Management(class_name, self.parameter_group_name)
 
     @staticmethod
     def create_parameter_group(module_name, class_name, db_cluster_parameter_group_name, db_parameter_group_family,

@@ -4,17 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9223bc00-e014-47fb-b764-eaef789e73a0" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/DB/Scripts/database.db" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DB/Scripts/db_instance.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DB/Scripts/endpoint.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DB/Scripts/parameter_group.py" afterDir="false" />
+    <list default="true" id="e0a1118d-e522-4914-9e57-b27dea5a4bf8" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DB/Scripts/Management.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB/Scripts/Management.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DB/Scripts/PyDB.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB/Scripts/PyDB.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DB/Scripts/db_cluster" beforeDir="false" afterPath="$PROJECT_DIR$/DB/Scripts/db_cluster_parameter_group.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DB/Scripts/db_cluster.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB/Scripts/db_cluster.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DB/Scripts/instance.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB/Scripts/db_parameter_group.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DB/Scripts/db_cluster_parameter_group.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB/Scripts/db_cluster_parameter_group.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DB/Scripts/db_parameter_group.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB/Scripts/db_parameter_group.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DB/Scripts/parameter_group.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB/Scripts/parameter_group.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,21 +29,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.PyDB.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "85b3c73b",
-    "last_opened_file_path": "C:/יד/בודקמפ/Annak",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.PyDB.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;85b3c73b&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/יד/בודקמפ/Annak&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="PyDB" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="KT_Cloud" />
@@ -102,7 +96,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/DBMNG-110-naive_implementation_of_aws_rds_API's_functions" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
