@@ -1,228 +1,152 @@
-import hashlib
-import shutil
-from datetime import datetime
-import aiofiles
 import os
-import asyncio
 import json
+from datetime import datetime
+from pathlib import Path
+
+import aiofiles
+
 from MetaData import MetadataManager
 
 
 class S3ClientSimulator:
-    def __init__(self, metadata_file):
+    def __init__(self, metadata_file, server_path):
         self.metadata_manager = MetadataManager(metadata_file)
+        self.server = Path(server_path)  # Ensure server_path is a Path object
 
-    async def get_object(self, key, version_id=None, is_sync=True):
+    async def copy_object(self, bucket_name, copy_source, key, is_sync=True):
+        source_bucket, source_key = copy_source['Bucket'], copy_source['Key']
 
-        # find the metadata of the object
-        metadata = self.metadata_manager.get_metadata(key)
+        # Perform metadata copy
+        await self.metadata_manager.copy_metadata(source_bucket, source_key, bucket_name, key, is_sync=is_sync)
 
-        if metadata:
-            if version_id is None:
-                # find the current version
-                version_id = self.metadata_manager.get_latest_version(key)
+        # Write the object to the filesystem
+        source_file_path = self.server / source_bucket / source_key
+        destination_file_path = self.server / bucket_name / key
+        destination_file_path.parent.mkdir(parents=True, exist_ok=True)
 
-            versioned_key = self.get_versioned_key(key, version_id)
-            if os.path.exists(versioned_key):
-                if is_sync:
-                    with open(versioned_key, 'r') as f:
-                        return f.read()
-                else:
-                    async with aiofiles.open(versioned_key, 'r') as f:
-                        return await f.read()
-            else:
-                raise FileNotFoundError(f"Version {version_id} of object {key} not found on disk")
-        else:
-            raise FileNotFoundError(f"Object {key} not found")
-
-    async def get_object_acl(self, key, version_id=None, is_sync=True):
-
-        # find the metadata of the object
-        metadata = self.metadata_manager.get_metadata(key)
-        if metadata:
-            if version_id is None:
-                version_id = await self.metadata_manager.get_latest_version(key, is_sync=is_sync)
-
-            if version_id in metadata['versions']:
-                acl = metadata['versions'][version_id].get('acl', None)
-                if acl is not None:
-                    return {
-                        "Owner": acl.get("owner", "unknown"),
-                        "Grants": acl.get("permissions", {})
-                    }
-                else:
-                    raise ValueError(f"ACL for version {version_id} of object {key} not found")
-            else:
-                raise FileNotFoundError(f"Version {version_id} of object {key} not found")
-        else:
-            raise FileNotFoundError(f"Object {key} not found")
-
-    async def delete_object(self, key, version_id=None, is_sync=True, by_pass_governance_retention=False):
-        if version_id:
-            if not await self.metadata_manager.check_permissions(key, version_id, by_pass_governance_retention,
-                                                                 is_sync=is_sync):
-                return {
-                    "DeleteMarker": False,
-                    "VersionId": version_id,
-                    "RequestCharged": "requester"
-                }
-            success = await self.metadata_manager.delete_version(key, version_id, is_sync=is_sync)
-            if success:
-                # find the path of the object of the version_id
-                versioned_key = self.get_versioned_key(key, version_id)
-                if os.path.exists(versioned_key):
-                    if is_sync:
-                        os.remove(versioned_key)
-                    else:
-                        await asyncio.get_event_loop().run_in_executor(None, os.remove, versioned_key)
-                return {
-                    "DeleteMarker": True,
-                    "VersionId": version_id,
-                    "RequestCharged": "requester"
-                }
-            else:
-                raise FileNotFoundError(f"Version {version_id} of object {key} not found")
-        else:
-            # find the current version
-            latest_version_id = self.metadata_manager.get_latest_version(key)
-            if not await self.metadata_manager.check_permissions(key, latest_version_id, by_pass_governance_retention,
-                                                                 is_sync=is_sync):
-                return {
-                    "DeleteMarker": False,
-                    "VersionId": latest_version_id,
-                    "RequestCharged": "requester"
-                }
-            success = await self.metadata_manager.delete_object(key, is_sync=is_sync)
-            if success:
-                # find the path of the object of the version_id
-                versioned_key = self.get_versioned_key(key, latest_version_id)
-                if os.path.exists(versioned_key):
-                    if is_sync:
-                        os.remove(versioned_key)
-                    else:
-                        await asyncio.get_event_loop().run_in_executor(None, os.remove, versioned_key)
-
-                return {
-                    "DeleteMarker": True,
-                    "VersionId": latest_version_id,
-                    "RequestCharged": "requester"
-                }
-            else:
-                raise FileNotFoundError(f"Object {key} not found")
-
-    async def delete_objects(self, keys, is_sync=True, by_pass_governance_retention=False):
-        deleted = []
-        errors = []
-        for item in keys:
-            key = item.get('Key')
-            version_id = item.get('VersionId')
-            try:
-                result = await self.delete_object(key, version_id, is_sync=is_sync,
-                                                  by_pass_governance_retention=by_pass_governance_retention)
-                deleted.append({
-                    'Key': key,
-                    'VersionId': result.get('VersionId'),
-                    'DeleteMarker': result.get('DeleteMarker'),
-                    'DeleteMarkerVersionId': result.get('VersionId')
-                })
-            except (FileNotFoundError, PermissionError) as e:
-                errors.append({
-                    'Key': key,
-                    'VersionId': version_id,
-                    'Code': "Error",
-                    'Message': str(e)
-                })
-        return {
-            'Deleted': deleted,
-            'Errors': errors,
-            'RequestCharged': "requester"
-        }
-
-    def _calculate_etag(self, file_path):
-        """Calculate the ETag of a file by its MD5 hash."""
-        hash_md5 = hashlib.md5()
-        if os.path.exists(file_path):
-            with open(file_path, 'r') as f:
-                for chunk in iter(lambda: f.read(4096), ""):
-                    hash_md5.update(chunk)
-        return hash_md5.hexdigest()
-
-    async def copy_object(self, source_key, destination_path, destination_key, is_sync=True):
-
-        if not isinstance(is_sync, bool):
-            raise TypeError(f"is_sync must be of type bool, got {type(is_sync).__name__}")
-
-        source_path = source_key
-        destination_file_path = destination_path + '/' + destination_key
-
-        # Check if the source file exists
-        if not os.path.exists(source_path):
-            raise FileNotFoundError(f"No such file: '{source_path}'")
-
-        # Check if the destination file already exists
-        if os.path.abspath(source_path) == os.path.abspath(destination_file_path):
-            raise shutil.SameFileError(
-                f"Source file '{source_path}' and destination file '{destination_file_path}' are the same")
-
-        # Copy the source file to the destination path
-        if is_sync:
-            shutil.copy2(source_path, destination_file_path)
-        else:
-            await asyncio.get_event_loop().run_in_executor(None, shutil.copy2, source_path, destination_file_path)
-
-        # load the metadata
-        metadata = self.metadata_manager.metadata
-        if source_key in metadata:
-            # Copy metadata for the source key to the destination key
-            data_to_add = {destination_file_path: metadata[source_key]}
-        else:
-            raise KeyError(f"No metadata found for source key: '{source_key}'")
-
-        # update the metadata file
-        data_to_add[destination_file_path]['LastModified'] = datetime.utcnow().isoformat() + 'Z'
-        data_to_add[destination_file_path]['ETag'] = f"\"{self._calculate_etag(destination_file_path)}\""
-        metadata.update(data_to_add)
+        if not source_file_path.exists():
+            raise FileNotFoundError(f"Source file {source_file_path} not found")
 
         if is_sync:
-            with open(self.metadata_manager.metadata_file, 'w') as file:
-                json.dump(metadata, file, indent=4)
+            with open(source_file_path, 'rb') as src_file:
+                with open(destination_file_path, 'wb') as dest_file:
+                    dest_file.write(src_file.read())
         else:
-            async with aiofiles.open(self.metadata_manager.metadata_file, 'w') as file:
-                await file.write(json.dumps(metadata, indent=4))
+            async with aiofiles.open(source_file_path, 'rb') as src_file:
+                async with aiofiles.open(destination_file_path, 'wb') as dest_file:
+                    await dest_file.write(await src_file.read())
+
+        # Get the updated metadata
+        destination_metadata = self.metadata_manager.get_bucket_metadata(bucket_name, key)
+        latest_version = self.metadata_manager.get_latest_version(bucket_name, key)
+        destination_version_metadata = destination_metadata['versions'][latest_version]
 
         return {
             'CopyObjectResult': {
-                'ETag': data_to_add[destination_file_path]['ETag'],
-                'LastModified': data_to_add[destination_file_path]['LastModified']
+                'ETag': destination_version_metadata['etag'],
+                'LastModified': destination_version_metadata['lastModified']
             }
         }
 
-    def get_versioned_key(self, key, version_id):
-        base, ext = os.path.splitext(key)
-        return f"{base}-{version_id}{ext}"
+    async def delete_object(self, bucket_name, key, is_sync=True):
+        delete_result = await self.metadata_manager.delete_object(bucket_name, key, is_sync=is_sync)
+        if delete_result:
+            file_path = self.server / bucket_name / key
+            if file_path.exists():
+                os.remove(file_path)
+            return {'DeleteMarker': True}
+        return {}
+
+    async def delete_objects(self, bucket_name, delete, is_sync=True):
+        deleted = []
+        errors = []
+        for obj in delete['Objects']:
+            key = obj['Key']
+            version_id = obj.get('VersionId')
+            try:
+                if version_id:
+                    delete_result = await self.metadata_manager.delete_version(bucket_name, key, version_id,
+                                                                               is_sync=is_sync)
+                else:
+                    delete_result = await self.metadata_manager.delete_object(bucket_name, key, is_sync=is_sync)
+
+                if delete_result:
+                    file_path = self.server / bucket_name / key
+                    if file_path.exists():
+                        os.remove(file_path)
+                    deleted.append({'Key': key, 'VersionId': version_id})
+                else:
+                    errors.append(
+                        {'Key': key, 'VersionId': version_id, 'Code': 'InternalError', 'Message': 'Deletion failed'})
+            except Exception as e:
+                errors.append({'Key': key, 'VersionId': version_id, 'Code': 'InternalError', 'Message': str(e)})
+
+        return {
+            'Deleted': deleted,
+            'Errors': errors
+        }
+
+    async def get_object_acl(self, bucket_name, key, is_sync=True):
+        latest_version = self.metadata_manager.get_latest_version(bucket_name, key)
+        metadata = self.metadata_manager.get_bucket_metadata(bucket_name, key)['versions'][latest_version]
+        acl = metadata.get('acl', {})
+        owner = acl.get('owner', 'unknown')
+        permissions = acl.get('permissions', [])
+
+        return {
+            'Owner': {'DisplayName': owner, 'ID': owner},
+            'Grants': [{'Grantee': {'Type': 'CanonicalUser', 'ID': owner, 'DisplayName': owner}, 'Permission': perm} for
+                       perm in permissions]
+        }
+
+    async def get_object(self, bucket_name, key, is_sync=True):
+        latest_version = self.metadata_manager.get_latest_version(bucket_name, key)
+        metadata = self.metadata_manager.get_bucket_metadata(bucket_name, key)['versions'][latest_version]
+
+        file_path = self.server / bucket_name / key
+        if not file_path.exists():
+            raise FileNotFoundError(f"Object {key} not found in bucket {bucket_name}")
+
+        with open(file_path, 'rb') as f:
+            content = f.read()
+
+        return {
+            'Body': content,
+            'ContentLength': metadata.get('contentLength', len(content)),
+            'ContentType': metadata.get('contentType', 'application/octet-stream'),
+            'ETag': metadata['etag'],
+            'Metadata': metadata.get('metadata', {}),
+            'LastModified': metadata['lastModified']
+        }
 
 
-def is_valid_type(key, type_check):
-    if not isinstance(key, type_check):
-        raise TypeError(f"type of {key} is Error- got {type(key).__name__}")
+# Example usage
+if __name__ == "__main__":
+    import asyncio
 
 
-# Usage Example
-s3_sim = S3ClientSimulator('C:/task/metadata.json')
-res = asyncio.run(s3_sim.get_object('C:/task/tile1.txt', is_sync=True))
-print(res)
+    async def main():
+        client = S3ClientSimulator('C:/Users/user1/Desktop/server/metadata.json', 'C:/Users/user1/Desktop/server')
 
-acl_info = asyncio.run(s3_sim.get_object_acl('C:/task/tile1.txt', version_id='1', is_sync=False))
-print(acl_info)
+        # Example for copy_object
+        #copy_result = await client.copy_object('bucket2', {'Bucket': 'bucket1', 'Key': 'object1.txt'}, 'QQQQQQQ.txt',False)
+        #print(copy_result)
 
-# res=asyncio.run(s3_sim.delete_object('C:/task/wu.txt',by_pass_governance_retention=True))
-# print(res)
-# objects_to_delete = [
-#     {'Key': 'C:/task/tile1.txt'},
-#     {'Key': 'C:/task/tile2.txt'}
-# ]
-# res=asyncio.run(s3_sim.delete_objects(objects_to_delete, True))
-# print(res)
+        # Example for delete_object
+        #delete_result = await client.delete_object('bucket1', 'object1.txt')
+        #print(delete_result)
 
-# res = asyncio.run(s3_sim.copy_object('C:/task/tile2.txt', 'C:/task', "wu.txt", is_sync=False))
-# print(res)
+        # Example for delete_objects
+        #delete_objects_result = await client.delete_objects('bucket2', {'Objects': [{'Key': 'kkk.txt'}]})
+        #print(delete_objects_result)
+
+        # Example for get_object_acl
+        #acl_result = await client.get_object_acl('bucket1', 'object1.txt')
+        #print(acl_result)
+
+        # Example for get_object
+        #object_result = await client.get_object('bucket1', 'object1.txt')
+        #print(object_result)
+
+
+    asyncio.run(main())
