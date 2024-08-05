@@ -6,9 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="e0a1118d-e522-4914-9e57-b27dea5a4bf8" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DB/Scripts/db_cluster_parameter_group.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB/Scripts/db_cluster_parameter_group.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DB/Scripts/db_parameter_group.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB/Scripts/db_parameter_group.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DB/Scripts/parameter_group.py" beforeDir="false" afterPath="$PROJECT_DIR$/DB/Scripts/parameter_group.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
