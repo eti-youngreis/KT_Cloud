@@ -76,7 +76,7 @@ class Endpoint:
         }
         return describe
 
-    def modify(endpoint_type, static_members, excluded_members):
+    def modify(self, endpoint_type, static_members, excluded_members):
         if endpoint_type != '':
             self.endpoint_type = endpoint_type
             update_metadata(self.__class__.__name__,self.endpoint_identifier,'endpoint_type', self.endpoint_type)
