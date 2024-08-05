@@ -34,7 +34,11 @@ class DBParameterGroup(ParameterGroup):
         """
         super().save_to_db(self.__class__.__name__)
 
-    def load_default_parameters(self):
+    def delete(self):
+        super().delete(self.__class__.__name__)
+
+    @staticmethod
+    def load_default_parameters():
         """
         Loads default parameters for the DB parameter group.
 
