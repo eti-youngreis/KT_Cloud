@@ -15,11 +15,9 @@ def db_setup():
 def create_option_group(db_setup):
     db_setup.CreateOptionGroup("mysql", "5.6", "description", "my-option-group")
 
-def test_can_modify_option_group(db_setup):
-    db_setup.CreateOptionGroup("mysql", "5.6", "description", "my-option-group-to-modify")
-    res = db_setup.ModifyOptionGroup("my-option-group-to-modify")
+def test_can_modify_option_group(db_setup,create_option_group):
+    res = db_setup.ModifyOptionGroup("my-option-group")
     assert res["ModifyOptionGroupResponse"]["ResponseMetadata"]["HTTPStatusCode"] == 200
-    assert db_setup.DeleteOptionGroup("my-option-group-to-modify")["DeleteOptionGroupResponse"]["ResponseMetadata"]["HTTPStatusCode"] == 200
 
 def test_handle__option_group_name_cannot_be_found(db_setup,create_option_group):
     res = db_setup.ModifyOptionGroup("invalid-name")
