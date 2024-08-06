@@ -15,22 +15,22 @@ def db_setup():
 def create_DBCluster(db_setup):
     db_setup.CreateDBCluster(db_cluster_identifier = "my-cluster1", engine = "postgres", port = 1150, storage_type = "aurora")
 
-def test_can_modify_DBCluster(db_setup, create_DBCluster):
-    assert db_setup.ModifyDBCluster(db_cluster_identifier = "my-cluster1")
+def test_can_describe_DBClusters(db_setup, create_DBCluster):
+    assert db_setup.DescribeDBClusters(db_cluster_identifier = "my-cluster1")
     # assert db_setup.DeleteDBCluster("my-cluster1")["DeleteDBClusterResponse"]["ResponseMetadata"]["HTTPStatusCode"] == 200
+
+def test_can_describe_DBClusters_with_max_records(db_setup, create_DBCluster):
+    assert db_setup.DescribeDBClusters(db_cluster_identifier = "my-cluster1", max_records = 58)
 
 def test_handle_db_cluster_identifier_cannot_be_found(db_setup, create_DBCluster):
     with pytest.raises(ValueError):
-        db_setup.ModifyDBCluster(db_cluster_identifier = "invalid-name")
+        db_setup.DescribeDBClusters(db_cluster_identifier = "invalid-name")
 
-def test_invalid_port_parameter_small(db_setup, create_DBCluster):
+def test_handle_too_short_max_records(db_setup):
     with pytest.raises(ValueError):
-        db_setup.ModifyDBCluster(db_cluster_identifier = "my-cluster1", port = 1149)
+        db_setup.DescribeDBClusters(max_records=19)
 
-def test_invalid_port_parameter_large(db_setup, create_DBCluster):
+def test_handle_too_long_max_records(db_setup):
     with pytest.raises(ValueError):
-        db_setup.ModifyDBCluster(db_cluster_identifier = "my-cluster1", port = 65536)
-
-# add tests to parameters: 
-# db_cluster_parameter_group_name, engine_version 
+        db_setup.DescribeDBClusters(max_records=101)
 
