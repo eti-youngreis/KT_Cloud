@@ -18,8 +18,23 @@ def is_valid_engineName(engine_name: str) -> bool:
     return validations.string_in_dict(engine_name, valid_engine_names)
 
 def is_valid_optionGroupName(option_group_name: str) -> bool:
-    """Check if the optionGroupName is valid based on the pattern and length."""
-    pattern = r'^[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*[a-zA-Z0-9]$'
+    """
+    Check if the optionGroupName is valid based on the pattern and length.
+
+    The optionGroupName must:
+    - Be between 1 and 255 characters in length.
+    - Start with a letter.
+    - Contain only letters, digits, or hyphens.
+    - Not contain two consecutive hyphens.
+    - End with a letter or digit.
+
+    Args:
+        option_group_name (str): The name of the option group to validate.
+
+    Returns:
+        bool: True if the optionGroupName is valid, False otherwise.
+    """
+    pattern = r'^[a-zA-Z](?!.*--)[a-zA-Z0-9-]{0,253}[a-zA-Z0-9]$'
     return validations.is_valid_length(option_group_name, 1, 255) and validations.is_valid_pattern(option_group_name, pattern)
 
 def option_group_exists(conn: sqlite3.Connection, option_group_name: str) -> bool:
