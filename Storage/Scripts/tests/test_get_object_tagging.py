@@ -140,7 +140,7 @@ async def test_get_object_tagging_async_specific_version(create_test_metadata):
     bucket = "bucket1"
     key = "object1.txt"
     version_id = "2"
-    tags = await functions.get_object_tagging(bucket, key, version_id=version_id, async_flag=True)
+    tags = await functions.get_object_tagging(bucket, key, version_id=version_id, sync_flag=False)
     expected_tags = [
         {"key": "Key1", "value": "Value1"},
         {"key": "Key2", "value": "Value2"}
@@ -159,14 +159,14 @@ async def test_get_object_tagging_async_invalid_key(create_test_metadata):
     # Test to ensure empty list is returned for an invalid key asynchronously
     bucket = "bucket1"
     key = "non_existent_file.txt"
-    tags = await functions.get_object_tagging(bucket, key, async_flag=True)
+    tags = await functions.get_object_tagging(bucket, key, sync_flag=False)
     assert tags == []
 
 def test_get_object_tagging_no_version_specified(create_test_metadata):
     # Test to get tags for the latest version synchronously without specifying version
     bucket = "bucket1"
     key = "object1.txt"
-    tags = asyncio.run(functions.get_object_tagging(bucket, key,async_flag=True))
+    tags = asyncio.run(functions.get_object_tagging(bucket, key,sync_flag=False))
     expected_tags = [
         {"key": "Key1", "value": "Value1"},
         {"key": "Key2", "value": "Value2"}
@@ -178,7 +178,7 @@ async def test_get_object_tagging_async_no_version_specified(create_test_metadat
     # Test to get tags for the latest version asynchronously without specifying version
     bucket = "bucket1"
     key = "object1.txt"
-    tags = await functions.get_object_tagging(bucket, key, async_flag=True)
+    tags = await functions.get_object_tagging(bucket, key, sync_flag=False)
     expected_tags = [
         {"key": "Key1", "value": "Value1"},
         {"key": "Key2", "value": "Value2"}
@@ -187,12 +187,12 @@ async def test_get_object_tagging_async_no_version_specified(create_test_metadat
 
 
 def test_get_object_tagging_invalid_arguments(create_test_metadata):
-    # Test that invalid arguments for `async_flag` raise a TypeError
+    # Test that invalid arguments for `sync_flag` raise a TypeError
     bucket = "bucket1"
     key = "object1.txt"
     with pytest.raises(TypeError):
-        asyncio.run(functions.get_object_tagging(bucket, key, version_id="2", async_flag="a"))
-        asyncio.run(functions.get_object_tagging(bucket, key, version_id="2", async_flag="m"))
+        asyncio.run(functions.get_object_tagging(bucket, key, version_id="2", sync_flag="a"))
+        asyncio.run(functions.get_object_tagging(bucket, key, version_id="2", sync_flag="m"))
 
 @pytest.mark.asyncio
 async def test_get_object_tagging_async_version_not_found(create_test_metadata):
@@ -200,7 +200,7 @@ async def test_get_object_tagging_async_version_not_found(create_test_metadata):
     bucket = "bucket1"
     key = "object1.txt"
     version_id = "nonexistent_version"
-    tags = await functions.get_object_tagging(bucket, key, version_id=version_id, async_flag=True)
+    tags = await functions.get_object_tagging(bucket, key, version_id=version_id, sync_flag=False)
     assert tags == []
 
 @pytest.mark.asyncio
@@ -208,7 +208,7 @@ async def test_get_object_tagging_async_bucket_not_found(create_test_metadata):
     # Test to ensure empty list is returned when bucket is not found asynchronously
     bucket = "non_existent_bucket"
     key = "object1.txt"
-    tags = await functions.get_object_tagging(bucket, key, async_flag=True)
+    tags = await functions.get_object_tagging(bucket, key, sync_flag=False)
     assert tags == []
 
 def test_get_object_tagging_sync_bucket_not_found(create_test_metadata):
@@ -223,7 +223,7 @@ async def test_get_object_tagging_async_invalid_version_id(create_test_metadata)
     # Test to ensure proper handling of an invalid version_id asynchronously
     bucket = "bucket1"
     key = "object1.txt"
-    tags = await functions.get_object_tagging(bucket, key, version_id="invalid_version_id", async_flag=True)
+    tags = await functions.get_object_tagging(bucket, key, version_id="invalid_version_id", sync_flag=False)
     expected_tags = []
     assert tags == expected_tags
 
