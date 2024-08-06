@@ -3,12 +3,10 @@ import json
 import aiofiles
 from datetime import datetime
 
-
 class MetadataManager:
     def __init__(self, metadata_file='metadata.json'):
         self.metadata_file = metadata_file
         self.metadata = self.load_metadata()
-
 
     def load_metadata(self):
         if os.path.exists(self.metadata_file):
@@ -53,8 +51,7 @@ class MetadataManager:
         return False
 
     async def delete_object(self, bucket, key, is_sync=True):
-        if bucket in self.metadata["server"]["buckets"] and key in self.metadata["server"]["buckets"][bucket][
-            "objects"]:
+        if bucket in self.metadata["server"]["buckets"] and key in self.metadata["server"]["buckets"][bucket]["objects"]:
             del self.metadata["server"]["buckets"][bucket]["objects"][key]
             if is_sync:
                 await self.save_metadata(True)
@@ -96,8 +93,7 @@ class MetadataManager:
 
             # Check Legal Hold
             if legal_hold:
-                raise PermissionError(
-                    f"Version {version_id} of object {key} in bucket {bucket} is under legal hold and cannot be deleted")
+                raise PermissionError(f"Version {version_id} of object {key} in bucket {bucket} is under legal hold and cannot be deleted")
 
             # Check Retention
             if retention_mode == 'COMPLIANCE' and not by_pass_governance_retention:
