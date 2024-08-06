@@ -18,17 +18,16 @@ class S3ClientSimulator:
             raise FileNotFoundError(f"Bucket '{bucket}' not found.")
 
         # Retrieve the object lock configuration for the bucket
-        object_lock_configurations = {}
-        for obj_key, obj_metadata in bucket_metadata.get("objects", {}).items():
-            object_lock = obj_metadata.get("objectLock", None)
-            object_lock_configurations[obj_key] = {
-                "ObjectLockEnabled": object_lock["objectLockEnabled"] if object_lock else "DISABLED",
-                "LockConfiguration": object_lock["lockConfiguration"] if object_lock else {}
-            }
+        object_lock = bucket_metadata.get("objectLock", None)
+        object_lock_configuration = {
+            "ObjectLockEnabled": object_lock["objectLockEnabled"] if object_lock else "DISABLED",
+            "LockConfiguration": object_lock["lockConfiguration"] if object_lock else {}
+        }
 
         return {
-            "ObjectLockConfigurations": object_lock_configurations
+            "ObjectLockConfiguration": object_lock_configuration
         }
+
 
     async def get_object_torrent(self, bucket, key, version_id=None, is_sync=True, IfMatch=None,if_modified_since=None,if_none_match=None,
         if_unmodified_since=None,range=None,ssec_ustomer_algorithm=None,ssec_ustomer_key=None,ssec_ustomerkey_md5=None,request_payer=None,):
@@ -214,18 +213,18 @@ async def main():
         print(e)
     head_object = await s3_client.head_object('bucket1', 'file2.txt')
     print("meta data is:", head_object)
-    try:
-        # Example body as bytes
-        body = b"Hello, World!"
-        result = await s3_client.put_object('bucket1', 'file3.txt', body)
-        print("PutObject result:", result)
-    except Exception as e:
-        print(e)
-    try:
-        response = await s3_client.put_object_acl('bucket1', 'file2.txt', {"owner": "default_owner", "permissions": ["READ", "WRITE"]},version_id="3")
-        print(response)
-    except Exception as e:
-        print(e)
+    # try:
+    #     # Example body as bytes
+    #     body = b"Hello, World!"
+    #     result = await s3_client.put_object('bucket1', 'file3.txt', body)
+    #     print("PutObject result:", result)
+    # except Exception as e:
+    #     print(e)
+    # try:
+    #     response = await s3_client.put_object_acl('bucket1', 'file2.txt', {"owner": "default_owner", "permissions": ["READ", "WRITE"]},version_id="3")
+    #     print(response)
+    # except Exception as e:
+    #     print(e)
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -262,7 +261,7 @@ if __name__ == "__main__":
 #
 #     piece_length = 512 * 1024  # 512KB
 #     pieces = []
-#     with open(file_path, 'rb') as f:
+#     with open(file_path, 'r') as f:
 #         while True:
 #             piece = f.read(piece_length)
 #             if not piece:
@@ -281,7 +280,7 @@ if __name__ == "__main__":
 #         'info': info
 #     }
 #
-#     with open(torrent_path, 'wb') as f:
+#     with open(torrent_path, 'w') as f:
 #         f.write(bencodepy.encode(torrent))
 #
 #     # Return the torrent file path
