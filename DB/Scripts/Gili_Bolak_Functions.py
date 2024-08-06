@@ -14,16 +14,17 @@ class Gili_Bolak_Functions:
 
     def create_object_management_table(self) -> None:
         """Create the object_management table if it does not exist."""
-        with self.open_connection() as conn:
-            c = conn.cursor()
-            c.execute('''
-            CREATE TABLE IF NOT EXISTS object_management (
-                object_id INTEGER PRIMARY KEY,
-                type_object TEXT,
-                metadata TEXT
-            )
-            ''')
-            conn.commit()
+        conn = self.open_connection()
+        c = conn.cursor()
+        c.execute('''
+        CREATE TABLE IF NOT EXISTS object_management (
+            object_id INTEGER PRIMARY KEY,
+            type_object TEXT,
+            metadata TEXT
+        )
+        ''')
+        conn.commit()
+        conn.close()
 
     def CreateOptionGroup(
         self,
@@ -34,8 +35,10 @@ class Gili_Bolak_Functions:
         tags: Optional[Dict] = None
     ) -> str:
         """Create a new option group and insert it into the object_management table."""
-        with self.open_connection() as conn:
-            return OptionGroup.CreateOptionGroup(conn, engine_name, major_engine_version, option_group_description, option_group_name, tags)
+        conn = self.open_connection()
+        return_obj = OptionGroup.CreateOptionGroup(conn, engine_name, major_engine_version, option_group_description, option_group_name, tags)
+        conn.close()
+        return return_obj
 
     def DeleteOptionGroup(self, option_group_name: str) -> str:
         """
@@ -44,8 +47,10 @@ class Gili_Bolak_Functions:
         If the option group does not exist or is not available, the function returns an appropriate error message in JSON format.
         If the option group is successfully deleted, the function returns a success response in JSON format.
         """
-        with self.open_connection() as conn:
-            return OptionGroup.DeleteOptionGroup(conn, option_group_name)
+        conn = self.open_connection()
+        return_obj = OptionGroup.DeleteOptionGroup(conn, option_group_name)
+        conn.close()
+        return return_obj
 
     def ModifyOptionGroup(
         self,
@@ -55,8 +60,10 @@ class Gili_Bolak_Functions:
         options_to_remove: Optional[List[str]] = None
     ) -> str:
         """Modify Option Group."""
-        with self.open_connection() as conn:
-            return OptionGroup.ModifyOptionGroup(conn, option_group_name, apply_immediately, options_to_include, options_to_remove)
+        conn = self.open_connection()
+        return_obj = OptionGroup.ModifyOptionGroup(conn, option_group_name, apply_immediately, options_to_include, options_to_remove)
+        conn.close()
+        return return_obj
 
     def CopyOptionGroup(
         self,
@@ -66,9 +73,11 @@ class Gili_Bolak_Functions:
         tags: Optional[Dict] = None
     ) -> str:
         """Copy an existing option group and insert it into the object_management table."""
-        with self.open_connection() as conn:
-            return OptionGroup.CopyOptionGroup(conn, source_option_group_identifier, target_option_group_description, target_option_group_identifier, tags)
-
+        conn = self.open_connection()
+        return_obj = OptionGroup.CopyOptionGroup(conn, source_option_group_identifier, target_option_group_description, target_option_group_identifier, tags)
+        conn.close()
+        return return_obj
+    
     def DescribeOptionGroups(
         self,
         engine_name: Optional[str] = None,
@@ -78,8 +87,10 @@ class Gili_Bolak_Functions:
         option_group_name: Optional[str] = None
     ) -> dict:
         """Describes the available option groups."""
-        with self.open_connection() as conn:
-            return OptionGroup.DescribeOptionGroups(conn, engine_name, major_engine_version, marker, max_records, option_group_name)
+        conn = self.open_connection()
+        return_obj = OptionGroup.DescribeOptionGroups(conn, engine_name, major_engine_version, marker, max_records, option_group_name)
+        conn.close()
+        return return_obj
 
     def DescribeOptionGroupOptions(
         self,
@@ -89,5 +100,7 @@ class Gili_Bolak_Functions:
         max_records: int = 100
     ) -> dict:
         """Describes all available options for the specified engine."""
-        with self.open_connection() as conn:
-            return OptionGroup.DescribeOptionGroupOptions(conn, engine_name, major_engine_version, marker, max_records)
+        conn = self.open_connection()
+        return_obj = OptionGroup.DescribeOptionGroupOptions(conn, engine_name, major_engine_version, marker, max_records)
+        conn.close()
+        return return_obj
