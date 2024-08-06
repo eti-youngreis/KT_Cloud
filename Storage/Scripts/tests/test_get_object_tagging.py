@@ -1,148 +1,237 @@
 import os
 import pytest
 import asyncio
+import json
 import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from PyStorage import PyStorage  # Ensure this is the correct import path
-
-from metadata import MetadataManager
+from PyStorage import PyStorage
 
 functions = PyStorage()
 
 @pytest.fixture
-def create_test_file(tmp_path):
-    # Create a temporary test file
-    file_path = tmp_path / "test_file.txt"
-    with open(file_path, 'w') as f:
-        f.write("This is a test file.")
-    return file_path
-
-@pytest.fixture
-def create_metadata_file(tmp_path):
-    # Create a temporary metadata file with an empty JSON object
+def create_test_metadata(tmp_path):
+    # Create a temporary metadata file
     metadata_file_path = tmp_path / "metadata.json"
-    with open(metadata_file_path, 'w') as f:
-        f.write("{}")
-    return metadata_file_path
+    data = {
+        "server": {
+            "buckets": {
+                "bucket1": {
+                    "objects": {
+                        "object1.txt": {
+                            "versions": {
+                                "1": {
+                                    "etag": "etag1",
+                                    "size": 1024,
+                                    "lastModified": "2023-07-01T12:00:00Z",
+                                    "isLatest": False,
+                                    "acl": {
+                                        "owner": "user1",
+                                        "permissions": ["READ", "WRITE"]
+                                    },
+                                    "legalHold": False,
+                                    "retention": {
+                                        "mode": "COMPLIANCE",
+                                        "retainUntilDate": "2024-07-01T12:00:00Z"
+                                    },
+                                    "ContentLength": 1024,
+                                    "ETag": "1234567890abcdef",
+                                    "ContentType": "text/plain",
+                                    "metadata": {"custom-metadata": "value"},
+                                    "checksum": "abc124",
+                                    "ObjectParts": "None",
+                                    "ObjectSize": 67890,
+                                    "StorageClass": "STANDARD",
+                                    "TagSet": [
+                                        {"key": "1", "value": "2"},
+                                        {"key": "3", "value": "4"}
+                                    ]
+                                },
+                                "2": {
+                                    "etag": "etag2",
+                                    "size": 2048,
+                                    "lastModified": "2023-08-01T12:00:00Z",
+                                    "isLatest": True,
+                                    "acl": {
+                                        "owner": "user1",
+                                        "permissions": ["READ"]
+                                    },
+                                    "legalHold": True,
+                                    "retention": {
+                                        "mode": "GOVERNANCE",
+                                        "retainUntilDate": "2024-08-01T12:00:00Z"
+                                    },
+                                    "TagSet": [
+                                        {"key": "Key1", "value": "Value1"},
+                                        {"key": "Key2", "value": "Value2"}
+                                    ],
+                                    "LastModified": "2024-07-31T12:00:00Z",
+                                    "ContentLength": 1024,
+                                    "ETag": "1234567890abcdef",
+                                    "ContentType": "text/plain",
+                                    "metadata": {"custom-metadata": "value"},
+                                    "checksum": "abc124",
+                                    "ObjectParts": "None",
+                                    "ObjectSize": 67890,
+                                    "StorageClass": "STANDARD"
+                                }
+                            }
+                        }
+                    }
+                },
+                "bucket2": {
+                    "objects": {
+                        "object3.pdf": {
+                            "versions": {
+                                "1": {
+                                    "etag": "etag4",
+                                    "size": 3072,
+                                    "lastModified": "2023-05-01T12:00:00Z",
+                                    "isLatest": True,
+                                    "acl": {
+                                        "owner": "user3",
+                                        "permissions": ["READ", "WRITE"]
+                                    },
+                                    "legalHold": False,
+                                    "retention": {
+                                        "mode": "GOVERNANCE",
+                                        "retainUntilDate": "2024-05-01T12:00:00Z"
+                                    },
+                                    "TagSet": [
+                                        {"key": "Key1", "value": "Value1"},
+                                        {"key": "Key2", "value": "Value2"}
+                                    ],
+                                    "LastModified": "2024-07-31T12:00:00Z",
+                                    "ContentLength": 1024,
+                                    "ETag": "1234567890abcdef",
+                                    "ContentType": "text/plain",
+                                    "metadata": {"custom-metadata": "value"},
+                                    "checksum": "abc124",
+                                    "ObjectParts": "None",
+                                    "ObjectSize": 67890,
+                                    "StorageClass": "STANDARD"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-@pytest.fixture
-def setup_metadata_manager(create_metadata_file):
-    # Set up the metadata manager with the test metadata file
-    metadata = functions.metadata_manager
-    metadata.metadata_file = str(create_metadata_file)
-    return metadata
+    with open(metadata_file_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+    
+    # Load the metadata into functions.metadata_manager.metadata
+    with open(metadata_file_path, 'r', encoding='utf-8') as f:
+        metadata = json.load(f)
+    functions.metadata_manager.metadata = metadata
+    functions.metadata_manager.metadata_file=str(metadata_file_path)
+    
+    yield metadata_file_path
+    
+    if os.path.exists(metadata_file_path):
+        os.remove(metadata_file_path)
 
-def test_get_object_tagging_file_with_tags(create_test_file, setup_metadata_manager):
-    # Test getting tags from a file after adding them, both synchronously and asynchronously
-    file_path = str(create_test_file)
-    tags = [{'Key': 'Project', 'Value': 'Test'}]
-    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=456, async_flag=False))
+@pytest.mark.asyncio
+async def test_get_object_tagging_async_specific_version(create_test_metadata):
+    # Test to get tags for a specific version asynchronously
+    bucket = "bucket1"
+    key = "object1.txt"
+    version_id = "2"
+    tags = await functions.get_object_tagging(bucket, key, version_id=version_id, async_flag=True)
+    expected_tags = [
+        {"key": "Key1", "value": "Value1"},
+        {"key": "Key2", "value": "Value2"}
+    ]
+    assert tags == expected_tags
 
-    tags_sync = asyncio.run(functions.get_object_tagging(file_path, version_id=456, async_flag=False))
-    tags_async = asyncio.run(functions.get_object_tagging(file_path, version_id=456, async_flag=True))
+def test_get_object_tagging_invalid_key(create_test_metadata):
+    # Test to ensure empty list is returned for an invalid key
+    bucket = "bucket1"
+    key = "non_existent_file.txt"
+    tags = asyncio.run(functions.get_object_tagging(bucket, key))
+    assert tags == []
 
-    assert tags_sync == tags
-    assert tags_async == tags
+@pytest.mark.asyncio
+async def test_get_object_tagging_async_invalid_key(create_test_metadata):
+    # Test to ensure empty list is returned for an invalid key asynchronously
+    bucket = "bucket1"
+    key = "non_existent_file.txt"
+    tags = await functions.get_object_tagging(bucket, key, async_flag=True)
+    assert tags == []
 
-def test_get_object_tagging_file_without_tags(create_test_file, setup_metadata_manager):
-    # Test getting an empty list of tags from a file after clearing them, both synchronously and asynchronously
-    file_path = str(create_test_file)
-    tags = []
-    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=False))
+def test_get_object_tagging_no_version_specified(create_test_metadata):
+    # Test to get tags for the latest version synchronously without specifying version
+    bucket = "bucket1"
+    key = "object1.txt"
+    tags = asyncio.run(functions.get_object_tagging(bucket, key,async_flag=True))
+    expected_tags = [
+        {"key": "Key1", "value": "Value1"},
+        {"key": "Key2", "value": "Value2"}
+    ]
+    assert tags == expected_tags
 
-    tags_sync = asyncio.run(functions.get_object_tagging(file_path, version_id=123, async_flag=False))
-    tags_async = asyncio.run(functions.get_object_tagging(file_path, version_id=123, async_flag=True))
+@pytest.mark.asyncio
+async def test_get_object_tagging_async_no_version_specified(create_test_metadata):
+    # Test to get tags for the latest version asynchronously without specifying version
+    bucket = "bucket1"
+    key = "object1.txt"
+    tags = await functions.get_object_tagging(bucket, key, async_flag=True)
+    expected_tags = [
+        {"key": "Key1", "value": "Value1"},
+        {"key": "Key2", "value": "Value2"}
+    ]
+    assert tags == expected_tags
 
-    assert tags_sync == tags
-    assert tags_async == tags
 
-def test_get_object_tagging_empty_values_sync(create_test_file, setup_metadata_manager):
-    # Test getting tags with empty key and value, both synchronously and asynchronously
-    file_path = str(create_test_file)
-    tags = [{"Key": "", "Value": ""}]
-    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=False))
-
-    result_sync = asyncio.run(functions.get_object_tagging(file_path, version_id=123, async_flag=False))
-    result_async = asyncio.run(functions.get_object_tagging(file_path, version_id=123, async_flag=True))
-
-    assert result_sync == tags
-    assert result_async == tags
-
-def test_get_object_tagging_single_key_empty_value(create_test_file, setup_metadata_manager):
-    # Test getting tags with a single key and empty value, both synchronously and asynchronously
-    file_path = str(create_test_file)
-    tags = [{"Key": "SingleKey", "Value": ""}]
-    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=False))
-
-    result_sync = asyncio.run(functions.get_object_tagging(file_path, version_id=123, async_flag=False))
-    result_async = asyncio.run(functions.get_object_tagging(file_path, version_id=123, async_flag=True))
-
-    assert result_sync == tags
-    assert result_async == tags
-
-def test_get_object_tagging_multiple_keys(create_test_file, setup_metadata_manager):
-    # Test getting tags with multiple key-value pairs, both synchronously and asynchronously
-    file_path = str(create_test_file)
-    tags = [{"Key": "Key1", "Value": "Value1"}, {"Key": "Key2", "Value": "Value2"}]
-    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=False))
-
-    result_sync = asyncio.run(functions.get_object_tagging(file_path, version_id=123, async_flag=False))
-    result_async = asyncio.run(functions.get_object_tagging(file_path, version_id=123, async_flag=True))
-
-    assert result_sync == tags
-    assert result_async == tags
-
-def test_get_object_tagging_invalid_arguments(create_test_file, setup_metadata_manager):
+def test_get_object_tagging_invalid_arguments(create_test_metadata):
     # Test that invalid arguments for `async_flag` raise a TypeError
-    file_path = str(create_test_file)
+    bucket = "bucket1"
+    key = "object1.txt"
     with pytest.raises(TypeError):
-        asyncio.run(functions.get_object_tagging(file_path, version_id=123, async_flag="a"))
-        asyncio.run(functions.get_object_tagging(file_path, version_id=123, async_flag="m"))
+        asyncio.run(functions.get_object_tagging(bucket, key, version_id="2", async_flag="a"))
+        asyncio.run(functions.get_object_tagging(bucket, key, version_id="2", async_flag="m"))
 
-def test_get_object_tagging_empty_file_path(create_test_file, setup_metadata_manager):
-    # Test getting tags from an empty file path, expecting an empty dictionary for both sync and async
-    file_path = str(create_test_file)
-    tags_sync = asyncio.run(functions.get_object_tagging(file_path, version_id=123, async_flag=False))
-    tags_async = asyncio.run(functions.get_object_tagging(file_path, version_id=123, async_flag=True))
+@pytest.mark.asyncio
+async def test_get_object_tagging_async_version_not_found(create_test_metadata):
+    # Test to ensure empty list is returned when version is not found asynchronously
+    bucket = "bucket1"
+    key = "object1.txt"
+    version_id = "nonexistent_version"
+    tags = await functions.get_object_tagging(bucket, key, version_id=version_id, async_flag=True)
+    assert tags == []
 
-    assert tags_sync == {}
-    assert tags_async == {}
+@pytest.mark.asyncio
+async def test_get_object_tagging_async_bucket_not_found(create_test_metadata):
+    # Test to ensure empty list is returned when bucket is not found asynchronously
+    bucket = "non_existent_bucket"
+    key = "object1.txt"
+    tags = await functions.get_object_tagging(bucket, key, async_flag=True)
+    assert tags == []
 
-def test_get_object_tagging_non_existent_file():
-    # Test getting tags from a non-existent file, expecting an empty dictionary for both sync and async
-    file_path = "non_existent_file.txt"
-    tags_sync = asyncio.run(functions.get_object_tagging(file_path, version_id=123, async_flag=False))
-    tags_async = asyncio.run(functions.get_object_tagging(file_path, version_id=123, async_flag=True))
-    
-    assert tags_sync == {}
-    assert tags_async == {}
+def test_get_object_tagging_sync_bucket_not_found(create_test_metadata):
+    # Test to ensure empty list is returned when bucket is not found synchronously
+    bucket = "non_existent_bucket"
+    key = "object1.txt"
+    tags = asyncio.run(functions.get_object_tagging(bucket, key))
+    assert tags == []
 
-def test_get_object_tagging_large_number_of_tags(create_test_file, setup_metadata_manager):
-    # Test handling a large number of tags, both synchronously and asynchronously
-    file_path = str(create_test_file)
-    tags = [{"Key": f"Key{i}", "Value": f"Value{i}"} for i in range(100)]
-    asyncio.run(functions.put_object_tagging(file_path, tags, version_id=123, async_flag=False))
-    
-    result_sync = asyncio.run(functions.get_object_tagging(file_path, version_id=123, async_flag=False))
-    result_async = asyncio.run(functions.get_object_tagging(file_path, version_id=123, async_flag=True))
-    
-    assert result_sync == tags
-    assert result_async == tags
+@pytest.mark.asyncio
+async def test_get_object_tagging_async_invalid_version_id(create_test_metadata):
+    # Test to ensure proper handling of an invalid version_id asynchronously
+    bucket = "bucket1"
+    key = "object1.txt"
+    tags = await functions.get_object_tagging(bucket, key, version_id="invalid_version_id", async_flag=True)
+    expected_tags = []
+    assert tags == expected_tags
 
-def test_get_object_tagging_no_version_id(create_test_file, setup_metadata_manager):
-    # Test getting tags from a file when no version ID is specified, should return tags for the latest version
-    file_path = str(create_test_file)
-    tags = [{"Key": "Project", "Value": "Test"}]
-
-    asyncio.run(functions.put_object_tagging(file_path, tags, async_flag=False))
-
-    result_sync = asyncio.run(functions.get_object_tagging(file_path, async_flag=False))
-
-    latest_version = setup_metadata_manager.get_latest_version(file_path)
-
-    result = asyncio.run(functions.get_object_tagging(file_path,latest_version, async_flag=False))
-
-    assert result_sync == result
+def test_get_object_tagging_sync_invalid_version_id(create_test_metadata):
+    # Test to ensure proper handling of an invalid version_id synchronously
+    bucket = "bucket1"
+    key = "object1.txt"
+    tags = asyncio.run(functions.get_object_tagging(bucket, key, version_id="invalid_version_id"))
+    expected_tags = []
+    assert tags == expected_tags
 
