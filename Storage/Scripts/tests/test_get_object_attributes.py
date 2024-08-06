@@ -141,7 +141,7 @@ async def test_get_object_attributes_async_specific_version(create_test_metadata
     bucket = "bucket1"
     key = "object1.txt"
     version_id = "2"
-    attributes = await functions.get_object_attributes(bucket, key, version_id=version_id, async_flag=True)
+    attributes = await functions.get_object_attributes(bucket, key, version_id=version_id, sync_flag=True)
     assert attributes["checksum"] == "abc124"
     assert attributes["ETag"] == "1234567890abcdef"
     assert attributes["ObjectParts"] == "None"
@@ -159,7 +159,7 @@ async def test_get_object_attributes_async_invalid_key(create_test_metadata):
     # Test to ensure FileNotFoundError is raised for an invalid key asynchronously
     key = "non_existent_file.txt"
     with pytest.raises(FileNotFoundError):
-        await functions.get_object_attributes("bucket1", key, async_flag=True)
+        await functions.get_object_attributes("bucket1", key, sync_flag=False)
 
 def test_get_object_attributes_no_version_specified( create_test_metadata):
     # Test to get the latest version attributes synchronously without specifying version
@@ -177,7 +177,7 @@ async def test_get_object_attributes_async_no_version_specified(create_test_meta
     # Test to get the latest version attributes asynchronously without specifying version
     bucket = "bucket1"
     key = "object1.txt"
-    attributes = await functions.get_object_attributes(bucket, key, async_flag=True)
+    attributes = await functions.get_object_attributes(bucket, key, sync_flag=True)
     assert attributes["checksum"] == "abc124"
     assert attributes["ETag"] == "1234567890abcdef"
     assert attributes["ObjectParts"] == "None"
@@ -192,7 +192,7 @@ async def test_get_object_attributes_async_version_not_found(create_test_metadat
     key = "object1.txt"
     version_id = "nonexistent_version"
     with pytest.raises(FileNotFoundError):
-        await functions.get_object_attributes(bucket, key, version_id=version_id, async_flag=True)
+        await functions.get_object_attributes(bucket, key, version_id=version_id, sync_flag=False)
 
 def test_get_object_attributes_sync_version_not_found(create_test_metadata):
     # Test to ensure FileNotFoundError is raised when version is not found synchronously
@@ -208,4 +208,4 @@ async def test_get_object_attributes_async_bucket_not_found(create_test_metadata
     bucket = "non_existent_bucket"
     key = "object1.txt"
     with pytest.raises(FileNotFoundError):
-        await functions.get_object_attributes(bucket, key, async_flag=True)
+        await functions.get_object_attributes(bucket, key, sync_flag=False)
