@@ -7,19 +7,14 @@ class PyStorage:
         # Initialize the metadata manager
         self.metadata_manager = MetadataManager()
 
-    def sync_get_object_attributes(self, key):
-        # Synchronously get object attributes by running the asynchronous function
-        attributes = asyncio.run(self.get_object_attributes(key))
-        return attributes
-    
-  
 
-    async def get_object_attributes(self,bucket, key, version_id=None, async_flag=False):  
+    async def get_object_attributes(self,bucket, key, version_id=None,MaxParts=None,PartNumberMarker =None,SSECustomerAlgorithm =None,SSECustomerKey =None,SSECustomerKeyMD5=None,RequestPayer=None,ExpectedBucketOwner =None,ObjectAttributes=None, sync_flag=False):  
         # Get the metadata for the given key
-        if async_flag:
-            metadata = await asyncio.to_thread(self.metadata_manager.get_bucket_metadata,bucket, key)
-        else:
+        if sync_flag:
             metadata = self.metadata_manager.get_bucket_metadata(bucket,key)   
+        else:
+            metadata = await asyncio.to_thread(self.metadata_manager.get_bucket_metadata,bucket, key)
+
               
         if metadata is None:
             raise FileNotFoundError(f'No metadata found for object {key}')
@@ -43,39 +38,77 @@ class PyStorage:
             'ObjectSize': version_metadata.get('ObjectSize'),
             'StorageClass': version_metadata.get('StorageClass', {})
         }
+        if MaxParts is not None:
+            object_parts = attributes.get('ObjectParts', [])
+            if object_parts:
+                # Limit the number of parts returned to MaxParts
+                attributes['ObjectParts'] = object_parts[:MaxParts]
 
         return attributes
 
-    # def sync_put_object_tagging(self, key, tags, version_id=None):
-    #     # Synchronously put object tagging by running the asynchronous function
-    #     asyncio.run(self.put_object_tagging(key, tags, version_id))
 
-    async def put_object_tagging(self,bucket, key, tags, version_id=None, async_flag=False):
-        # Check if async_flag is a boolean
-        if not isinstance(async_flag, bool):
+
+
+    async def put_object_tagging(self,bucket, key,tags, version_id=None, ContentMD5=None,ChecksumAlgorithm=None,ExpectedBucketOwner=None,RequestPayer=None, sync_flag=True):
+
+        if not isinstance(sync_flag, bool):
             raise TypeError('async_flag must be a boolean')
+        
+        # Update only the TagSet field for a given key and version ID, preserving other fields
+        if key not in self.metadata_manager.metadata:
+            self.metadata_manager.metadata[key] = {'versions': {}}
 
-        # Update metadata tags asynchronously or synchronously based on async_flag
-        if async_flag:
-            await self.metadata_manager.update_metadata_tags(bucket,key, version_id, {'TagSet': tags}, False)
+        versions = self.metadata_manager.get_versions(bucket,key)
+        version_id_str = str(version_id)
+
+        if version_id_str in versions:
+            # Update the TagSet field if the version exists
+            versions[version_id_str]['TagSet'] = tags['TagSet']
+        elif version_id:
+            # Add a new version with the given data if the version does not exist
+            versions[version_id_str] = tags
         else:
-            await self.metadata_manager.update_metadata_tags(bucket,key ,version_id, {'TagSet': tags}, True)
-
-        print(f'Tags for {key} have been saved.')
-
-    def sync_get_object_tagging(self, key, version_id=None):
-        # Synchronously get object tagging by running the asynchronous function
-        tags = asyncio.run(self.get_object_tagging(key, version_id))
-        return tags
-
-    async def get_object_tagging(self,bucket, key, version_id=None, async_flag=False):
-        # Check if async_flag is a boolean
-        if not isinstance(async_flag, bool):
-            raise TypeError('async_flag must be a boolean')
-
-        # Get tags asynchronously or synchronously based on async_flag
-        if async_flag:            
-            tags = await asyncio.to_thread(self.metadata_manager.get_tags,bucket, key, version_id)
+            latest_version = self.metadata_manager.get_latest_version(key)
+            if latest_version:
+                versions[str(latest_version)]['TagSet'] = tags['TagSet']
+            else:
+                versions['0'] = tags
+                
+        # Save metadata either synchronously or asynchronously
+        if sync_flag:
+            await self.metadata_manager.save_metadata(True)
         else:
-            tags = self.metadata_manager.get_tags(key,bucket, version_id)
-        return tags
+            await self.metadata_manager.save_metadata(False)
+
+
+
+    
+    async def get_object_tagging(self,bucket, key,ExpectedBucketOwner=None,RequestPayer=None, version_id=None,sync_flag=True):
+                # Check if async_flag is a boolean
+        if not isinstance(sync_flag, bool):
+            raise TypeError('sync_flag must be a boolean')
+        # Retrieve the TagSet for a given key and version ID
+                # Get the metadata for the given key
+        if sync_flag:
+            metadata = self.metadata_manager.get_bucket_metadata(bucket,key)  
+        else:
+            metadata = await asyncio.to_thread(self.metadata_manager.get_bucket_metadata,bucket, key)
+            
+        versions = self.metadata_manager.get_versions(bucket,key)
+        if metadata is None or versions is None:
+            return []
+
+        version_id_str = str(version_id)
+        
+        if version_id_str in versions:
+            return versions[version_id_str].get('TagSet', [])
+        
+        elif not version_id:
+            # If the version ID is not found, try to get the latest version
+                latest_version = self.metadata_manager.get_latest_version(bucket,key)
+                if latest_version:
+                    return versions[str(latest_version)].get('TagSet', [])
+                       
+        return []
+    
+    
