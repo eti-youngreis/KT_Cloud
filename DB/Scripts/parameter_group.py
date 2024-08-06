@@ -1,6 +1,6 @@
 import json
 
-from Management import insert_into_management_table, delete_from_Management
+from DB.Scripts.Management import insert_into_management_table, delete_from_Management
 from abc import abstractmethod
 
 
@@ -46,7 +46,7 @@ class ParameterGroup:
         metadata_json = json.dumps(metadata)
         return metadata_json
 
-    def save_to_db(self, class_name):
+    def save_to_db(self, class_name,conn=None):
         """
         Saves the parameter group to the database.
 
@@ -54,7 +54,7 @@ class ParameterGroup:
         class_name (str): The name of the class for saving to the management table
         """
         metadata_json = self.get_metadata()
-        insert_into_management_table(class_name, self.parameter_group_name, metadata_json)
+        insert_into_management_table(class_name, self.parameter_group_name, metadata_json,conn)
 
     def describe(self, name):
         """
@@ -117,5 +117,5 @@ class ParameterGroup:
         ParameterGroup: The default parameter group instance
         """
         if ParameterGroup.default_parameter_group is None:
-            ParameterGroup.default_parameter_group = ParameterGroup("default", "aurora-mysql5.7", "default")
+            ParameterGroup.default_parameter_group = ParameterGroup("default", "aurora-mysql5.7", "default", None)
         return ParameterGroup.default_parameter_group

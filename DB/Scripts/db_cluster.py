@@ -1,7 +1,7 @@
-from db_instance import DBInstance
-from endpoint import Endpoint
+from DB.Scripts.db_instance import DBInstance
+from DB.Scripts.endpoint import Endpoint
 from typing import List
-from parameter_group import ParameterGroup
+from DB.Scripts.parameter_group import ParameterGroup
 
 
 class DBCluster:
@@ -84,7 +84,7 @@ class DBCluster:
     #     for snapshot in self.snapshots:
     #         delete_db_snapshot(snapshot.snapshot_id)
 
-    def delete_endpoint(self, endpoint):
+    def delete_endpoint(self, endpoint, conn=None):
         """
         Deletes a specified endpoint from the DB cluster.
 
@@ -100,7 +100,7 @@ class DBCluster:
         # If the endpoint is in use
         if endpoint.counter > 0:
             raise RuntimeError(f"the endpoint is in use")
-        endpoint.delete()
+        endpoint.delete(conn)
         response = endpoint.describe('deleting')
         self.endpoints.remove(endpoint)
         return response

@@ -1,9 +1,11 @@
-from parameter_group import ParameterGroup
-from db_parameter_group import DBParameterGroup
-from db_cluster_parameter_group import DBClusterParameterGroup
+#from parameter_group import ParameterGroup
+import re
+from DB.Scripts.parameter_group import ParameterGroup
+from DB.Scripts.db_parameter_group import DBParameterGroup
+from DB.Scripts.db_cluster_parameter_group import DBClusterParameterGroup
 from typing import List
-from Management import *
-from db_cluster import DBCluster
+from DB.Scripts.Management import *
+from DB.Scripts.db_cluster import DBCluster
 
 clusters: List[DBCluster] = []
 db_parameter_groups: List[DBParameterGroup] = []
@@ -57,7 +59,7 @@ def delete_db_snapshot(snapshot_id):
     delete_from_Management("DBSnapshot", snapshot_id)
 
 
-def get_dbcluster_by_id(cluster_id, clusters_in_func):
+def get_dbcluster_by_id(cluster_id, clusters_in_func=clusters):
     """
     Function to find a cluster by its ID
 
@@ -71,14 +73,15 @@ def get_dbcluster_by_id(cluster_id, clusters_in_func):
     Raises:
     ValueError: If the cluster does not exist
     """
-    cluster = next((c for c in clusters_in_func if c.id == cluster_id), None)
+    cluster = next((c for c in clusters_in_func if c.cluster_identifier == cluster_id), None)
     if cluster is None:
         raise ValueError("Cluster does not exist")
     return cluster
 
 
+
 def create_parameter_group(parameter_groups, module_name, class_name, parameter_group_name, parameter_group_family,
-                           description, tags):
+                           description, tags,conn=None):
     """
     Function to create a parameter group
 
@@ -97,12 +100,14 @@ def create_parameter_group(parameter_groups, module_name, class_name, parameter_
     Raises:
     ValueError: If the parameter group already exists
     """
+    if bool(re.match('^[a-z]+$', parameter_group_name)):
+        raise ValueError("the parameter_group_name must be whit lower letters")
     parameter_group_names = [p.db_cluster_parameter_group_name for p in parameter_groups]
     if parameter_group_name in parameter_group_names:
         raise ValueError(f"The parameter group already exists")
     parameter_group = ParameterGroup(module_name, class_name, parameter_group_name, parameter_group_family, description,
                                      tags)
-    parameter_group.save_to_db()
+    parameter_group.save_to_db(conn)
     db_parameter_groups.append(parameter_group)
     return parameter_group.describe()
 
@@ -406,7 +411,7 @@ def describe_db_parameters(db_parameter_group_name, source='user', max_records=1
     return describe_parameters(db_parameter_groups, db_parameter_group_name, source, max_records, marker)
 
 
-def delete_db_cluster(clusters_in_func, cluster_identifier, delete_instances=True, backup=True):
+def delete_db_cluster(clusters_in_func, cluster_identifier, delete_instances=True, backup=True,conn=None):
     """
     Function to delete a DB cluster
 
@@ -428,24 +433,43 @@ def delete_db_cluster(clusters_in_func, cluster_identifier, delete_instances=Tru
         if backup:
             # Backup operation (not implemented here, just an example)
             print(f"Backing up cluster {cluster_identifier}")
+        # if snapshot:
+        #     if snapshot_id=='':
+        #         raise ValueError("snapshot_id must have a valid value if a snapshot is created")
+        #     is_valid_identifier(snapshot_id,255)
+        #     # ביצוע גיבוי (לא ממומש כאן, רק דוגמה)
+        #     print(f"Backing up cluster {cluster_id}")
 
         if delete_instances:
             cluster.delete_all_instances()
         else:
-            cluster.make_instances_independent()
+            cluster.make_instances_independent(conn)
         cluster.delete_all_endpoints()
         # cluster.delete_all_snapshots()
-        delete_from_Management("DBCluster", cluster_identifier)
-        clusters.remove(cluster)
+        delete_from_Management("DBCluster", cluster_identifier,conn)
+        clusters_in_func.remove(cluster)
         print(f"Cluster {cluster_identifier} deleted successfully.")
     except ValueError as e:
         raise ValueError(e)
     except Exception as e:
         raise RuntimeError(f"Error deleting cluster: {e}")
 
+def is_valid_identifier(identifier,length):
+    if not 1 <= len(identifier) <= length:
+        raise ValueError(f"the length must be between 1 to {length}")
+
+    # ביטוי רגולרי לבדיקת הדרישות הנוספות
+    pattern = r'^[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]$'
+    if length==63:
+        pattern = r'^[a-zA-Z][a-zA-Z0-9-.]*[a-zA-Z0-9]$'
+
+    # בדיקה שהמשתנה תואם את הביטוי הרגולרי ושאין בו שתי מקפים רצופים
+    if not(re.match(pattern, identifier) and '--' not in identifier):
+        raise ValueError("The identity syntax is incorrect")
+
 
 def create_db_cluster_endpoint(cluster_identifier, endpoint_identifier, endpoint_type='READER', static_members=None,
-                               excluded_members=None):
+                               excluded_members=None,conn=None,clusters_in_func=clusters):
     """
     Function to create a DB cluster endpoint
 
@@ -459,12 +483,15 @@ def create_db_cluster_endpoint(cluster_identifier, endpoint_identifier, endpoint
     Returns:
     DBEndpoint: The created endpoint
     """
-    cluster = get_dbcluster_by_id(cluster_identifier, clusters)
+    endpoint_types=['ANY','WRITER','READER']
+    if not endpoint_type in endpoint_types:
+        raise ValueError("the value of endpoint type is invalid")
+    cluster = get_dbcluster_by_id(cluster_identifier, clusters_in_func)
     return cluster.add_endpoint(cluster_identifier, endpoint_identifier, endpoint_type, static_members,
-                                excluded_members)
+                                excluded_members,conn)
 
 
-def delete_db_cluster_endpoint(endpoint_identifier):
+def delete_db_cluster_endpoint(endpoint_identifier,clusters_in_func=clusters,conn=None):
     """
     Function to delete a DB cluster endpoint
 
@@ -474,11 +501,11 @@ def delete_db_cluster_endpoint(endpoint_identifier):
     Returns:
     bool: True if the deletion was successful, False otherwise
     """
-    cluster, endpoint = find_cluster_and_endpoint_by_endpoint_identifier(endpoint_identifier)
-    return cluster.delete_endpoint(endpoint)
+    cluster, endpoint = find_cluster_and_endpoint_by_endpoint_identifier(endpoint_identifier,clusters_in_func)
+    return cluster.delete_endpoint(endpoint,conn)
 
 
-def describe_db_cluster_endpoints(endpoint_identifier):
+def describe_db_cluster_endpoints(endpoint_identifier,clusters_in_func=clusters):
     """
     Function to describe DB cluster endpoints
 
@@ -488,7 +515,7 @@ def describe_db_cluster_endpoints(endpoint_identifier):
     Returns:
     dict: Description of the found endpoint
     """
-    _, endpoint = find_cluster_and_endpoint_by_endpoint_identifier(endpoint_identifier, clusters)
+    _, endpoint = find_cluster_and_endpoint_by_endpoint_identifier(endpoint_identifier, clusters_in_func)
     return endpoint.describe()
 
 

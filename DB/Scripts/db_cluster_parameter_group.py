@@ -1,5 +1,5 @@
-from parameter import Parameter
-from parameter_group import ParameterGroup
+from DB.Scripts.parameter import Parameter
+from DB.Scripts.parameter_group import ParameterGroup
 
 
 class DBClusterParameterGroup(ParameterGroup):
@@ -30,13 +30,13 @@ class DBClusterParameterGroup(ParameterGroup):
             return {self.__class__.__name__: super().describe('DBClusterParameterGroupName')}
         return super().describe('DBClusterParameterGroupName')
 
-    def save_to_db(self):
+    def save_to_db(self,conn=None):
         """
         Saves the DB cluster parameter group to the database.
 
         Calls the parent class's save_to_db method with the class name.
         """
-        super().save_to_db(self.__class__.__name__)
+        super().save_to_db(self.__class__.__name__, conn)
 
     def delete(self):
         super().delete(self.__class__.__name__)
