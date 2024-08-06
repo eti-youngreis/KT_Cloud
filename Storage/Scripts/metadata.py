@@ -4,21 +4,23 @@ import aiofiles
 from datetime import datetime
 class MetadataManager:
     
-    def __init__(self,metadata_file='C:/Users/shana/Desktop/server/metadata.json'):
+    def __init__(self, metadata_file='C:/Users/shana/Desktop/server/metadata.json'):
+        # Initialize MetadataManager with a metadata file path
         self.metadata_file = metadata_file
         self.metadata = self.load_metadata()
 
 
     def load_metadata(self):
+        # Load metadata from file if it exists, otherwise return default structure
         if os.path.exists(self.metadata_file):
             with open(self.metadata_file, 'r', encoding='utf-8') as f:
                 return json.load(f)
         else:
-
             return {"server": {"buckets": {}}}
         
 
     async def save_metadata(self, sync_flag=True):
+        # Save metadata either synchronously or asynchronously
         if sync_flag:
             with open(self.metadata_file, 'w', encoding='utf-8') as f:
                 json.dump(self.metadata, f, indent=4, ensure_ascii=False)
@@ -28,6 +30,7 @@ class MetadataManager:
 
 
     def get_bucket_metadata(self, bucket, key):
+        # Retrieve metadata for a specific bucket and key
         bucket_metadata = self.metadata["server"]["buckets"].get(bucket, {})
         object_metadata = bucket_metadata.get("objects", {}).get(key, None)
         return object_metadata
@@ -72,6 +75,7 @@ class MetadataManager:
     
 
     def get_latest_version(self, bucket, key):
+        # Get the latest version for a given key
         metadata = self.get_bucket_metadata(bucket, key)
         if metadata and "versions" in metadata:
             return max(metadata["versions"].keys(), key=int)
@@ -97,6 +101,7 @@ class MetadataManager:
     #                     f"Version {version_id} of object {key} in bucket {bucket} is under Compliance Retention and cannot be deleted until {retain_until_date}")
     #         return True
     #     return False
+
     def get_versions(self,bucket, key):
         # Retrieve versions for a given key
         metadata = self.get_bucket_metadata(bucket,key)
@@ -104,5 +109,4 @@ class MetadataManager:
             return metadata.get('versions', {})
         return {}
     
-
 
