@@ -7,17 +7,19 @@ class PyStorage:
         # Initialize the metadata manager
         self.metadata_manager = MetadataManager()
 
-    def sync_get_object_attributes(self, file_path):
+    def sync_get_object_attributes(self, key):
         # Synchronously get object attributes by running the asynchronous function
-        attributes = asyncio.run(self.get_object_attributes(file_path))
+        attributes = asyncio.run(self.get_object_attributes(key))
         return attributes
+    
+  
 
-    async def get_object_attributes(self, key, version_id=None, async_flag=False):  
+    async def get_object_attributes(self,bucket, key, version_id=None, async_flag=False):  
         # Get the metadata for the given key
         if async_flag:
-            metadata = await asyncio.to_thread(self.metadata_manager.get_metadata, key)
+            metadata = await asyncio.to_thread(self.metadata_manager.get_bucket_metadata,bucket, key)
         else:
-            metadata = self.metadata_manager.get_metadata(key)   
+            metadata = self.metadata_manager.get_bucket_metadata(bucket,key)   
               
         if metadata is None:
             raise FileNotFoundError(f'No metadata found for object {key}')
@@ -44,36 +46,36 @@ class PyStorage:
 
         return attributes
 
-    def sync_put_object_tagging(self, file_path, tags, version_id=None):
-        # Synchronously put object tagging by running the asynchronous function
-        asyncio.run(self.put_object_tagging(file_path, tags, version_id))
+    # def sync_put_object_tagging(self, key, tags, version_id=None):
+    #     # Synchronously put object tagging by running the asynchronous function
+    #     asyncio.run(self.put_object_tagging(key, tags, version_id))
 
-    async def put_object_tagging(self, file_path, tags, version_id=None, async_flag=False):
+    async def put_object_tagging(self,bucket, key, tags, version_id=None, async_flag=False):
         # Check if async_flag is a boolean
         if not isinstance(async_flag, bool):
             raise TypeError('async_flag must be a boolean')
 
         # Update metadata tags asynchronously or synchronously based on async_flag
         if async_flag:
-            await self.metadata_manager.update_metadata_tags(file_path, version_id, {'TagSet': tags}, False)
+            await self.metadata_manager.update_metadata_tags(bucket,key, version_id, {'TagSet': tags}, False)
         else:
-            await self.metadata_manager.update_metadata_tags(file_path, version_id, {'TagSet': tags}, True)
+            await self.metadata_manager.update_metadata_tags(bucket,key ,version_id, {'TagSet': tags}, True)
 
-        print(f'Tags for {file_path} have been saved.')
+        print(f'Tags for {key} have been saved.')
 
-    def sync_get_object_tagging(self, file_path, version_id=None):
+    def sync_get_object_tagging(self, key, version_id=None):
         # Synchronously get object tagging by running the asynchronous function
-        tags = asyncio.run(self.get_object_tagging(file_path, version_id))
+        tags = asyncio.run(self.get_object_tagging(key, version_id))
         return tags
 
-    async def get_object_tagging(self, file_path, version_id=None, async_flag=False):
+    async def get_object_tagging(self,bucket, key, version_id=None, async_flag=False):
         # Check if async_flag is a boolean
         if not isinstance(async_flag, bool):
             raise TypeError('async_flag must be a boolean')
 
         # Get tags asynchronously or synchronously based on async_flag
         if async_flag:            
-            tags = await asyncio.to_thread(self.metadata_manager.get_tags, file_path, version_id)
+            tags = await asyncio.to_thread(self.metadata_manager.get_tags,bucket, key, version_id)
         else:
-            tags = self.metadata_manager.get_tags(file_path, version_id)
+            tags = self.metadata_manager.get_tags(key,bucket, version_id)
         return tags
