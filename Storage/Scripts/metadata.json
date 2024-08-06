@@ -17,7 +17,16 @@
                         ]
                     }
                 },
-                "TagSet": [],
+                "TagSet": [
+                    {
+                        "Key": "Key1",
+                        "Value": "Value1"
+                    },
+                    {
+                        "Key": "Key2",
+                        "Value": "Value2"
+                    }
+                ],
                 "ObjectLockConfiguration": {
                     "ObjectLockEnabled": "Enabled",
                     "Rule": {
@@ -31,7 +40,11 @@
                 "ContentLength": 1024,
                 "ETag": "1234567890abcdef",
                 "ContentType": "text/plain",
-                "Metadata": {}
+                "Metadata": {},
+                "checksum": "abc124",
+                "ObjectParts": "None",
+                "ObjectSize": 67890,
+                "StorageClass": "STANDARD"
             },
             "12554": {
                 "LegalHold": {
@@ -49,7 +62,16 @@
                         ]
                     }
                 },
-                "TagSet": [],
+                "TagSet": [
+                    {
+                        "Key": "Key1",
+                        "Value": "Value1"
+                    },
+                    {
+                        "Key": "Key2",
+                        "Value": "Value2"
+                    }
+                ],
                 "ObjectLockConfiguration": {
                     "ObjectLockEnabled": "Disabled",
                     "Rule": {
@@ -148,7 +170,12 @@
                 "Metadata": {
                     "custom-metadata": "value"
                 },
-                "LastModified": "2024-07-31T20:45:05Z"
+                "LastModified": "2024-07-31T20:45:05Z",
+                "Metadata": {},
+                "checksum": "abc124",
+                "ObjectParts": "None",
+                "ObjectSize": 67890,
+                "StorageClass": "STANDARD"
             }
         }
     }
