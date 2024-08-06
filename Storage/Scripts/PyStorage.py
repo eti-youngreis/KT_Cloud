@@ -28,12 +28,12 @@ class S3ClientSimulator:
             raise FileNotFoundError(f"Source file {source_file_path} not found")
 
         if is_sync:
-            with open(source_file_path, 'rb') as src_file:
-                with open(destination_file_path, 'wb') as dest_file:
+            with open(source_file_path, 'r') as src_file:
+                with open(destination_file_path, 'w') as dest_file:
                     dest_file.write(src_file.read())
         else:
-            async with aiofiles.open(source_file_path, 'rb') as src_file:
-                async with aiofiles.open(destination_file_path, 'wb') as dest_file:
+            async with aiofiles.open(source_file_path, 'r') as src_file:
+                async with aiofiles.open(destination_file_path, 'w') as dest_file:
                     await dest_file.write(await src_file.read())
 
         # Get the updated metadata
