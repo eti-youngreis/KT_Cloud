@@ -104,50 +104,5 @@ class MetadataManager:
             return metadata.get('versions', {})
         return {}
     
-    async def update_metadata_tags(self,bucket, key, version_id, data, sync_flag=True):
-        # Update only the TagSet field for a given key and version ID, preserving other fields
-        if key not in self.metadata:
-            self.metadata[key] = {'versions': {}}
-
-        versions = self.get_versions(bucket,key)
-        version_id_str = str(version_id)
-
-        if version_id_str in versions:
-            # Update the TagSet field if the version exists
-            versions[version_id_str]['TagSet'] = data['TagSet']
-        elif version_id:
-            # Add a new version with the given data if the version does not exist
-            versions[version_id_str] = data
-        else:
-            latest_version = self.get_latest_version(key)
-            if latest_version:
-                versions[str(latest_version)]['TagSet'] = data['TagSet']
-            else:
-                versions['0'] = data
-                
-        # Save metadata either synchronously or asynchronously
-        if sync_flag:
-            await self.save_metadata(True)
-        else:
-            await self.save_metadata(False)
 
 
-    def get_tags(self,bucket, key, version_id=None):
-        # Retrieve the TagSet for a given key and version ID
-        metadata = self.get_bucket_metadata(bucket,key)
-        versions = self.get_versions(bucket,key)
-        if metadata is None or versions is None:
-            return []
-
-        version_id_str = str(version_id)
-        
-        if version_id_str in versions:
-            return versions[version_id_str].get('TagSet', [])
-        
-        elif not version_id:
-            # If the version ID is not found, try to get the latest version
-                latest_version = self.get_latest_version(bucket,key)
-                if latest_version:
-                    return versions[str(latest_version)].get('TagSet', [])
-                       
-        return []
