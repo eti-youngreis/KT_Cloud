@@ -5,12 +5,12 @@ from datetime import datetime
 import aiofiles
 from metadata import MetadataManager
 
-URL_SERVER = 'D:\\בוטקמפ\\server'
-
+URL_SERVER ="D:\\בוטקמפ\\server"
 class S3ClientSimulator:
 
-    def __init__(self, metadata_file=f'{URL_SERVER}/metadata.json'):
-        self.metadata_manager = MetadataManager(metadata_file)
+    def __init__(self,server_path=URL_SERVER, metadata_file='metadata.json'):
+        self.metadata_manager = MetadataManager(f"{server_path}/{metadata_file}")
+        self.server_path=server_path
 
     async def get_object_attributes(self,bucket, key, version_id=None,MaxParts=None,PartNumberMarker =None,SSECustomerAlgorithm =None,SSECustomerKey =None,SSECustomerKeyMD5=None,RequestPayer=None,ExpectedBucketOwner =None,ObjectAttributes=None, sync_flag=False):
         if sync_flag:
@@ -69,6 +69,7 @@ class S3ClientSimulator:
     async def put_object_tagging(self,bucket, key,tags, version_id=None, ContentMD5=None,ChecksumAlgorithm=None,ExpectedBucketOwner=None,RequestPayer=None, sync_flag=True):
         if not isinstance(sync_flag, bool):
             raise TypeError('sync_flag must be a boolean')
+        print(self.metadata_manager.metadata_file ,"kkk")
         # Initialize metadata for the key if not present
         if key not in self.metadata_manager.metadata:
             self.metadata_manager.metadata[key] = {'versions': {}}
@@ -93,10 +94,11 @@ class S3ClientSimulator:
             await self.metadata_manager.save_metadata(False)
     async def get_object_lock_configuration(self, bucket):
         # Check if the bucket exists
-        bucket_metadata = self.metadata_manager.metadata['server']['buckets'].get(bucket)
+        bucket_metadata = self.metadata_manager.metadata.get('server', {}).get('buckets', {}).get(bucket)
 
-        if bucket_metadata is None:
+        if not bucket_metadata:
             raise FileNotFoundError(f'Bucket {bucket} not found.')
+        
 
         # Retrieve the object lock configuration for the bucket
         object_lock = bucket_metadata.get('objectLock', None)
@@ -272,7 +274,7 @@ class S3ClientSimulator:
         return hashlib.md5(content).hexdigest()
 
 async def main():
-    s3_client = S3ClientSimulator(f'{URL_SERVER}\\metadata.json')
+    s3_client = S3ClientSimulator()
     try:
         lock_config = await s3_client.get_object_lock_configuration('bucket1')
         print(lock_config)
@@ -304,6 +306,44 @@ async def main():
         print(response)
     except Exception as e:
         print(e)
+    
+
+    try:
+        # Example body as bytes
+        body = b'Hello, World!'
+        result = await s3_client.put_object('bucket2', 'new-file.txt', body)
+        print('PutObject result:', result)
+    except Exception as e:
+        print(e)
+
+    try:
+        response = await s3_client.put_object_acl('bucket1', 'file2.txt', {'owner': 'default_owner', 'permissions': ['READ', 'WRITE']}, version_id='3')
+        print('PutObjectAcl result:', response)
+    except Exception as e:
+        print(e)
+
+    try:
+        # Get object tagging for a specific object
+        tags = await s3_client.get_object_tagging('bucket1', 'object1.txt')
+        print('Tags for file.txt:', tags)
+    except FileNotFoundError as e:
+        print(e)
+
+    try:
+        # Put object tagging for a specific object
+        new_tags = {'TagSet': [{'Key': 'aa', 'Value': 'bb'}]}
+        await s3_client.put_object_tagging('bucket1', 'object1.txt', new_tags, version_id=1)
+        print('Tags updated for file.txt.')
+    except Exception as e:
+        print(e)
+
+    try:
+        # Get object attributes for a specific object
+        attributes = await s3_client.get_object_attributes('bucket1', 'object1.txt')
+        print('Attributes for file.txt:', attributes)
+    except FileNotFoundError as e:
+        print(e)
+
 
 if __name__ == '__main__':
     asyncio.run(main())
