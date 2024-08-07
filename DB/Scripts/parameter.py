@@ -1,6 +1,6 @@
 class Parameter:
-    def __init__(self, parameter_name, parameter_value, description='', source='engine-default', apply_type='', 
-                 data_type='', allowed_values='', is_modifiable=True, minimum_engine_version='', 
+    def __init__(self, parameter_name, parameter_value, description='', source='engine-default', apply_type='',
+                 data_type='', allowed_values='', is_modifiable=True, minimum_engine_version='',
                  apply_method='', supported_engine_modes=None):
         """
         Initializes a Parameter instance.
@@ -50,15 +50,17 @@ class Parameter:
             'ApplyMethod': self.apply_method,
             'SupportedEngineModes': self.supported_engine_modes
         }
+
     def update(self, new_parameter):
         if self.is_modifiable == False:
-            raise ValueError(f"you can't modify the parameter {self.parameter_name}")
+            raise ValueError(f"you can't modify the parameter {
+                             self.parameter_name}")
         self.source = 'user'
-        if 'ParameterValue'  in new_parameter:
+        if 'ParameterValue' in new_parameter:
             self.parameter_name = new_parameter['ParameterValue']
-        if 'Description'  in new_parameter:
+        if 'Description' in new_parameter:
             self.description = new_parameter['Description']
-        if 'IsModifiable'  in new_parameter:
+        if 'IsModifiable' in new_parameter:
             self.is_modifiable = new_parameter['IsModifiable']
 
 # דוגמה לשימוש במחלקה

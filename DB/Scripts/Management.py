@@ -102,11 +102,11 @@ def update_metadata(name_condition, id_condition, key, new_value, conn=None):
             conn.close()
 
 
-def execute_query(db_name, query, params,conn=None):
-    conn_is_None=False
+def execute_query(db_name, query, params, conn=None):
+    conn_is_None = False
     if not conn:
         conn = sqlite3.connect(db_name)
-        conn_is_None=True
+        conn_is_None = True
     conn = sqlite3.connect(db_name)
     c = conn.cursor()
     print(query)
@@ -123,11 +123,11 @@ def execute_query(db_name, query, params,conn=None):
     return res
 
 
-def insert_into_management_table(class_name, object_id, metadata,conn=None):
-    conn_is_None=False
+def insert_into_management_table(class_name, object_id, metadata, conn=None):
+    conn_is_None = False
     if not conn:
         conn = sqlite3.connect('database.db')
-        conn_is_None=True
+        conn_is_None = True
     c = conn.cursor()
     execute_query('database.db',
                   '''CREATE TABLE IF NOT EXISTS object_management (object_id TEXT PRIMARY KEY, class_name TEXT NOT NULL, metadata TEXT)''',
@@ -139,4 +139,3 @@ def insert_into_management_table(class_name, object_id, metadata,conn=None):
     conn.commit()
     if conn_is_None:
         conn.close()
-

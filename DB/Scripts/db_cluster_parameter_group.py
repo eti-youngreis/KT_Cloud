@@ -30,7 +30,7 @@ class DBClusterParameterGroup(ParameterGroup):
             return {self.__class__.__name__: super().describe('DBClusterParameterGroupName')}
         return super().describe('DBClusterParameterGroupName')
 
-    def save_to_db(self,conn=None):
+    def save_to_db(self, conn=None):
         """
         Saves the DB cluster parameter group to the database.
 
@@ -50,9 +50,7 @@ class DBClusterParameterGroup(ParameterGroup):
         list: A dictionary containing default parameters
         """
         # Example of default parameters; can be replaced with actual defaults
-        parameters=[]
-        parameters.append(Parameter('backup_retention_period',7))
-        parameters.append(Parameter('preferred_backup_window','03:00-03:30'))
-        parameters.append(Parameter('preferred_maintenance_window','Mon:00:00-Mon:00:30'))
+        parameters = [Parameter('backup_retention_period', 7),
+                      Parameter('preferred_backup_window', '03:00-03:30'),
+                      Parameter('preferred_maintenance_window', 'Mon:00:00-Mon:00:30')]
         return parameters
-       

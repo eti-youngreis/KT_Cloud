@@ -13,7 +13,8 @@ class DBParameterGroup(ParameterGroup):
         description (str): Description of the DB parameter group
         tags (list): List of tags associated with the DB parameter group
         """
-        super().__init__(db_cluster_parameter_group_name, db_parameter_group_family, description, tags)
+        super().__init__(db_cluster_parameter_group_name,
+                         db_parameter_group_family, description, tags)
 
     def describe(self, with_title=True):
         """
@@ -29,11 +30,11 @@ class DBParameterGroup(ParameterGroup):
             return {self.__class__.__name__: super().describe('DBParameterGroupName')}
         return super().describe('DBParameterGroupName')
 
-    def save_to_db(self,conn=None):
+    def save_to_db(self, conn=None):
         """
         Saves the DB parameter group to the database.
         """
-        super().save_to_db(self.__class__.__name__,conn)
+        super().save_to_db(self.__class__.__name__, conn)
 
     def delete(self):
         super().delete(self.__class__.__name__)
@@ -47,10 +48,8 @@ class DBParameterGroup(ParameterGroup):
         list: Default parameters for the DB parameter group
         """
         # Loading default parameters - can be replaced with actual parameters
-        parameters=[]
-        parameters.append(Parameter('max_connections',100))
-        parameters.append(Parameter('innodb_buffer_pool_size','128M'))
-        parameters.append(Parameter('character_set_server','utf8'))
-        parameters.append(Parameter('time_zone','UTC'))
+        parameters = [Parameter('max_connections', 100),
+                      Parameter('innodb_buffer_pool_size', '128M'),
+                      Parameter('character_set_server', 'utf8'),
+                      Parameter('time_zone', 'UTC')]
         return parameters
-

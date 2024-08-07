@@ -21,7 +21,8 @@ class DBInstance:
         conn (optional): Database connection object (default: None)
         """
         self.cluster_id = None
-        update_metadata(self.__class__.__name__, self.db_instance_identifier, 'cluster_id', None,conn=conn)
+        update_metadata(self.__class__.__name__,
+                        self.db_instance_identifier, 'cluster_id', None, conn=conn)
 
     def delete(self):
         """

@@ -69,7 +69,8 @@ class DBCluster:
             static_members = [inst.db_instance_identifier for inst in self.instances if inst.db_instance_identifier
                               not in excluded_members]
 
-        endpoint = Endpoint(cluster_identifier, endpoint_identifier, endpoint_type, static_members, excluded_members)
+        endpoint = Endpoint(cluster_identifier, endpoint_identifier,
+                            endpoint_type, static_members, excluded_members)
         endpoint.save_to_db()
         self.endpoints.append(endpoint)
         print(f"Custom endpoint {endpoint_identifier} created successfully.")

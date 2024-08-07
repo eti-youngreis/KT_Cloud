@@ -46,7 +46,7 @@ class ParameterGroup:
         metadata_json = json.dumps(metadata)
         return metadata_json
 
-    def save_to_db(self, class_name,conn=None):
+    def save_to_db(self, class_name, conn=None):
         """
         Saves the parameter group to the database.
 
@@ -54,7 +54,8 @@ class ParameterGroup:
         class_name (str): The name of the class for saving to the management table
         """
         metadata_json = self.get_metadata()
-        insert_into_management_table(class_name, self.parameter_group_name, metadata_json,conn)
+        insert_into_management_table(
+            class_name, self.parameter_group_name, metadata_json, conn)
 
     def describe(self, name):
         """
@@ -86,7 +87,6 @@ class ParameterGroup:
                 if old_parameter.parameter_name == new_parameter['ParameterName']:
                     old_parameter.update(new_parameter)
 
-
     @staticmethod
     def create_parameter_group(module_name, class_name, db_cluster_parameter_group_name, db_parameter_group_family,
                                description, tags):
@@ -117,5 +117,6 @@ class ParameterGroup:
         ParameterGroup: The default parameter group instance
         """
         if ParameterGroup.default_parameter_group is None:
-            ParameterGroup.default_parameter_group = ParameterGroup("default", "aurora-mysql5.7", "default", None)
+            ParameterGroup.default_parameter_group = ParameterGroup(
+                "default", "aurora-mysql5.7", "default", None)
         return ParameterGroup.default_parameter_group
