@@ -129,3 +129,15 @@ class Gili_Bolak_Functions:
         return_obj = DBSecurityGroup.DeleteDBSecurityGroup(conn, db_security_group_name)
         conn.close()
         return return_obj
+    
+    def DescribeDBSecurityGroups(
+        self,
+        db_security_group_name: str = None,
+        marker: Optional[str] = None,
+        max_records: int = 100    
+    ) -> dict:
+        """Describes the available db security groups."""
+        conn = self.open_connection()
+        return_obj = DBSecurityGroup.DescribeDBSecurityGroups(conn, db_security_group_name, marker, max_records)
+        conn.close()
+        return return_obj

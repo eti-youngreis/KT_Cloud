@@ -199,3 +199,63 @@ def DeleteDBSecurityGroup(conn: sqlite3.Connection, db_security_group_name: str)
             }
         }
   
+def DescribeDBSecurityGroups(
+        conn: sqlite3.Connection,
+        db_security_group_name: Optional[str] = None,
+        marker: Optional[str] = None,
+        max_records: int = 100    
+    ) -> dict:
+        """Describes the available db security groups."""
+        if db_security_group_name is not None:
+            if not db_security_group_name_exists(conn, db_security_group_name):
+                return {
+                    "Error": {
+                        "Code": "SecurityGroupNotFoundFault",
+                        "Message": f"The specified db_security_group_name_exists '{db_security_group_name}' could not be found.",
+                        "HTTPStatusCode": 404
+                    }
+                }
+        query = '''
+        SELECT object_id, metadata FROM object_management 
+        WHERE type_object = 'DBSecurityGroup'
+        '''
+        params = []
+
+        if db_security_group_name:
+            query += ' AND metadata LIKE ?'
+            params.append(f'%"{db_security_group_name}"%')
+
+        query += ' ORDER BY object_id LIMIT ? OFFSET ?'
+        offset = int(marker) if marker else 0
+        params.append(max_records)
+        params.append(offset)
+
+        try:
+            c = conn.cursor()
+            c.execute(query, params)
+            rows = c.fetchall()
+
+            db_security_groups_list = []
+            for row in rows:
+                metadata = json.loads(row[1])
+                db_security_groups_list.append(metadata)
+
+            next_marker = offset + max_records if len(rows) == max_records else None
+
+            return {
+                "DescribeDBSecurityGroupResponse": {
+                    "ResponseMetadata": {
+                        "HTTPStatusCode": 200
+                    },
+                    "DBSecurityGroupList": db_security_groups_list,
+                    "Marker": next_marker
+                }
+            }
+        except OperationalError as e:
+            return {
+                "Error": {
+                    "Code": "InternalError",
+                    "Message": f"An internal error occurred: {str(e)}",
+                    "HTTPStatusCode": 500
+                }
+            }
