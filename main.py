@@ -1,12 +1,6 @@
 from rds_client import *
 from try2.functions_in_configuration_table import *
-
-def is_valid_json(json_string):
-    try:
-        json.loads(json_string)
-        return True
-    except json.JSONDecodeError:
-        return False
+from help_functions import is_valid_json
 
 
 def map_to_object(obj):

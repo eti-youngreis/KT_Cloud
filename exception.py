@@ -23,10 +23,18 @@ class MissingRequireParamError(Exception):
     pass
 
 
+class InvalidDBInstanceStateError(Exception):
+    """Raised when trying to perform an operation on DBInstaace when it is not in the appropriate status for this operation"""
+    pass
+
+
 class ParamValidationError(Exception):
     pass
 
 
-class InvalidDBInstanceStateError(Exception):
-    """Raised when trying to perform an operation on DBInstaace when it is not in the appropriate status for this operation"""
+class StartNonStoppedDBInstance(Exception):
+    """Raised when trying to start non stopped db instance"""
+    pass
+
+class DBSnapshotNotFoundError(Exception):
     pass

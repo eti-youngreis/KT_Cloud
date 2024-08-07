@@ -120,3 +120,4 @@ class DBInstance:
         """Start the DB instance."""
         self.status = 'available'
         self.save_to_db(True)
+

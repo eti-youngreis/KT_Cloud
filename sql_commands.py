@@ -6,56 +6,29 @@ import os
 def start_object_management_table(table_name):
     """Create the management table if it doesn't exist."""
     table_schema = 'class_name TEXT,object_id TEXT,metadata TEXT,parent_id TEXT'
-    create_table('object_management', table_name, table_schema,False)
-    # Check if parent_id column exists, and add it if it doesn't
-    # c.execute(f"PRAGMA table_info({table_name})")
-    # columns = [info[1] for info in c.fetchall()]
-    # if 'parent_id' not in columns:
-    #     c.execute(f"ALTER TABLE {table_name} ADD COLUMN parent_id TEXT")
+    create_table('object_management.db', table_name, table_schema)
 
-
-def create_table(db_name, table_name, table_schema, need_triggers=False):
-    query = f'CREATE TABLE IF NOT EXISTS {table_name} ({table_schema})'
-    execute_query(db_name, query)
-    # if need_triggers:
-    #     create_triggers_for_table(db_name, table_name)
-    #     print(f"Table {table_name} and its triggers created successfully.")
-
-def insert_into_table(db, table, data):
-    columns = ', '.join(data.keys())
-    placeholders = ', '.join(['?'] * len(data))
-    query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
-    execute_query(db, query, data.values())
 
 def insert_into_management_table(class_name, object_id, metadata, parent_id=None):
     """Insert a new object into the management table."""
-    conn = sqlite3.connect('object_management')
-    c = conn.cursor()
-    c.execute(f'''SELECT * FROM object_management WHERE class_name = ? and object_id = ?''', (class_name, object_id))
-    row = c.fetchall()
-    if row:
-        update_management_table(object_id, metadata)
-    else:
-        c.execute('''
-            INSERT INTO object_management (class_name, object_id, metadata, parent_id)
-            VALUES (?, ?, ?, ?)
-            ''', (class_name, object_id, metadata, parent_id))
-    conn.commit()
-    conn.close()
+    select_query = f'''SELECT * FROM object_management WHERE class_name = ? and object_id = ?'''
+    select_params = (class_name, object_id)
+    #check if object id exists in row of table
+    row = execute_query('object_management.db',select_query,select_params,False) 
+    if row: #if exist
+        update_management_table(object_id, metadata)#update the row of object id 
+    else: #if not exist
+        #insert new row with object id as id
+        data = {'class_name':class_name, 'object_id':object_id, 'metadata':metadata, 'parent_id':parent_id}
+        insert_into_table('object_management.db','object_management',data)
+
 
 
 def update_management_table(object_id, new_metadata):
     """Update the metadata of an existing object in the management table."""
-    conn = sqlite3.connect('object_management')
-    c = conn.cursor()
-    c.execute('''
-              UPDATE object_management
-              SET metadata = ?
-              WHERE object_id = ?
-              ''', (new_metadata, object_id))
-    conn.commit()
-    conn.close()
-
+    update_query = '''UPDATE object_management SET metadata = ? WHERE object_id = ?''' 
+    update_params = (new_metadata, object_id)
+    execute_query('object_management.db',update_query, update_params)
 
 def create_db(db_path):
     """Create a new SQLite database at the specified path."""
@@ -63,19 +36,18 @@ def create_db(db_path):
         new_conn = sqlite3.connect(db_path)
         new_conn.close()
 
+def create_table(db_name, table_name, table_schema):
+    "create a table in a given db by given table_schema"
+    query = f'CREATE TABLE IF NOT EXISTS {table_name} ({table_schema})'
+    execute_query(db_name, query)
 
-def execute_query(db_name, query, params=None, want_all=True):
-    """Execute a query on the specified database."""
-    conn = sqlite3.connect(db_name)
-    c = conn.cursor()
-    if params:
-        c.execute(query, params)
-    else:
-        c.execute(query)
-    res = c.fetchall() if want_all else c.fetchone()
-    conn.commit()
-    conn.close()
-    return res
+
+def insert_into_table(db, table, data):
+    "insert data to row in table"
+    columns = ', '.join(data.keys())
+    placeholders = ', '.join(['?'] * len(data))
+    query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
+    execute_query(db, query, tuple(data.values()))
 
 
 def check_if_exists_in_table(db, table, object_id):
@@ -98,7 +70,7 @@ def get_objects_by_class_name(db, table, class_name):
 
 def del_object(object_id, table, db):
     """Delete an object from the specified table."""
-    query = f'DELETE FROM {table} WHERE object_id == {object_id}'
+    query = f"DELETE FROM {table} WHERE object_id == '{object_id}'"
     execute_query(db, query)
 
 
@@ -263,4 +235,18 @@ def comments():
 def del_class_from_management_table(class_name):
     query = f'DELETE FROM object_management WHERE class_name = ?'
     params = (class_name,)
-    execute_query('object_management', query, params)
+    execute_query('object_management.db', query, params)
+
+
+def execute_query(db_name, query, params=None, want_all=True):
+    """Execute a query on the specified database"""
+    conn = sqlite3.connect(db_name)
+    c = conn.cursor()
+    if params:
+        c.execute(query, params)
+    else:
+        c.execute(query)
+    res = c.fetchall() if want_all else c.fetchone()
+    conn.commit()
+    conn.close()
+    return res

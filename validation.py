@@ -1,4 +1,6 @@
 from exception import ParamValidationError, MissingRequireParamError
+
+
 def check_required_params(required_params, kwargs):
     """Check if all required parameters are present in kwargs."""
     for param in required_params:
@@ -11,3 +13,4 @@ def check_extra_params(all_params, kwargs):
     for param in kwargs:
         if param not in all_params:
             raise ParamValidationError(f"Unknown parameter in input: {param}, must be one of: {string_all_params}")
+
