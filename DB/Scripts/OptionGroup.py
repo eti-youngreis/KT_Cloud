@@ -432,14 +432,16 @@ def DescribeOptionGroups(
         raise ValueError(f"Invalid engineName: {engine_name}")
     if not validations.is_valid_number(max_records, 20, 100):
         raise ValueError(f"Invalid max_records: {max_records}. max_records must be between 20 to 100.")
-        # return {
-        #     "Error": {
-        #         "Code": "InvalidParameter",
-        #         "Message": "max_records must be between 20 and 100.",
-        #         "HTTPStatusCode": 400
-        #     }
-        # }
-
+    if option_group_name is not None:
+        if not option_group_exists(conn, option_group_name):
+            return {
+            "Error": {
+                "Code": "OptionGroupNotFoundFault",
+                "Message": f"The specified option group '{option_group_name}' could not be found.",
+                "HTTPStatusCode": 404
+            }
+        }
+    
     query = '''
     SELECT object_id, metadata FROM object_management 
     WHERE type_object = 'OptionGroup'
@@ -504,16 +506,8 @@ def DescribeOptionGroupOptions(
         raise ValueError("Engine name is required.")
     if not is_valid_engineName(engine_name):
         raise ValueError(f"Invalid engineName: {engine_name}")
-    
     if not validations.is_valid_number(max_records, 20, 100):
         raise ValueError(f"Invalid max_records: {max_records}. max_records must be between 20 to 100.")
-        # return {
-        #     "Error": {
-        #         "Code": "InvalidParameter",
-        #         "Message": "max_records must be between 20 and 100.",
-        #         "HTTPStatusCode": 400
-        #     }
-        # }
 
     try:
         c = conn.cursor()
