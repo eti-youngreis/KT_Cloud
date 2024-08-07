@@ -27,12 +27,26 @@ def exist_key_value_in_json_column(conn: sqlite3.Connection, table_name: str, co
     except OperationalError as e:
         print(f"Error: {e}")
 
+def exist_value_in_column(conn: sqlite3.Connection, table_name: str, column_name: str, value: str) -> bool:
+    """Check if a specific value exists within a column in the given table."""
+    try:
+        c = conn.cursor()
+        c.execute(f'''
+        SELECT COUNT(*) FROM {table_name}
+        WHERE {column_name} LIKE ?
+        ''', (value,))
+        return c.fetchone()[0] > 0
+    except OperationalError as e:
+        print(f"Error: {e}")
+
+
+
 def is_valid_number(num: int, min: int = -sys.maxsize - 1, max: int = sys.maxsize) -> bool:
     return min <= num <= max
 
 def check_required_params(required_params, **kwargs):
     for param in required_params:
         if param not in kwargs.keys():
-            print(param)
+            # print(param)
             return False
     return True

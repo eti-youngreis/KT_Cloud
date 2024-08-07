@@ -11,16 +11,16 @@ def db_setup():
         yield library
         # library.conn.close()
 
-@pytest.fixture()
+@pytest.fixture(scope='module')
 def create_DBCluster(db_setup):
-    db_setup.CreateDBCluster(db_cluster_identifier = "my-cluster1", engine = "postgres", port = 1150, storage_type = "aurora")
+    db_setup.CreateDBCluster(db_cluster_identifier = "my-cluster5", engine = "postgres", port = 1150, storage_type = "aurora")
 
 def test_can_describe_DBClusters(db_setup, create_DBCluster):
-    assert db_setup.DescribeDBClusters(db_cluster_identifier = "my-cluster1")
+    assert db_setup.DescribeDBClusters(db_cluster_identifier = "my-cluster5")
     # assert db_setup.DeleteDBCluster("my-cluster1")["DeleteDBClusterResponse"]["ResponseMetadata"]["HTTPStatusCode"] == 200
 
 def test_can_describe_DBClusters_with_max_records(db_setup, create_DBCluster):
-    assert db_setup.DescribeDBClusters(db_cluster_identifier = "my-cluster1", max_records = 58)
+    assert db_setup.DescribeDBClusters(db_cluster_identifier = "my-cluster5", max_records = 58)
 
 def test_handle_db_cluster_identifier_cannot_be_found(db_setup, create_DBCluster):
     with pytest.raises(ValueError):

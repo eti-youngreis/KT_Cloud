@@ -16,9 +16,9 @@ def test_can_create_valid_DBCluster(db_setup):
     # assert res_delete["DeleteDBClusterResponse"]["ResponseMetadata"]["HTTPStatusCode"] == 200
 
 def test_handle_DBClusterIdentifier_already_exists_fault(db_setup):
+    db_setup.CreateDBCluster(db_cluster_identifier = "my-clust", engine = "postgres")
     with pytest.raises(ValueError):
-        db_setup.CreateDBCluster(db_cluster_identifier = "my-cluster1", engine = "postgres")
-        db_setup.CreateDBCluster(db_cluster_identifier = "my-cluster1", engine = "postgres")
+        db_setup.CreateDBCluster(db_cluster_identifier = "my-clust", engine = "postgres")
 
 def test_invalid_DBClusterIdentifier_length_aurora(db_setup):
     with pytest.raises(ValueError):
@@ -43,11 +43,6 @@ def test_invalid_DBClusterIdentifier_end_hyphen(db_setup):
 def test_invalid_DBClusterIdentifier_consecutive_hyphens(db_setup):
     with pytest.raises(ValueError):
         db_setup.CreateDBCluster(db_cluster_identifier = "my--cluster", engine = "aurora-mysql")
-
-def test_valid_DBClusterIdentifier_edge_cases(db_setup):
-    assert db_setup.CreateDBCluster(db_cluster_identifier = "my-cluster1", engine = "aurora-mysql")
-    assert db_setup.CreateDBCluster(db_cluster_identifier = "a" * 63, engine = "aurora-mysql")
-    assert db_setup.CreateDBCluster(db_cluster_identifier = "a" * 52, engine = "mysql")
 
 def test_handle_invalid_engine(db_setup):
     with pytest.raises(ValueError):

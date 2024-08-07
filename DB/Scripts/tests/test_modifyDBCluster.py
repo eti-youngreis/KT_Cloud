@@ -11,12 +11,12 @@ def db_setup():
         yield library
         # library.conn.close()
 
-@pytest.fixture()
+@pytest.fixture(scope='module')
 def create_DBCluster(db_setup):
-    db_setup.CreateDBCluster(db_cluster_identifier = "my-cluster1", engine = "postgres", port = 1150, storage_type = "aurora")
+    db_setup.CreateDBCluster(db_cluster_identifier = "my-cluster88", engine = "postgres", port = 1150, storage_type = "aurora")
 
 def test_can_modify_DBCluster(db_setup, create_DBCluster):
-    assert db_setup.ModifyDBCluster(db_cluster_identifier = "my-cluster1")
+    assert db_setup.ModifyDBCluster(db_cluster_identifier = "my-cluster88")
     # assert db_setup.DeleteDBCluster("my-cluster1")["DeleteDBClusterResponse"]["ResponseMetadata"]["HTTPStatusCode"] == 200
 
 def test_handle_db_cluster_identifier_cannot_be_found(db_setup, create_DBCluster):
@@ -25,11 +25,11 @@ def test_handle_db_cluster_identifier_cannot_be_found(db_setup, create_DBCluster
 
 def test_invalid_port_parameter_small(db_setup, create_DBCluster):
     with pytest.raises(ValueError):
-        db_setup.ModifyDBCluster(db_cluster_identifier = "my-cluster1", port = 1149)
+        db_setup.ModifyDBCluster(db_cluster_identifier = "my-cluster88", port = 1149)
 
 def test_invalid_port_parameter_large(db_setup, create_DBCluster):
     with pytest.raises(ValueError):
-        db_setup.ModifyDBCluster(db_cluster_identifier = "my-cluster1", port = 65536)
+        db_setup.ModifyDBCluster(db_cluster_identifier = "my-cluster88", port = 65536)
 
 # add tests to parameters: 
 # db_cluster_parameter_group_name, engine_version 
