@@ -1,8 +1,8 @@
 from DB.Scripts.parameter import Parameter
-from DB.Scripts.parameter_group import ParameterGroup
+from DB.Scripts import DBParameterGroup
 
 
-class DBClusterParameterGroup(ParameterGroup):
+class DBClusterParameterGroup(DBParameterGroup):
     def __init__(self, db_cluster_parameter_group_name, db_parameter_group_family, description, tags):
         """
         Initializes a DBClusterParameterGroup instance.
@@ -13,7 +13,7 @@ class DBClusterParameterGroup(ParameterGroup):
         description (str): Description of the parameter group
         tags (list): Tags associated with the parameter group
         """
-        super(ParameterGroup, self).__init__(db_cluster_parameter_group_name, db_parameter_group_family, description,
+        super(DBParameterGroup, self).__init__(db_cluster_parameter_group_name, db_parameter_group_family, description,
                                              tags)
 
     def describe(self, with_title=True):
@@ -26,9 +26,10 @@ class DBClusterParameterGroup(ParameterGroup):
         Returns:
         dict: A dictionary containing the description of the parameter group
         """
+        data = super().describe(with_title=False)
         if with_title:
-            return {self.__class__.__name__: super().describe('DBClusterParameterGroupName')}
-        return super().describe('DBClusterParameterGroupName')
+            return {self.__class__.__name__: data}
+        return data
 
     def save_to_db(self, conn=None):
         """
@@ -36,10 +37,10 @@ class DBClusterParameterGroup(ParameterGroup):
 
         Calls the parent class's save_to_db method with the class name.
         """
-        super().save_to_db(self.__class__.__name__, conn)
+        super().save_to_db(conn)
 
     def delete(self):
-        super().delete(self.__class__.__name__)
+        super().delete()
 
     @staticmethod
     def load_default_parameters():
