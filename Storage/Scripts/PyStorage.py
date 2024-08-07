@@ -1,7 +1,7 @@
 import asyncio
 from metadata import MetadataManager
 
-class PyStorage:
+class S3ClientSimulator:
 
     def __init__(self):
         # Initialize the metadata manager

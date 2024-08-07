@@ -6,10 +6,9 @@ import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from PyStorage import PyStorage
+from PyStorage import S3ClientSimulator
 
-functions = PyStorage()
-
+functions = S3ClientSimulator()
 
 @pytest.fixture
 def create_test_metadata(tmp_path):
