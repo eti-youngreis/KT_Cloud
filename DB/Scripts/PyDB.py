@@ -43,8 +43,7 @@ def find_cluster_and_endpoint_by_endpoint_identifier(endpoint_identifier, cluste
         for endpoint in cluster.endpoints:
             if endpoint.endpoint_identifier == endpoint_identifier:
                 return cluster, endpoint
-    raise ValueError(f"Endpoint with identifier {
-                     endpoint_identifier} not found in any cluster")
+    raise ValueError(f"Endpoint with identifier {endpoint_identifier} not found in any cluster")
 
 
 def delete_db_snapshot(snapshot_id):
