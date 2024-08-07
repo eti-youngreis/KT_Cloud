@@ -3,7 +3,7 @@ import hashlib
 import os
 from datetime import datetime
 import aiofiles
-from metaDataManeger import MetadataManager
+from metadata import MetadataManager
 
 #URL_SERVER = 'D:\\בוטקמפ\\server'
 class S3ClientSimulator:
@@ -192,43 +192,6 @@ class S3ClientSimulator:
         }
     def generate_etag(self, content):
         return hashlib.md5(content).hexdigest()
-# Example usage:
-async def main():
-    s3_client = S3ClientSimulator('')
-    try:
-        lock_config = await s3_client.get_object_lock_configuration('bucket1')
-        print(lock_config)
-    except FileNotFoundError as e:
-        print(e)
-    try:
-        torrent_info = await s3_client.get_object_torrent('bucket1', 'file.txt')
-        print("Torrent Info for latest version:", torrent_info)
-    except FileNotFoundError as e:
-        print(e)
-
-    # Example of getting specific version torrent info
-    try:
-        torrent_info = await s3_client.get_object_torrent('bucket1', 'file.txt', version_id='1')
-        print("Torrent Info for version 1:", torrent_info)
-    except FileNotFoundError as e:
-        print(e)
-    head_object = await s3_client.head_object('bucket1', 'file2.txt')
-    print("meta data is:", head_object)
-    # try:
-    #     # Example body as bytes
-    #     body = b"Hello, World!"
-    #     result = await s3_client.put_object('bucket1', 'file3.txt', body)
-    #     print("PutObject result:", result)
-    # except Exception as e:
-    #     print(e)
-    # try:
-    #     response = await s3_client.put_object_acl('bucket1', 'file2.txt', {"owner": "default_owner", "permissions": ["READ", "WRITE"]},version_id="3")
-    #     print(response)
-    # except Exception as e:
-    #     print(e)
-
-#if __name__ == "__main__":
-#   asyncio.run(main())
 
 
 
@@ -236,52 +199,9 @@ async def main():
 
 
 
-# async def get_object_torrent(self, bucket, key, version_id=None, is_sync=True):
-#     # Retrieve the object metadata
-#     metadata = self.metadata_manager.get_bucket_metadata(bucket, key)
-#
-#     if not metadata:
-#         raise FileNotFoundError(f"Object {key} not found in bucket {bucket}")
-#
-#     # If version_id is provided, fetch that specific version
-#     if version_id:
-#         version_metadata = metadata.get('versions', {}).get(version_id)
-#         if not version_metadata:
-#             raise FileNotFoundError(f"Version {version_id} not found for object {key} in bucket {bucket}")
-#     else:
-#         # If no version_id is provided, get the latest version
-#         version_id = self.metadata_manager.get_latest_version(bucket, key)
-#         version_metadata = metadata.get('versions', {}).get(version_id)
-#
-#     # Prepare the torrent information
-#     file_path = f'D:/בוטקמפ/server/{bucket}/{key}'
-#     torrent_path = f'D:/בוטקמפ/server/torrents/{bucket}/{key}.torrent'
-#
-#     if not os.path.exists(os.path.dirname(torrent_path)):
-#         os.makedirs(os.path.dirname(torrent_path))
-#
-#     piece_length = 512 * 1024  # 512KB
-#     pieces = []
-#     with open(file_path, 'r') as f:
-#         while True:
-#             piece = f.read(piece_length)
-#             if not piece:
-#                 break
-#             pieces.append(hashlib.sha1(piece).digest())
-#
-#     info = {
-#         'name': key,
-#         'piece length': piece_length,
-#         'pieces': b''.join(pieces),
-#         'length': os.path.getsize(file_path)
-#     }
-#
-#     torrent = {
-#         'announce': 'http://tracker.example.com/announce',
-#         'info': info
-#     }
-#
-#     with open(torrent_path, 'w') as f:
+
+
+
 #         f.write(bencodepy.encode(torrent))
 #
 #     # Return the torrent file path
