@@ -1,4 +1,3 @@
-from typing import Optional, Dict, List
 import json
 import validations
 import sqlite3
@@ -211,7 +210,7 @@ def DescribeDBSecurityGroups(
                 return {
                     "Error": {
                         "Code": "SecurityGroupNotFoundFault",
-                        "Message": f"The specified db_security_group_name_exists '{db_security_group_name}' could not be found.",
+                        "Message": f"The specified db_security_group_name '{db_security_group_name}' could not be found.",
                         "HTTPStatusCode": 404
                     }
                 }

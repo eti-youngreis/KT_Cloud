@@ -2,6 +2,7 @@ from typing import Optional, Dict, List
 import sqlite3
 import OptionGroup
 import DBSecurityGroup
+import DBSubnetGroup
 
 class Gili_Bolak_Functions:
     
@@ -139,5 +140,17 @@ class Gili_Bolak_Functions:
         """Describes the available db security groups."""
         conn = self.open_connection()
         return_obj = DBSecurityGroup.DescribeDBSecurityGroups(conn, db_security_group_name, marker, max_records)
+        conn.close()
+        return return_obj
+    
+    def DescribeDBSubnetGroups(
+        self,
+        db_security_group_name: str = None,
+        marker: Optional[str] = None,
+        max_records: int = 100    
+    ) -> dict:
+        """Describes the available db subnet groups."""
+        conn = self.open_connection()
+        return_obj = DBSubnetGroup.DescribeDBSubnetGroups(conn, db_security_group_name, marker, max_records)
         conn.close()
         return return_obj
