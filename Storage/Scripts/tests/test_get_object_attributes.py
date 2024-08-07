@@ -3,13 +3,9 @@ import pytest
 import asyncio
 import json
 import sys
-
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from PyStorage import S3ClientSimulator
-
 functions = S3ClientSimulator()
-
 @pytest.fixture
 def create_test_metadata(tmp_path):
     # Create a temporary metadata file
@@ -119,21 +115,16 @@ def create_test_metadata(tmp_path):
             }
         }
     }
-
     with open(metadata_file_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
-    
     # Load the metadata into functions.metadata_manager.metadata
     with open(metadata_file_path, 'r', encoding='utf-8') as f:
         metadata = json.load(f)
     functions.metadata_manager.metadata = metadata
     functions.metadata_manager.metadata_file=str(metadata_file_path)
     yield metadata_file_path
-    
     if os.path.exists(metadata_file_path):
         os.remove(metadata_file_path)
-
-
 @pytest.mark.asyncio
 async def test_get_object_attributes_async_specific_version(create_test_metadata):
     # Test to get attributes for a specific version asynchronously
@@ -146,20 +137,17 @@ async def test_get_object_attributes_async_specific_version(create_test_metadata
     assert attributes["ObjectParts"] == "None"
     assert attributes["ObjectSize"] == 67890
     assert attributes["StorageClass"] == "STANDARD"
-
 def test_get_object_attributes_invalid_key(create_test_metadata):
     # Test to ensure FileNotFoundError is raised for an invalid key
     key = "non_existent_file.txt"
     with pytest.raises(FileNotFoundError):
         asyncio.run(functions.get_object_attributes("bucket1", key))
-
 @pytest.mark.asyncio
 async def test_get_object_attributes_async_invalid_key(create_test_metadata):
     # Test to ensure FileNotFoundError is raised for an invalid key asynchronously
     key = "non_existent_file.txt"
     with pytest.raises(FileNotFoundError):
         await functions.get_object_attributes("bucket1", key, sync_flag=False)
-
 def test_get_object_attributes_no_version_specified( create_test_metadata):
     # Test to get the latest version attributes synchronously without specifying version
     bucket = "bucket1"
@@ -170,7 +158,6 @@ def test_get_object_attributes_no_version_specified( create_test_metadata):
     assert attributes["ObjectParts"] == "None"
     assert attributes["ObjectSize"] == 67890
     assert attributes["StorageClass"] == "STANDARD"
-
 @pytest.mark.asyncio
 async def test_get_object_attributes_async_no_version_specified(create_test_metadata):
     # Test to get the latest version attributes asynchronously without specifying version
@@ -182,8 +169,6 @@ async def test_get_object_attributes_async_no_version_specified(create_test_meta
     assert attributes["ObjectParts"] == "None"
     assert attributes["ObjectSize"] == 67890
     assert attributes["StorageClass"] == "STANDARD"
-
-
 @pytest.mark.asyncio
 async def test_get_object_attributes_async_version_not_found(create_test_metadata):
     # Test to ensure FileNotFoundError is raised when version is not found asynchronously
@@ -192,7 +177,6 @@ async def test_get_object_attributes_async_version_not_found(create_test_metadat
     version_id = "nonexistent_version"
     with pytest.raises(FileNotFoundError):
         await functions.get_object_attributes(bucket, key, version_id=version_id, sync_flag=False)
-
 def test_get_object_attributes_sync_version_not_found(create_test_metadata):
     # Test to ensure FileNotFoundError is raised when version is not found synchronously
     bucket = "bucket1"
@@ -200,7 +184,6 @@ def test_get_object_attributes_sync_version_not_found(create_test_metadata):
     version_id = "nonexistent_version"
     with pytest.raises(FileNotFoundError):
         asyncio.run(functions.get_object_attributes(bucket, key, version_id=version_id))
-
 @pytest.mark.asyncio
 async def test_get_object_attributes_async_bucket_not_found(create_test_metadata):
     # Test to ensure FileNotFoundError is raised when bucket is not found asynchronously
