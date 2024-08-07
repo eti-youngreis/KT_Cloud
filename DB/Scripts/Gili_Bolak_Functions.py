@@ -1,6 +1,7 @@
 from typing import Optional, Dict, List
 import sqlite3
 import OptionGroup
+import DBSecurityGroup
 
 class Gili_Bolak_Functions:
     
@@ -102,5 +103,29 @@ class Gili_Bolak_Functions:
         """Describes all available options for the specified engine."""
         conn = self.open_connection()
         return_obj = OptionGroup.DescribeOptionGroupOptions(conn, engine_name, major_engine_version, marker, max_records)
+        conn.close()
+        return return_obj
+    
+    def CreateDBSecurityGroup(
+        self,
+        db_security_group_description: str,
+        db_security_group_name: str,
+        tags: Optional[Dict] = None
+    )->str:
+        """Create a new db_security_group and insert it into the object_management table."""
+        conn = self.open_connection()
+        return_obj = DBSecurityGroup.CreateDBSecurityGroup(conn, db_security_group_description, db_security_group_name, tags)
+        conn.close()
+        return return_obj
+    
+    def DeleteDBSecurityGroup(self, db_security_group_name: str) -> str:
+        """
+        Deletes an existing db_security_group.
+        The function checks if the db_security_group exists and if it is in the 'available' state.
+        If the db_security_group does not exist or is not available, the function returns an appropriate error message in JSON format.
+        If the db_security_group is successfully deleted, the function returns a success response in JSON format.
+        """
+        conn = self.open_connection()
+        return_obj = DBSecurityGroup.DeleteDBSecurityGroup(conn, db_security_group_name)
         conn.close()
         return return_obj
