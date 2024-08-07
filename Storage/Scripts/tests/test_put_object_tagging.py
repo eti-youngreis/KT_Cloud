@@ -3,9 +3,13 @@ import pytest
 import asyncio
 import json
 import sys
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from PyStorage import S3ClientSimulator
+
 functions = S3ClientSimulator()
+
 @pytest.fixture
 def create_test_metadata(tmp_path):
     metadata_file_path = tmp_path / "metadata.json"
