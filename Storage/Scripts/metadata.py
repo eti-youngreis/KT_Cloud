@@ -2,6 +2,7 @@ import os
 import json
 import aiofiles
 from datetime import datetime
+
 class MetadataManager:
     
     def __init__(self, metadata_file='C:/Users/shana/Desktop/server/metadata.json'):
@@ -34,6 +35,25 @@ class MetadataManager:
         bucket_metadata = self.metadata["server"]["buckets"].get(bucket, {})
         object_metadata = bucket_metadata.get("objects", {}).get(key, None)
         return object_metadata
+
+
+    def get_versions(self,bucket, key):
+        # Retrieve versions for a given key
+        metadata = self.get_bucket_metadata(bucket,key)
+        if metadata:
+            return metadata.get('versions', {})
+        return {}
+
+    def get_latest_version(self, bucket, key):
+        # Get the latest version for a given key
+        metadata = self.get_bucket_metadata(bucket, key)
+        if metadata and "versions" in metadata:
+            return max(metadata["versions"].keys(), key=int)
+        else:
+            raise FileNotFoundError(f"No versions found for object {key} in bucket {bucket}")
+    
+
+
     
 
     # async def update_metadata(self, bucket, key, version_id, data, sync_flag=True):
@@ -74,13 +94,18 @@ class MetadataManager:
     #     return False
     
 
-    def get_latest_version(self, bucket, key):
-        # Get the latest version for a given key
-        metadata = self.get_bucket_metadata(bucket, key)
-        if metadata and "versions" in metadata:
-            return max(metadata["versions"].keys(), key=int)
-        else:
-            raise FileNotFoundError(f"No versions found for object {key} in bucket {bucket}")
+
+    # async def delete_object(self, bucket, key, sync_flag=True):
+    #     if bucket in self.metadata["server"]["buckets"] and key in self.metadata["server"]["buckets"][bucket]["objects"]:
+    #         del self.metadata["server"]["buckets"][bucket]["objects"][key]
+    #         if sync_flag:
+    #             await self.save_metadata(True)
+    #         else:
+    #             await self.save_metadata(False)
+    #         return True
+    #     return False
+    
+
 
 
     # async def check_permissions(self, bucket, key, version_id, by_pass_governance_retention, sync_flag=True):
@@ -102,11 +127,5 @@ class MetadataManager:
     #         return True
     #     return False
 
-    def get_versions(self,bucket, key):
-        # Retrieve versions for a given key
-        metadata = self.get_bucket_metadata(bucket,key)
-        if metadata:
-            return metadata.get('versions', {})
-        return {}
     
 
