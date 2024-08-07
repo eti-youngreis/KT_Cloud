@@ -22,7 +22,7 @@ def delete_db_instance(instance_id):
     Returns:
     bool: True if the deletion was successful, False otherwise
     """
-    delete_from_Management("DBInstance", instance_id)
+    delete_from_management("DBInstance", instance_id)
 
 
 def find_cluster_and_endpoint_by_endpoint_identifier(endpoint_identifier, clusters_in_func):
@@ -56,7 +56,7 @@ def delete_db_snapshot(snapshot_id):
     Returns:
     bool: True if the deletion was successful, False otherwise
     """
-    delete_from_Management("DBSnapshot", snapshot_id)
+    delete_from_management("DBSnapshot", snapshot_id)
 
 
 def get_dbcluster_by_id(cluster_id, clusters_in_func=clusters):
@@ -452,7 +452,7 @@ def delete_db_cluster(clusters_in_func, cluster_identifier, delete_instances=Tru
             cluster.make_instances_independent(conn)
         cluster.delete_all_endpoints()
         # cluster.delete_all_snapshots()
-        delete_from_Management("DBCluster", cluster_identifier, conn)
+        delete_from_management("DBCluster", cluster_identifier, conn)
         clusters_in_func.remove(cluster)
         print(f"Cluster {cluster_identifier} deleted successfully.")
     except ValueError as e:

@@ -30,7 +30,7 @@ import sqlite3
 #         return None
 
 
-def delete_from_Management(name, id_number, conn=None):
+def delete_from_management(name, id_number, conn=None):
     """
       פונקציה למחיקת רשומה מהטבלה Management לפי שם ומספר מזהה
 

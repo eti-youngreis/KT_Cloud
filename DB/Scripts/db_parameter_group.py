@@ -1,7 +1,7 @@
 import json
 
 from DB.Scripts.parameter import Parameter
-from DB.Scripts.Management import insert_into_management_table, delete_from_Management
+from DB.Scripts.Management import insert_into_management_table, delete_from_management
 
 
 class DBParameterGroup():
@@ -75,7 +75,7 @@ class DBParameterGroup():
         return data
 
     def delete(self):
-        delete_from_Management(self.__class__.__name__,
+        delete_from_management(self.__class__.__name__,
                                self.parameter_group_name)
 
     def modify_parameters(self, parameters):

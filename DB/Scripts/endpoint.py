@@ -1,6 +1,6 @@
 import uuid
 import json
-from DB.Scripts.Management import insert_into_management_table, delete_from_Management, update_metadata
+from DB.Scripts.Management import insert_into_management_table, delete_from_management, update_metadata
 
 
 class Endpoint:
@@ -51,7 +51,7 @@ class Endpoint:
         """
         Deletes the endpoint from the management table.
         """
-        delete_from_Management(self.__class__.__name__,
+        delete_from_management(self.__class__.__name__,
                                self.endpoint_identifier)
 
     def describe(self, status='available'):
