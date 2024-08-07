@@ -81,7 +81,7 @@ class S3ClientSimulator:
             # Add new version with tags
             versions[version_id_str] = tags
         else:
-            latest_version = self.metadata_manager.get_latest_version(key)
+            latest_version = self.metadata_manager.get_latest_version(bucket,key)
             if latest_version:
                 versions[str(latest_version)]['TagSet'] = tags['TagSet']
             else:
