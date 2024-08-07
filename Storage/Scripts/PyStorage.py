@@ -9,7 +9,7 @@ URL_SERVER = 'D:\\בוטקמפ\\server'
 
 class S3ClientSimulator:
 
-    def __init__(self, metadata_file):
+    def __init__(self, metadata_file=f'{URL_SERVER}/metadata.json'):
         self.metadata_manager = MetadataManager(metadata_file)
 
     async def get_object_attributes(self,bucket, key, version_id=None,MaxParts=None,PartNumberMarker =None,SSECustomerAlgorithm =None,SSECustomerKey =None,SSECustomerKeyMD5=None,RequestPayer=None,ExpectedBucketOwner =None,ObjectAttributes=None, sync_flag=False):
@@ -63,35 +63,34 @@ class S3ClientSimulator:
         elif not version_id:
             # Get TagSet from latest version if version ID is not provided
             latest_version = self.metadata_manager.get_latest_version(bucket, key)
-        if latest_version:
-                return versions[str(latest_version)].get('TagSet', [])
-        return []
-    async def get_object_tagging(self,bucket, key,ExpectedBucketOwner=None,RequestPayer=None, version_id=None,sync_flag=True):
-        if not isinstance(sync_flag, bool):
-            raise TypeError('sync_flag must be a boolean')
-
-        # Fetch metadata for the key
-        if sync_flag:
-            metadata = self.metadata_manager.get_bucket_metadata(bucket, key)
-        else:
-            metadata = await asyncio.to_thread(self.metadata_manager.get_bucket_metadata, bucket, key)
-
-        versions = self.metadata_manager.get_versions(bucket, key)
-        if metadata is None or versions is None:
-            return []
-
-        version_id_str = str(version_id)
-
-        if version_id_str in versions:
-            return versions[version_id_str].get('TagSet', [])
-
-        elif not version_id:
-            # Get TagSet from latest version if version ID is not provided
-            latest_version = self.metadata_manager.get_latest_version(bucket, key)
             if latest_version:
                 return versions[str(latest_version)].get('TagSet', [])
-
         return []
+    async def put_object_tagging(self,bucket, key,tags, version_id=None, ContentMD5=None,ChecksumAlgorithm=None,ExpectedBucketOwner=None,RequestPayer=None, sync_flag=True):
+        if not isinstance(sync_flag, bool):
+            raise TypeError('sync_flag must be a boolean')
+        # Initialize metadata for the key if not present
+        if key not in self.metadata_manager.metadata:
+            self.metadata_manager.metadata[key] = {'versions': {}}
+        versions = self.metadata_manager.get_versions(bucket, key)
+        version_id_str = str(version_id)
+        if version_id_str in versions:
+            # Update TagSet for existing version
+            versions[version_id_str]['TagSet'] = tags['TagSet']
+        elif version_id:
+            # Add new version with tags
+            versions[version_id_str] = tags
+        else:
+            latest_version = self.metadata_manager.get_latest_version(key)
+            if latest_version:
+                versions[str(latest_version)]['TagSet'] = tags['TagSet']
+            else:
+                versions['0'] = tags
+        # Save metadata
+        if sync_flag:
+            await self.metadata_manager.save_metadata(True)
+        else:
+            await self.metadata_manager.save_metadata(False)
     async def get_object_lock_configuration(self, bucket):
         # Check if the bucket exists
         bucket_metadata = self.metadata_manager.metadata['server']['buckets'].get(bucket)
@@ -268,3 +267,39 @@ class S3ClientSimulator:
     def generate_etag(self, content):
         return hashlib.md5(content).hexdigest()
 
+async def main():
+    s3_client = S3ClientSimulator(f'{URL_SERVER}\\metadata.json')
+    try:
+        lock_config = await s3_client.get_object_lock_configuration('bucket1')
+        print(lock_config)
+    except FileNotFoundError as e:
+        print(e)
+    try:
+        torrent_info = await s3_client.get_object_torrent('bucket1', 'file.txt')
+        print('Torrent Info for latest version:', torrent_info)
+    except FileNotFoundError as e:
+        print(e)
+
+    # Example of getting specific version torrent info
+    try:
+        torrent_info = await s3_client.get_object_torrent('bucket1', 'file.txt', version_id='1')
+        print('Torrent Info for version 1:', torrent_info)
+    except FileNotFoundError as e:
+        print(e)
+    head_object = await s3_client.head_object('bucket1', 'file2.txt')
+    print('meta data is:', head_object)
+    try:
+        # Example body as bytes
+        body = b'Hello, World!'
+        result = await s3_client.put_object('bucket2', 'new-file.txt', body)
+        print('PutObject result:', result)
+    except Exception as e:
+        print(e)
+    try:
+        response = await s3_client.put_object_acl('bucket1', 'file2.txt', {'owner': 'default_owner', 'permissions': ['READ', 'WRITE']},version_id='3')
+        print(response)
+    except Exception as e:
+        print(e)
+
+if __name__ == '__main__':
+    asyncio.run(main())
