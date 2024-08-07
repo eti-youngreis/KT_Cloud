@@ -14,7 +14,7 @@ class DBClusterParameterGroup(DBParameterGroup):
         tags (list): Tags associated with the parameter group
         """
         super(DBParameterGroup, self).__init__(db_cluster_parameter_group_name, db_parameter_group_family, description,
-                                             tags)
+                                               tags)
 
     def describe(self, with_title=True):
         """
@@ -26,10 +26,7 @@ class DBClusterParameterGroup(DBParameterGroup):
         Returns:
         dict: A dictionary containing the description of the parameter group
         """
-        data = super().describe(with_title=False)
-        if with_title:
-            return {self.__class__.__name__: data}
-        return data
+        return super().describe(with_title=False)
 
     def save_to_db(self, conn=None):
         """

@@ -20,10 +20,10 @@ class DBParameterGroup():
         self.description = description
         self.tags = tags
         self.parameters = self.load_default_parameters()
-    
+
     def load_default_parameters(self):
         pass
-    
+
     def get_metadata(self):
         """
         Retrieves metadata of the parameter group as a JSON string.
@@ -41,7 +41,7 @@ class DBParameterGroup():
         metadata = {k: v for k, v in data.items() if v is not None}
         metadata_json = json.dumps(metadata)
         return metadata_json
-    
+
     def save_to_db(self, conn=None):
         """
         Saves the parameter group to the database.
@@ -52,7 +52,7 @@ class DBParameterGroup():
         metadata_json = self.get_metadata()
         insert_into_management_table(
             self.__class__.__name__, self.parameter_group_name, metadata_json, conn)
-        
+
     def describe(self, with_title=True):
         """
         Describes the DB parameter group.
@@ -63,7 +63,7 @@ class DBParameterGroup():
         Returns:
         dict: Description of the DB parameter group, with or without class name as title
         """
-        
+
         data = {
             "name": self.parameter_group_name,
             'DBParameterGroupFamily': self.db_parameter_group_family,
@@ -74,16 +74,16 @@ class DBParameterGroup():
             return {self.__class__.__name__: data}
         return data
 
-
     def delete(self):
-        delete_from_Management(self.__class__.__name__, self.parameter_group_name)
+        delete_from_Management(self.__class__.__name__,
+                               self.parameter_group_name)
 
     def modify_parameters(self, parameters):
         for new_parameter in parameters:
             for old_parameter in self.parameters:
                 if old_parameter.parameter_name == new_parameter['ParameterName']:
                     old_parameter.update(new_parameter)
-    
+
     @staticmethod
     def create_parameter_group(module_name, class_name, db_cluster_parameter_group_name, db_parameter_group_family,
                                description, tags):
@@ -117,7 +117,7 @@ class DBParameterGroup():
             DBParameterGroup.default_parameter_group = DBParameterGroup(
                 "default", "aurora-mysql5.7", "default", None)
         return DBParameterGroup.default_parameter_group
-               
+
     @staticmethod
     def load_default_parameters():
         """
