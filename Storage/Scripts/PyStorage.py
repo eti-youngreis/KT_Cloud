@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 import aiofiles
-from MetaData import MetadataManager
+from metadata import MetadataManager
 def is_valid_type(key, type_check):
     if not isinstance(key, type_check):
         raise TypeError(f"type of {key} is Error- got {type(key).__name__}")
