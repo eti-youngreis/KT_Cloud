@@ -117,12 +117,14 @@ class S3ClientSimulator:
         metadata = self.metadata_manager.get_bucket_metadata(bucket, key)
 
         if not metadata:
+            raise FileNotFoundError(f"Object {key} not found in bucket {bucket}")
             raise FileNotFoundError(f'Object {key} not found in bucket {bucket}')
 
         # If version_id is provided, fetch that specific version
         if version_id:
             version_metadata = metadata.get('versions', {}).get(version_id)
             if not version_metadata:
+                raise FileNotFoundError(f"Version {version_id} not found for object {key} in bucket {bucket}")
                 raise FileNotFoundError(f'Version {version_id} not found for object {key} in bucket {bucket}')
         else:
             # If no version_id is provided, get the latest version
@@ -151,7 +153,7 @@ class S3ClientSimulator:
 
         if not metadata:
             raise FileNotFoundError(f'Object {key} not found in bucket {bucket}')
-
+            
         # If version_id is provided, fetch that specific version
         if version_id:
             version_metadata = metadata.get('versions', {}).get(version_id)
@@ -177,6 +179,7 @@ class S3ClientSimulator:
 
         return response_metadata
     async def put_object(self, bucket, key, body, acl=None, metadata=None,
+
     content_type=None, sse_customer_algorithm=None,sse_customer_key=None, sse_customer_key_md5=None,sync_flag=True):
 
         # Check if the bucket exists
@@ -205,64 +208,65 @@ class S3ClientSimulator:
             await f.write(body)
 
         # Update previous versions' isLatest to False
-        for version in object_metadata['versions'].values():
-            version['isLatest'] = False
+        for version in object_metadata["versions"].values():
+            version["isLatest"] = False
 
         # Prepare the metadata for the new version
         etag = self.generate_etag(body)
-        object_metadata['versions'][version_id] = {
-            'etag': etag,
-            'size': len(body),
-            'lastModified': datetime.utcnow().isoformat() + 'Z',
-            'isLatest': True,
-            'acl': acl if acl else {'owner': 'default_owner', 'permissions': ['READ', 'WRITE']},
-            'legalHold': {'Status': 'OFF'},
-            'retention': {'mode': 'NONE'},
-            'tagSet': [],
-            'contentLength': len(body),
-            'contentType': content_type if content_type else 'application/octet-stream',
-            'metadata': metadata if metadata else {}
+        object_metadata["versions"][version_id] = {
+            "etag": etag,
+            "size": len(body),
+            "lastModified": datetime.utcnow().isoformat() + "Z",
+            "isLatest": True,
+            "acl": acl if acl else {"owner": "default_owner", "permissions": ["READ", "WRITE"]},
+            "legalHold": {"Status": "OFF"},
+            "retention": {"mode": "NONE"},
+            "tagSet": [],
+            "contentLength": len(body),
+            "contentType": content_type if content_type else "application/octet-stream",
+            "metadata": metadata if metadata else {}
         }
 
-        bucket_metadata['objects'][key] = object_metadata
+        bucket_metadata["objects"][key] = object_metadata
 
         # Save metadata to file
-        await self.metadata_manager.save_metadata(sync_flag)
+        await self.metadata_manager.save_metadata()
 
         return {
-            'ETag': object_metadata['versions'][version_id]['etag'],
-            'VersionId': version_id
+            "ETag": object_metadata["versions"][version_id]["etag"],
+            "VersionId": version_id
         }
-    async def put_object_acl(self, bucket, key, acl, version_id=None,sync_flag=True,GrantFullControl=None,GrantRead=None,GrantReadACP=None,GrantWriteACP=None):
+    async def put_object_acl(self, bucket, key, acl, version_id=None,is_sync=True,GrantFullControl=None,GrantRead=None,GrantReadACP=None,GrantWriteACP=None):
         # Check if the bucket exists
-        bucket_metadata = self.metadata_manager.get_metadata(bucket)
+        bucket_metadata = self.metadata_manager.metadata["server"]["buckets"].get(bucket)
         if not bucket_metadata:
-            raise FileNotFoundError(f'Bucket {bucket} does not exist')
+            raise FileNotFoundError(f"Bucket '{bucket}' does not exist")
 
-        object_metadata = bucket_metadata['objects'].get(key)
+        object_metadata = bucket_metadata["objects"].get(key)
 
         if not object_metadata:
-            raise FileNotFoundError(f'Object {key} does not exist in bucket {bucket}')
+            raise FileNotFoundError(f"Object '{key}' does not exist in bucket '{bucket}'")
 
         # If version_id is not provided, find the latest version
         if not version_id:
-            for vid, metadata in object_metadata['versions'].items():
-                if metadata['isLatest']:
+            for vid, metadata in object_metadata["versions"].items():
+                if metadata["isLatest"]:
                     version_id = vid
                     break
 
-        if not version_id or version_id not in object_metadata['versions']:
-            raise FileNotFoundError(f'Version {version_id} does not exist for object {key} in bucket {bucket}')
+        if not version_id or version_id not in object_metadata["versions"]:
+            raise FileNotFoundError(f"Version '{version_id}' does not exist for object '{key}' in bucket '{bucket}'")
 
         # Update the ACL for the specified version
-        object_metadata['versions'][version_id]['acl'] = acl
+        object_metadata["versions"][version_id]["acl"] = acl
 
         # Save metadata to file
-        await self.metadata_manager.save_metadata(sync_flag)
+        await self.metadata_manager.save_metadata(is_sync)
 
         return {
-            'VersionId': version_id,
-            'ACL': acl
+            "VersionId": version_id,
+            "ACL": acl
+      
         }
     def generate_etag(self, content):
         return hashlib.md5(content).hexdigest()
@@ -303,3 +307,4 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
+
