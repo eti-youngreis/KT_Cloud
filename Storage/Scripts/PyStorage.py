@@ -69,10 +69,16 @@ class S3ClientSimulator:
     async def put_object_tagging(self,bucket, key,tags, version_id=None, ContentMD5=None,ChecksumAlgorithm=None,ExpectedBucketOwner=None,RequestPayer=None, sync_flag=True):
         if not isinstance(sync_flag, bool):
             raise TypeError('sync_flag must be a boolean')
-        print(self.metadata_manager.metadata_file ,"kkk")
-        # Initialize metadata for the key if not present
-        if key not in self.metadata_manager.metadata:
-            self.metadata_manager.metadata[key] = {'versions': {}}
+            # Check if the bucket exists
+        bucket_metadata = self.metadata_manager.get_metadata(bucket)
+        if not bucket_metadata:
+            raise FileNotFoundError(f"Bucket '{bucket}' does not exist")
+        
+        object_metadata = self.metadata_manager.get_bucket_metadata(bucket,key)
+
+        if not object_metadata:
+            raise FileNotFoundError(f"Object '{key}' does not exist in bucket '{bucket}'")
+
         versions = self.metadata_manager.get_versions(bucket, key)
         version_id_str = str(version_id)
         if version_id_str in versions:
