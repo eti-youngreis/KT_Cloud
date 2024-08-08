@@ -1,6 +1,5 @@
 # from parameter_group import ParameterGroup
 import re
-from DB.Scripts.parameter_group import ParameterGroup
 from DB.Scripts.db_parameter_group import DBParameterGroup
 from DB.Scripts.db_cluster_parameter_group import DBClusterParameterGroup
 from typing import List
@@ -106,7 +105,7 @@ def create_parameter_group(parameter_groups, module_name, class_name, parameter_
         p.db_cluster_parameter_group_name for p in parameter_groups]
     if parameter_group_name in parameter_group_names:
         raise ValueError(f"The parameter group already exists")
-    parameter_group = ParameterGroup(module_name, class_name, parameter_group_name, parameter_group_family, description,
+    parameter_group = DBParameterGroup(module_name, class_name, parameter_group_name, parameter_group_family, description,
                                      tags)
     parameter_group.save_to_db(conn)
     db_parameter_groups.append(parameter_group)
