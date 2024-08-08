@@ -49,7 +49,7 @@ class DBCluster:
             endpoint.delete()
             # delete_db_endpoint(endpoint.endpoint_id)
 
-    def add_endpoint(self, cluster_identifier, endpoint_identifier, endpoint_type, static_members, excluded_members):
+    def add_endpoint(self, cluster_identifier, endpoint_identifier, endpoint_type, static_members, excluded_members,conn=None):
         """
         Adds a new endpoint to the DB cluster.
 
@@ -70,7 +70,7 @@ class DBCluster:
                               not in excluded_members]
 
         endpoint = Endpoint(cluster_identifier, endpoint_identifier, endpoint_type, static_members, excluded_members)
-        endpoint.save_to_db()
+        endpoint.save_to_db(conn)
         self.endpoints.append(endpoint)
         print(f"Custom endpoint {endpoint_identifier} created successfully.")
         return endpoint.describe('creating')

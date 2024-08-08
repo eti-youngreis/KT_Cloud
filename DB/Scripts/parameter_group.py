@@ -7,7 +7,7 @@ from abc import abstractmethod
 class ParameterGroup:
     default_parameter_group = None
 
-    def __init__(self, db_cluster_parameter_group_name, db_parameter_group_family, description, tags):
+    def __init__(self, db_cluster_parameter_group_name, db_parameter_group_family, description, tags,conn=None):
         """
         Initializes a ParameterGroup instance.
 
@@ -36,17 +36,23 @@ class ParameterGroup:
         str: JSON string representing the parameter group's metadata
         """
         data = {
-            'parameter_group_name': self.parameter_group_name,
+            # 'parameter_group_name': self.parameter_group_name,
             'db_parameter_group_family': self.db_parameter_group_family,
             'description': self.description,
             'tags': self.tags,
-            'parameters': self.parameters
+            'parameters': self.parameters_to_json()
         }
         metadata = {k: v for k, v in data.items() if v is not None}
         metadata_json = json.dumps(metadata)
         return metadata_json
 
-    def save_to_db(self, class_name,conn=None):
+    def parameters_to_json(self):
+        parameters_in_dict_in_list = []
+        for p in self.parameters:
+            parameters_in_dict_in_list.append(p.describe())
+        return parameters_in_dict_in_list
+
+    def save_to_db(self, class_name, conn=None):
         """
         Saves the parameter group to the database.
 
@@ -54,7 +60,7 @@ class ParameterGroup:
         class_name (str): The name of the class for saving to the management table
         """
         metadata_json = self.get_metadata()
-        insert_into_management_table(class_name, self.parameter_group_name, metadata_json,conn)
+        insert_into_management_table(class_name, self.parameter_group_name, metadata_json, conn)
 
     def describe(self, name):
         """
@@ -80,12 +86,11 @@ class ParameterGroup:
         """
         delete_from_Management(class_name, self.parameter_group_name)
 
-    def modify_parameters(self, parameters):
+    def modify_parameters(self, parameters, conn):
         for new_parameter in parameters:
             for old_parameter in self.parameters:
                 if old_parameter.parameter_name == new_parameter['ParameterName']:
-                    old_parameter.update(new_parameter)
-
+                    old_parameter.update(self.__class__.__name__, self.parameter_group_name, new_parameter, conn)
 
     @staticmethod
     def create_parameter_group(module_name, class_name, db_cluster_parameter_group_name, db_parameter_group_family,

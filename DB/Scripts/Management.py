@@ -35,8 +35,8 @@ def delete_from_Management(name, id_number, conn=None):
       פונקציה למחיקת רשומה מהטבלה Management לפי שם ומספר מזהה
 
       Args:
-      name (str): שם הרשומה למחיקה
-      id_number (str): מספר מזהה של הרשומה למחיקה
+      class_name (str): שם הרשומה למחיקה
+      object_id (str): מספר מזהה של הרשומה למחיקה
 
       Returns:
       bool: True אם המחיקה הצליחה, False אחרת
@@ -51,7 +51,7 @@ def delete_from_Management(name, id_number, conn=None):
     cursor = conn.cursor()
     cursor.execute('''
           DELETE FROM Management
-          WHERE name = ? AND id_number = ?
+          WHERE class_name = ? AND object_id = ?
       ''', (name, id_number))
 
     conn.commit()
@@ -59,7 +59,8 @@ def delete_from_Management(name, id_number, conn=None):
         conn.close()
 
 
-def update_metadata(name_condition, id_condition, key, new_value, conn=None):
+def update_metadata(name_condition, id_condition, key, new_value, conn=None, is_update_parameter=False,
+                    name_of_parameter=None):
     print("conn_update_metadata:", conn)
     conn_is_None = False
     if not conn:
@@ -70,20 +71,33 @@ def update_metadata(name_condition, id_condition, key, new_value, conn=None):
         print("metadata:", name_condition, id_condition)
         # שליפת הרשומות שעונות על התנאי
         cursor.execute('''
-            SELECT name, id_number, metadata
+            SELECT class_name, object_id, metadata
             FROM Management
-            WHERE name = ? AND id_number = ?
+            WHERE class_name = ? AND object_id = ?
         ''', (name_condition, id_condition))
 
         records = cursor.fetchall()
-
         for record in records:
             name, id_number, metadata = record
             metadata_dict = json.loads(metadata)
 
             # עדכון התכונה ב-metadata
-            metadata_dict[key] = new_value
-
+            if is_update_parameter is False:
+                metadata_dict[key] = new_value
+            else:
+                # parameter = [p for p in metadata_dict['parameters'] if p['ParameterName'] == name_of_parameter][0]
+                # print(parameter)
+                parameter = None
+                count = -1
+                for p in metadata_dict['parameters']:
+                    if p['ParameterName'] == name_of_parameter:
+                        parameter = p
+                        count += 1
+                if parameter is not None:
+                    parameter[key] = new_value
+                    # update_parameters = json.dumps(attributes_of_parameter)
+                    metadata_dict['parameters'][count] = parameter
+                # print(metadata_dict)
             # המרה בחזרה למחרוזת JSON
             updated_metadata = json.dumps(metadata_dict)
             print("metadata:", updated_metadata, name, id_number)
@@ -91,9 +105,8 @@ def update_metadata(name_condition, id_condition, key, new_value, conn=None):
             cursor.execute('''
                 UPDATE Management
                 SET metadata = ?
-                WHERE name = ? AND id_number = ?
+                WHERE class_name = ? AND object_id = ?
             ''', (updated_metadata, name, id_number))
-
         conn.commit()
     except sqlite3.Error as e:
         raise RuntimeError(f"Error updating metadata: {e}")
@@ -102,11 +115,11 @@ def update_metadata(name_condition, id_condition, key, new_value, conn=None):
             conn.close()
 
 
-def execute_query(db_name, query, params,conn=None):
-    conn_is_None=False
+def execute_query(db_name, query, params, conn=None):
+    conn_is_None = False
     if not conn:
         conn = sqlite3.connect(db_name)
-        conn_is_None=True
+        conn_is_None = True
     conn = sqlite3.connect(db_name)
     c = conn.cursor()
     print(query)
@@ -123,20 +136,19 @@ def execute_query(db_name, query, params,conn=None):
     return res
 
 
-def insert_into_management_table(class_name, object_id, metadata,conn=None):
-    conn_is_None=False
+def insert_into_management_table(class_name, object_id, metadata, conn=None):
+    conn_is_None = False
     if not conn:
         conn = sqlite3.connect('database.db')
-        conn_is_None=True
+        conn_is_None = True
     c = conn.cursor()
     execute_query('database.db',
                   '''CREATE TABLE IF NOT EXISTS object_management (object_id TEXT PRIMARY KEY, class_name TEXT NOT NULL, metadata TEXT)''',
                   None)
     c.execute('''
-          INSERT INTO object_management (class_name, object_id, metadata)
+          INSERT INTO Management (class_name, object_id, metadata)
           VALUES (?, ?, ?)
           ''', (class_name, object_id, metadata))
     conn.commit()
     if conn_is_None:
         conn.close()
-

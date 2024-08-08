@@ -29,17 +29,17 @@ class DBParameterGroup(ParameterGroup):
             return {self.__class__.__name__: super().describe('DBParameterGroupName')}
         return super().describe('DBParameterGroupName')
 
-    def save_to_db(self,conn=None):
+    def save_to_db(self, conn=None):
         """
         Saves the DB parameter group to the database.
         """
-        super().save_to_db(self.__class__.__name__,conn)
+        super().save_to_db(self.__class__.__name__, conn)
 
     def delete(self):
         super().delete(self.__class__.__name__)
 
-    @staticmethod
-    def load_default_parameters():
+    #@staticmethod
+    def load_default_parameters(self):
         """
         Loads default parameters for the DB parameter group.
 
@@ -47,10 +47,11 @@ class DBParameterGroup(ParameterGroup):
         list: Default parameters for the DB parameter group
         """
         # Loading default parameters - can be replaced with actual parameters
-        parameters=[]
-        parameters.append(Parameter('max_connections',100))
-        parameters.append(Parameter('innodb_buffer_pool_size','128M'))
-        parameters.append(Parameter('character_set_server','utf8'))
-        parameters.append(Parameter('time_zone','UTC'))
+        parameters = []
+        parameters.append(Parameter('max_connections', 100))
+        parameters.append(Parameter('innodb_buffer_pool_size', '128M'))
+        parameters.append(Parameter('character_set_server', 'utf8'))
+        parameters.append(Parameter('time_zone', 'UTC'))
+        # for p in parameters:
+        #     p.save_to_db(conn)
         return parameters
-

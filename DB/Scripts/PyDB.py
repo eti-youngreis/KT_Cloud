@@ -1,4 +1,4 @@
-#from parameter_group import ParameterGroup
+# from parameter_group import ParameterGroup
 import re
 from DB.Scripts.parameter_group import ParameterGroup
 from DB.Scripts.db_parameter_group import DBParameterGroup
@@ -79,9 +79,8 @@ def get_dbcluster_by_id(cluster_id, clusters_in_func=clusters):
     return cluster
 
 
-
 def create_parameter_group(parameter_groups, module_name, class_name, parameter_group_name, parameter_group_family,
-                           description, tags,conn=None):
+                           description, tags, conn=None):
     """
     Function to create a parameter group
 
@@ -105,8 +104,10 @@ def create_parameter_group(parameter_groups, module_name, class_name, parameter_
     parameter_group_names = [p.db_cluster_parameter_group_name for p in parameter_groups]
     if parameter_group_name in parameter_group_names:
         raise ValueError(f"The parameter group already exists")
-    parameter_group = ParameterGroup(module_name, class_name, parameter_group_name, parameter_group_family, description,
-                                     tags)
+    print('hello')
+    parameter_group = ParameterGroup.create_parameter_group(module_name, class_name, parameter_group_name,
+                                                            parameter_group_family, description,
+                                                            tags)
     parameter_group.save_to_db(conn)
     db_parameter_groups.append(parameter_group)
     return parameter_group.describe()
@@ -148,7 +149,7 @@ def describe_parameter_groups(parameter_groups, title, parameter_group_name, max
     return {'Marker': marker, title: parameter_groups_local}
 
 
-def describe_parameters(parameter_groups, parameter_group_name, source, max_records, marker):
+def describe_parameters(parameter_groups, parameter_group_name, source, max_records, marker, parameter_groups_in_func):
     """
     Retrieves a list of parameters from a specific parameter group, filtered by source and limited by max_records.
 
@@ -164,13 +165,13 @@ def describe_parameters(parameter_groups, parameter_group_name, source, max_reco
             - 'Parameters': A list of parameters matching the criteria.
             - 'Marker' (optional): A marker indicating the position to resume pagination if there are more records.
     """
-    parameter_group = next((p for p in parameter_groups if p.parameter_group_name == parameter_group_name), None)
+    parameter_group = next((p for p in parameter_groups_in_func if p.parameter_group_name == parameter_group_name), None)
     if parameter_group is None:
         raise ValueError(f"The parameter group does not exist")
-    
+
     parameters_local = []
     count = 0
-    for p in parameter_group:
+    for p in parameter_group.parameters:
         if p.parameter_name == marker or marker is None:
             marker = None
             if p.source == source:
@@ -180,7 +181,7 @@ def describe_parameters(parameter_groups, parameter_group_name, source, max_reco
                 else:
                     marker = p.parameter_name
                     break
-    
+
     result = {'Parameters': parameters_local}
     if marker is not None:
         result['Marker'] = marker
@@ -188,7 +189,7 @@ def describe_parameters(parameter_groups, parameter_group_name, source, max_reco
     return result
 
 
-def modify_parameter_group(title, parameter_groups, parameter_group_name, parameters):
+def modify_parameter_group(title, parameter_groups, parameter_group_name, parameters, parameter_groups_in_func, conn):
     """
     Modifies parameters in a parameter group.
 
@@ -204,10 +205,11 @@ def modify_parameter_group(title, parameter_groups, parameter_group_name, parame
     Raises:
         ValueError: If the specified parameter group does not exist.
     """
-    parameter_group = next((p for p in parameter_groups if p.parameter_group_name == parameter_group_name), None)
+    parameter_group = next((p for p in parameter_groups_in_func if p.parameter_group_name == parameter_group_name),
+                           None)
     if parameter_group is None:
         raise ValueError(f"The parameter group does not exist")
-    parameter_group.modify_parameters(parameters)
+    parameter_group.modify_parameters(parameters, conn)
     return {title: parameter_group_name}
 
 
@@ -293,7 +295,8 @@ def describe_db_cluster_parameter_groups(db_cluster_parameter_group_name=None, m
                                      max_records, marker)
 
 
-def modify_db_cluster_parameter_group(db_cluster_parameter_group_name, parameters):
+def modify_db_cluster_parameter_group(db_cluster_parameter_group_name, parameters, conn=None,
+                                      parameter_groups_in_func=db_cluster_parameter_groups):
     """
     Modifies a DB cluster parameter group.
 
@@ -304,10 +307,12 @@ def modify_db_cluster_parameter_group(db_cluster_parameter_group_name, parameter
     Returns:
         dict: A dictionary with the key 'DBClusterParameterGroupName' and the modified parameter group name.
     """
-    return modify_parameter_group('DBClusterParameterGroupName', db_cluster_parameter_groups, db_cluster_parameter_group_name, parameters)
+    return modify_parameter_group('DBClusterParameterGroupName', db_cluster_parameter_groups,
+                                  db_cluster_parameter_group_name, parameters, parameter_groups_in_func, conn)
 
 
-def describe_cluster_db_parameters(db_cluster_parameter_group_name, source='user', max_records=100, marker=None):
+def describe_db_cluster_parameters(db_cluster_parameter_group_name, source='user', max_records=100, marker=None,
+                                   parameter_groups_in_func=db_cluster_parameter_groups):
     """
     Retrieves a list of parameters for a specific DB cluster parameter group, filtered by source and limited by max_records.
 
@@ -322,7 +327,8 @@ def describe_cluster_db_parameters(db_cluster_parameter_group_name, source='user
             - 'Parameters': A list of parameters matching the criteria.
             - 'Marker' (optional): A marker indicating the position to resume pagination if there are more records.
     """
-    return describe_parameters(db_cluster_parameter_groups, db_cluster_parameter_group_name, source, max_records, marker)
+    return describe_parameters(db_cluster_parameter_groups, db_cluster_parameter_group_name, source, max_records,
+                               marker, parameter_groups_in_func)
 
 
 def create_db_parameter_group(db_parameter_group_family, db_parameter_group_name, description, tags=None):
@@ -379,7 +385,8 @@ def describe_db_parameter_groups(db_parameter_group_name=None, max_records=100, 
                                      max_records, marker)
 
 
-def modify_db_parameter_group(db_parameter_group_name, parameters):
+def modify_db_parameter_group(db_parameter_group_name, parameters, conn=None,
+                              parameter_groups_in_func=db_parameter_groups):
     """
     Modifies a DB parameter group.
 
@@ -390,7 +397,8 @@ def modify_db_parameter_group(db_parameter_group_name, parameters):
     Returns:
         dict: A dictionary with the key 'DBParameterGroupName' and the modified parameter group name.
     """
-    return modify_parameter_group('DBParameterGroupName', db_parameter_groups, db_parameter_group_name, parameters)
+    return modify_parameter_group('DBParameterGroupName', db_parameter_groups, db_parameter_group_name, parameters,
+                                  parameter_groups_in_func, conn)
 
 
 def describe_db_parameters(db_parameter_group_name, source='user', max_records=100, marker=None):
@@ -411,7 +419,7 @@ def describe_db_parameters(db_parameter_group_name, source='user', max_records=1
     return describe_parameters(db_parameter_groups, db_parameter_group_name, source, max_records, marker)
 
 
-def delete_db_cluster(clusters_in_func, cluster_identifier, delete_instances=True, backup=True,conn=None):
+def delete_db_cluster(clusters_in_func, cluster_identifier, delete_instances=True, backup=True, conn=None):
     """
     Function to delete a DB cluster
 
@@ -446,7 +454,7 @@ def delete_db_cluster(clusters_in_func, cluster_identifier, delete_instances=Tru
             cluster.make_instances_independent(conn)
         cluster.delete_all_endpoints()
         # cluster.delete_all_snapshots()
-        delete_from_Management("DBCluster", cluster_identifier,conn)
+        delete_from_Management("DBCluster", cluster_identifier, conn)
         clusters_in_func.remove(cluster)
         print(f"Cluster {cluster_identifier} deleted successfully.")
     except ValueError as e:
@@ -454,22 +462,23 @@ def delete_db_cluster(clusters_in_func, cluster_identifier, delete_instances=Tru
     except Exception as e:
         raise RuntimeError(f"Error deleting cluster: {e}")
 
-def is_valid_identifier(identifier,length):
+
+def is_valid_identifier(identifier, length):
     if not 1 <= len(identifier) <= length:
         raise ValueError(f"the length must be between 1 to {length}")
 
     # ביטוי רגולרי לבדיקת הדרישות הנוספות
     pattern = r'^[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]$'
-    if length==63:
+    if length == 63:
         pattern = r'^[a-zA-Z][a-zA-Z0-9-.]*[a-zA-Z0-9]$'
 
     # בדיקה שהמשתנה תואם את הביטוי הרגולרי ושאין בו שתי מקפים רצופים
-    if not(re.match(pattern, identifier) and '--' not in identifier):
+    if not (re.match(pattern, identifier) and '--' not in identifier):
         raise ValueError("The identity syntax is incorrect")
 
 
 def create_db_cluster_endpoint(cluster_identifier, endpoint_identifier, endpoint_type='READER', static_members=None,
-                               excluded_members=None,conn=None,clusters_in_func=clusters):
+                               excluded_members=None, conn=None, clusters_in_func=clusters):
     """
     Function to create a DB cluster endpoint
 
@@ -483,15 +492,15 @@ def create_db_cluster_endpoint(cluster_identifier, endpoint_identifier, endpoint
     Returns:
     DBEndpoint: The created endpoint
     """
-    endpoint_types=['ANY','WRITER','READER']
+    endpoint_types = ['ANY', 'WRITER', 'READER']
     if not endpoint_type in endpoint_types:
         raise ValueError("the value of endpoint type is invalid")
     cluster = get_dbcluster_by_id(cluster_identifier, clusters_in_func)
     return cluster.add_endpoint(cluster_identifier, endpoint_identifier, endpoint_type, static_members,
-                                excluded_members,conn)
+                                excluded_members, conn)
 
 
-def delete_db_cluster_endpoint(endpoint_identifier,clusters_in_func=clusters,conn=None):
+def delete_db_cluster_endpoint(endpoint_identifier, clusters_in_func=clusters, conn=None):
     """
     Function to delete a DB cluster endpoint
 
@@ -501,11 +510,11 @@ def delete_db_cluster_endpoint(endpoint_identifier,clusters_in_func=clusters,con
     Returns:
     bool: True if the deletion was successful, False otherwise
     """
-    cluster, endpoint = find_cluster_and_endpoint_by_endpoint_identifier(endpoint_identifier,clusters_in_func)
-    return cluster.delete_endpoint(endpoint,conn)
+    cluster, endpoint = find_cluster_and_endpoint_by_endpoint_identifier(endpoint_identifier, clusters_in_func)
+    return cluster.delete_endpoint(endpoint, conn)
 
 
-def describe_db_cluster_endpoints(endpoint_identifier,clusters_in_func=clusters):
+def describe_db_cluster_endpoints(endpoint_identifier, clusters_in_func=clusters):
     """
     Function to describe DB cluster endpoints
 
@@ -519,7 +528,8 @@ def describe_db_cluster_endpoints(endpoint_identifier,clusters_in_func=clusters)
     return endpoint.describe()
 
 
-def modify_db_cluster_endpoint(endpoint_identifier, endpoint_type='', static_members=None, excluded_members=None):
+def modify_db_cluster_endpoint(endpoint_identifier, endpoint_type='', static_members=None, excluded_members=None,
+                               conn=None, clusters_in_func=clusters):
     """
     Modifies a DB cluster endpoint.
 
@@ -532,7 +542,5 @@ def modify_db_cluster_endpoint(endpoint_identifier, endpoint_type='', static_mem
     Returns:
         dict: The modified endpoint details.
     """
-    cluster, endpoint = find_cluster_and_endpoint_by_endpoint_identifier(endpoint_identifier)
-    return endpoint.modify(endpoint_type, static_members, excluded_members)
-
-   
+    cluster, endpoint = find_cluster_and_endpoint_by_endpoint_identifier(endpoint_identifier, clusters_in_func)
+    return endpoint.modify(endpoint_type, static_members, excluded_members, conn)

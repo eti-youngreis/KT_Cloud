@@ -39,12 +39,12 @@ class Endpoint:
         metadata_json = json.dumps(metadata)
         return metadata_json
 
-    def save_to_db(self,conn=None):
+    def save_to_db(self, conn=None):
         """
         Saves the endpoint to the database.
         """
         metadata_json = self.get_metadata()
-        insert_into_management_table(self.__class__.__name__, self.endpoint_identifier, metadata_json,conn)
+        insert_into_management_table(self.__class__.__name__, self.endpoint_identifier, metadata_json, conn)
 
     def delete(self):
         """
@@ -76,15 +76,23 @@ class Endpoint:
         }
         return describe
 
-    def modify(self, endpoint_type, static_members, excluded_members):
+    def modify(self, endpoint_type, static_members, excluded_members, conn=None):
         if endpoint_type != '':
             self.endpoint_type = endpoint_type
-            update_metadata(self.__class__.__name__, self.endpoint_identifier, 'endpoint_type', self.endpoint_type)
+            update_metadata(self.__class__.__name__, self.endpoint_identifier, 'endpoint_type', self.endpoint_type,
+                            conn)
         if static_members is not None:
             self.static_members = static_members
-            update_metadata(self.__class__.__name__, self.endpoint_identifier, 'static_members', self.static_members)
+            update_metadata(self.__class__.__name__, self.endpoint_identifier, 'static_members', self.static_members,
+                            conn)
+        else:
+            static_members = []
         if excluded_members is not None:
+            static_members = [s for s in static_members if s not in excluded_members]
+            self.static_members = static_members
+            update_metadata(self.__class__.__name__, self.endpoint_identifier, 'static_members', self.static_members,
+                            conn)
             self.excluded_members = excluded_members
             update_metadata(self.__class__.__name__, self.endpoint_identifier, 'excluded_members',
-                            self.excluded_members)
+                            self.excluded_members, conn)
         return self.describe('modifying')

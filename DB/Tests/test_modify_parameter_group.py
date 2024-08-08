@@ -1,5 +1,10 @@
+import os
+import sys
+
 import pytest
 from unittest.mock import patch
+# sys.path.append(os.path.abspath(os.path.join(
+# os.path.dirname(__file__), '../Scripts')))
 from DB.Scripts.PyDB import *
 from DB.Scripts.endpoint import Endpoint
 
@@ -10,33 +15,128 @@ def setup_db():
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS Management (
-            name TEXT NOT NULL,
-            id_number TEXT NOT NULL,
+            class_name TEXT NOT NULL,
+            object_id TEXT NOT NULL,
             metadata TEXT
         )
     ''')
     conn.commit()
     cursor.execute('''
-        INSERT INTO Management (name, id_number, metadata) VALUES (?, ?, ?)
-    ''', ("DBCluster", "cluster1", "{}"))
+        INSERT INTO Management (class_name, object_id, metadata) VALUES (?, ?, ?)
+    ''', ("DBClusterParameterGroup", "db_cluster_parameter_group_2", "{}"))
     cursor.execute('''
-        INSERT INTO Management (name, id_number, metadata) VALUES (?, ?, ?)
+        INSERT INTO Management (class_name, object_id, metadata) VALUES (?, ?, ?)
     ''', ("DBInstance", "instance1", "{}"))
     cursor.execute('''
-        INSERT INTO Management (name, id_number, metadata) VALUES (?, ?, ?)
+        INSERT INTO Management (class_name, object_id, metadata) VALUES (?, ?, ?)
     ''', ("DBInstance", "instance2", "{}"))
     conn.commit()
     yield conn
     conn.close()
 
 
-def test_modify_not_exists_db_cluster_parameter_group(setup_db):
+@pytest.fixture
+def sample_db_cluster_parameter_groups(setup_db):
+    db_cluster_parameter_group = DBClusterParameterGroup('db_cluster_parameter_group_1', 'mysql8.0', 'sample')
+    db_cluster_parameter_group.save_to_db(setup_db)
+    # insert_into_management_table("DBClusterParameterGroup",db_cluster_parameter_group.parameter_group_name,db_cluster_parameter_group.)
+    return [db_cluster_parameter_group]
+
+
+def test_modify_not_exists_db_cluster_parameter_group():
     # create_db_cluster_parameter_group('cluster_parameter_group_1', )
     with pytest.raises(ValueError):
         modify_db_cluster_parameter_group('cluster_parameter_group_1', '11')
     # assert 1 == 1
 
 
+def test_modify_db_cluster_parameter_group_parameter_does_not_exist(sample_db_cluster_parameter_groups, setup_db):
+    conn = setup_db
+    cursor = conn.cursor()
+    # create_db_cluster_parameter_group('db_cluster_parameter_group_1', 'mysql8.0', 'sample')
+    cursor.execute(
+        'SELECT * FROM Management WHERE class_name = ? AND object_id = ?',
+        ("DBClusterParameterGroup", "db_cluster_parameter_group_1"))
+    result = cursor.fetchone()
+    metadata_before = result[2]
+    metadata_dict = json.loads(metadata_before)
+    # print(metadata_dict['parameters'])
+    Parameters = [
+        {
+            'ParameterName': 'max_connections',
+            'ParameterValue': '150',
+            'Description': 'Maximum number of connections',
+            'Source': 'user',
+            'ApplyType': 'dynamic',
+            'DataType': 'integer',
+            'AllowedValues': '1-10000',
+            'IsModifiable': True,
+            'MinimumEngineVersion': '10.1',
+            'ApplyMethod': 'immediate',
+            'SupportedEngineModes': ['provisioned']
+        }
+    ]
+
+    modify_db_cluster_parameter_group('db_cluster_parameter_group_1', parameters=Parameters, conn=conn,
+                                      parameter_groups_in_func=sample_db_cluster_parameter_groups)
+    cursor.execute(
+        'SELECT * FROM Management WHERE class_name = ? AND object_id = ?',
+        ("DBClusterParameterGroup", "db_cluster_parameter_group_1"))
+    result = cursor.fetchone()
+    metadata_after = result[2]
+    assert metadata_after == metadata_before
+    # metadata_dict = json.loads(metadata_after)
+
+
+def test_modify_db_cluster_parameter_group(sample_db_cluster_parameter_groups, setup_db):
+    conn = setup_db
+    cursor = conn.cursor()
+    # create_db_cluster_parameter_group('db_cluster_parameter_group_1', 'mysql8.0', 'sample')
+    cursor.execute(
+        'SELECT * FROM Management WHERE class_name = ? AND object_id = ?',
+        ("DBClusterParameterGroup", "db_cluster_parameter_group_1"))
+    result = cursor.fetchone()
+    metadata_before = result[2]
+    metadata_dict = json.loads(metadata_before)
+    # print(metadata_dict['parameters'])
+    Parameters = [
+        {
+            'ParameterName': 'backup_retention_period',
+            'ParameterValue': 9,
+            'Description': 'Maximum number of connections',
+            'Source': 'user',
+            'ApplyType': 'dynamic',
+            'DataType': 'integer',
+            'AllowedValues': '1-10000',
+            'IsModifiable': True,
+            'MinimumEngineVersion': '10.1',
+            'ApplyMethod': 'immediate',
+            'SupportedEngineModes': ['provisioned']
+        }
+    ]
+
+    modify_db_cluster_parameter_group('db_cluster_parameter_group_1', parameters=Parameters, conn=conn,
+                                      parameter_groups_in_func=sample_db_cluster_parameter_groups)
+    cursor.execute(
+        'SELECT * FROM Management WHERE class_name = ? AND object_id = ?',
+        ("DBClusterParameterGroup", "db_cluster_parameter_group_1"))
+    result = cursor.fetchone()
+    metadata_after = result[2]
+    metadata_after_dict = json.loads(metadata_after)
+    print(metadata_after_dict)
+    assert metadata_after_dict['parameters'][0]['ParameterValue'] == 9
+
+
+def test_describe_db_cluster_parameters(sample_db_cluster_parameter_groups, setup_db):
+    with pytest.raises(ValueError):
+        describe_db_cluster_parameters('1')
+
+
+def test_describe_db_cluster_parameters(sample_db_cluster_parameter_groups, setup_db):
+    result = describe_db_cluster_parameters(sample_db_cluster_parameter_groups[0].parameter_group_name,
+                                            source='engine-default',
+                                            parameter_groups_in_func=sample_db_cluster_parameter_groups)
+    assert result['Parameters'][0]['ParameterName'] == 'backup_retention_period'
 # from endpoint import Endpoint, modify_db_cluster_endpoint
 # from db_instance import DBInstance
 # from endpoint import Endpoint
