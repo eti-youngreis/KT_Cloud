@@ -41,6 +41,17 @@ def sample_clusters():
     return [cluster]
 
 
+@pytest.fixture
+def endpoint():
+    return Endpoint(
+        cluster_identifier="cluster1",
+        endpoint_identifier="endpoint1",
+        endpoint_type="CUSTOM",
+        static_members=["member1"],
+        excluded_members=["member2"]
+    )
+
+
 def test_modify_not_exists_db_cluster_endpoint():
     with pytest.raises(ValueError):
         modify_db_cluster_endpoint('1')
@@ -88,3 +99,24 @@ def test_modify_db_cluster_endpoint(sample_clusters, setup_db):
     assert metadata_dict['excluded_members'] == ['instance1']
     assert 'instance1' not in metadata_dict['static_members']
 
+
+def test_modify_with_empty_values(endpoint):
+    endpoint.modify(
+        endpoint_type="",
+        static_members=None,
+        excluded_members=None
+    )
+    assert endpoint.endpoint_type == 'CUSTOM'
+    assert endpoint.static_members == ["member1"]
+    assert endpoint.excluded_members == ["member2"]
+
+
+def test_modify_invalid_endpoint_type(sample_clusters, setup_db):
+    conn = setup_db
+    cursor = conn.cursor()
+    clusters = sample_clusters
+    # modify_db_cluster_endpoint("endpoint")
+    create_db_cluster_endpoint("cluster1", "db-tamar.colcjtm9obot.rds.vast-data.com", 'READER', excluded_members=[],
+                               conn=conn, clusters_in_func=clusters)
+    with pytest.raises(ValueError):
+        modify_db_cluster_endpoint('db-tamar.colcjtm9obot.rds.vast-data.com', 'hello')

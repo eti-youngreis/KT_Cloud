@@ -36,13 +36,14 @@ def sample_db_cluster_parameter_groups(setup_db):
     # insert_into_management_table("DBClusterParameterGroup",db_cluster_parameter_group.parameter_group_name,db_cluster_parameter_group.)
     return [db_cluster_parameter_group]
 
+
 def test_modify_not_exists():
     with pytest.raises(ValueError):
         describe_db_cluster_parameters('1')
+
 
 def test_describe_db_cluster_parameters(sample_db_cluster_parameter_groups, setup_db):
     result = describe_db_cluster_parameters(sample_db_cluster_parameter_groups[0].parameter_group_name,
                                             source='engine-default',
                                             parameter_groups_in_func=sample_db_cluster_parameter_groups)
     assert result['Parameters'][0]['ParameterName'] == 'backup_retention_period'
-

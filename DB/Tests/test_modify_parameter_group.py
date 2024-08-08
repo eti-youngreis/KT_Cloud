@@ -43,25 +43,9 @@ def sample_db_cluster_parameter_groups(setup_db):
     return [db_cluster_parameter_group]
 
 
-def test_modify_not_exists_db_cluster_parameter_group():
-    # create_db_cluster_parameter_group('cluster_parameter_group_1', )
-    with pytest.raises(ValueError):
-        modify_db_cluster_parameter_group('cluster_parameter_group_1', '11')
-    # assert 1 == 1
-
-
-def test_modify_db_cluster_parameter_group_parameter_does_not_exist(sample_db_cluster_parameter_groups, setup_db):
-    conn = setup_db
-    cursor = conn.cursor()
-    # create_db_cluster_parameter_group('db_cluster_parameter_group_1', 'mysql8.0', 'sample')
-    cursor.execute(
-        'SELECT * FROM Management WHERE class_name = ? AND object_id = ?',
-        ("DBClusterParameterGroup", "db_cluster_parameter_group_1"))
-    result = cursor.fetchone()
-    metadata_before = result[2]
-    metadata_dict = json.loads(metadata_before)
-    # print(metadata_dict['parameters'])
-    Parameters = [
+@pytest.fixture
+def parameters():
+    return [
         {
             'ParameterName': 'max_connections',
             'ParameterValue': '150',
@@ -77,18 +61,16 @@ def test_modify_db_cluster_parameter_group_parameter_does_not_exist(sample_db_cl
         }
     ]
 
-    modify_db_cluster_parameter_group('db_cluster_parameter_group_1', parameters=Parameters, conn=conn,
-                                      parameter_groups_in_func=sample_db_cluster_parameter_groups)
-    cursor.execute(
-        'SELECT * FROM Management WHERE class_name = ? AND object_id = ?',
-        ("DBClusterParameterGroup", "db_cluster_parameter_group_1"))
-    result = cursor.fetchone()
-    metadata_after = result[2]
-    assert metadata_after == metadata_before
-    # metadata_dict = json.loads(metadata_after)
+
+def test_modify_not_exists_db_cluster_parameter_group():
+    # create_db_cluster_parameter_group('cluster_parameter_group_1', )
+    with pytest.raises(ValueError):
+        modify_db_cluster_parameter_group('cluster_parameter_group_1', '11')
+    # assert 1 == 1
 
 
-def test_modify_db_cluster_parameter_group(sample_db_cluster_parameter_groups, setup_db):
+def test_modify_db_cluster_parameter_group_parameter_does_not_exist(sample_db_cluster_parameter_groups, setup_db,
+                                                                    parameters):
     conn = setup_db
     cursor = conn.cursor()
     # create_db_cluster_parameter_group('db_cluster_parameter_group_1', 'mysql8.0', 'sample')
@@ -99,23 +81,31 @@ def test_modify_db_cluster_parameter_group(sample_db_cluster_parameter_groups, s
     metadata_before = result[2]
     metadata_dict = json.loads(metadata_before)
     # print(metadata_dict['parameters'])
-    Parameters = [
-        {
-            'ParameterName': 'backup_retention_period',
-            'ParameterValue': 9,
-            'Description': 'Maximum number of connections',
-            'Source': 'user',
-            'ApplyType': 'dynamic',
-            'DataType': 'integer',
-            'AllowedValues': '1-10000',
-            'IsModifiable': True,
-            'MinimumEngineVersion': '10.1',
-            'ApplyMethod': 'immediate',
-            'SupportedEngineModes': ['provisioned']
-        }
-    ]
 
-    modify_db_cluster_parameter_group('db_cluster_parameter_group_1', parameters=Parameters, conn=conn,
+    modify_db_cluster_parameter_group('db_cluster_parameter_group_1', parameters=parameters, conn=conn,
+                                      parameter_groups_in_func=sample_db_cluster_parameter_groups)
+    cursor.execute(
+        'SELECT * FROM Management WHERE class_name = ? AND object_id = ?',
+        ("DBClusterParameterGroup", "db_cluster_parameter_group_1"))
+    result = cursor.fetchone()
+    metadata_after = result[2]
+    assert metadata_after == metadata_before
+    # metadata_dict = json.loads(metadata_after)
+
+
+def test_modify_db_cluster_parameter_group(sample_db_cluster_parameter_groups, setup_db, parameters):
+    conn = setup_db
+    cursor = conn.cursor()
+    # create_db_cluster_parameter_group('db_cluster_parameter_group_1', 'mysql8.0', 'sample')
+    cursor.execute(
+        'SELECT * FROM Management WHERE class_name = ? AND object_id = ?',
+        ("DBClusterParameterGroup", "db_cluster_parameter_group_1"))
+    result = cursor.fetchone()
+    metadata_before = result[2]
+    metadata_dict = json.loads(metadata_before)
+    # print(metadata_dict['parameters'])
+
+    modify_db_cluster_parameter_group('db_cluster_parameter_group_1', parameters=parameters, conn=conn,
                                       parameter_groups_in_func=sample_db_cluster_parameter_groups)
     cursor.execute(
         'SELECT * FROM Management WHERE class_name = ? AND object_id = ?',
@@ -127,16 +117,11 @@ def test_modify_db_cluster_parameter_group(sample_db_cluster_parameter_groups, s
     assert metadata_after_dict['parameters'][0]['ParameterValue'] == 9
 
 
-def test_describe_db_cluster_parameters(sample_db_cluster_parameter_groups, setup_db):
+def test_modify_invalid_parameter(sample_db_cluster_parameter_groups, setup_db, parameters):
+    parameters[0]['ApplyMethod'] = '111'
     with pytest.raises(ValueError):
-        describe_db_cluster_parameters('1')
+        modify_db_cluster_parameter_group('db_cluster_parameter_group_1', parameters, parameter_groups_in_func=sample_db_cluster_parameter_groups, conn=setup_db)
 
-
-def test_describe_db_cluster_parameters(sample_db_cluster_parameter_groups, setup_db):
-    result = describe_db_cluster_parameters(sample_db_cluster_parameter_groups[0].parameter_group_name,
-                                            source='engine-default',
-                                            parameter_groups_in_func=sample_db_cluster_parameter_groups)
-    assert result['Parameters'][0]['ParameterName'] == 'backup_retention_period'
 # from endpoint import Endpoint, modify_db_cluster_endpoint
 # from db_instance import DBInstance
 # from endpoint import Endpoint
