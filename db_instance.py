@@ -74,16 +74,16 @@ class DBInstance:
             AlreadyExistsError: If the database already exists.
         """
         if db_name in self.databases:
-            raise AlreadyExistsError("db exists")
+            raise AlreadyExistsError('db exists')
 
         db_path = os.path.join(self.endpoint, db_name)
         print(db_path)
         try:
             create_db(db_path)
-            print(f"Database {db_name} created at {db_path}")
+            print(f'Database {db_name} created at {db_path}')
             self.databases[db_name] = db_path
             update_management_table(self.db_instance_identifier, get_json(self.get_data_dict()))
-            print(f"DB log and triggers created at {db_path}")
+            print(f'DB log and triggers created at {db_path}')
 
 
         except:
@@ -103,7 +103,7 @@ class DBInstance:
             str: The path to the database.
         """
         if db_name not in self.databases:
-            raise ConnectionError("db not exists")
+            raise ConnectionError('db not exists')
         db_path = self.databases[db_name]
         return db_path
 
