@@ -18,3 +18,10 @@ class OptionGroupModel:
             "tags": self.tags,
             "available": self.available
         }
+    
+    def modify(self,**updates):
+        self.engine_name = updates.get('engine_name', self.engine_name)
+        self.major_engine_version = updates.get('major_engine_version', self.major_engine_version)
+        self.option_group_description = updates.get('option_group_description', self.option_group_description)
+        self.option_group_name = updates.get('option_group_name', self.option_group_name)
+        self.tags = updates.get('tags', self.engine_name)
