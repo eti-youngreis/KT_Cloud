@@ -1,7 +1,7 @@
 from DataAccess import GenericDataAccess
 from typing import Dict, Any
 
-
+""
 class DataAccessLayer(GenericDataAccess):
     def insert(self, table_name: str, metadata: Dict[str, Any]) -> None:
         """Insert a new record into the specified table."""
