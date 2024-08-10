@@ -67,6 +67,19 @@ class MetadataManager:
         else:
             await self.save_metadata(False)
 
+     async def copy_metadata(self, source_bucket, source_key, destination_bucket, destination_key, is_sync=True):
+        source_metadata = self.get_bucket_metadata(source_bucket, source_key)
+        if not source_metadata:
+            raise FileNotFoundError(f"Source object {source_bucket}/{source_key} not found")
+
+        latest_version = self.get_latest_version(source_bucket, source_key)
+        source_version_metadata = source_metadata['versions'][latest_version]
+
+        # Prepare destination metadata
+        destination_metadata = source_version_metadata.copy()
+        destination_metadata['etag'] = 'newetag'  # Generate a new ETag as necessary
+        destination_metadata['lastModified'] = datetime.utcnow().isoformat() + 'Z'
+
     async def delete_version(self, bucket, key, version_id, is_sync=True):
         bucket_data = self.metadata["server"]["buckets"].get(bucket, {})
         if key in bucket_data.get("objects", {}) and version_id in bucket_data["objects"][key]["versions"]:
