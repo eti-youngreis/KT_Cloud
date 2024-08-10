@@ -97,6 +97,19 @@ class MetadataManager:
         else:
             raise FileNotFoundError(f"No versions found for object {key} in bucket {bucket}")
 
+     async def copy_metadata(self, source_bucket, source_key, destination_bucket, destination_key, is_sync=True):
+        source_metadata = self.get_bucket_metadata(source_bucket, source_key)
+        if not source_metadata:
+            raise FileNotFoundError(f"Source object {source_bucket}/{source_key} not found")
+
+        latest_version = self.get_latest_version(source_bucket, source_key)
+        source_version_metadata = source_metadata['versions'][latest_version]
+
+        # Prepare destination metadata
+        destination_metadata = source_version_metadata.copy()
+        destination_metadata['etag'] = 'newetag'  # Generate a new ETag as necessary
+        destination_metadata['lastModified'] = datetime.utcnow().isoformat() + 'Z'
+
     async def check_permissions(self, bucket, key, version_id, by_pass_governance_retention, is_sync=True):
         metadata = self.get_bucket_metadata(bucket, key)
         if metadata and version_id in metadata['versions']:
