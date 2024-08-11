@@ -1,7 +1,7 @@
-from DataAccess import ObjectManager
+
 from typing import Dict, Any
 
-class StorageManager(ObjectManager):
+class StorageManager:
     """here will be storage actions - S3/localFileSystem"""
     def insert(self) -> None:
        pass
