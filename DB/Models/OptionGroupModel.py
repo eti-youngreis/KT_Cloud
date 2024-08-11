@@ -1,7 +1,7 @@
 
 from typing import Dict
 class OptionGroupModel:
-    def __init__(self, engine_name: str, major_engine_version: str, option_group_description: str, option_group_name: str, tags: Optional[Dict] = None):
+    def __init__(self, engine_name, major_engine_version, option_group_description, option_group_name, tags = None):
         self.engine_name = engine_name
         self.major_engine_version = major_engine_version
         self.option_group_description = option_group_description
