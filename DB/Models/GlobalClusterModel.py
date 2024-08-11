@@ -2,6 +2,16 @@ from typing import List
 
 class FailoverState:
     
+    """
+    Represents the failover state of a database cluster.
+
+    Attributes:
+        from_db_cluster_arn (str): The ARN of the source database cluster.
+        is_data_loss_allowed (bool): Indicates if data loss is allowed during failover.
+        status (str): The status of the failover process.
+        to_db_cluster_arn (str): The ARN of the target database cluster.
+    """
+    
     def __init__(self, from_db_cluster_arn: str = None,
                  is_data_loss_allowed: bool = None,
                  status: str = None,
@@ -11,7 +21,18 @@ class FailoverState:
         self.status = status
         self.to_db_cluster_arn = to_db_cluster_arn
 
+
 class GlobalClusterMember:
+    """
+    Represents a member of a global database cluster.
+
+    Attributes:
+        db_cluster_arn (str): The ARN of the database cluster.
+        global_write_forwarding_status (str): The write forwarding status of the cluster.
+        is_writer (bool): Indicates if this cluster is the writer.
+        readers (List[str]): List of reader clusters.
+        synchronization_status (str): The synchronization status of the cluster.
+    """
     def __init__(self, db_cluster_arn: str = None,
                  global_write_forwarding_status: str = None,
                  is_writer: bool = None,
@@ -25,19 +46,11 @@ class GlobalClusterMember:
 
 
 class GlobalClusterModel:
-
-    def __init__(self, database_name:str = None,
-                 deletion_protection: bool = None,
-                 engine: str = None,
-                 engine_lifecycle_support: str = None,
-                 engine_version: str = None,
-                 failover_state: FailoverState = None,
-                 global_cluster_arn: str = None,
-                 global_cluster_identifier: str = None,
-                 global_cluster_members: List[GlobalClusterMember] = None,
-                 global_cluster_resource_id: str = None,
-                 status: str = None,
-                 storage_encrypted: bool = None):
+    
+    def __init__(self, database_name:str = None, deletion_protection: bool = None, engine: str = None, engine_lifecycle_support: str = None,
+                 engine_version: str = None, failover_state: FailoverState = None, global_cluster_arn: str = None, global_cluster_identifier: str = None,
+                 global_cluster_members: List[GlobalClusterMember] = None, global_cluster_resource_id: str = None, status: str = None, storage_encrypted: bool = None):
+        
         self.database_name = database_name
         self.deletion_protection = deletion_protection
         self.engine = engine
