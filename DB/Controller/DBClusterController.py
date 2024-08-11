@@ -1,5 +1,5 @@
 from Service import DBClusterService
-class DBClusterClient:
+class DBClusterController:
     def __init__(self, service: DBClusterService):
         self.service = service
 
