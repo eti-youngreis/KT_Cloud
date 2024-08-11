@@ -6,7 +6,7 @@ class DBProxyModel:
         self.auth = kwargs['auth']
         self.creation_date = datetime.now()
         self.updation_date = None
-        self.target_groups = {}
+    
 
     def to_dict(self) -> Dict:
         return {

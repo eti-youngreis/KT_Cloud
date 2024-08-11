@@ -1,6 +1,6 @@
 from Abc import DBO
 
-class DBProxy(DBO):
+class DBProxyService(DBO):
 
     def create(self, *args, **kwargs):
         """Implement logic to create a DBProxy."""
