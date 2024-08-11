@@ -2,13 +2,12 @@ import uuid
 import time
 
 class Session:
-    def __init__(self, session_mode='ReadOnly', bucket=None, timeout=3600):
+    def __init__(self, session_mode='ReadOnly', bucket=None):
         self.session_id = str(uuid.uuid4())  # Unique session identifier
         self.session_mode = session_mode      # Mode of the session (ReadOnly or ReadWrite)
         self.bucket = bucket                  # Bucket associated with the session
         self.creation_time = time.time()      # Timestamp of session creation
         self.last_access_time = self.creation_time  # Timestamp of last session access
-        self.timeout = timeout                # Session timeout period (default: 1 hour)
         self.objects_accessed = set()         # Set to track accessed objects
 
     def is_active(self):
