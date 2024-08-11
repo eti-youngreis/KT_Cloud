@@ -1,7 +1,10 @@
+from typing import Optional, Dict
 from Service import OptionGroupService
-class OptionGroupClient:
-    def __init__(self, optionGroupService):
-        self.service = optionGroupService
+
+class OptionGroupController:
+    def __init__(self, service: OptionGroupService):
+        self.service = service
+
 
     def create_option_group(self, engine_name, major_engine_version, option_group_description, option_group_name, tags = None):
         self.service.create(engine_name, major_engine_version, option_group_description, option_group_name, tags)
