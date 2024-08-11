@@ -21,6 +21,8 @@ class FailoverState:
         self.status = status
         self.to_db_cluster_arn = to_db_cluster_arn
 
+    def to_dict(self):
+        return {}
 
 class GlobalClusterMember:
     """
@@ -44,6 +46,8 @@ class GlobalClusterMember:
         self.readers = readers
         self.synchronization_status = synchronization_status
 
+    def to_dict(self):
+        return {}
 
 class GlobalClusterModel:
     
