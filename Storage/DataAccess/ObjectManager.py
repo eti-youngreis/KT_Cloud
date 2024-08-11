@@ -1,8 +1,12 @@
+from DataAccess import StorageManager
 from typing import Dict, Any
 import json
 import sqlite3
 
 class ObjectManager:
+    def __init__(self, storage_manager:StorageManager): 
+        self.storage_manager = storage_manager
+    
     """here will be access to json managment file"""
     def __init__(self):
         pass
