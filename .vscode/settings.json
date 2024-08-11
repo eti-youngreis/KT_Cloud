@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./DB/DataAccess",
+        "./DB/Service/Classes"
+    ]
+}
