@@ -2,7 +2,7 @@ from typing import Dict, Any
 import json
 import sqlite3
 
-class GenericData:
+class GenericDataAccess:
     def __init__(self, conn: sqlite3.Connection):
         self.conn = conn
 
