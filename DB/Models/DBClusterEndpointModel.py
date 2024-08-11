@@ -11,9 +11,9 @@ class DBClusterEndpointModel:
 
     def to_dict(self) -> Dict:
         return {
-            "endpoint_identifier" :self.endpoint_identifier,
-            "cluster_identifier" :self.cluster_identifier,
-            "endpoint_type": self.endpoint_type,
-            "static_members": self.static_members,
-            "excluded_members": self.excluded_members
+            'endpoint_identifier': self.endpoint_identifier,
+            'cluster_identifier': self.cluster_identifier,
+            'endpoint_type': self.endpoint_type,
+            'static_members': self.static_members,
+            'excluded_members': self.excluded_members
         }
