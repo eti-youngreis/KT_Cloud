@@ -13,9 +13,7 @@ class DataAccessLayer(GenericDataAccess):
     def select(self, table_name: str, criteria: str) -> Dict[str, Any]:
         """Select records from the specified table based on criteria."""
         return super().select(table_name, criteria)
-
+ 
     def delete(self, table_name: str, object_id: int) -> None:
         """Delete a record from the specified table."""
         super().delete(table_name, object_id)
-
-
