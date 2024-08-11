@@ -1,5 +1,5 @@
 from Service import OptionGroupService
-class OptionGroupClient:
+class OptionGroupController:
     def __init__(self, service: OptionGroupService):
         self.service = service
 
