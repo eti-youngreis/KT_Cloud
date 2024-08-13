@@ -23,3 +23,25 @@ def validate_tags(tags: Optional[Dict]) -> bool:
     if not isinstance(tags, dict):
         return False
     return all(isinstance(k, str) and isinstance(v, str) for k, v in tags.items())
+
+def check_required_params(required_params, kwargs):
+    """Check if all required parameters are present in kwargs."""
+    return all(param in kwargs for param in required_params)
+
+def check_extra_params(all_params, kwargs):
+    """Check if all parameters in kwargs are allowed."""
+    return all(param in all_params for param in kwargs)
+
+def check_filters_validation(filters):
+    """Validate filters. Returns True if valid, False otherwise."""
+    if not isinstance(filters, list):
+        return False
+    
+    for filter_item in filters:
+        if not (isinstance(filter_item, dict) and
+                'Name' in filter_item and isinstance(filter_item['Name'], str) and
+                'Values' in filter_item and isinstance(filter_item['Values'], list) and
+                all(isinstance(value, str) for value in filter_item['Values'])):
+            return False
+    
+    return True
