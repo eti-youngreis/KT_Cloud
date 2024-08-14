@@ -31,6 +31,8 @@ class EventSubscriptionService(DBO):
 
     def describe(self, marker: str, max_records: int, subscription_name: str = None):
 
+        # TODO: Implement functionality for 'marker' and 'max_records' once they are available
+
         validate_subscription_props(
             self.dal, subscription_name=subscription_name)
 
@@ -39,8 +41,9 @@ class EventSubscriptionService(DBO):
     def modify(self, subscription_name: str, **kwargs):
 
         if EventSubscriptionProps.SOURCES in kwargs:
-            raise ValueError('Modifying sources is not allowed in the modify function')
-        
+            raise ValueError(
+                'Modifying sources is not allowed in the modify function')
+
         validate_subscription_props(
             self.dal, subscription_name=subscription_name)
 
@@ -51,4 +54,5 @@ class EventSubscriptionService(DBO):
 
         validate_subscription_props(self.dal, updated_subscription)
 
-        self.dal.update(subscription_table_name, subscription_name, updated_subscription)
+        self.dal.update(subscription_table_name,
+                        subscription_name, updated_subscription)
