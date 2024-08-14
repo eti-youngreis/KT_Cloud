@@ -1,3 +1,4 @@
+from Filter import Filter
 from typing import List
 from DB.DataAccess import DataAccessLayer
 from DB.Service.Abc import DBO
