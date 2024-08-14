@@ -1,5 +1,5 @@
 import sqlite3
-from typing import Dict, Any
+from typing import Dict, Any, List, Tuple
 import json
 
 class DBManager:
@@ -48,16 +48,27 @@ class DBManager:
         except sqlite3.OperationalError as e:
             raise Exception(f"Error updating {table_name}: {e}")
 
-    def select(self, table_name: str, criteria: str) -> Dict[int, Dict[str, Any]]:
-        """Select records from the specified table based on criteria."""
+    def select(self, table_name: str, columns: List[str] = ['*'], criteria: str = '') -> Dict[int, Dict[str, Any]]:
+        """Select records from the specified table based on criteria.
+        
+        Args:
+            table_name (str): The name of the table.
+            columns (List[str]): The columns to select. Default is all columns ('*').
+            criteria (str): SQL condition for filtering records. Default is no filter.
+        
+        Returns:
+            Dict[int, Dict[str, Any]]: A dictionary where keys are object_ids and values are metadata.
+        """
+        columns_clause = ', '.join(columns)
+        query = f'SELECT object_id, {columns_clause} FROM {table_name}'
+        if criteria:
+            query += f' WHERE {criteria}'
+        
         try:
             c = self.connection.cursor()
-            c.execute(f'''
-                SELECT object_id, metadata FROM {table_name} 
-                WHERE {criteria}
-            ''')
+            c.execute(query)
             results = c.fetchall()
-            return {result[0]: json.loads(result[1]) for result in results}
+            return {result[0]: dict(zip(columns, result[1:])) for result in results}
         except sqlite3.OperationalError as e:
             raise Exception(f"Error selecting from {table_name}: {e}")
 
@@ -72,6 +83,16 @@ class DBManager:
             self.connection.commit()
         except sqlite3.OperationalError as e:
             raise Exception(f"Error deleting from {table_name}: {e}")
+
+    def describe(self, table_name: str) -> Dict[str, str]:
+        """Describe the schema of the specified table."""
+        try:
+            c = self.connection.cursor()
+            c.execute(f"PRAGMA table_info({table_name})")
+            columns = c.fetchall()
+            return {col[1]: col[2] for col in columns}
+        except sqlite3.OperationalError as e:
+            raise Exception(f"Error describing table {table_name}: {e}")
 
     def close(self):
         """Close the database connection."""

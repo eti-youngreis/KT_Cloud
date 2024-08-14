@@ -1,26 +1,41 @@
 from typing import Dict, Any
+import json
+import sqlite3
 from DBManager import DBManager
 
 class ObjectManager:
     def __init__(self, db_file: str):
-        """Initialize the ObjectManager with a database file."""
+        """Initialize ObjectManager with the database connection."""
         self.db_manager = DBManager(db_file)
+        self.table_name = "objects"
 
-    def insert_object(self, object_type: str, metadata: Dict[str, Any]) -> None:
-        """Insert a new object into the database."""
-        self.db_manager.insert("objects", object_type, metadata)
+    def create(self, object_type: str, metadata: Dict[str, Any]) -> None:
+        """Create a new object in the database."""
+        self.db_manager.insert(self.table_name, object_type, metadata)
 
-    def update_object(self, object_id: int, metadata: Dict[str, Any]) -> None:
+    def update(self, object_id: int, metadata: Dict[str, Any]) -> None:
         """Update an existing object in the database."""
-        self.db_manager.update("objects", {"metadata": json.dumps(metadata)}, f"object_id = {object_id}")
+        self.db_manager.update(self.table_name, {"metadata": json.dumps(metadata)}, f"object_id = {object_id}")
 
-    def get_objects(self, criteria: str) -> Dict[int, Dict[str, Any]]:
-        """Retrieve objects from the database based on criteria."""
-        return self.db_manager.select("objects", criteria)
+    def get(self, object_id: int) -> Dict[str, Any]:
+        """Retrieve an object from the database."""
+        result = self.db_manager.select(self.table_name, ["type_object", "metadata"], f"object_id = {object_id}")
+        if result:
+            return result[object_id]
+        else:
+            raise FileNotFoundError(f"Object with ID {object_id} not found.")
 
-    def delete_object(self, object_id: int) -> None:
+    def delete(self, object_id: int) -> None:
         """Delete an object from the database."""
-        self.db_manager.delete("objects", f"object_id = {object_id}")
+        self.db_manager.delete(self.table_name, f"object_id = {object_id}")
+
+    def get_all_objects(self) -> Dict[int, Dict[str, Any]]:
+        """Retrieve all objects from the database."""
+        return self.db_manager.select(self.table_name, ["object_id", "type_object", "metadata"])
+
+    def describe_table(self) -> Dict[str, str]:
+        """Describe the schema of the table."""
+        return self.db_manager.describe(self.table_name)
 
     def close(self):
         """Close the database connection."""
