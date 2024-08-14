@@ -8,7 +8,13 @@ class ObjectManager:
         """Initialize ObjectManager with the database connection."""
         self.db_manager = DBManager(db_file)
         self.table_name = "objects"
-
+        self.create_table()
+    
+    def create_table(self):
+        """create objects table in the database"""
+        table_schema = 'object_id INTEGER PRIMARY KEY AUTOINCREMENT,type_object TEXT NOT NULL,metadata TEXT NOT NULL'
+        self.db_manager.create_table(self.table_name, table_schema)
+        
     def create(self, object_type: str, metadata: Dict[str, Any]) -> None:
         """Create a new object in the database."""
         self.db_manager.insert(self.table_name, object_type, metadata)
