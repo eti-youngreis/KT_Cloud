@@ -1,17 +1,18 @@
+from datetime import datetime
+import hashlib
+
 # domain/versioning.py
 class Version:
     def __init__(self, version_id: str):
         self.version_id = version_id
-        
-class Versioning:
-    def __init__(self):
-        self.versions:list[Version] = {}
-
-    # def add_version(self, key: str, content: bytes):
-    #     version_id = str(len(self.versions) + 1)
-    #     self.versions[key] = Version(version_id, content)
-    #     return version_id
-
-    # def get_version(self, key: str, version_id: str) -> bytes:
-    #     return self.versions[key].content if key in self.versions else None
-
+        self.etag = hashlib.md5(version_id).hexdigest()
+        self.size = 0
+        self.last_modified = datetime.utcnow()  # אתחול לתאריך ושעה של היום
+        self.legal_hold = False
+        # self.acl = 
+        # self.retention =
+        self.content_length = 0
+        self.content_type = "text/plain"
+        # self.meta_data = 
+        # self.object_parts =
+        # self.tags = 
