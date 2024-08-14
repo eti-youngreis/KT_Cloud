@@ -146,11 +146,38 @@ class ObjectService(STOE):
         }
 
 
-    async def copy_object(self, copy_source, is_sync=True):
-        pass
+    async def copy_object(self, source_obj:ObjectModel,destination_bucket, destination_key=None,version_id=None, sync_flag=True):
+        source_bucket=source_obj.bucket
+        source_key = source_obj.key
+        version_status = self.object_manager.get_versioning_status(source_bucket)
+        if version_status=='enabled' and version_id:
+            await self.object_manager.copy_object(source_bucket, source_key, destination_bucket, destination_key,version_id,sync_flag=sync_flag)          
+        await self.object_manager.copy_object(source_bucket, source_key, destination_bucket, destination_key, sync_flag=sync_flag)
 
-    async def delete_objects(self, delete, is_sync=True):
-        pass
+
+    async def delete_objects(self,obj:ObjectModel, delete, flag_sync=True):
+        bucket = obj.bucket
+        deleted = []
+        errors = []
+        for object in delete['Objects']:
+            version_id = object.get('VersionId',None)
+            key=object['Key']
+            obj = ObjectModel(bucket, object['Key'])
+            
+            try:
+                delete_result=await self.delete(obj,version_id,flag_sync=flag_sync)
+                if delete_result is not {}:
+                    deleted.append({'Key': key, 'VersionId': version_id})
+                else:
+                    errors.append(
+                        {'Key': key, 'VersionId': version_id, 'Code': 'InternalError', 'Message': 'Deletion failed'})
+            except Exception as e:
+                errors.append({'Key': key, 'VersionId': version_id, 'Code': 'InternalError', 'Message': str(e)})
+
+        return {
+            'Deleted': deleted,
+            'Errors': errors
+        }
 
     async def put_object_acl(self, obj: ObjectModel, acl: ACL, version_id=None, is_sync=True):
         bucket = obj.bucket
