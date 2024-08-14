@@ -1,25 +1,27 @@
 import re
 from typing import Optional,Dict
 
-def is_valid_engineName(engine_name: str) -> bool:
-    """Check if the engine name is valid."""
-    # Example regex for a valid engine name, adjust as needed
-    # Assumes valid engine names contain only letters, digits, and underscores
-    pattern = r'^[\w-]+$'
-    return bool(re.match(pattern, engine_name))
+def string_in_dict(string: str, values: dict) -> bool:
+    """Check if the string is in dict."""
+    return string in values
 
-def is_valid_optionGroupName(option_group_name: str) -> bool:
-    """Check if the option group name is valid."""
-    # Example regex for a valid option group name, adjust as needed
-    # Assumes valid option group names are between 1 and 255 characters
-    # and contain only letters, digits, hyphens, and underscores
-    pattern = r'^[\w-]{1,255}$'
-    return bool(re.match(pattern, option_group_name))
+def is_valid_length(string: str, min_length: int, max_length: int) -> bool:
+    """Check if the string is valid based on the length."""
+    return min_length <= len(string) <= max_length
 
-def validate_tags(tags: Optional[Dict]) -> bool:
-    """Check if the tags are valid. Tags should be a dictionary with string keys and values."""
-    if tags is None:
-        return True
-    if not isinstance(tags, dict):
-        return False
-    return all(isinstance(k, str) and isinstance(v, str) for k, v in tags.items())
+def is_valid_pattern(string: str, pattern: str) -> bool:
+    """Check if the optionGroupName is valid based on the pattern."""
+    return bool(re.match(pattern, string))
+
+def exist_key_value_in_json_column(table_name: str, column_name: str, key: str, value: str) -> bool:
+    """Check if a specific key-value pair exists within a JSON column in the given table."""
+    try:
+        c = conn.cursor()
+        c.execute(f'''
+        SELECT COUNT(*) FROM {table_name}
+        WHERE {column_name} LIKE ?
+        ''', (f'%"{key}": "{value}"%',))
+        return c.fetchone()[0] > 0
+    except OperationalError as e:
+        print(f"Error: {e}")
+        
