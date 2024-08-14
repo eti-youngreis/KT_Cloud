@@ -23,7 +23,7 @@ class DBSecurityGroupController:
                                     marker:str = None, max_records:int = 100):
         return self.service.describe(db_security_group_name, filters, marker, max_records)
     
-    def revoke_db_decurity_group_ingress(self, db_security_gruop_name:str, cidrip: str = None, 
+    def revoke_db_security_group_ingress(self, db_security_group_name:str, cidrip: str = None, 
                                          ec2_security_group_id:str = None, ec2_security_group_name:str = None,
                                          ec2_security_group_owner_id:str = None):
         pass
