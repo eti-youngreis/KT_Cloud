@@ -2,11 +2,21 @@ import re
 from typing import Optional,Dict
 
 def is_valid_bucket_name(bucket_name: str) -> bool:
-    """Check if the bucket name is valid."""
-    # Example regex for a valid bucket name, adjust as needed
-    # Assumes valid bucket names contain only letters, digits, and underscores
-    pattern = r'^[\w-]+$'
-    return bool(re.match(pattern, bucket_name))
+    """Check if the bucket name is valid according to S3 bucket naming rules."""
+    # Check length
+    if len(bucket_name) < 3 or len(bucket_name) > 63:
+        return False
+    # Check allowed characters and patterns
+    pattern = r'^[a-z0-9]+([.-][a-z0-9]+)*$'
+    if not re.match(pattern, bucket_name):
+        return False
+    # Check if it starts and ends with a letter or number
+    if bucket_name[0] in '0123456789' or bucket_name[-1] in '0123456789':
+        return False
+    # Check for consecutive dots
+    if '..' in bucket_name:
+        return False
+    return True  
 
 def is_valid_policy_name(policy_name: str) -> bool:
     """Check if the policy name is valid."""

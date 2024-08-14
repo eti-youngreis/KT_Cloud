@@ -1,11 +1,23 @@
-from Abc import STOE
 from Validation import is_valid_bucket_name, is_valid_policy_name
+from DataAccess.BucketDAL import BucketDAL
+from Service.Abc.STOE import STOE
 
 class Bucket(STOE):
-    
-    def create(self,*args, **kwargs):
+
+    def __init__(self):
+        self.BucketDAL = BucketDAL()
+
+    def create(self, bucket_name: str, **kwargs):
         """Create a new bucket."""
-        pass
+        #בדיקת שם תקין
+         if not is_valid_bucket_name(bucket_name) :
+            raise ValueError(f"Invalid bucket name: '{bucket_name}'.")
+
+        #לבדוק אם זה שם יחיד 
+        if self.get(bucket_name):
+            raise ValueError("Bucket already exists")
+
+        return BucketDAL.create()
 
     def delete(self, *args,**kwargs):
         """Delete an existing storage object."""
