@@ -8,7 +8,7 @@ from .StorageManager import StorageManager
 class ObjectManager:
     """here will be access to json managment file"""
 
-    def __init__(self, metadata_file="D:/בוטקמפ/server/metadata.json"):
+    def __init__(self, metadata_file="s3 project/KT_Cloud/Storage/server/metadata.json"):
         self.metadata_file = metadata_file
         self.metadata = self.load_metadata()
         self.storage_maneger = StorageManager()

@@ -49,7 +49,7 @@ class ObjectService(STOE):
                 self.object_manager.metadata['server']['buckets'][bucket] = bucket_metadata
                 object_metadata = {"versions": {}}
             else:
-                object_metadata = self.object_manager.get_bucket(bucket)["objects"].get(key, {"versions": {}})
+                object_metadata = self.object_manager.get_versions(bucket,key)
 
             version_id = str(len(object_metadata['versions']) + 1)
             for version in object_metadata["versions"].values():
