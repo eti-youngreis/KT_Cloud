@@ -2,8 +2,8 @@
 from typing import Dict
 from datetime import datetime
 class EventModel:
-    def __init__(self, enent_identifier:str, resource_identifier:str):
-        self.event_identifier = enent_identifier
+    def __init__(self, event_identifier:str, resource_identifier:str):
+        self.event_identifier = event_identifier
         self.resource_identifier = resource_identifier
         self.creation_date = datetime.now()
 
