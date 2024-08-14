@@ -1,0 +1,11 @@
+{
+    "filters":[
+        "DescribeDBClusterBacktracks",
+        "DescribeDBClusterEndpoints",
+        "DescribeDBClusters",
+        "DescribeDBInstances",
+        "DescribeDBRecommendations",
+        "DescribeDBShardGroups",
+        "DescribePendingMaintenanceActions"
+    ]
+}
