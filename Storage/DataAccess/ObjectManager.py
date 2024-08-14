@@ -5,14 +5,7 @@ import aiofiles
 import os
 
 from .StorageManager import StorageManager
-
-
 class ObjectManager:
-    def __init__(self, storage_manager:StorageManager): 
-        self.storage_manager = storage_manager
-    
-    """here will be access to json managment file"""
-
     def __init__(self, metadata_file="s3 project/KT_Cloud/Storage/server/metadata.json"):
         self.metadata_file = metadata_file
         self.metadata = self.load_metadata()
@@ -113,3 +106,4 @@ class ObjectManager:
         else:
             await self.update(False)
         self.storage_maneger.encript_version(bucket,key,version)
+        
