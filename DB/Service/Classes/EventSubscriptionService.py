@@ -50,3 +50,5 @@ class EventSubscriptionService(DBO):
         updated_subscription = {**event_subscription, **kwargs}
 
         validate_subscription_props(self.dal, updated_subscription)
+
+        self.dal.update(subscription_table_name, subscription_name, updated_subscription)
