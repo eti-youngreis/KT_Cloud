@@ -7,6 +7,4 @@ class ObjectModel:
         # self.tagging = Tagging()
         self.versioning = Versioning()
         # self.acl = ACL()
-
-
-  
+    
