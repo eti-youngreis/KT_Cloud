@@ -108,3 +108,4 @@ class ObjectManager:
         else:
             await self.update(False)
         self.storage_maneger.encript_version(bucket,key,version)
+        
