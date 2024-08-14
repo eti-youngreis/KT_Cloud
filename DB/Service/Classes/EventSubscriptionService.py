@@ -1,7 +1,7 @@
 from typing import List
 from DB.Validation.EventSubscriptionValidation import validate_subscription_props, subscription_table_name
 from DataAccess.DataAccessLayer import DataAccessLayer
-from Models.EventSubscriptionModel import EventSubscriptionModel
+from Models.EventSubscriptionModel import EventSubscriptionModel, EventSubscriptionProps
 from Models.SourceType import SourceType
 from Service.Abc.DBO import DBO
 
@@ -38,7 +38,7 @@ class EventSubscriptionService(DBO):
 
     def modify(self, subscription_name: str, **kwargs):
 
-        if 'sources' in kwargs:
+        if EventSubscriptionProps.SOURCES in kwargs:
             raise ValueError('Modifying sources is not allowed in the modify function')
         
         validate_subscription_props(
