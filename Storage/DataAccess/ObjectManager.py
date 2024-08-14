@@ -5,8 +5,6 @@ import aiofiles
 import os
 
 from .StorageManager import StorageManager
-
-
 class ObjectManager:
     def __init__(self, metadata_file="s3 project/KT_Cloud/Storage/server/metadata.json"):
         self.metadata_file = metadata_file
