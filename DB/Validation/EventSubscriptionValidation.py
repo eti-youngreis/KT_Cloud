@@ -2,6 +2,7 @@ from typing import Dict, List
 
 from DB.DataAccess.DataAccessLayer import DataAccessLayer
 from DB.Models.SourceType import SourceType
+from KT_Cloud.DB.Models.EventCategory import EventCategory
 from KT_Cloud.DB.Models.EventSubscriptionModel import EventSubscriptionProps
 
 
@@ -24,7 +25,7 @@ def validate_subscription_name(dal: DataAccessLayer, subscription_name: str, exi
 
     event_subscriptions = dal.select(subscription_table_name, '%')
 
-    if subscription_name in event_subscriptions or not exists:
+    if subscription_name in event_subscriptions != exists:
         raise ValueError(f'Subscription name {
                          'already exists' if exists else 'doesn\'t exist'}')
 
@@ -44,7 +45,7 @@ def validate_sources(dal: DataAccessLayer, sources: Dict[SourceType, str]):
                              source_id}' does not match the expected source type '{source_type}'")
 
 
-def validate_event_categories(dal: DataAccessLayer, event_categories: List[str]):
+def validate_event_categories(dal: DataAccessLayer, event_categories: List[EventCategory]):
     return True
 
 
