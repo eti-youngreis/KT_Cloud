@@ -49,13 +49,18 @@ class ObjectService(STOE):
                 self.object_manager.metadata['server']['buckets'][bucket] = bucket_metadata
                 object_metadata = {"versions": {}}
             else:
-                object_metadata = self.object_manager.get_versions(bucket,key)
+                object_metadata = self.object_manager.get_bucket(bucket)['objects'].get(key, {"versions": {}})
+
+            # Make sure 'versions' key exists
+            if 'versions' not in object_metadata:
+                object_metadata['versions'] = {}
 
             version_id = str(len(object_metadata['versions']) + 1)
             for version in object_metadata["versions"].values():
                 version["isLatest"] = False
+
             await self.object_manager.update()
-            await self.object_manager.create(bucket, key, data,body,version_id, object_metadata, flag_sync)
+            await self.object_manager.create(bucket, key, data, body, version_id, object_metadata, flag_sync)
         except FileNotFoundError as e:
             print(f"Error: The file or directory was not found: {e}")
             raise
@@ -67,6 +72,7 @@ class ObjectService(STOE):
             raise
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
+
 
     def generate_etag(self, content):
             return hashlib.md5(content).hexdigest()
@@ -146,7 +152,7 @@ if __name__ == '__main__':
         print(res1)
         try:
             body = b"Hello, World! \n I write now I want to see if it's work"
-            obj = ObjectModel("bucket3", "fff/file.txt")
+            obj = ObjectModel("bucket3", "kkk/file.txt")
             await res.put(obj, body)
         except Exception as e:
             print(e)
