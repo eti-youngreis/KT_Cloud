@@ -31,7 +31,8 @@ class Cluster:
         self.status = 'available'
         self.instances = {}
         self.primary_endpoint = None
-        #create a cluster - a folder etc'....
+        # self.primary_writer_instance = create db instance
+        # self.reader_instances = replica of the instance in different azs
 
 
     def to_dict(self) -> Dict:
@@ -61,7 +62,9 @@ class Cluster:
             'tags': self.tags ,
             'created_at': self.created_at,
             'status':self.status,
-            'instances':self.instances
+            'instances':self.instances,
+            # 'primary_writer_instance' : self.primary_writer_instance,
+            # 'reader_instances' : self.reader_instances
         }
 
     
