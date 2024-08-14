@@ -6,7 +6,7 @@ import os
 
 from .StorageManager import StorageManager
 class ObjectManager:
-    def __init__(self, metadata_file="s3 project/KT_Cloud/Storage/server/metadata.json"):
+    def __init__(self, metadata_file="s3/KT_cloud/Storage/server/metadata.json"):
         self.metadata_file = metadata_file
         self.metadata = self.load_metadata()
         self.storage_maneger = StorageManager()
@@ -43,11 +43,19 @@ class ObjectManager:
 
     def get_bucket(self, bucket):
         return self.metadata["server"]["buckets"].get(bucket, None)
+    
+    def get_object(self, bucket,key):
+        bucket=self.get_bucket(bucket)
+        if bucket:
+            return bucket['objects'].get(key,None)
+        else:
+            raise FileNotFoundError(f"No bucket found")
 
+    
     def get_buckets(self):
         return self.metadata["server"]["buckets"]
 
-    def get_object(self, bucket, key, version_id=None):
+    def get_object_by_version(self, bucket, key, version_id=None):
         meta_data = self.get_versions(bucket, key).get(version_id, None)
         content = self.storage_maneger.get(bucket, key, version_id)
         return {
