@@ -1,9 +1,9 @@
 import os
 from typing import Dict, Any
-
 class StorageManager:
     def __init__(self):
        self.server_path="s3 project/KT_Cloud/Storage/server"
+        
     """here will be storage actions - S3/localFileSystem"""
     def create(self, bucket, key, version_id, data) -> None:
       """Creates a new file with the specified content."""

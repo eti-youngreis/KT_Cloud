@@ -7,7 +7,7 @@ class STO(ABC):
         pass
 
     @abstractmethod
-    def delete(self, *args, **kwargs):
+    def delete(self, *args,**kwargs):
         """Delete an existing storage object."""
         pass
 
