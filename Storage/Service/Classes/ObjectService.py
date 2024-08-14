@@ -17,14 +17,23 @@ class ObjectService(STOE):
     async def get(self,obj:ObjectModel, version_id=None, flag_sync=True):
         bucket = obj.bucket
         key = obj.key
-        if bucket not in self.object_manager.get_buckets() or key not in self.object_manager.get_bucket(bucket)['objects'] :
-            raise FileNotFoundError("bucket or key not exist")
-        if version_id is None:
-            version_id = self.object_manager.get_latest_version(bucket, key)
-        elif version_id not in self.object_manager.get_versions(bucket, key):
-            raise FileNotFoundError("version id not exist")
-
-        return self.object_manager.get_object(bucket, key, version_id)
+        try:
+            if bucket not in self.object_manager.get_buckets() or key not in self.object_manager.get_bucket(bucket)['objects'] :
+                raise FileNotFoundError("bucket or key not exist")
+            if version_id is None:
+                version_id = self.object_manager.get_latest_version(bucket, key)
+            elif version_id not in self.object_manager.get_versions(bucket, key):
+                raise FileNotFoundError("version id not exist")
+        
+            return self.object_manager.get_object(bucket, key, version_id)
+        except FileNotFoundError as e:
+            print(f"Error: The file or directory was not found: {e}")
+        except PermissionError as e:
+            print(f"Error: Permission denied when accessing the file or directory: {e}")
+        except OSError as e:
+            print(f"OS error occurred: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
 
     async def put(self, obj: ObjectModel, body, acl=None, metadata=None, content_type=None, flag_sync=True):
         bucket = obj.bucket
