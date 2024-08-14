@@ -38,21 +38,17 @@ class EventSubscriptionService(DBO):
 
         self.dal.select(subscription_table_name, subscription_name or '%')
 
-    def modify(self, subscription_name: str, **kwargs):
-
-        if EventSubscriptionProps.SOURCES in kwargs:
-            raise ValueError(
-                'Modifying sources is not allowed in the modify function')
+    def modify(self, subscription_name: str, sns_topic_arn: str, event_categories: List[str] = [], source_type: SourceType = SourceType.ALL):
 
         validate_subscription_props(
-            self.dal, subscription_name=subscription_name)
+            self.dal, subscription_name=subscription_name, sns_topic_arn=sns_topic_arn,
+            event_categories=event_categories, source_type=source_type)
 
         event_subscription = self.dal.select(
             subscription_table_name, subscription_name)
 
-        updated_subscription = {**event_subscription, **kwargs}
-
-        validate_subscription_props(self.dal, updated_subscription)
+        updated_subscription = {**event_subscription, EventSubscriptionProps.SNS_TOPIC_ARN: sns_topic_arn,
+                                EventSubscriptionProps.EVENT_CATEGORIES: event_categories, EventSubscriptionProps.SOURCE_TYPE: source_type}
 
         self.dal.update(subscription_table_name,
                         subscription_name, updated_subscription)
