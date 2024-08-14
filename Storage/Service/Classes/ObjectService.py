@@ -112,34 +112,38 @@ class ObjectService(STOE):
     async def put_object_tagging(self, obj: ObjectModel, tags: Tag, version_id=None, sync_flag=True):
         if not isinstance(sync_flag, bool):
             raise TypeError('sync_flag must be a boolean')
-
         bucket = obj.bucket
         key = obj.key
-
+        # Check if the bucket exists
         bucket_metadata = self.object_manager.get_bucket(bucket)
         if not bucket_metadata:
             raise FileNotFoundError(f"Bucket '{bucket}' does not exist")
+        # Check if the object exists
         object_metadata = self.object_manager.get_object(bucket, key)
-
-        if object_metadata is None:  # שינוי כאן
+        if object_metadata is None:
             raise FileNotFoundError(f"Object '{key}' does not exist in bucket '{bucket}'")
 
+        # If version_id is not provided, find the latest version
+        if not version_id:
+            version_id = self.object_manager.get_latest_version(bucket, key)
+                
         versions = self.object_manager.get_versions(bucket, key)
-        version_id_str = str(version_id) if version_id is not None else None
 
+        if version_id not in versions:
+            raise FileNotFoundError(f"Version '{version_id}' does not exist in object '{key}'")
+        
         tags_dict = tags.list_tags()
-        if version_id and version_id_str in versions:
-            versions[version_id_str]['tagSet'] = tags_dict
-        elif version_id_str:
-            versions[version_id_str] = {'tagSet': tags_dict}
-        else:
-            latest_version = self.object_manager.get_latest_version(bucket, key)
-            if latest_version:
-                versions[str(latest_version)]['tagSet'] = tags_dict
-            else:
-                versions['0'] = {'tagSet': tags_dict}
 
+        versions[version_id]["tagSet"] = tags_dict
+    
+
+        # Save metadata to file
         await self.object_manager.update(sync_flag)
+
+        return {
+            "VersionId": version_id,
+            "Tag_Set": tags_dict
+        }
 
 
     async def copy_object(self, copy_source, is_sync=True):
