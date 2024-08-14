@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from typing import Dict, Any
 import os
 import aiofiles
@@ -14,6 +15,18 @@ class StorageManager:
    def create(self, bucket, key, version_id, data) -> None:
       """Creates a new file with the specified content."""
    
+=======
+import os
+from typing import Dict, Any
+class StorageManager:
+    def __init__(self):
+       self.server_path="s3 project/KT_Cloud/Storage/server"
+        
+    """here will be storage actions - S3/localFileSystem"""
+    def create(self, bucket, key, version_id, data) -> None:
+      """Creates a new file with the specified content."""
+
+>>>>>>> 2417ae55ea86523eacff9d187579bb5014fc187c
       file_path = os.path.join(self.server_path, bucket, key)
 
       if key.endswith('/'):
@@ -25,6 +38,7 @@ class StorageManager:
          file_name, file_extension = os.path.splitext(key)
          versioned_file_name = f"{file_name}.v{version_id}{file_extension}"
          file_path = os.path.join(self.server_path, bucket, versioned_file_name)
+<<<<<<< HEAD
          
          os.makedirs(os.path.dirname(file_path), exist_ok=True)  # Ensure the directory exists
          with open(file_path, "wb") as f:
@@ -82,6 +96,39 @@ class StorageManager:
             
       else:
          print(f"Object '{key}' with version '{version_id}' not found in bucket '{bucket_name}'.")
+=======
+
+         os.makedirs(os.path.dirname(file_path), exist_ok=True)  # Ensure the directory exists
+         with open(file_path, "wb") as f:
+            f.write(data)
+
+         print(f"File '{key}' created in bucket '{bucket}' with version '{version_id}'.")
+
+    def get(self, bucket, key, version_id) -> Dict[str, Any]:
+
+      """Retrieves the content of a specified file in a bucket and version."""
+      file_name, file_extension = os.path.splitext(key)
+      versioned_file_name = f"{file_name}.v{version_id}{file_extension}"
+      file_path = os.path.join(self.server_path, bucket, versioned_file_name)
+
+      if not os.path.exists(file_path):
+         return {"error": "File not found"}
+
+      with open(file_path, 'rb') as f:
+         data = f.read()
+
+      return data
+      # return {"file_name": key, "version": version_id, "content": data}
+
+    def delete(self) -> None:
+      pass
+    
+    def rename(self)->None:
+      pass
+    
+    def copy(self)->None:
+      pass
+>>>>>>> 2417ae55ea86523eacff9d187579bb5014fc187c
 
          
    def rename(self, bucket_name, old_key, new_key, version_id) -> None:

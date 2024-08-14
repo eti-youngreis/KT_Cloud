@@ -1,4 +1,4 @@
-import STO
+from .STO import STO
 from abc import ABC, abstractmethod
 
 class STOE(STO):
