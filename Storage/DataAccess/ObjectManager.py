@@ -73,7 +73,7 @@ class ObjectManager:
         if metadata:
             return metadata.get('versions', {})
         return {}
-
+        
     def get_latest_version(self, bucket, key):
         # Get the latest version for a given key
         metadata = self.get_object(bucket, key)
@@ -87,12 +87,14 @@ class ObjectManager:
         object_metadata = self.get_latest_version(bucket, key)
         version_id = str(len(object_metadata['versions']) + 1)
         self.storage_maneger.create(bucket, key, version_id, data)
-
+        
+    #naive implementation
     def get_versioning_status(self, bucket):
         bucket_metadata = self.metadata["server"]["buckets"].get(bucket, {})
         versioning_status = bucket_metadata.get("versioning", "not enabled")
         return versioning_status
 
+    #naive implementation
     async def delete_object(self, bucket, key, sync_flag=True):
         if bucket in self.metadata["server"]["buckets"] and key in self.metadata["server"]["buckets"][bucket]["objects"]:
             del self.metadata["server"]["buckets"][bucket]["objects"][key]
@@ -102,7 +104,7 @@ class ObjectManager:
                 await self.update(False)
             self.storage_maneger.delete(bucket,key)
 
-
+    #naive implementation
     async def put_deleteMarker(self, bucket, key,  version, sync_flag=True):
         if bucket not in self.metadata["server"]["buckets"]:
             self.metadata["server"]["buckets"][bucket] = {"objects": {}}
@@ -115,6 +117,7 @@ class ObjectManager:
             await self.update(False)
         self.storage_maneger.encript_version(bucket,key,version)
 
+     #naive implementation
      async def copy_object(self, source_bucket, source_key, destination_bucket, destination_key,version_id=None, sync_flag=True):
         source_metadata = self.get_versions(source_bucket, source_key)
         if not source_metadata:
