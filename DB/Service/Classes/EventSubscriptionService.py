@@ -1,6 +1,7 @@
 from typing import List
 from DB.Validation.EventSubscriptionValidation import validate_subscription_props, subscription_table_name
 from DataAccess.DataAccessLayer import DataAccessLayer
+from KT_Cloud.DB.Models.EventCategory import EventCategory
 from Models.EventSubscriptionModel import EventSubscriptionModel, EventSubscriptionProps
 from Models.SourceType import SourceType
 from Service.Abc.DBO import DBO
@@ -11,7 +12,7 @@ class EventSubscriptionService(DBO):
     def __init__(self, dal: DataAccessLayer):
         self.dal = dal
 
-    def create(self, subscription_name: str, sources: List[(SourceType, str)], event_categories: List[str],
+    def create(self, subscription_name: str, sources: List[(SourceType, str)], event_categories: List[EventCategory],
                sns_topic_arn: str, source_type: SourceType):
 
         validate_subscription_props(self.dal, subscription_name=subscription_name, sources=sources,
@@ -38,7 +39,7 @@ class EventSubscriptionService(DBO):
 
         self.dal.select(subscription_table_name, subscription_name or '%')
 
-    def modify(self, subscription_name: str, sns_topic_arn: str, event_categories: List[str] = [], source_type: SourceType = SourceType.ALL):
+    def modify(self, subscription_name: str, sns_topic_arn: str, event_categories: List[EventCategory] = [], source_type: SourceType = SourceType.ALL):
 
         validate_subscription_props(
             self.dal, subscription_name=subscription_name, sns_topic_arn=sns_topic_arn,

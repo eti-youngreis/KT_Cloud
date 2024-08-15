@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import Dict, List
+from KT_Cloud.DB.Models.EventCategory import EventCategory
 from Models.SourceType import SourceType
 
 
@@ -17,7 +18,7 @@ class EventSubscriptionModel:
         self,
         subscription_name: str,
         sources: List[(SourceType, str)],
-        event_categories: List[str],
+        event_categories: List[EventCategory],
         sns_topic_arn: str,
         source_type: SourceType
     ) -> None:
