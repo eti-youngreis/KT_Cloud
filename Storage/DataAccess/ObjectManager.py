@@ -42,7 +42,9 @@ class ObjectManager:
         self.storage_maneger.create(bucket, key, version_id, body)
 
     def get_bucket(self, bucket):
-        return self.metadata["server"]["buckets"].get(bucket, None)
+        bucketJson = self.metadata["server"]["buckets"].get(bucket, None)
+        bucket = Bucket(bucketJson["name"], bucketJson["object"], bucketJson["creationDate"], bucketJson["policy"], bucketJson["acl"], bucketJson["Tag"], bucketJson["cors_configuration"])
+        return bucket
     
     def get_object(self, bucket,key):
         bucket=self.get_bucket(bucket)

@@ -23,3 +23,23 @@ def validate_tags(tags: Optional[Dict]) -> bool:
     if not isinstance(tags, dict):
         return False
     return all(isinstance(k, str) and isinstance(v, str) for k, v in tags.items())
+
+def validate_cors_configuration(self, cors_configuration):
+    required_keys = ['AllowedOrigins', 'AllowedMethods']
+    
+    # בדיקה שכל המפתחות הנדרשים קיימים
+    for key in required_keys:
+        if key not in cors_configuration:
+            print(f"Missing required key: {key}")
+            return False
+    
+    # בדיקה אם המפתחות הקיימים מכילים ערכים תקינים (למשל, רשימות ולא מחרוזות)
+    if not isinstance(cors_configuration['AllowedOrigins'], list):
+        print("AllowedOrigins should be a list.")
+        return False
+    if not isinstance(cors_configuration['AllowedMethods'], list):
+        print("AllowedMethods should be a list.")
+        return False
+    
+    # אפשר להוסיף ולידציות נוספות בהתאם לדרישות
+    return True
