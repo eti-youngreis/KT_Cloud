@@ -3,7 +3,7 @@ from typing import Dict, Any
 import json
 import aiofiles
 import os
-
+from Models.VesionModel import Version
 from .StorageManager import StorageManager
 class VersionManager:
     def __init__(self, metadata_file="s3 project/KT_Cloud/Storage/server/metadata.json"):
@@ -26,8 +26,9 @@ class VersionManager:
     async def create(self, bucket, key, data, body,version_id, object_metadata, sync_flag=True):
         pass
 
-    def get(self, bucket, key):
-        pass
+    def get(self, bucket:str, key:str, version:str) -> Version:
+        version_json = self.metadata["server"]["buckets"][bucket]["objects"][key]["versions"].get()
+
 
     def put(self, bucket, key, data, sync_flag):
         pass
