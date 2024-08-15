@@ -6,13 +6,13 @@ from typing import Dict
 from watchdog.observers import Observer
 from KT_Cloud.DB.Models.event_file import MyHandler
 
-class DBInstance:
-    BASE_PATH = "db_instances"
-    observer = Observer()
-    static_counter = 0
 
-    def __init__(self, db_instance_identifier: str, allocated_storage: int = None, port: int = 3306, region: str = 'a', is_replica: bool = False, 
-                 source_instance: 'DBInstance' = None, backup_auto: bool = False,  region_auto_backup: str = '',  created_time: datetime = None,  
+class DBInstance:
+    BASE_PATH = 'db_instances'
+    observer = Observer()
+
+    def __init__(self, db_instance_identifier: str, allocated_storage: int = None, port: int = 3306, region: str = 'a', is_replica: bool = False,
+                 source_instance: 'DBInstance' = None, backup_auto: bool = False,  region_auto_backup: str = '',  created_time: datetime = None,
                  master_username: str = None,  master_user_password: str = None, databases: dict = None,  db_name: str = None,  path_file: str = None):
         """
         Initializes a DBInstance or Replica instance based on the is_replica flag.
@@ -33,7 +33,6 @@ class DBInstance:
             db_name (str, optional): The name of the database (only for primary instances).
             path_file (str, optional): The file path for storing instance data.
         """
-        # Initialize common attributes
         try:
             self.db_instance_identifier = db_instance_identifier
             self.allocated_storage = allocated_storage if allocated_storage is not None else source_instance.allocated_storage if source_instance else allocated_storage
@@ -46,23 +45,27 @@ class DBInstance:
             self.master_username = master_username if master_username is not None else source_instance.master_username if source_instance else master_username
             self.master_user_password = master_user_password if master_user_password is not None else source_instance.master_user_password if source_instance else master_user_password
             self.databases = databases if databases is not None else {}
-            
+
             if is_replica and source_instance:
-                self.endpoint = os.path.join(DBInstance.BASE_PATH, self.db_instance_identifier)
+                self.endpoint = os.path.join(
+                    DBInstance.BASE_PATH, self.db_instance_identifier)
                 self.db_instance_identifier += f'_replica{DBInstance.static_counter}'
                 self.instance_id = source_instance.db_instance_identifier
-                self.path_file =  getattr(source_instance, 'path_file', f'./{self.db_instance_identifier+".txt"}')
+                self.path_file = getattr(
+                    source_instance, 'path_file', f'./{self.db_instance_identifier}.txt')
                 DBInstance.static_counter += 1
             else:
                 self.db_name = db_name
-                self.path_file = path_file if path_file is not None else f'./{self.db_instance_identifier+".txt"}'
+                self.path_file = path_file if path_file is not None else f'./{self.db_instance_identifier}.txt'
                 self.replicas = {}
-                
+
             self.db_instance_arn = f'arn:vast:rds:{self.region}:2:{self.db_instance_identifier}:db:mydatabase'
-            self.endpoint = os.path.join(DBInstance.BASE_PATH, self.db_instance_identifier)
-            path_dic = "./"
+            self.endpoint = os.path.join(
+                DBInstance.BASE_PATH, self.db_instance_identifier)
+            path_dic = './'
             event_handler = MyHandler(self)
-            DBInstance.observer.schedule(event_handler, path_dic, recursive=False)
+            DBInstance.observer.schedule(
+                event_handler, path_dic, recursive=False)
             if not DBInstance.observer.is_alive():
                 DBInstance.observer.start()
 
@@ -71,10 +74,10 @@ class DBInstance:
             if not os.path.exists(self.endpoint):
                 os.mkdir(self.endpoint)
         except:
-            raise ValueError("The parameters are not perfect")
+            raise ValueError('The parameters are not perfect')
 
     def to_dict(self) -> Dict:
-        """Retrieve the metadata of the instance as a dictionary."""
+        '''Retrieve the metadata of the instance as a dictionary.'''
         data = {
             'db_instance_identifier': self.db_instance_identifier,
             'allocated_storage': self.allocated_storage,
