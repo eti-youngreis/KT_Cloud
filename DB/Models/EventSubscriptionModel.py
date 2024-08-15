@@ -16,7 +16,7 @@ class EventSubscriptionModel:
     def __init__(
         self,
         subscription_name: str,
-        sources: Dict[SourceType, str],
+        sources: List[(SourceType, str)],
         event_categories: List[str],
         sns_topic_arn: str,
         source_type: SourceType
@@ -25,7 +25,7 @@ class EventSubscriptionModel:
         self.source_type = source_type
         self.sources = {source_type.value: set() for source_type in SourceType}
 
-        for source_type, source_id in sources.items():
+        for source_type, source_id in sources:
             self.sources[source_type.value].add(source_id)
 
         self.event_categories = event_categories

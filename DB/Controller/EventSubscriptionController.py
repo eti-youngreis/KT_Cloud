@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import List
 from KT_Cloud.DB.Models.EventCategory import EventCategory
 from Models.SourceType import SourceType
 from Service.Classes.EventSubscriptionService import EventSubscriptionService
@@ -8,7 +8,7 @@ class EventSubscriptionController:
     def __init__(self, service: EventSubscriptionService) -> None:
         self.service = service
 
-    def create_event_subscription(self, subscription_name: str, sources: Dict[SourceType, str],
+    def create_event_subscription(self, subscription_name: str, sources: List[(SourceType, str)],
                                   event_categories: List[EventCategory], sns_topic_arn: str, source_type: SourceType = SourceType.All):
 
         self.service.create(subscription_name=subscription_name, sources=sources,

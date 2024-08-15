@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import List
 
 from DB.DataAccess.DataAccessLayer import DataAccessLayer
 from DB.Models.SourceType import SourceType
@@ -30,7 +30,7 @@ def validate_subscription_name(dal: DataAccessLayer, subscription_name: str, exi
                          'already exists' if exists else 'doesn\'t exist'}')
 
 
-def validate_sources(dal: DataAccessLayer, sources: Dict[SourceType, str]):
+def validate_sources(dal: DataAccessLayer, sources: List[(SourceType, str)]):
 
     source_ids = dal.select(source_table_name, '%')
 

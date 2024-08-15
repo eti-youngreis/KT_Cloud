@@ -11,7 +11,7 @@ class EventSubscriptionService(DBO):
     def __init__(self, dal: DataAccessLayer):
         self.dal = dal
 
-    def create(self, subscription_name: str, sources: List[SourceType, str], event_categories: List[str],
+    def create(self, subscription_name: str, sources: List[(SourceType, str)], event_categories: List[str],
                sns_topic_arn: str, source_type: SourceType):
 
         validate_subscription_props(self.dal, subscription_name=subscription_name, sources=sources,
