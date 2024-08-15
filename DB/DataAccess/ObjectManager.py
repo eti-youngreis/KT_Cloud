@@ -1,6 +1,5 @@
 from typing import Dict, Any
 import json
-import sqlite3
 from DBManager import DBManager
 
 class ObjectManager:
