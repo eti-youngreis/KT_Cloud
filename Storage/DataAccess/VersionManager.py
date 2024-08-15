@@ -33,6 +33,4 @@ class VersionManager:
         pass
 
     def get_versioning_status(self, bucket):
-        bucket_metadata = self.metadata["server"]["buckets"].get(bucket, {})
-        versioning_status = bucket_metadata.get("versioning", "not enabled")
-        return versioning_status
+        pass
