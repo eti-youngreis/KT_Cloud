@@ -1,5 +1,4 @@
 from typing import List
-
 from DB.DataAccess.DataAccessLayer import DataAccessLayer
 from DB.Models.SourceType import SourceType
 from KT_Cloud.DB.Models.EventCategory import EventCategory
