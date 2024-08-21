@@ -1,6 +1,18 @@
 import re
 from typing import Optional,Dict
 
+def string_in_dict(string: str, values: dict) -> bool:
+    """Check if the string is in dict."""
+    return string in values
+
+def is_valid_length(string: str, min_length: int, max_length: int) -> bool:
+    """Check if the string is valid based on the length."""
+    return min_length <= len(string) <= max_length
+
+def is_valid_pattern(string: str, pattern: str) -> bool:
+    """Check if the optionGroupName is valid based on the pattern."""
+    return bool(re.match(pattern, string))
+
 def is_valid_engineName(engine_name: str) -> bool:
     """Check if the engine name is valid."""
     # Example regex for a valid engine name, adjust as needed
