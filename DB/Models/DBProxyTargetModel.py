@@ -1,12 +1,12 @@
 from typing import Dict
-class DBProxyTargetModel:
+class TargetModel:
     def __init__(self, target_arn:str,
             endpoint:str,
             tracked_cluster_id:str,
             db_instance_id: str,
             port:int,
             type:str,
-            role:str,
+            role:str = 'READ_WRITE',
             ) -> None:
         self.target_arn = target_arn
         self.endpoint = endpoint

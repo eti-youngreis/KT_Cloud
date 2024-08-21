@@ -12,15 +12,15 @@ class DBProxyController:
     
     def delete_db_proxy(self,db_proxy_name:str) -> Dict:
         """delete a db proxy"""
-        self.service.delete(db_proxy_name)
+        return self.service.delete(db_proxy_name)
     
     def describe_db_proxies(self,db_proxy_name:Optional[str] = None, filters:Optional[str] = None, marker:Optional[str] = None, max_records:Optional[int] = None) -> Dict:
         """describe db proxies"""
-        self.service.describe(db_proxy_name, filters, marker, max_records)
+        return self.service.describe(db_proxy_name, filters, marker, max_records)
         
     def modify_db_proxy(self, db_proxy_name:str, new_db_proxy_name:Optional[str]=  None, require_TLS:Optional[bool] = None,
     idle_client_timeout:Optional[int] = None,
     debug_logging:Optional[bool] = None) -> Dict:
         """modify a db proxy"""
-        self.service.modify(db_proxy_name, new_db_proxy_name, require_TLS,idle_client_timeout,debug_logging)
+        return self.service.modify(db_proxy_name, new_db_proxy_name, require_TLS,idle_client_timeout,debug_logging)
         

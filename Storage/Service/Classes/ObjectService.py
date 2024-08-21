@@ -93,6 +93,7 @@ class ObjectService(STOE):
     async def create(self, body, acl=None, metadata=None, content_type=None, flag_sync=True):
         pass
 
+    #naive implementation
     async def delete(self,obj:ObjectModel, version_id=None, flag_sync=True):
         bucket = obj.bucket
         key = obj.key
@@ -112,41 +113,72 @@ class ObjectService(STOE):
     async def put_object_tagging(self, obj: ObjectModel, tags: Tag, version_id=None, sync_flag=True):
         if not isinstance(sync_flag, bool):
             raise TypeError('sync_flag must be a boolean')
-
         bucket = obj.bucket
         key = obj.key
-
+        # Check if the bucket exists
         bucket_metadata = self.object_manager.get_bucket(bucket)
         if not bucket_metadata:
             raise FileNotFoundError(f"Bucket '{bucket}' does not exist")
+        # Check if the object exists
         object_metadata = self.object_manager.get_object(bucket, key)
-
-        if object_metadata is None:  # שינוי כאן
+        if object_metadata is None:
             raise FileNotFoundError(f"Object '{key}' does not exist in bucket '{bucket}'")
 
+        # If version_id is not provided, find the latest version
+        if not version_id:
+            version_id = self.object_manager.get_latest_version(bucket, key)
+                
         versions = self.object_manager.get_versions(bucket, key)
-        version_id_str = str(version_id) if version_id is not None else None
 
+        if version_id not in versions:
+            raise FileNotFoundError(f"Version '{version_id}' does not exist in object '{key}'")
+        
         tags_dict = tags.list_tags()
-        if version_id and version_id_str in versions:
-            versions[version_id_str]['tagSet'] = tags_dict
-        elif version_id_str:
-            versions[version_id_str] = {'tagSet': tags_dict}
-        else:
-            latest_version = self.object_manager.get_latest_version(bucket, key)
-            if latest_version:
-                versions[str(latest_version)]['tagSet'] = tags_dict
-            else:
-                versions['0'] = {'tagSet': tags_dict}
 
+        versions[version_id]["tagSet"] = tags_dict
+    
+
+        # Save metadata to file
         await self.object_manager.update(sync_flag)
 
+        return {
+            "VersionId": version_id,
+            "Tag_Set": tags_dict
+        }
 
-    async def copy_object(self, copy_source, is_sync=True):
-        pass
+    #naive implementation
+    async def copy_object(self, source_obj:ObjectModel,destination_bucket, destination_key=None,version_id=None, sync_flag=True):
+        source_bucket=source_obj.bucket
+        source_key = source_obj.key
+        version_status = self.object_manager.get_versioning_status(source_bucket)
+        if version_status=='enabled' and version_id:
+            await self.object_manager.copy_object(source_bucket, source_key, destination_bucket, destination_key,version_id,sync_flag=sync_flag)          
+        await self.object_manager.copy_object(source_bucket, source_key, destination_bucket, destination_key, sync_flag=sync_flag)
 
-    async def delete_objects(self, delete, is_sync=True):
-        pass
+    #naive implementation
+    async def delete_objects(self,obj:ObjectModel, delete, flag_sync=True):
+        bucket = obj.bucket
+        deleted = []
+        errors = []
+        for object in delete['Objects']:
+            version_id = object.get('VersionId',None)
+            key=object['Key']
+            obj = ObjectModel(bucket, object['Key'])
+            
+            try:
+                delete_result=await self.delete(obj,version_id,flag_sync=flag_sync)
+                if delete_result is not {}:
+                    deleted.append({'Key': key, 'VersionId': version_id})
+                else:
+                    errors.append(
+                        {'Key': key, 'VersionId': version_id, 'Code': 'InternalError', 'Message': 'Deletion failed'})
+            except Exception as e:
+                errors.append({'Key': key, 'VersionId': version_id, 'Code': 'InternalError', 'Message': str(e)})
+
+        return {
+            'Deleted': deleted,
+            'Errors': errors
+        }
 
     async def put_object_acl(self, obj: ObjectModel, acl: ACL, version_id=None, is_sync=True):
         bucket = obj.bucket

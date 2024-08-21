@@ -7,7 +7,7 @@ class Version:
         self.version_id = version_id
         self.etag = hashlib.md5(version_id).hexdigest()
         self.size = 0
-        self.last_modified = datetime.utcnow()  # אתחול לתאריך ושעה של היום
+        self.last_modified = datetime.utcnow() 
         self.legal_hold = False
         # self.acl = 
         # self.retention =

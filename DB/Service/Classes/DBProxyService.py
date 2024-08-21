@@ -4,7 +4,7 @@ from Models.DBProxyModel import DBProxyModel
 from DataAccess.ObjectManager import ObjectManager
 from Validation.Validation import check_filters_validation
 from exceptions.exception import ParamValidationError
-from exceptions.db_proxy_exception import DBProxiNotExistsError
+from exceptions.db_proxy_exception import *
 
 class DBProxyService(DBO):
     def __init__(self, dal:ObjectManager):
@@ -23,13 +23,13 @@ class DBProxyService(DBO):
     def delete(self, db_proxy_name:str) -> Dict:
         """delete a DBProxy."""
         if db_proxy_name not in self.db_proxies:
-            raise DBProxiNotExistsError(f'db with key: {db_proxy_name} does not exist')
+            raise DBProxyNotFoundFault(f'db with key: {db_proxy_name} does not exist')
         self.dal.delete(db_proxy_name)
 
     def describe(self, db_proxy_name:Optional[str] = None, filters:Optional[str] = None, marker:Optional[str] = None, max_records:Optional[int] = None) -> Dict:
         """describe DBProxies."""
         if db_proxy_name and db_proxy_name not in self.db_proxies:
-            raise DBProxiNotExistsError(f'db with key: {db_proxy_name} does not exist')
+            raise DBProxyNotFoundFault(f'db with key: {db_proxy_name} does not exist')
         if filters and not check_filters_validation(filters):
             raise ParamValidationError('filters must be a list of dicts, with this structure: {Name:str, Values:list(str)}')
         
@@ -39,14 +39,26 @@ class DBProxyService(DBO):
     debug_logging:Optional[bool] = None) -> Dict:
         """modify a DBProxy."""
         if db_proxy_name not in self.db_proxies:
-            raise DBProxiNotExistsError(f'db with key: {db_proxy_name} does not exist')
+            raise DBProxyNotFoundFault(f'db with key: {db_proxy_name} does not exist')
         db_proxy = self.db_proxies[db_proxy_name]
         db_proxy.modify(new_db_proxy_name,require_TLS, idle_client_timeout, debug_logging)
+        db_proxy_name = new_db_proxy_name if new_db_proxy_name else db_proxy_name
+        self.dal.update(db_proxy_name, db_proxy.to_dict())
             
         
-    def register_db_proxy_targets():
-        pass
+    def register_db_proxy_targets(self, db_proxy_name, target_group_name = None, db_instance_identifiers = [], db_cluster_identifiers=[]):
+        if db_proxy_name not in self.db_proxies:
+            raise DBProxyNotFoundFault("DB proxy name is not unique")
+        db_proxy = self.db_proxies[db_proxy_name]
+        return db_proxy.register_targets(target_group_name, db_instance_identifiers, db_cluster_identifiers)
     
-    def deregister_db_proxy_targets():
-        pass
+        
+        
+    
+    def deregister_db_proxy_targets(self, db_proxy_name, target_group_name = None, db_instance_identifiers = [], db_cluster_identifiers=[]):
+        if db_proxy_name not in self.db_proxies:
+            raise DBProxyNotFoundFault("DB proxy name is not unique")
+        db_proxy = self.db_proxies[db_proxy_name]
+        db_proxy.deregister_targets(target_group_name, db_instance_identifiers, db_cluster_identifiers)
+        return {}
         

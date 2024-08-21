@@ -1,16 +1,17 @@
 from typing import Dict
 from datetime import datetime
-class DBProxyTargetModel:
+from exceptions.db_proxy_exception import *
+from DBProxyTargetModel import TargetModel
+MAX_TARGETS = 10
+class TargetGroupModel:
     def __init__(self, db_proxy_name:str,
             target_group_name:str,
-            target_group_arn:str,
-            is_default: bool,
-            status:str,
-            created_date: datetime,
+            is_default: bool = True,
+            status:str = "available",
             ) -> None:
         self.db_proxy_name = db_proxy_name,
         self.target_group_name = target_group_name
-        self.target_group_arn = target_group_arn
+        self.target_group_arn = None
         self.is_default = is_default
         self.status = status
         self.connection_pool_config = {
@@ -22,8 +23,9 @@ class DBProxyTargetModel:
                 ],
                 'InitQuery': 'string'
             }
-        self.created_date = created_date
+        self.created_date = datetime.now()
         self.updated_date = self.created_date
+        self.targets = {}
     
 
     def to_dict(self) -> Dict:
@@ -38,3 +40,17 @@ class DBProxyTargetModel:
             'updated_date':self.updated_date
             
         }
+        
+    def register_target(self, target_identifier:str, is_cluster_flag:bool):
+        if is_cluster_flag:
+            pass #check if there is a cluster with this identifier
+        else:
+            pass #check if there is a db instance with this identifier
+        target = TargetModel("","","",0,'','')
+        self.targets[target_identifier] = target
+        return target.to_dict()
+    
+    def deregister_target(self, target_identifier:str) -> None:
+        if target_identifier not in self.targets:
+            raise DBProxyTargetNotFoundFault(f'target {target_identifier} not found in target group {self.target_group_name} in proxy {self.db_proxy_name}')
+        del self.targets[target_identifier]
