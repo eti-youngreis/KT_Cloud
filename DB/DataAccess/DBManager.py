@@ -1,6 +1,7 @@
 import sqlite3
 from typing import Dict, Any, List, Tuple, Optional
 import json
+from sqlite3 import OperationalError
 
 class DBManager:
     def __init__(self, db_file: str):
@@ -114,7 +115,32 @@ class DBManager:
             return result if result else None
         except sqlite3.OperationalError as e:
             raise Exception(f"Error executing query {query}: {e}")
+        
+    def exist_key_value_in_json_column(self, table_name: str, key: str, value: str) -> bool:
+        """Check if a specific key-value pair exists within a JSON column in the given table."""
+        try:
+            c = self.connection.cursor()
+            c.execute(f'''
+            SELECT COUNT(*) FROM {table_name}
+            WHERE metadata LIKE ? LIMIT 1
+            ''', (f'%"{key}": "{value}"%',))
+            return c.fetchone()[0] > 0
+        except OperationalError as e:
+            print(f"Error: {e}")
 
+    def is_identifier_exit(self, table_name: str, value: str) -> bool:
+        """Check if a specific value exists within a column in the given table."""
+        try:
+            c = self.connection.cursor()
+            c.execute(f'''
+            SELECT COUNT(*) FROM {table_name}
+            WHERE object_id LIKE ?
+            ''', (value,))
+            return c.fetchone()[0] > 0
+        except OperationalError as e:
+            print(f"Error: {e}")
+    
+    
 
 
     def close(self):
