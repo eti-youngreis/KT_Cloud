@@ -53,67 +53,49 @@ class DBClusterService(DBO):
         else:
             kwargs["storage_type"] = "aurora"
 
-   
-    # def create(self, **kwargs) -> Dict:
-    #     """Create a new cluster and insert it into the object_management table."""
-    #     required_params=["db_cluster_identifier","engine"]
-    #     if not self.validate_cluster_parameters(required_params, **kwargs):
-    #         raise ValueError(f"Missing required fields")
-    #     if not self.is_valid_dbClusterIdentifier(kwargs["db_cluster_identifier"]):
-    #         raise ValueError(f"Invalid dbClusterIdentifier:")
-    #     if not self.is_valid_engineName(kwargs["engine"]):
-    #         raise ValueError(f"Invalid engineName: ")
-    #     if self.is_identifier_exit(kwargs["db_cluster_identifier"]):
-    #         raise ValueError("Cluster identifier already exist")
-    #     self.check_parameters_constarins(**kwargs)
-    #     cluster = DBClusterModel(**kwargs)
-    #     # self.CreateDBInstance(DBInstanceIdentifier = f'{kwargs["db_cluster_identifier"]}_primary_instance', DBClusterIdentifier =  kwargs["db_cluster_identifier"])
-    #     self.dal.create(cluster.to_dict())
-    #     # self.objects["Clusters"][kwargs["db_cluster_identifier"]] =  cluster
-    #     return cluster.to_dict()
 
-def create(self, **kwargs) -> Dict:
-    """
-    Create a new database cluster and store it in the database.
+    def create(self, **kwargs) -> Dict:
+        """
+        Create a new database cluster and store it in the database.
 
-    Parameters:
-    - db_cluster_identifier (str): The unique identifier for the cluster.
-    - engine (str): The database engine to use (e.g., "mysql", "postgres").
-    - other_params: Additional parameters for cluster configuration.
+        Parameters:
+        - db_cluster_identifier (str): The unique identifier for the cluster.
+        - engine (str): The database engine to use (e.g., "mysql", "postgres").
+        - other_params: Additional parameters for cluster configuration.
 
-    Returns:
-    - Dict: A dictionary representation of the created cluster.
+        Returns:
+        - Dict: A dictionary representation of the created cluster.
 
-    Raises:
-    - ValueError: If required parameters are missing, or values are invalid.
-    """
-    required_params = ["db_cluster_identifier", "engine"]
-    if not self.validate_cluster_parameters(required_params, **kwargs):
-        raise ValueError("Missing required fields")
+        Raises:
+        - ValueError: If required parameters are missing, or values are invalid.
+        """
+        required_params = ["db_cluster_identifier", "engine"]
+        if not self.validate_cluster_parameters(required_params, **kwargs):
+            raise ValueError("Missing required fields")
 
-    db_cluster_identifier = kwargs["db_cluster_identifier"]
-    engine = kwargs["engine"]
+        db_cluster_identifier = kwargs["db_cluster_identifier"]
+        engine = kwargs["engine"]
 
-    if not self.is_valid_dbClusterIdentifier(db_cluster_identifier):
-        raise ValueError(f"Invalid dbClusterIdentifier: {db_cluster_identifier}")
-    
-    if not self.is_valid_engineName(engine):
-        raise ValueError(f"Invalid engineName: {engine}")
+        if not self.is_valid_dbClusterIdentifier(db_cluster_identifier):
+            raise ValueError(f"Invalid dbClusterIdentifier: {db_cluster_identifier}")
+        
+        if not self.is_valid_engineName(engine):
+            raise ValueError(f"Invalid engineName: {engine}")
 
-    if self.is_identifier_exit(db_cluster_identifier):
-        raise ValueError("Cluster identifier already exists")
+        if self.is_identifier_exit(db_cluster_identifier):
+            raise ValueError("Cluster identifier already exists")
 
-    self.check_parameters_constraints(**kwargs)
+        self.check_parameters_constraints(**kwargs)
 
-    cluster = DBClusterModel(**kwargs)
-    
-    try:
-        self.dal.create(cluster.to_dict())
-    except Exception as e:
-        # Handle any exceptions that occur during the database operation
-        raise RuntimeError(f"Failed to create cluster: {e}")
+        cluster = DBClusterModel(**kwargs)
+        
+        try:
+            self.dal.create(cluster.to_dict())
+        except Exception as e:
+            # Handle any exceptions that occur during the database operation
+            raise RuntimeError(f"Failed to create cluster: {e}")
 
-    return cluster.to_dict()
+        return cluster.to_dict()
 
 
     def modify(self, **kwargs) -> Dict:
