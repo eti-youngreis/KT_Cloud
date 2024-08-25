@@ -40,9 +40,6 @@ class ClusterManager:
         else:
             raise FileNotFoundError(f"Object with ID {object_id} not found.")
 
-        
-
-        
 
     def delete(self, object_id: int) -> None:
         """Delete an object from the database."""
@@ -52,16 +49,6 @@ class ClusterManager:
         """Retrieve all objects from the database."""
         return self.db_manager.select(self.table_name, ["object_id", "metadata"])
     
-    def get_option_group_count(self)->int:
-        query = f"SELECT COUNT(*) FROM {self.table_name}"
-        try:
-            c = self.db_manager.connection.cursor()
-            c.execute(query)
-            count = c.fetchone()[0]
-            return count
-        except sqlite3.OperationalError as e:
-            raise Exception(f"Error checking for count of OptionGroups: {e}")
-        
 
     def describe_table(self) -> Dict[str, str]:
         """Describe the schema of the table."""

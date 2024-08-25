@@ -67,14 +67,12 @@ class DBClusterService(DBO):
             raise ValueError("Cluster identifier already exist")
         self.check_parameters_constarins(**kwargs)
         cluster = DBClusterModel(**kwargs)
-        self.CreateDBInstance(DBInstanceIdentifier = f'{kwargs["db_cluster_identifier"]}_primary_instance', DBClusterIdentifier =  kwargs["db_cluster_identifier"])
-        cluster.save_changes_in_management_db(conn)
-        self.objects["Clusters"][kwargs["db_cluster_identifier"]] =  cluster
-        return {"cluster": cluster.get_cluster_data_in_dict()}
+        # self.CreateDBInstance(DBInstanceIdentifier = f'{kwargs["db_cluster_identifier"]}_primary_instance', DBClusterIdentifier =  kwargs["db_cluster_identifier"])
+        self.dal.create(cluster.to_dict())
+        # self.objects["Clusters"][kwargs["db_cluster_identifier"]] =  cluster
+        return cluster.to_dict()
 
 
-
-    
     def modify(self, **kwargs) -> Dict:
         """Modify an existing db cluster"""
         pass
