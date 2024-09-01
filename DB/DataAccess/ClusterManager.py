@@ -10,6 +10,7 @@ class ClusterManager:
         self.table_name ='cluster_managment'
         self.create_table()
     
+    
     def create_table(self):
         """create objects table in the database"""
         table_schema = 'object_id TEXT NOT NULL PRIMARY KEY ,metadata TEXT NOT NULL'

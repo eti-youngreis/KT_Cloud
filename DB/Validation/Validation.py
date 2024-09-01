@@ -1,5 +1,6 @@
 import re
 from typing import Optional,Dict
+import sys
 
 def string_in_dict(string: str, values: dict) -> bool:
     """Check if the string is in dict."""
@@ -19,6 +20,9 @@ def is_valid_engineName(engine_name: str) -> bool:
     # Assumes valid engine names contain only letters, digits, and underscores
     pattern = r'^[\w-]+$'
     return bool(re.match(pattern, engine_name))
+
+def is_valid_number(num: int, min: int = -sys.maxsize - 1, max: int = sys.maxsize) -> bool:
+    return min <= num <= max
 
 def is_valid_optionGroupName(option_group_name: str) -> bool:
     """Check if the option group name is valid."""
