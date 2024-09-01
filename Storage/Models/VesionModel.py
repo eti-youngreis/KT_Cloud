@@ -1,5 +1,7 @@
 from datetime import datetime
 import hashlib
+from AclModel import Acl
+from Tag import Tag
 
 # domain/versioning.py
 class Version:
@@ -10,9 +12,11 @@ class Version:
         self.last_modified = datetime.utcnow()  # אתחול לתאריך ושעה של היום
         self.legal_hold = False
         # self.acl = 
+
         # self.retention =
         self.content_length = 0
         self.content_type = "text/plain"
         # self.meta_data = 
         # self.object_parts =
         # self.tags = 
+

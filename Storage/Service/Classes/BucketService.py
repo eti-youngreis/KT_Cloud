@@ -11,6 +11,7 @@ class Bucket(STOE):
         self.StorageManager=StorageManager()
 
     async def create(self, bucket_name: str)->BucketModel:
+
         """Create a new bucket."""
 
         # Validating the bucket name
@@ -50,4 +51,15 @@ class Bucket(STOE):
     def head(self, *args, **kwargs):
         """check if object exists and is accessible with the appropriate user permissions."""
         pass
-  
+
+    def put_bucket_encryption(self, bucket:Bucket, is_encrypted = True):
+        if bucket.name not in self.object_manager.get_buckets():
+            raise FileNotFoundError("bucket or key not exist")
+        bucket.encrypt_mode= True
+        for obj in bucket.objects.values():
+            obj:ObjectModel
+            obj_content= self.object_manager.read(bucket.name, obj.key)
+            encrypted_data, obj_encrypt_config = obj.encryption.encrypt_content(obj_content)
+            self.object_service.put(obj, encrypted_data, obj_encrypt_config)
+
+            

@@ -50,6 +50,7 @@ class DBManager:
 
     def select(self, table_name: str, columns: List[str] = ['*'], criteria: str = '') -> Dict[int, Dict[str, Any]]:
         """Select records from the specified table based on criteria.
+ 
         
         Args:
             table_name (str): The name of the table.
@@ -59,6 +60,7 @@ class DBManager:
         Returns:
             Dict[int, Dict[str, Any]]: A dictionary where keys are object_ids and values are metadata.
         """
+
         columns_clause = ', '.join(columns)
         query = f'SELECT object_id, {columns_clause} FROM {table_name}'
         if criteria:
@@ -74,6 +76,7 @@ class DBManager:
 
     def delete(self, table_name: str, criteria: str) -> None:
         """Delete a record from the specified table based on criteria."""
+
         try:
             c = self.connection.cursor()
             c.execute(f'''
@@ -82,18 +85,72 @@ class DBManager:
             ''')
             self.connection.commit()
         except sqlite3.OperationalError as e:
-            raise Exception(f"Error deleting from {table_name}: {e}")
+
+            raise Exception(f'Error deleting from {table_name}: {e}')
 
     def describe(self, table_name: str) -> Dict[str, str]:
-        """Describe the schema of the specified table."""
+        '''Describe the schema of the specified table.'''
         try:
             c = self.connection.cursor()
-            c.execute(f"PRAGMA table_info({table_name})")
+            c.execute(f'PRAGMA table_info({table_name})')
             columns = c.fetchall()
             return {col[1]: col[2] for col in columns}
         except sqlite3.OperationalError as e:
-            raise Exception(f"Error describing table {table_name}: {e}")
+            raise Exception(f'Error describing table {table_name}: {e}')
+    
+    
+
+    def execute_query(self, query: str) -> Optional[List[Tuple]]:
+        '''Execute a given query and return the results.'''
+        try:
+            c = self.connection.cursor()
+            c.execute(query)
+            results = c.fetchall()
+            return results if results else None
+        except sqlite3.OperationalError as e:
+            raise Exception(f'Error executing query {query}: {e}')
+
+    def execute_query_with_single_result(self, query: str) -> Optional[Tuple]:
+        '''Execute a given query and return a single result.'''
+        try:
+            c = self.connection.cursor()
+            c.execute(query)
+            result = c.fetchone()
+            return result if result else None
+        except sqlite3.OperationalError as e:
+            raise Exception(f'Error executing query {query}: {e}')
+        
+    def is_json_column_contains_key_and_value(self, table_name: str, key: str, value: str) -> bool:
+        '''Check if a specific key-value pair exists within a JSON column in the given table.'''
+        try:
+            c = self.connection.cursor()
+            # Properly format the LIKE clause with escaped quotes for key and value
+            c.execute(f'''
+            SELECT COUNT(*) FROM {table_name}
+            WHERE metadata LIKE ?
+            LIMIT 1
+            ''', (f'%"{key}": "{value}"%',))
+            # Check if the count is greater than 0, indicating the key-value pair exists
+            return c.fetchone()[0] > 0
+        except OperationalError as e:
+            print(f'Error: {e}')
+            return False
+
+    def is_identifier_exit(self, table_name: str, value: str) -> bool:
+        '''Check if a specific value exists within a column in the given table.'''
+        try:
+            c = self.connection.cursor()
+            c.execute(f'''
+            SELECT COUNT(*) FROM {table_name}
+            WHERE object_id LIKE ?
+            ''', (value,))
+            return c.fetchone()[0] > 0
+        except OperationalError as e:
+            print(f'Error: {e}')
+    
+    
+
 
     def close(self):
-        """Close the database connection."""
+        '''Close the database connection.'''
         self.connection.close()
