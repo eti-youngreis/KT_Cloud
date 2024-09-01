@@ -32,16 +32,17 @@ class Bucket(STOE):
         pass
 
     def put_cors_configuration(self, bucket_name, cors_configuration):
-        # בדיקת קיום הדלי
+        
+        # Checking the existence of the bucket
         bucket = ObjectManager.get_bucket(bucket_name)
         if not bucket:
             raise ValueError(f"Bucket '{bucket_name}' does not exist.")
         
-        # ולידציה של CORS configuration
+        # Cors configuration validations
         if not self.validate_cors_configuration(cors_configuration):
             raise ValueError("Invalid CORS configuration format.")
         
-        # יצירת אובייקט CORSConfigurationModel והגדרת CORS לדלי
+        # Creating a cors object and defining the cors configuration for the bucket
         cors_config = CORSConfigurationModel(cors_configuration)
         bucket.cors_configuration = cors_config
         bucket.ObjectManager.update()
