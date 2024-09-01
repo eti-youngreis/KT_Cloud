@@ -23,9 +23,17 @@ class Bucket(STOE):
         await StorageManager.create(bucket_name)
         return bucket_obj
 
-    def delete(self, *args,**kwargs):
+    def delete(self,bucket_name: str)->bool:
         """Delete an existing storage object."""
-        pass
+
+        bucket = self.get(bucket_name)
+
+        if not bucket:
+            raise ValueError(f"Bucket '{bucket_name}' not found.")
+
+        await BucketDAL.delete(bucket_name,bucket_obj)
+        await StorageManager.delete(bucket_name)
+        return True
 
     def get(self, *args, **kwargs):
         """get storage object."""

@@ -11,9 +11,7 @@ class BucketDAL:
     def create(self,bucket_name) -> None:
         """create a new bucket."""
 
-        return ObjectManager.create(bucket_name)
-        StorageManager.create(bucket_name,bucket_obj)
-        
+        return ObjectManager.create(bucket_name)        
 
     def insert(self) -> None:
         """Insert a new Object into managment file."""
@@ -30,4 +28,4 @@ class BucketDAL:
 
     def delete(self) -> None:
         """Delete an object from managment file."""
-        pass
+        return ObjectManager.delete(bucket_name)
