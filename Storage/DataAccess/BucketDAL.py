@@ -1,5 +1,6 @@
 from DataAccess.StorageManager import StorageManager
 from DataAccess.ObjectManager import ObjectManager
+from Models.BucketModel import BucketModel
 
 class BucketDAL:
     def __init__(self): 
@@ -10,9 +11,7 @@ class BucketDAL:
 
     def create(self,bucket_name) -> None:
         """create a new bucket."""
-
         return ObjectManager.create(bucket_name)
-        StorageManager.create(bucket_name,bucket_obj)
         
 
     def insert(self) -> None:
@@ -23,9 +22,10 @@ class BucketDAL:
         """Update an existing object in managment file."""
         pass
 
-    def get(self) -> None:
-        """Get object from managment file."""
-        pass
+    def get(self) -> BucketModel:
+        """Get bucket from managment file."""
+        return ObjectManager.get(bucket_name)
+
         
 
     def delete(self) -> None:

@@ -14,7 +14,7 @@ class Bucket(STOE):
         """Create a new bucket."""
 
         # Validating the bucket name
-        if not is_valid_bucket_name(bucket_name) :
+        if not is_valid_bucket_name(bucket_name):
             raise ValueError(f"Invalid bucket name: '{bucket_name}'.")
         
         bucket_obj=BucketModel(bucket_name)
@@ -27,9 +27,17 @@ class Bucket(STOE):
         """Delete an existing storage object."""
         pass
 
-    def get(self, *args, **kwargs):
+    async def get(self, bucket_name: str)->BucketModel:
         """get storage object."""
-        pass
+
+        if not bucket_name:
+            raise ValueError("Bucket name must be provided.")
+
+        metadata=await StorageManager.get(bucket_name)
+        if not metadata:
+            raise ValueError("Bucket with this name was not found.")
+
+        return metadata
 
     def put(self, *args, **kwargs):
         """put storage object."""
