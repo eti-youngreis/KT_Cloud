@@ -4,7 +4,6 @@ from Models import DBClusterModel
 from Abc import DBO
 from Validation import Validation 
 
-
 class DBClusterService(DBO):
     def __init__(self, dal: ClusterManager):
         self.dal = dal
