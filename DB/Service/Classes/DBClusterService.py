@@ -101,9 +101,76 @@ class DBClusterService(DBO):
         """Modify an existing db cluster"""
         pass
 
+
     def describe(self, **kwargs) -> Dict:
         """Retrieve the details of a cluster."""
         pass
+
+    def DescribeDBClusters(self, **kwargs):
+         result = []
+         with self.open_connection() as conn:
+            if "max_records" in kwargs :
+                if not Validation.is_valid_number(kwargs["max_records"], 20, 100):
+                     raise ValueError(f"Invalid max_records. max_records must be between 20 to 100.")
+                else:
+                    kwargs["max_records"] = 100
+                    
+            if "db_cluster_identifier" in kwargs:
+                # kwargs["db_cluster_identifier"]
+ 
+                # if not validations.exist_value_in_column(conn, "object_management", "object_id", kwargs["db_cluster_identifier"] ):
+                #     raise ValueError("Cluster identifier does not exist")
+                for key, inner_dict in self.objects.items():
+                    if kwargs["db_cluster_identifier"] in inner_dict:
+                        cluster_to_describe = inner_dict[kwargs["db_cluster_identifier"]]
+                del kwargs["db_cluster_identifier"]
+                result.append(cluster_to_describe.describe_cluster(conn, **kwargs))
+            else:
+
+                for cluster in self.objects["Clusters"].values():
+
+                    passed_all_filters = True
+
+                    # Check if the DB cluster matches all filter criteria
+                    if "filters" in kwargs and "db-cluster-id" in kwargs["filters"] and cluster.db_cluster_identifier not in kwargs["filters"]["db-cluster-id"]:
+                        passed_all_filters = False
+
+                    if "filters" in kwargs and "engine" in kwargs["filters"] and cluster.engine not in kwargs["filters"]["engine"]:
+                        passed_all_filters = False
+
+                # Send the DB cluster to describe_cluster function if it passed all filters
+                    if passed_all_filters:
+                        result.append(cluster.describe_cluster(conn, **kwargs))
+           
+            return result
+
+
+
+
+    def modify(self, **kwargs) -> Dict:
+        """Modify a db cluster"""
+        required_params=["db_cluster_identifier"]
+        if not self.validate_cluster_parameters(required_params, **kwargs):
+            raise ValueError(f"Cluster identifier is required")
+        
+        db_cluster_identifier = kwargs["db_cluster_identifier"]
+        
+        if not self.is_valid_dbClusterIdentifier(db_cluster_identifier):
+            raise ValueError(f"Invalid dbClusterIdentifier: {db_cluster_identifier}")
+        
+        self.check_parameters_constarins(**kwargs)
+
+        # return self.dal.
+
+        # for _ , inner_dict in self.objects.items():
+        #     if kwargs["db_cluster_identifier"] in inner_dict:
+        #         cluster_obj_to_modify = inner_dict[kwargs["db_cluster_identifier"]]
+        #         cluster_obj_to_modify.modify_cluster(**kwargs)
+        #         cluster_obj_to_modify.save_changes_in_management_db(conn, True)
+        #         return {"modified_cluster": cluster_obj_to_modify.get_cluster_data_in_dict()}
+
+
+
 
     def delete(self, **kwargs):
         """Delete an existing db cluster"""
