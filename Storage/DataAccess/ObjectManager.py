@@ -9,7 +9,7 @@ class ObjectManager:
     def __init__(self, metadata_file="s3/KT_cloud/Storage/server/metadata.json"):
         self.metadata_file = metadata_file
         self.metadata = self.load_metadata()
-        self.storage_maneger = StorageManager()
+        self.storage_manager = StorageManager()
 
     def load_metadata(self):
         # Load metadata from file if it exists, otherwise return default structure
@@ -39,7 +39,7 @@ class ObjectManager:
             async with aiofiles.open(self.metadata_file, 'w', encoding='utf-8') as f:
                 await f.write(json.dumps(self.metadata, indent=4, ensure_ascii=False))
 
-        self.storage_maneger.create(bucket, key, version_id, body)
+        self.storage_manager.create(bucket, key, version_id, body)
 
     def get_bucket(self, bucket):
         return self.metadata["server"]["buckets"].get(bucket, None)
@@ -57,7 +57,7 @@ class ObjectManager:
 
     def get_object_by_version(self, bucket, key, version_id=None):
         meta_data = self.get_versions(bucket, key).get(version_id, None)
-        content = self.storage_maneger.get(bucket, key, version_id)
+        content = self.storage_manager.get(bucket, key, version_id)
         return {
             'Body': content,
             'ContentLength': meta_data.get('contentLength', len(content)),
@@ -81,12 +81,12 @@ class ObjectManager:
             return max(metadata["versions"].keys(), key=int)
         else:
             raise FileNotFoundError(f"No versions found for object {key} in bucket {bucket}")
-
+# מיותר!
     def put(self, bucket, key, data, sync_flag):
         self.create(bucket, key, data, sync_flag)
         object_metadata = self.get_latest_version(bucket, key)
         version_id = str(len(object_metadata['versions']) + 1)
-        self.storage_maneger.create(bucket, key, version_id, data)
+        self.storage_manager.create(bucket, key, version_id, data)
 
     def get_versioning_status(self, bucket):
         bucket_metadata = self.metadata["server"]["buckets"].get(bucket, {})
@@ -100,7 +100,7 @@ class ObjectManager:
                 await self.update(True)
             else:
                 await self.update(False)
-            self.storage_maneger.delete(bucket,key)
+            self.storage_manager.delete(bucket,key)
 
 
     async def put_deleteMarker(self, bucket, key,  version, sync_flag=True):
@@ -113,5 +113,16 @@ class ObjectManager:
             await self.update(True)
         else:
             await self.update(False)
-        self.storage_maneger.encript_version(bucket,key,version)
+        self.storage_manager.encript_version(bucket,key,version)
         
+        
+    async def read(self, bucket: str, key: str, version_id = None):
+        try:
+            if version_id is None:
+                version_id = self.get_latest_version(bucket, key)
+            
+            content = self.storage_manager.get(bucket, key, version_id).content
+            return content
+        except FileNotFoundError as e:
+            print(f"Error reading object: {str(e)}")
+            return b""
