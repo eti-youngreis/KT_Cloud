@@ -1,5 +1,5 @@
 
-from typing import Dict
+from typing import Dict, Optional
 class PolicyModel:
     def __init__(self, bucket_name: str, major_bucket_version: str, policy_content: str, policy_name: str, tags: Optional[Dict] = None):
         self.bucket_name = bucket_name

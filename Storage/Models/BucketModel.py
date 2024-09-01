@@ -1,3 +1,5 @@
+from typing import Dict, Optional
+
 
 from typing import Set
 from Storage.Models.ObjectModel import ObjectModel
@@ -14,10 +16,3 @@ class Bucket:
     
     def update_encryption(self, is_encrypted):
         self.encrypt_mode = is_encrypted
-
-
-
-
-
-
-

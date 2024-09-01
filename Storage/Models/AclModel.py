@@ -1,4 +1,4 @@
-class ACL:
+class Acl:
     def __init__(self, owner):
         self.owner = owner
         self.permissions = []
@@ -7,18 +7,18 @@ class ACL:
         self.permissions.append(permission)
 
     def remove_permission(self, user, permission):
-        """הסר הרשאה למשתמש"""
+        # Remove user permission
         if user in self.permissions:
             self.permissions[user].discard(permission)
             if not self.permissions[user]:
                 del self.permissions[user]
 
     def check_permission(self, user, permission):
-        """בדוק אם למשתמש יש הרשאה מסוימת"""
+        # Check if the user has a certain permission
         return permission in self.permissions.get(user, set())
 
     def is_owner(self, user):
-        """בדוק אם המשתמש הוא בעל הקובץ"""
+        # Check if the user owns the file
         return self.owner == user
 
     def __str__(self):
