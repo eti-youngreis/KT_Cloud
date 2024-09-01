@@ -27,13 +27,13 @@ def validate_tags(tags: Optional[Dict]) -> bool:
 def validate_cors_configuration(self, cors_configuration):
     required_keys = ['AllowedOrigins', 'AllowedMethods']
     
-    # בדיקה שכל המפתחות הנדרשים קיימים
+    # Checking that all the required keys are present
     for key in required_keys:
         if key not in cors_configuration:
             print(f"Missing required key: {key}")
             return False
     
-    # בדיקה אם המפתחות הקיימים מכילים ערכים תקינים (למשל, רשימות ולא מחרוזות)
+    # Checking if the existing keys contain valid values ​​(for example, lists and not strings)
     if not isinstance(cors_configuration['AllowedOrigins'], list):
         print("AllowedOrigins should be a list.")
         return False
@@ -41,5 +41,4 @@ def validate_cors_configuration(self, cors_configuration):
         print("AllowedMethods should be a list.")
         return False
     
-    # אפשר להוסיף ולידציות נוספות בהתאם לדרישות
     return True
