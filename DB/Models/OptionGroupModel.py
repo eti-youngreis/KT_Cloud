@@ -11,10 +11,10 @@ class OptionGroupModel:
 
     def to_dict(self) -> Dict:
         return {
-            "engineName": self.engine_name,
-            "majorEngineVersion": self.major_engine_version,
-            "optionGroupDescription": self.option_group_description,
-            "optionGroupName": self.option_group_name,
-            "tags": self.tags,
-            "available": self.available
+            'engineName': self.engine_name,
+            'majorEngineVersion': self.major_engine_version,
+            'optionGroupDescription': self.option_group_description,
+            'optionGroupName': self.option_group_name,
+            'tags': self.tags,
+            'available': self.available
         }
