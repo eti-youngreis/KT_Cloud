@@ -30,4 +30,5 @@ class BucketDAL:
 
     def delete(self) -> None:
         """Delete an object from managment file."""
-        pass
+        return ObjectManager.delete(bucket_name)
+
