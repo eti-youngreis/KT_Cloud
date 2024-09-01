@@ -27,8 +27,7 @@ class VersionManager:
         pass
 
     def get(self, bucket:str, key:str, version:str) -> Version:
-        version_json = self.metadata["server"]["buckets"][bucket]["objects"][key]["versions"].get()
-
+        return self.metadata["server"]["buckets"][bucket]["objects"][key]["versions"].get(version,None)
 
     def put(self, bucket, key, data, sync_flag):
         pass
