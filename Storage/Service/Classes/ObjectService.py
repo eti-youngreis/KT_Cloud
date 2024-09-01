@@ -38,7 +38,8 @@ class ObjectService(STOE):
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
 
-    async def put(self, obj: ObjectModel, body, acl:Acl=None, metadata=None, content_type=None, flag_sync=True):
+    async def put(self, obj: ObjectModel, body, encription=None, acl=None, metadata=None, content_type=None, flag_sync=True):
+
         bucket = obj.bucket
         key = obj.key
         try:
@@ -54,6 +55,7 @@ class ObjectService(STOE):
                 "tagSet": [],
                 "contentLength": len(body),
                 "contentType": content_type if content_type else "application/octet-stream",
+                "encryption": encription,
                 "metadata": metadata if metadata else {}
             }
             if not self.object_manager.get_bucket(bucket):
@@ -415,6 +417,7 @@ class ObjectService(STOE):
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
             return {'error': str(e)}
+        
 
     def list(self, *args, **kwargs):
         """list storage object."""
@@ -480,6 +483,7 @@ class ObjectService(STOE):
     async def put_object_lock_configuration(self, object_lock_enabled, mode="GOVERNANCE", days=30, years=0,
                                             is_sync=True):
         pass
+    
 
 if __name__ == '__main__':
     async def main():
