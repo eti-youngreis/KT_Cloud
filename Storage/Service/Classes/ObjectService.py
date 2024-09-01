@@ -427,17 +427,191 @@ class ObjectService(STOE):
     async def get_object_lock_configuration(self):
         pass
 
-    async def put_object_legal_hold(self, legal_hold_status, version_id=None, is_sync=True):
-        pass
+    #naive Implementation
+    async def put_object_legal_hold(self, obj: ObjectModel, legal_hold_status, version_id=None, is_sync=True):
+        bucket = obj.bucket
+        key = obj.key
+        try:
+            if legal_hold_status not in ['ON', 'OFF']:
+                raise ValueError("Legal hold status must be either 'ON' or 'OFF'")
+            if sync_flag:
+                metadata = self.object_manager.get_object(bucket, key)
+            else:
+                metadata = await asyncio.to_thread(self.object_manager.get_object, bucket, key)
 
-    async def get_object_legal_hold(self, version_id=None, is_async=True):
-        pass
+            if metadata is None:
+                raise FileNotFoundError(f"No metadata found for object {key}")
 
-    async def get_object_retention(self, version_id=None, is_sync=True):
-        pass
+            # Ensure 'versions' key exists
+            versions = metadata.get('versions', {})
+            if not versions:
+                raise FileNotFoundError(f"No versions found for object {key}")
 
-    async def put_object_retention(self, retention_mode, retain_until_date, version_id=None, is_sync=True):
-        pass
+            # Use the latest version if no version ID is specified
+            if version_id is None:
+                version_id = max(versions.keys(), key=int)
+
+            # Get version metadata
+            version_metadata = versions.get(str(version_id))
+            if version_metadata is None:
+                raise FileNotFoundError(f"No version found with ID {version_id} for object {key}")
+
+            if metadata and "versions" in metadata:
+                if version_id is None:
+                    version_id = self.get_latest_version(bucket, key)
+                # Update the LegalHold status for the specified version
+                metadata["versions"][version_id]["LegalHold"]["Status"] = legal_hold_status
+                # Save the updated metadata based on sync/asynchronous mode
+                await self.object_manager.update(is_sync)
+
+                return {"LegalHold": {"Status": legal_hold_status}}
+            else:
+                if not metadata:
+                    raise KeyError(f"Object key '{key}' not found in metadata")
+                elif "versions" in metadata and version_id not in metadata["versions"]:
+                    raise KeyError(f"Version id '{version_id}' not found for object key '{key}' in metadata")
+        except Exception as e:
+            return {
+                'Error': str(e)
+            }
+
+    #naive Implementation
+    async def get_object_legal_hold(self,obj:ObjectModel, version_id=None, is_async=True):
+        bucket = obj.bucket
+        key = obj.key
+        
+        try:
+            # Fetch metadata synchronously or asynchronously based on sync_flag
+            if sync_flag:
+                metadata = self.object_manager.get_object(bucket, key)
+            else:
+                metadata = await asyncio.to_thread(self.object_manager.get_object, bucket, key)
+
+            if metadata is None:
+                raise FileNotFoundError(f"No metadata found for object {key}")
+
+            # Ensure 'versions' key exists
+            versions = metadata.get('versions', {})
+            if not versions:
+                raise FileNotFoundError(f"No versions found for object {key}")
+
+            # Use the latest version if no version ID is specified
+            if version_id is None:
+                version_id = max(versions.keys(), key=int)
+
+            # Get version metadata
+            version_metadata = versions.get(str(version_id))
+            if version_metadata is None:
+                raise FileNotFoundError(f"No version found with ID {version_id} for object {key}")
+
+            # Extract and return object object_legal_hold
+            if "LegalHold" in version_metadata:
+                legal_hold = version_metadata["LegalHold"]
+            else:
+                legal_hold = {"Status":"OFF"}
+
+            return {"LegalHold": legal_hold}
+            
+        except FileNotFoundError as e:
+            print(f"Error: {e}")
+            return {'error': str(e)}
+        except PermissionError as e:
+            print(f"Error: Permission denied when accessing the file or directory: {e}")
+            return {'error': str(e)}
+        except OSError as e:
+            print(f"OS error occurred: {e}")
+            return {'error': str(e)}
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            return {'error': str(e)}
+
+
+
+
+    async def put_object_retention(self,obj:ObjectModel, retention_mode, retain_until_date, version_id=None, is_sync=True):
+
+        bucket = obj.bucket
+        key = obj.key
+
+        try:
+            # Fetch metadata synchronously or asynchronously based on sync_flag
+            if sync_flag:
+                metadata = self.object_manager.get_object(bucket, key)
+            else:
+                metadata = await asyncio.to_thread(self.object_manager.get_object, bucket, key)
+
+            if metadata is None:
+                raise FileNotFoundError(f"No metadata found for object {key}")
+
+            # Ensure 'versions' key exists
+            versions = metadata.get('versions', {})
+            if not versions:
+                raise FileNotFoundError(f"No versions found for object {key}")
+
+            # Use the latest version if no version ID is specified
+            if version_id is None:
+                version_id = max(versions.keys(), key=int)
+
+            # Get version metadata
+            version_metadata = versions.get(str(version_id))
+            if version_metadata is None:
+                raise FileNotFoundError(f"No version found with ID {version_id} for object {key}")
+
+            if "LegalHold" in version_metadata:
+                    legal_hold = version_metadata["LegalHold"]
+            else:
+                legal_hold = {"Status":"OFF"}
+
+            return {"LegalHold": legal_hold}
+        except Exception as e:
+            return {
+                'Error': str(e)
+            }
+        
+    async def get_object_retention(self, obj: ObjectModel, retention_mode, retain_until_date, version_id=None, is_sync=True):
+        bucket = obj.bucket
+        key = obj.key
+        if retention_mode not in ['COMPLIANCE', 'GOVERNANCE']:
+            raise ValueError("retention_mode must be either 'COMPLIANCE' or 'GOVERNANCE'")
+        try:
+            # Fetch metadata synchronously or asynchronously based on is_sync
+            if is_sync:
+                metadata = self.object_manager.get_object(bucket, key)
+            else:
+                metadata = await asyncio.to_thread(self.object_manager.get_object, bucket, key)
+
+            if metadata is None:
+                raise FileNotFoundError(f"No metadata found for object {key}")
+
+            # Ensure 'versions' key exists
+            versions = metadata.get('versions', {})
+            if not versions:
+                raise FileNotFoundError(f"No versions found for object {key}")
+
+            # Use the latest version if no version ID is specified
+            if version_id is None:
+                version_id = max(versions.keys(), key=int)
+
+            # Get version metadata
+            version_metadata = versions.get(str(version_id))
+            if version_metadata is None:
+                raise FileNotFoundError(f"No version found with ID {version_id} for object {key}")
+
+            # Update the Retention configuration for the specified version
+            version_metadata["Retention"] = {
+                "Mode": retention_mode,
+                "RetainUntilDate": retain_until_date
+            }
+
+            await self.object_manager.update(is_sync)
+            return {"Retention": {"Mode": retention_mode, "RetainUntilDate": retain_until_date}}
+
+        except Exception as e:
+            return {
+                'Error': str(e)
+            }
+
+
 
     async def put_object_lock_configuration(self, object_lock_enabled, mode="GOVERNANCE", days=30, years=0,
                                             is_sync=True):
