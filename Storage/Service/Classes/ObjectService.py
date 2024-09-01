@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 
 from Models.ObjectModel import ObjectModel
 from Models.Tag import Tag
-from Models.Acl import ACL
+from Models.AclModel import Acl
 
 from DataAccess.ObjectManager import ObjectManager
 from Service.Abc.STOE import STOE
@@ -17,7 +17,7 @@ class ObjectService(STOE):
     def __init__(self):
         self.object_manager = ObjectManager()
 
-    async def get(self,obj:ObjectModel, version_id=None, flag_sync=True):
+    async def get(self,obj:ObjectModel, version_id:str=None, flag_sync:bool=True):
         bucket = obj.bucket
         key = obj.key
         try:
@@ -38,7 +38,8 @@ class ObjectService(STOE):
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
 
-    async def put(self, obj: ObjectModel, body, acl=None, metadata=None, content_type=None, flag_sync=True):
+    async def put(self, obj: ObjectModel, body, encription=None, acl=None, metadata=None, content_type=None, flag_sync=True):
+
         bucket = obj.bucket
         key = obj.key
         try:
@@ -54,6 +55,7 @@ class ObjectService(STOE):
                 "tagSet": [],
                 "contentLength": len(body),
                 "contentType": content_type if content_type else "application/octet-stream",
+                "encryption": encription,
                 "metadata": metadata if metadata else {}
             }
             if not self.object_manager.get_bucket(bucket):
@@ -93,6 +95,7 @@ class ObjectService(STOE):
     async def create(self, body, acl=None, metadata=None, content_type=None, flag_sync=True):
         pass
 
+    #naive implementation
     async def delete(self,obj:ObjectModel, version_id=None, flag_sync=True):
         bucket = obj.bucket
         key = obj.key
@@ -145,7 +148,7 @@ class ObjectService(STOE):
             "Tag_Set": tags_dict
         }
 
-
+    #naive implementation
     async def copy_object(self, source_obj:ObjectModel,destination_bucket, destination_key=None,version_id=None, sync_flag=True):
         source_bucket=source_obj.bucket
         source_key = source_obj.key
@@ -154,7 +157,7 @@ class ObjectService(STOE):
             await self.object_manager.copy_object(source_bucket, source_key, destination_bucket, destination_key,version_id,sync_flag=sync_flag)          
         await self.object_manager.copy_object(source_bucket, source_key, destination_bucket, destination_key, sync_flag=sync_flag)
 
-
+    #naive implementation
     async def delete_objects(self,obj:ObjectModel, delete, flag_sync=True):
         bucket = obj.bucket
         deleted = []
@@ -179,7 +182,7 @@ class ObjectService(STOE):
             'Errors': errors
         }
 
-    async def put_object_acl(self, obj: ObjectModel, acl: ACL, version_id=None, is_sync=True):
+    async def put_object_acl(self, obj: ObjectModel, acl: Acl, version_id=None, is_sync=True):
         bucket = obj.bucket
         key = obj.key
         # Check if the bucket exists
@@ -200,7 +203,7 @@ class ObjectService(STOE):
             raise FileNotFoundError(f"Version '{version_id}' does not exist for object '{key}' in bucket '{bucket}'")
         
         versions = self.object_manager.get_versions(bucket, key)
-        # Update the ACL for the specified version
+        # Update the Acl for the specified version
         if version_id not in versions:
             raise FileNotFoundError(f"Version '{version_id}' does not exist in object '{key}'")
 
@@ -214,7 +217,7 @@ class ObjectService(STOE):
 
         return {
             "VersionId": version_id,
-            "ACL": {
+            "Acl": {
                 "owner": acl.owner,
                 "permissions": acl.permissions
             }
@@ -246,7 +249,7 @@ class ObjectService(STOE):
             owner = acl_metadata.get("owner", "unknown")
             permissions = acl_metadata.get("permissions", [])
 
-            acl = ACL(owner=owner)
+            acl = Acl(owner=owner)
             for perm in permissions:
                 acl.add_permission(perm)
 
@@ -414,6 +417,7 @@ class ObjectService(STOE):
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
             return {'error': str(e)}
+        
 
     def list(self, *args, **kwargs):
         """list storage object."""
@@ -429,8 +433,46 @@ class ObjectService(STOE):
     async def put_object_legal_hold(self, legal_hold_status, version_id=None, is_sync=True):
         pass
 
-    async def get_object_legal_hold(self, version_id=None, is_async=True):
-        pass
+    async def put_object_legal_hold(self, bucket:str, key:str, legal_hold_status:str, version_id:str=None, is_sync:bool=True):
+        try:
+            if legal_hold_status not in ["ON", "OFF"]:
+                raise ValueError("Legal hold status must be either 'ON' or 'OFF'")
+
+            if not isinstance(bucket, str) or not bucket:
+                raise ValueError("Bucket name must be a non-empty string")
+            if not isinstance(key, str) or not key:
+                raise ValueError("Object key must be a non-empty string")
+            
+            metadata = self.object_manager.get_bucket_metadata(bucket, key)
+            if not metadata:
+                raise KeyError(f"Object key '{key}' not found in metadata")
+
+            if "versions" not in metadata:
+                metadata["versions"] = {}
+
+            if version_id is None:
+                version_id = self.object_manager.get_latest_version(bucket, key)
+
+            if version_id not in metadata["versions"]:
+                metadata["versions"][version_id] = {}
+
+            if "LegalHold" not in metadata["versions"][version_id]:
+                metadata["versions"][version_id]["LegalHold"] = {}
+            metadata["versions"][version_id]["LegalHold"]["Status"] = legal_hold_status
+
+            # Save the updated metadata based on sync/asynchronous mode
+            await self.object_manager.save_metadata(is_sync)
+
+            return {"LegalHold": {"Status": legal_hold_status}}
+        
+
+        except ValueError as e:
+            return {"Error": f"Invalid value: {str(e)}"}
+        except KeyError as e:
+            return {"Error": f"Metadata issue: {str(e)}"}
+        except Exception as e:
+            return {"Error": f"Unexpected error: {str(e)}"}
+
 
     async def get_object_retention(self, version_id=None, is_sync=True):
         pass
@@ -441,6 +483,7 @@ class ObjectService(STOE):
     async def put_object_lock_configuration(self, object_lock_enabled, mode="GOVERNANCE", days=30, years=0,
                                             is_sync=True):
         pass
+    
 
 if __name__ == '__main__':
     async def main():
@@ -461,19 +504,19 @@ if __name__ == '__main__':
         tags=await res.get_object_tagging(obj,"1")
         print(tags)
 
-        # Example ACL
-        acl = ACL(owner="user1")
+        # Example Acl
+        acl = Acl(owner="user1")
         acl.add_permission("READ")
 
         try:
-            # Assuming the object already exists and you want to set ACL for a specific version
+            # Assuming the object already exists and you want to set Acl for a specific version
             response = await res.put_object_acl(obj, acl, is_sync=True)
-            print(f"ACL successfully updated: {response}")
+            print(f"Acl successfully updated: {response}")
         except Exception as e:
-            print(f"Error while updating ACL: {e}")
+            print(f"Error while updating Acl: {e}")
 
         acl = await res.get_object_acl(obj, flag_sync=True)
-        print(f"ACL: {acl}")
+        print(f"Acl: {acl}")
 
         head_object=await res.head_object(obj)
         print(head_object,"head_object")
