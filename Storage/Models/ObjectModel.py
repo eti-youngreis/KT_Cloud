@@ -8,5 +8,8 @@ class ObjectModel:
         self.key = object_key
         # self.tagging = Tagging()
         self.versioning:list[Version] = []
+        # self.acl = ACL()
+    
         self.encryption = EncryptionModel()
         # self.acl = ACL()
+

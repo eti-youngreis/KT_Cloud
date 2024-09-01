@@ -7,6 +7,7 @@ from datetime import datetime
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from Models.ObjectModel import ObjectModel
+
 from Models.Tag import Tag
 from Models.AclModel import Acl
 
@@ -16,6 +17,7 @@ from Service.Abc.STOE import STOE
 class ObjectService(STOE):
     def __init__(self):
         self.object_manager = ObjectManager()
+
 
     async def get(self,obj:ObjectModel, version_id:str=None, flag_sync:bool=True):
         bucket = obj.bucket
@@ -38,6 +40,7 @@ class ObjectService(STOE):
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
 
+
     async def put(self, obj: ObjectModel, body, encription=None, acl=None, metadata=None, content_type=None, flag_sync=True):
 
         bucket = obj.bucket
@@ -55,6 +58,7 @@ class ObjectService(STOE):
                 "tagSet": [],
                 "contentLength": len(body),
                 "contentType": content_type if content_type else "application/octet-stream",
+
                 "encryption": encription,
                 "metadata": metadata if metadata else {}
             }
@@ -79,8 +83,8 @@ class ObjectService(STOE):
             print(f"Error: The file or directory was not found: {e}")
             raise
         except PermissionError as e:
-            
-            (f"Error: Permission denied when accessing the file or directory: {e}")
+            print(f"Error: Permission denied when accessing the file or directory: {e}")
+
             raise
         except OSError as e:
             print(f"OS error occurred: {e}")
@@ -94,6 +98,7 @@ class ObjectService(STOE):
 
     async def create(self, body, acl=None, metadata=None, content_type=None, flag_sync=True):
         pass
+
 
     #naive implementation
     async def delete(self,obj:ObjectModel, version_id=None, flag_sync=True):
@@ -111,6 +116,7 @@ class ObjectService(STOE):
             await self.object_manager.put_deleteMarker(bucket, key, version_id, flag_sync=flag_sync)
             return {'DeleteMarker': True, 'VersionId': version_id}
         return {}
+
     
     async def put_object_tagging(self, obj: ObjectModel, tags: Tag, version_id=None, sync_flag=True):
         if not isinstance(sync_flag, bool):
@@ -427,11 +433,13 @@ class ObjectService(STOE):
         """check if object exists and is accessible with the appropriate user permissions."""
         pass
 
+
     async def get_object_lock_configuration(self):
         pass
 
     async def put_object_legal_hold(self, legal_hold_status, version_id=None, is_sync=True):
         pass
+
 
     async def put_object_legal_hold(self, bucket:str, key:str, legal_hold_status:str, version_id:str=None, is_sync:bool=True):
         try:
@@ -483,11 +491,12 @@ class ObjectService(STOE):
     async def put_object_lock_configuration(self, object_lock_enabled, mode="GOVERNANCE", days=30, years=0,
                                             is_sync=True):
         pass
-    
+
 
 if __name__ == '__main__':
     async def main():
         res = ObjectService()
+
         obj = ObjectModel("bucket3", "fff/file.txt")
         try:
             body = b"Hello, World! \n I write now I want to see if it's work"

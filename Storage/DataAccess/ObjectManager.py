@@ -3,14 +3,17 @@ from typing import Dict, Any
 import json
 import aiofiles
 import os
+from .StorageManager import StorageManager
 import datetime
 
-from .StorageManager import StorageManager
 class ObjectManager:
-    def __init__(self, metadata_file='s3/KT_cloud/Storage/server/metadata.json'):
+
+    def __init__(self, metadata_file="s3 project/KT_Cloud/Storage/server/metadata.json"):
         self.metadata_file = metadata_file
         self.metadata = self.load_metadata()
-        self.storage_manager = StorageManager()
+        self.storage_maneger = StorageManager()
+
+
 
     def load_metadata(self):
         # Load metadata from file if it exists, otherwise return default structure
@@ -18,7 +21,7 @@ class ObjectManager:
             with open(self.metadata_file, 'r', encoding='utf-8') as f:
                 return json.load(f)
         else:
-            return {'server': {'buckets': {}}}
+            return {"server": {"buckets": {}}}
 
     async def update(self, sync_flag=True):
         # Save metadata either synchronously or asynchronously
@@ -30,8 +33,8 @@ class ObjectManager:
                 await f.write(json.dumps(self.metadata, indent=4, ensure_ascii=False))
 
     async def create(self, bucket, key, data, body,version_id, object_metadata, sync_flag=True):
-        object_metadata['versions'][version_id] = data
-        self.get_bucket(bucket)['objects'][key] = object_metadata
+        object_metadata["versions"][version_id] = data
+        self.get_bucket(bucket)["objects"][key] = object_metadata
 
         if sync_flag:
             with open(self.metadata_file, 'w', encoding='utf-8') as f:
@@ -40,7 +43,7 @@ class ObjectManager:
             async with aiofiles.open(self.metadata_file, 'w', encoding='utf-8') as f:
                 await f.write(json.dumps(self.metadata, indent=4, ensure_ascii=False))
 
-        self.storage_manager.create(bucket, key, version_id, body)
+
 
     def get_bucket(self, bucket):
         bucketJson = self.metadata["server"]["buckets"].get(bucket, None)
@@ -76,6 +79,7 @@ class ObjectManager:
         if metadata:
             return metadata.get('versions', {})
         return {}
+
         
     def get_latest_version(self, bucket, key):
         # Get the latest version for a given key

@@ -106,6 +106,7 @@ class DBClusterService(DBO):
         """Retrieve the details of a cluster."""
         pass
 
+
     def DescribeDBClusters(self, **kwargs):
          result = []
          with self.open_connection() as conn:
@@ -168,8 +169,6 @@ class DBClusterService(DBO):
         #         cluster_obj_to_modify.modify_cluster(**kwargs)
         #         cluster_obj_to_modify.save_changes_in_management_db(conn, True)
         #         return {"modified_cluster": cluster_obj_to_modify.get_cluster_data_in_dict()}
-
-
 
 
     def delete(self, **kwargs):

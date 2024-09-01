@@ -1,30 +1,43 @@
-from Abc import STOE
-from Storage.Service.Classes.ObjectService import ObjectService
-from ...DataAccess.ObjectManager import ObjectManager
-from Validation import is_valid_bucket_name, is_valid_policy_name
-from DataAccess import ObjectManager
-from Models.CorsModel import CORSConfigurationModel
-from Validtion import validate_cors_configuration
-from ...Models.BucketModel import Bucket
-from ...Models.ObjectModel import ObjectModel    
+from DataAccess.BucketDAL import BucketDAL
+from Service.Abc.STOE import STOE
+from Models.BucketModel import BucketModel
+from DataAccess.StorageManager import StorageManager
 
-class BucketService(STOE):
-    # כל פונקציה צריכה: לעדכן ב:1.מחלקות 2.objectManager3.storageManager
+class Bucket(STOE):
+
     def __init__(self):
-        self.object_manager = ObjectManager()
-        self.object_service = ObjectService()
-        
-    def create(self,*args, **kwargs):
+        self.BucketDAL = BucketDAL()
+        self.StorageManager=StorageManager()
+
+    async def create(self, bucket_name: str)->BucketModel:
+
         """Create a new bucket."""
-        pass
+
+        # Validating the bucket name
+        if not is_valid_bucket_name(bucket_name):
+            raise ValueError(f"Invalid bucket name: '{bucket_name}'.")
+        
+        bucket_obj=BucketModel(bucket_name)
+
+        await BucketDAL.create(bucket_name,bucket_obj)
+        await StorageManager.create(bucket_name)
+        return bucket_obj
 
     def delete(self, *args,**kwargs):
         """Delete an existing storage object."""
         pass
 
-    def get(self, *args, **kwargs):
+    async def get(self, bucket_name: str)->BucketModel:
         """get storage object."""
-        pass
+
+        if not bucket_name:
+            raise ValueError("Bucket name must be provided.")
+
+        metadata=await StorageManager.get(bucket_name)
+        if not metadata:
+            raise ValueError("Bucket with this name was not found.")
+
+        return metadata
 
     def put(self, *args, **kwargs):
         """put storage object."""

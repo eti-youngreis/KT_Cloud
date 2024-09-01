@@ -1,9 +1,11 @@
 from typing import Dict, Any
 import json
+import sqlite3
 from DBManager import DBManager
 
 class ObjectManager:
     def __init__(self, db_file: str):
+
         '''Initialize ObjectManager with the database connection.'''
         self.db_manager = DBManager(db_file)
         self.table_name = 'objects'

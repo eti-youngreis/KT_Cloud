@@ -3,6 +3,7 @@ from typing import Dict, Any
 import json
 import aiofiles
 import os
+
 from Models.VesionModel import Version
 from .StorageManager import StorageManager
 class VersionManager:
@@ -26,6 +27,7 @@ class VersionManager:
     async def create(self, bucket, key, data, body,version_id, object_metadata, sync_flag=True):
         pass
 
+
     def get(self, bucket:str, key:str, version:str) -> Version:
         return self.metadata["server"]["buckets"][bucket]["objects"][key]["versions"].get(version,None)
 
@@ -33,4 +35,7 @@ class VersionManager:
         pass
 
     def get_versioning_status(self, bucket):
-        pass
+        bucket_metadata = self.metadata["server"]["buckets"].get(bucket, {})
+        versioning_status = bucket_metadata.get("versioning", "not enabled")
+        return versioning_status
+

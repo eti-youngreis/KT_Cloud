@@ -3,18 +3,18 @@ from typing import Dict, Any
 import os
 import aiofiles
 import shutil
-import ctypes
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
-import base64
-
+import base6import ObjectManager
 
 
 URL_SERVER = 's3/KT_cloud/Storage/server'
 class StorageManager:
+   """here will be storage actions - S3/localFileSystem"""
 
    def __init__(self, server_path=URL_SERVER) -> None:
       self.server_path = server_path
+
    def create_bucket(self, bucket_name) -> None:
       """Creates a new bucket"""
       file_path = os.path.join(self.server_path, bucket_name)
