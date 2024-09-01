@@ -118,8 +118,8 @@ class ObjectManager:
             await self.update(False)
         self.storage_maneger.encript_version(bucket,key,version)
 
-     #naive implementation
-     async def copy_object(self, source_bucket, source_key, destination_bucket, destination_key,version_id=None, sync_flag=True):
+    #naive implementation
+    async def copy_object(self, source_bucket, source_key, destination_bucket, destination_key,version_id=None, sync_flag=True):
         source_metadata = self.get_versions(source_bucket, source_key)
         if not source_metadata:
             raise FileNotFoundError(f"Source object {source_bucket}/{source_key} not found")      
