@@ -15,15 +15,14 @@ class StorageManager:
 
    def __init__(self, server_path=URL_SERVER) -> None:
       self.server_path = server_path
+   def create_bucket(self, bucket_name) -> None:
+      """Creates a new bucket"""
+      file_path = os.path.join(self.server_path, bucket_name)
+      os.makedirs(file_path, exist_ok=True)
       
-   def create(self, bucket, key = None, data = None, version_id = None) -> None:
+   def create(self, bucket, key, data, version_id) -> None:
       """Creates a new file with the specified content"""
-      # Create a bucket
-      if key is None or data is None or version_id is None:
-         file_path = os.path.join(self.server_path, bucket)
-         os.makedirs(file_path, exist_ok=True)
-         
-      # Create a object  
+      
       file_path = os.path.join(self.server_path, bucket, key)
       
       if key.endswith('/'):
