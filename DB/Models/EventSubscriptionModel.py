@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Dict, List
-from KT_Cloud.DB.Models.EventCategory import EventCategory
+from DB.Models.EventCategory import EventCategory
 from Models.SourceType import SourceType
 
 

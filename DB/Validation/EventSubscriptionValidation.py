@@ -1,8 +1,8 @@
 from typing import List
-from DB.DataAccess.DataAccessLayer import DataAccessLayer
+from DB.DataAccess.EventSubscriptionManager import EventSubscriptionManager
 from DB.Models.SourceType import SourceType
-from KT_Cloud.DB.Models.EventCategory import EventCategory
-from KT_Cloud.DB.Models.EventSubscriptionModel import EventSubscriptionProps
+from DB.Models.EventCategory import EventCategory
+from DB.Models.EventSubscriptionModel import EventSubscriptionProps
 
 
 subscription_table_name = 'EventSubscription'
@@ -10,7 +10,7 @@ source_table_name = 'Sources'
 sns_topics_arns_table_name = 'SNS_Topics_ARNs'
 
 
-def validate_subscription_props(dal: DataAccessLayer, **kwargs):
+def validate_subscription_props(dal: EventSubscriptionManager, **kwargs):
 
     for key, value in kwargs.items():
 
@@ -20,18 +20,18 @@ def validate_subscription_props(dal: DataAccessLayer, **kwargs):
         validations[key](dal, **value)
 
 
-def validate_subscription_name(dal: DataAccessLayer, subscription_name: str, exists: bool):
+def validate_subscription_name(dal: EventSubscriptionManager, subscription_name: str, exists: bool):
 
-    event_subscriptions = dal.select(subscription_table_name, '%')
+    event_subscriptions = dal.get('%')
 
     if subscription_name in event_subscriptions != exists:
         raise ValueError(f'Subscription name {
                          'already exists' if exists else 'doesn\'t exist'}')
 
 
-def validate_sources(dal: DataAccessLayer, sources: List[(SourceType, str)]):
+def validate_sources(dal: EventSubscriptionManager, sources: List[(SourceType, str)]):
 
-    source_ids = dal.select(source_table_name, '%')
+    source_ids = dal.get_sources(source_table_name, '%')
 
     for source_type, source_id in sources:
 
@@ -44,13 +44,13 @@ def validate_sources(dal: DataAccessLayer, sources: List[(SourceType, str)]):
                              source_id}' does not match the expected source type '{source_type}'")
 
 
-def validate_event_categories(dal: DataAccessLayer, event_categories: List[EventCategory]):
+def validate_event_categories(dal: EventSubscriptionManager, event_categories: List[EventCategory]):
     return True
 
 
-def validate_sns_topic_arn(dal: DataAccessLayer, sns_topic_arn: str):
+def validate_sns_topic_arn(dal: EventSubscriptionManager, sns_topic_arn: str):
 
-    sns_topic_arns = dal.select(sns_topics_arns_table_name, '%')
+    sns_topic_arns = dal.get(sns_topics_arns_table_name,'%')
 
     if sns_topic_arn not in sns_topic_arns:
         raise ValueError(f"SNS topic ARN '{sns_topic_arn}' doesn't exist.")

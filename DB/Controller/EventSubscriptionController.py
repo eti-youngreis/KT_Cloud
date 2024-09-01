@@ -1,5 +1,5 @@
 from typing import List
-from KT_Cloud.DB.Models.EventCategory import EventCategory
+from DB.Models.EventCategory import EventCategory
 from Models.SourceType import SourceType
 from Service.Classes.EventSubscriptionService import EventSubscriptionService
 
