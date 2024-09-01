@@ -8,7 +8,6 @@ import ObjectManager
 
 URL_SERVER = 's3/KT_cloud/Storage/server'
 class StorageManager:
-   """here will be storage actions - S3/localFileSystem"""
 
    def __init__(self, server_path=URL_SERVER) -> None:
       self.server_path = server_path

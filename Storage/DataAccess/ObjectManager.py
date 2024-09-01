@@ -3,10 +3,11 @@ from typing import Dict, Any
 import json
 import aiofiles
 import os
+import datetime
 
 from .StorageManager import StorageManager
 class ObjectManager:
-    def __init__(self, metadata_file="s3 project/KT_Cloud/Storage/server/metadata.json"):
+    def __init__(self, metadata_file="s3/KT_cloud/Storage/server/metadata.json"):
         self.metadata_file = metadata_file
         self.metadata = self.load_metadata()
         self.storage_maneger = StorageManager()
@@ -43,11 +44,19 @@ class ObjectManager:
 
     def get_bucket(self, bucket):
         return self.metadata["server"]["buckets"].get(bucket, None)
+    
+    def get_object(self, bucket,key):
+        bucket=self.get_bucket(bucket)
+        if bucket:
+            return bucket['objects'].get(key,None)
+        else:
+            raise FileNotFoundError(f"No bucket found")
 
+    
     def get_buckets(self):
         return self.metadata["server"]["buckets"]
 
-    def get_object(self, bucket, key, version_id=None):
+    def get_object_by_version(self, bucket, key, version_id=None):
         meta_data = self.get_versions(bucket, key).get(version_id, None)
         content = self.storage_maneger.get(bucket, key, version_id)
         return {
@@ -65,7 +74,7 @@ class ObjectManager:
         if metadata:
             return metadata.get('versions', {})
         return {}
-
+        
     def get_latest_version(self, bucket, key):
         # Get the latest version for a given key
         metadata = self.get_object(bucket, key)
@@ -79,12 +88,14 @@ class ObjectManager:
         object_metadata = self.get_latest_version(bucket, key)
         version_id = str(len(object_metadata['versions']) + 1)
         self.storage_maneger.create(bucket, key, version_id, data)
-
+        
+    #naive implementation
     def get_versioning_status(self, bucket):
         bucket_metadata = self.metadata["server"]["buckets"].get(bucket, {})
         versioning_status = bucket_metadata.get("versioning", "not enabled")
         return versioning_status
 
+    #naive implementation
     async def delete_object(self, bucket, key, sync_flag=True):
         if bucket in self.metadata["server"]["buckets"] and key in self.metadata["server"]["buckets"][bucket]["objects"]:
             del self.metadata["server"]["buckets"][bucket]["objects"][key]
@@ -94,7 +105,7 @@ class ObjectManager:
                 await self.update(False)
             self.storage_maneger.delete(bucket,key)
 
-
+    #naive implementation
     async def put_deleteMarker(self, bucket, key,  version, sync_flag=True):
         if bucket not in self.metadata["server"]["buckets"]:
             self.metadata["server"]["buckets"][bucket] = {"objects": {}}
@@ -106,4 +117,24 @@ class ObjectManager:
         else:
             await self.update(False)
         self.storage_maneger.encript_version(bucket,key,version)
+
+     #naive implementation
+     async def copy_object(self, source_bucket, source_key, destination_bucket, destination_key,version_id=None, sync_flag=True):
+        source_metadata = self.get_versions(source_bucket, source_key)
+        if not source_metadata:
+            raise FileNotFoundError(f"Source object {source_bucket}/{source_key} not found")      
+        if version_id is None:
+            version_id = self.get_latest_version(source_bucket, source_key)
+        source_version_metadata = source_metadata['versions'][version_id]
+         
+        # Prepare destination metadata
+        destination_metadata = source_version_metadata.copy()
+        destination_metadata['etag'] = 'newetag'  # Generate a new ETag as necessary
+        destination_metadata['lastModified'] = datetime.utcnow().isoformat() + 'Z'
+         
+        # Update destination metadata
+        await self.write_metadata_to_object(destination_bucket, destination_key, version_id, destination_metadata,sync_flag=sync_flag)
+        self.storage_maneger.copy(source_bucket, source_key, destination_bucket, destination_key, version_id)
+
+
         
