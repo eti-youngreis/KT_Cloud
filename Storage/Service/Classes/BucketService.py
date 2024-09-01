@@ -43,9 +43,10 @@ class Bucket(STOE):
         """put storage object."""
         pass
 
-    def list(self, *args, **kwargs):
+    def list(self)->list:
         """list storage object."""
         pass
+        
 
     def head(self, *args, **kwargs):
         """check if object exists and is accessible with the appropriate user permissions."""
