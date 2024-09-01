@@ -93,6 +93,7 @@ class ObjectService(STOE):
     async def create(self, body, acl=None, metadata=None, content_type=None, flag_sync=True):
         pass
 
+    #naive implementation
     async def delete(self,obj:ObjectModel, version_id=None, flag_sync=True):
         bucket = obj.bucket
         key = obj.key
@@ -145,7 +146,7 @@ class ObjectService(STOE):
             "Tag_Set": tags_dict
         }
 
-
+    #naive implementation
     async def copy_object(self, source_obj:ObjectModel,destination_bucket, destination_key=None,version_id=None, sync_flag=True):
         source_bucket=source_obj.bucket
         source_key = source_obj.key
@@ -154,7 +155,7 @@ class ObjectService(STOE):
             await self.object_manager.copy_object(source_bucket, source_key, destination_bucket, destination_key,version_id,sync_flag=sync_flag)          
         await self.object_manager.copy_object(source_bucket, source_key, destination_bucket, destination_key, sync_flag=sync_flag)
 
-
+    #naive implementation
     async def delete_objects(self,obj:ObjectModel, delete, flag_sync=True):
         bucket = obj.bucket
         deleted = []
