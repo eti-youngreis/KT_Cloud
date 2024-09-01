@@ -120,7 +120,7 @@ class ObjectManager:
 
         self.storage_maneger.encript_version(bucket,key,version)
 
-    #naive implementation
+
     async def copy_object(self, source_bucket, source_key, destination_bucket, destination_key,version_id=None, sync_flag=True):
         source_metadata = self.get_versions(source_bucket, source_key)
         if not source_metadata:
@@ -128,7 +128,7 @@ class ObjectManager:
         if version_id is None:
             version_id = self.get_latest_version(source_bucket, source_key)
         source_version_metadata = source_metadata['versions'][version_id]
-         
+
         # Prepare destination metadata
         destination_metadata = source_version_metadata.copy()
         destination_metadata['etag'] = 'newetag'  # Generate a new ETag as necessary
