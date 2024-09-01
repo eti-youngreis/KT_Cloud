@@ -15,34 +15,37 @@ class DBManager:
                 CREATE TABLE IF NOT EXISTS {table_name} ({table_schema})
             """)
 
-    def insert(self, table_name: str, object_type: str, metadata: Dict[str, Any]) -> None:
+    def insert(self, table_name: str, metadata: Dict[str, Any]) -> None:
         """Insert a new record into the specified table."""
         metadata_json = json.dumps(metadata)
         try:
             c = self.connection.cursor()
             c.execute(f'''
-                INSERT INTO {table_name} (type_object, metadata)
-                VALUES (?, ?)
-            ''', (object_type, metadata_json))
+                INSERT INTO {table_name} (metadata)
+                VALUES (?)
+            ''', (metadata_json,))
             self.connection.commit()
         except sqlite3.OperationalError as e:
             raise Exception(f"Error inserting into {table_name}: {e}")
+
 
     def update(self, table_name: str, updates: Dict[str, Any], criteria: str) -> None:
         """Update records in the specified table based on criteria."""
         set_clause = ', '.join([f"{k} = ?" for k in updates.keys()])
         values = list(updates.values())
         
+        query = f'''
+            UPDATE {table_name}
+            SET {set_clause}
+            WHERE {criteria}
+        '''
         try:
             c = self.connection.cursor()
-            c.execute(f'''
-                UPDATE {table_name}
-                SET {set_clause}
-                WHERE {criteria}
-            ''', values)
+            c.execute(query, values)
             self.connection.commit()
         except sqlite3.OperationalError as e:
             raise Exception(f"Error updating {table_name}: {e}")
+
 
     def select(self, table_name: str, columns: List[str] = ['*'], criteria: str = '') -> Dict[int, Dict[str, Any]]:
         """Select records from the specified table based on criteria.
@@ -101,6 +104,17 @@ class DBManager:
             return results if results else None
         except sqlite3.OperationalError as e:
             raise Exception(f"Error executing query {query}: {e}")
+
+    def execute_query_one(self, query: str) -> Optional[Tuple]:
+        """Execute a given query and return a single result."""
+        try:
+            c = self.connection.cursor()
+            c.execute(query)
+            result = c.fetchone()
+            return result if result else None
+        except sqlite3.OperationalError as e:
+            raise Exception(f"Error executing query {query}: {e}")
+
 
 
     def close(self):
