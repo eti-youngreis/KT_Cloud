@@ -3,7 +3,11 @@ from typing import Dict, Any
 import os
 import aiofiles
 import shutil
-import ObjectManager
+import ctypes
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
+import base64
+
 
 
 URL_SERVER = 's3/KT_cloud/Storage/server'
@@ -12,11 +16,16 @@ class StorageManager:
    def __init__(self, server_path=URL_SERVER) -> None:
       self.server_path = server_path
       
-   def create(self, bucket, key, version_id, data) -> None:
+   def create(self, bucket, key = None, data = None, version_id = None) -> None:
       """Creates a new file with the specified content"""
-   
+      # Create a bucket
+      if key is None or data is None or version_id is None:
+         file_path = os.path.join(self.server_path, bucket)
+         os.makedirs(file_path, exist_ok=True)
+         
+      # Create a object  
       file_path = os.path.join(self.server_path, bucket, key)
-
+      
       if key.endswith('/'):
          # Create a directory
          os.makedirs(file_path, exist_ok=True)
@@ -32,7 +41,7 @@ class StorageManager:
             f.write(data)
          print(f"File '{key}' created in bucket '{bucket}' with version '{version_id}'.")
 
-   def get(self, bucket, key, version_id) -> Dict[str, Any]:
+   def get(self, bucket, key , version_id) -> Dict[str, Any]:
       
       """Retrieves the content of a specified file in a bucket and version."""
       file_name, file_extension = os.path.splitext(key)
@@ -85,7 +94,34 @@ class StorageManager:
          print(f"Object '{key}' with version '{version_id}' not found in bucket '{bucket_name}'.")
 
    def encript_version(self, bucket, key, version) -> None:
-     pass     
+      
+      # Preparing the file for the encrypted version
+      file_name, file_extension = os.path.splitext(key)
+      encrypted_version = self._encrypt(version)
+      versioned_file_name = f"{file_name}.v{encrypted_version}{file_extension}"
+      file_path = os.path.join(self.server_path, bucket, versioned_file_name) 
+      
+      # Update the file attribute (make it hidden)
+      result = ctypes.windll.kernel32.SetFileAttributesW(str(file_path), 0x02)
+      if result:
+         print(f"File '{versioned_file_name}' in bucket '{bucket}' has been encrypted and hidden.")
+      else:
+         print(f"Failed to set hidden attribute on '{versioned_file_name}' in bucket '{bucket}'.")  
+         
+   def _encrypt(self, version_id):
+      # Encryption of the version number
+      cipher = AES.new(self.key, AES.MODE_CBC)
+      iv = cipher.iv
+      encrypted_version = cipher.encrypt(pad(version_id.encode('utf-8'), AES.block_size))
+      return base64.b64encode(iv + encrypted_version).decode('utf-8')
+   
+   def decrypt_version(self, encrypted_version):
+      """Function to decrypt the encrypted version"""
+      encrypted_version = base64.b64decode(encrypted_version)
+      iv = encrypted_version[:AES.block_size]
+      cipher = AES.new(self.key, AES.MODE_CBC, iv)
+      decrypted_version = unpad(cipher.decrypt(encrypted_version[AES.block_size:]), AES.block_size)
+      return decrypted_version.decode('utf-8')    
    def rename(self, bucket_name, old_key, new_key, version_id) -> None:
       
       """Rename a file in a specified bucket and version."""
@@ -105,17 +141,12 @@ class StorageManager:
          print(f"Object '{old_key}' with version '{version_id}' not found in bucket '{bucket_name}'.")
 
 
-   def copy(self, source_bucket_name, source_key,target_bucket_name, 
-            target_key , source_version_id=None) -> None:
+   def copy(self, source_bucket_name, source_key,source_version_id,
+            target_bucket_name, target_key) -> None:
       """Copy a file from one bucket to another with optional source version."""
       # Construct source file path
       source_file_name, source_file_extension = os.path.splitext(source_key)
-      if source_version_id:
-         source_versioned_file_name = f"{source_file_name}.v{source_version_id}{source_file_extension}"
-      else:
-         version_id = ObjectManager.get_latest_verison(source_bucket_name,source_key)
-         source_versioned_file_name = f"{source_file_name}.v{version_id}{source_file_extension}"
-      
+      source_versioned_file_name = f"{source_file_name}.v{source_version_id}{source_file_extension}"
       source_file_path = os.path.join(self.server_path, source_bucket_name, source_versioned_file_name)
 
       # Construct target file path (without versioning)
