@@ -136,7 +136,7 @@ class DBManager:
             print(f'Error: {e}')
             return False
 
-    def is_identifier_exit(self, table_name: str, value: str) -> bool:
+    def is_identifier_exist(self, table_name: str, value: str) -> bool:
         '''Check if a specific value exists within a column in the given table.'''
         try:
             c = self.connection.cursor()

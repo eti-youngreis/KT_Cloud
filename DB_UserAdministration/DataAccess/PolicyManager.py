@@ -22,9 +22,9 @@ class PolicyManager:
         '''Check if the JSON column contains the specified key and value.'''
         return self.db_manager.is_json_column_contains_key_and_value(self.table_name, key, value)
 
-    def is_identifier_exit(self, value: str) -> bool:
+    def is_identifier_exist(self, value: str) -> bool:
         '''Check if a policy with the specified ID exists in the database.'''
-        return self.db_manager.is_identifier_exit(self.table_name, value)
+        return self.db_manager.is_identifier_exist(self.table_name, value)
 
     def update(self, policy_id: str, metadata: Dict[str, Any]) -> None:
         '''Update an existing policy in the database.'''
