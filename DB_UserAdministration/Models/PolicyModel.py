@@ -1,6 +1,6 @@
 from typing import List
 
-
+# commit
 class Policy:
     def __init__(self, name: str, permissions: List[Permission] = None):
         self.name = name

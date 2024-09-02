@@ -2,6 +2,7 @@ from typing import Dict, Any
 import json
 from DB.DataAccess.DBManager import DBManager
 
+# commit
 class PolicyManager:
     def __init__(self, db_file: str):
         '''Initialize PolicyManager with the database connection.'''
