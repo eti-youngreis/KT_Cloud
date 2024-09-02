@@ -8,15 +8,11 @@ class DBManager:
         self.connection = sqlite3.connect(db_file)
         self.create_tables()
 
-    def create_tables(self):
+    def create_table(self,table_name,table_schema):
         """Create tables in the database if they do not exist."""
         with self.connection:
-            self.connection.execute("""
-                CREATE TABLE IF NOT EXISTS objects (
-                    object_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    type_object TEXT NOT NULL,
-                    metadata TEXT NOT NULL
-                )
+            self.connection.execute(f"""
+                CREATE TABLE IF NOT EXISTS {table_name}({table_schema})
             """)
 
     def insert(self, table_name: str, object_type: str, metadata: Dict[str, Any]) -> None:
@@ -132,11 +128,11 @@ class DBManager:
             ''', (f'%"{key}": "{value}"%',))
             # Check if the count is greater than 0, indicating the key-value pair exists
             return c.fetchone()[0] > 0
-        except OperationalError as e:
+        except sqlite3.OperationalError as e:
             print(f'Error: {e}')
             return False
 
-    def is_identifier_exit(self, table_name: str, value: str) -> bool:
+    def is_identifier_exist(self, table_name: str, value: str) -> bool:
         '''Check if a specific value exists within a column in the given table.'''
         try:
             c = self.connection.cursor()
@@ -145,7 +141,7 @@ class DBManager:
             WHERE object_id LIKE ?
             ''', (value,))
             return c.fetchone()[0] > 0
-        except OperationalError as e:
+        except sqlite3.OperationalError as e:
             print(f'Error: {e}')
     
     
