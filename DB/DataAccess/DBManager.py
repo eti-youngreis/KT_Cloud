@@ -1,5 +1,5 @@
 import sqlite3
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Optional, Tuple
 import json
 
 class DBManager:
@@ -19,6 +19,12 @@ class DBManager:
                 )
             """)
 
+    def create_table(self, table_name, table_schema):
+        '''create a table in a given db by given table_schema'''
+        with self.connection:
+            self.connection.execute(f'''
+                CREATE TABLE IF NOT EXISTS {table_name} ({table_schema})
+            ''')
     def insert(self, table_name: str, object_type: str, metadata: Dict[str, Any]) -> None:
         """Insert a new record into the specified table."""
         metadata_json = json.dumps(metadata)
@@ -132,7 +138,7 @@ class DBManager:
             ''', (f'%"{key}": "{value}"%',))
             # Check if the count is greater than 0, indicating the key-value pair exists
             return c.fetchone()[0] > 0
-        except OperationalError as e:
+        except sqlite3.OperationalError as e:
             print(f'Error: {e}')
             return False
 
@@ -145,7 +151,7 @@ class DBManager:
             WHERE object_id LIKE ?
             ''', (value,))
             return c.fetchone()[0] > 0
-        except OperationalError as e:
+        except sqlite3.OperationalError as e:
             print(f'Error: {e}')
     
     
