@@ -1,5 +1,7 @@
 from typing import List
 
+from permissionModel import Permission
+
 # commit
 class Policy:
     def __init__(self, name: str, permissions: List[Permission] = None):
