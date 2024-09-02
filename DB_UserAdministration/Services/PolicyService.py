@@ -1,5 +1,5 @@
 from sqlite3 import OperationalError
-from typing import Dict, List
+from typing import Dict
 from DB_UserAdministration.DataAccess import PolicyManager
 from DB_UserAdministration.Models.PolicyModel import Policy
 from DB_UserAdministration.Validation.PolicyValidation import validate_policy_name
