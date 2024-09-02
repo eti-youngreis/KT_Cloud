@@ -8,6 +8,12 @@ class DBManager:
         '''Initialize the database connection and create tables if they do not exist.'''
         self.connection = sqlite3.connect(db_file)
  
+    
+    
+    
+    
+    
+    
     def create_table(self, table_name, table_schema):
         '''create a table in a given db by given table_schema'''
         with self.connection:
