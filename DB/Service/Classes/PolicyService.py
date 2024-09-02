@@ -1,6 +1,6 @@
 from sqlite3 import OperationalError
-from Service.Classes import Policy
 from DB.DataAccess import PolicyManager
+from DB.Models.PolicyModel import Policy
 
 
 class PolicyService:
