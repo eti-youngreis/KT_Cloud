@@ -8,4 +8,5 @@ class PolicyController:
     def create_policy(self, name):
         self.service.create(name)
         
-    
+    def add_permission(self, policy_name, permission):
+        self.service.add_permission(policy_name, permission)
