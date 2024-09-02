@@ -1,6 +1,5 @@
 from typing import Dict, Any
 import json
-import sqlite3
 from DB.DataAccess.DBManager import DBManager
 
 class QuotaManager:
@@ -26,7 +25,7 @@ class QuotaManager:
 
     def get(self, quota_id: int) -> Dict[str, Any]:
         '''Retrieve an quota from the database.'''
-        result = self.db_manager.select(self.table_name, ['type_object', 'metadata'], f'quota_id = {quota_id}')
+        result = self.db_manager.select(self.table_name, ['quota_id','metadata'], f'quota_id = {quota_id}')
         if result:
             return result[quota_id]
         else:
@@ -36,9 +35,16 @@ class QuotaManager:
         '''Delete an object from the database.'''
         self.db_manager.delete(self.table_name, f'quota_id = {quota_id}')
 
-    def get_all_objects(self) -> Dict[int, Dict[str, Any]]:
+    def get_all_quotas(self) -> Dict[str, Dict[str, Any]]:
         '''Retrieve all objects from the database.'''
         return self.db_manager.select(self.table_name, ['quota_id', 'metadata'])
+    
+    def get_quotas_by_owner_id(self, owner_id:str):
+        # Using SQL JSON functions to query based on a JSON column
+        criteria = "JSON_EXTRACT(metadata, '$.owner_id') = %s"
+        # Execute the query with the given owner_id as parameter
+        return self.db_manager.select(self.table_name, ['qouta_id','metadata'], criteria, (owner_id))
+
 
     def describe_table(self) -> Dict[str, str]:
         '''Describe the schema of the table.'''

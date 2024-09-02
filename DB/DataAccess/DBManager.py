@@ -59,7 +59,7 @@ class DBManager:
             Dict[int, Dict[str, Any]]: A dictionary where keys are object_ids and values are metadata.
         '''
         columns_clause = ', '.join(columns)
-        query = f'SELECT object_id, {columns_clause} FROM {table_name}'
+        query = f'SELECT {columns_clause} FROM {table_name}'
         if criteria:
             query += f' WHERE {criteria}'
         
@@ -95,21 +95,21 @@ class DBManager:
     
     
 
-    def execute_query(self, query: str) -> Optional[List[Tuple]]:
+    def execute_query(self, query: str, params:Tuple = ()) -> Optional[List[Tuple]]:
         '''Execute a given query and return the results.'''
         try:
             c = self.connection.cursor()
-            c.execute(query)
+            c.execute(query, params)
             results = c.fetchall()
             return results if results else None
         except sqlite3.OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
 
-    def execute_query_with_single_result(self, query: str) -> Optional[Tuple]:
+    def execute_query_with_single_result(self, query: str, params:Tuple = ()) -> Optional[Tuple]:
         '''Execute a given query and return a single result.'''
         try:
             c = self.connection.cursor()
-            c.execute(query)
+            c.execute(query, params)
             result = c.fetchone()
             return result if result else None
         except sqlite3.OperationalError as e:
