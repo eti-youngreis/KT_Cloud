@@ -1,20 +1,19 @@
+from typing import Dict, List
 
-from typing import Dict, Optional
+from Models.PermissionModel import Permission
+
+
+# from Storage.Models.PermissionModel import Permission
+
 class PolicyModel:
-    def __init__(self, bucket_name: str, major_bucket_version: str, policy_content: str, policy_name: str, tags: Optional[Dict] = None):
-        self.bucket_name = bucket_name
-        self.major_bucket_version = major_bucket_version
-        self.policy_content = policy_content
+    def __init__(self,policy_name:str, version: str, permissions: List[Permission]=None):
         self.policy_name = policy_name
-        self.tags = tags
-        self.available = True
+        self.version = version
+        self.permissions = permissions or []
 
     def to_dict(self) -> Dict:
         return {
-            "bucketName": self.bucket_name,
-            "majorBucketVersion": self.major_bucket_version,
-            "policyContent": self.policy_content,
+            "version": self.version,
             "policyName": self.policy_name,
-            "tags": self.tags,
-            "available": self.available
+            "permissions": [permission.to_dict() for permission in self.permissions]
         }
