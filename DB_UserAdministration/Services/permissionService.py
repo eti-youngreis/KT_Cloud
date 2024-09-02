@@ -6,10 +6,10 @@ class permissionService:
     def __init__(self, dal:permissionManager) -> None:
         self.dal = dal
 
-    def create_permission(self, action:Action, resource: Resource, effect:Effect) -> Permission:
+    def create_permission(self, action:Action, resource: Resource, effect:Effect):
         new_permission = Permission(action, resource, effect)
         return self.dal.create_permission(new_permission.to_dict())
-
+    
     def delete_permission(self, permission_id: int):
         return self.dal.delete_permission(permission_id)
 

@@ -14,10 +14,13 @@ class permissionManager:
 
 
     def create_table(self):
-        pass
+        '''create objects table in the database'''
+        table_schema = 'object_id INTEGER PRIMARY KEY AUTOINCREMENT ,metadata TEXT NOT NULL'
+        self.db_manager.create_table(self.table_name, table_schema)
 
     
-    def delete_permission(self):
-        pass
+    def delete_permission(self, permission_id):
+        criteria = f'object_id = {permission_id}'
+        self.dal.delete(self.table_name, criteria)
 
 
