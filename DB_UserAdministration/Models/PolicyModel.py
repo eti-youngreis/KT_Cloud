@@ -19,7 +19,7 @@ class Policy:
         # the evaluate function returns wether non of the policy permissions deny access
         # and at least one permits access
         for permission in self.permissions:
-            if permission.resource == resource and permission.action == action:
+            if (permission.resource == resource or permission.resource == '*') and permission.action == action:
                 if permission.effect == "Deny":
                     return False
                 elif permission.effect == "Allow":
