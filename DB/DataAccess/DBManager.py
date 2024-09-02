@@ -2,21 +2,19 @@ import sqlite3
 from typing import Dict, Any, List, Tuple
 import json
 
+
 class DBManager:
     def __init__(self, db_file: str):
         """Initialize the database connection and create tables if they do not exist."""
         self.connection = sqlite3.connect(db_file)
         self.create_tables()
 
-    def create_tables(self):
-        """Create tables in the database if they do not exist."""
+    def create_table(self, table_name, table_schema):
+        """create a table in a given db by given table_schema"""
         with self.connection:
-            self.connection.execute("""
-                CREATE TABLE IF NOT EXISTS objects (
-                    object_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    type_object TEXT NOT NULL,
-                    metadata TEXT NOT NULL
-                )
+            self.connection.execute(f"""
+            self.connection.execute(f'''
+                CREATE TABLE IF NOT EXISTS {table_name} ({table_schema})
             """)
 
     def insert(self, table_name: str, object_type: str, metadata: Dict[str, Any]) -> None:
@@ -25,8 +23,8 @@ class DBManager:
         try:
             c = self.connection.cursor()
             c.execute(f'''
-                INSERT INTO {table_name} (type_object, metadata)
-                VALUES (?, ?)
+                INSERT INTO {table_name}(type_object, metadata)
+                VALUES(?, ?)
             ''', (object_type, metadata_json))
             self.connection.commit()
         except sqlite3.OperationalError as e:
@@ -36,7 +34,7 @@ class DBManager:
         """Update records in the specified table based on criteria."""
         set_clause = ', '.join([f"{k} = ?" for k in updates.keys()])
         values = list(updates.values())
-        
+
         try:
             c = self.connection.cursor()
             c.execute(f'''
@@ -50,13 +48,13 @@ class DBManager:
 
     def select(self, table_name: str, columns: List[str] = ['*'], criteria: str = '') -> Dict[int, Dict[str, Any]]:
         """Select records from the specified table based on criteria.
- 
-        
+
+
         Args:
             table_name (str): The name of the table.
             columns (List[str]): The columns to select. Default is all columns ('*').
             criteria (str): SQL condition for filtering records. Default is no filter.
-        
+
         Returns:
             Dict[int, Dict[str, Any]]: A dictionary where keys are object_ids and values are metadata.
         """
@@ -65,7 +63,7 @@ class DBManager:
         query = f'SELECT object_id, {columns_clause} FROM {table_name}'
         if criteria:
             query += f' WHERE {criteria}'
-        
+
         try:
             c = self.connection.cursor()
             c.execute(query)
@@ -97,8 +95,6 @@ class DBManager:
             return {col[1]: col[2] for col in columns}
         except sqlite3.OperationalError as e:
             raise Exception(f'Error describing table {table_name}: {e}')
-    
-    
 
     def execute_query(self, query: str) -> Optional[List[Tuple]]:
         '''Execute a given query and return the results.'''
@@ -119,7 +115,7 @@ class DBManager:
             return result if result else None
         except sqlite3.OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
-        
+
     def is_json_column_contains_key_and_value(self, table_name: str, key: str, value: str) -> bool:
         '''Check if a specific key-value pair exists within a JSON column in the given table.'''
         try:
@@ -147,9 +143,6 @@ class DBManager:
             return c.fetchone()[0] > 0
         except OperationalError as e:
             print(f'Error: {e}')
-    
-    
-
 
     def close(self):
         '''Close the database connection.'''
