@@ -26,11 +26,11 @@ class PolicyManager:
         '''Check if a policy with the specified ID exists in the database.'''
         return self.db_manager.is_identifier_exit(self.table_name, value)
 
-    def update(self, policy_id: int, metadata: Dict[str, Any]) -> None:
+    def update(self, policy_id: str, metadata: Dict[str, Any]) -> None:
         '''Update an existing policy in the database.'''
         self.db_manager.update(self.table_name, {'metadata': json.dumps(metadata)}, f'policy_id = {policy_id}')
 
-    def get(self, policy_id: int) -> Dict[str, Any]:
+    def get(self, policy_id: str) -> Dict[str, Any]:
         '''Retrieve a policy from the database.'''
         result = self.db_manager.select(self.table_name, ['metadata'], f'policy_id = {policy_id}')
         if result:
