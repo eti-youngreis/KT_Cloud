@@ -1,5 +1,5 @@
 from Abc import DBO
-from typing import Optional
+from typing import Optional, List
 from DB.Validation.ValiditionDBClusterEndpoint import is_valid_identifier
 from Models import DBClusterEndpointModel
 from DataAccess import DataAccessLayer
@@ -11,7 +11,7 @@ class DBClusterEndpointService(DBO):
 
 
     def create(self, cluster_identifier: str, endpoint_identifier: str, endpoint_type: str, 
-               static_members: Optional[str] = None, excluded_members: Optional[str] = None):
+               static_members:  Optional[List[str]] = None, excluded_members:  Optional[List[str]] = None):
         """Create a new DB Cluster Endpoint."""
         if not is_valid_identifier(cluster_identifier):
             raise ValueError(f"Invalid cluster_identifier: {cluster_identifier}")

@@ -1,4 +1,4 @@
-class ACL:
+class Acl:
     def __init__(self, owner):
         self.owner = owner
         self.permissions = []
@@ -7,7 +7,7 @@ class ACL:
         self.permissions.append(permission)
 
     def remove_permission(self, user, permission):
-       # Remove user permission
+        # Remove user permission
         if user in self.permissions:
             self.permissions[user].discard(permission)
             if not self.permissions[user]:

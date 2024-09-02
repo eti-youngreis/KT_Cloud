@@ -41,6 +41,7 @@ def validate_tags(tags: Optional[Dict]) -> bool:
     return all(isinstance(k, str) and isinstance(v, str) for k, v in tags.items())
 
 def check_required_params(required_params, kwargs):
+
     '''Check if all required parameters are present in kwargs.'''
     return all(param in kwargs for param in required_params)
 
