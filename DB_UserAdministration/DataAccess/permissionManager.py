@@ -12,18 +12,19 @@ class permissionManager:
     def create_permission(self,permission):
         self.db.insert(self.table_name, permission)
 
-    def is_exit_permission(self, action, resource, effect):
-        '''Check if an permission with these given values exists in the database.'''
+    def is_exist_permission(self, action, resource, effect):
+        '''Check if a permission with the given values exists in the database.'''
         query = f'SELECT 1 FROM {self.table_name} WHERE metadata LIKE ? LIMIT 1'
+        search_pattern = f"%'action': '{action}'%'resource': '{resource}'%'effect': '{effect}'%"
+
         try:
             c = self.db_manager.connection.cursor()
-            c.execute(query, (f'%\'action\': \'{action}\'%
-                             %\'resource\': \'{resource}\'%
-                            %\'effect\': \'{effect}\'%',))
+            c.execute(query, (search_pattern,))
             result = c.fetchone()
             return result is not None
         except sqlite3.OperationalError as e:
-            raise Exception(f'Error checking for option group existence: {e}')
+            raise Exception(f'Error checking for permission existence: {e}')
+        finally:
 
 
     def create_table(self):
