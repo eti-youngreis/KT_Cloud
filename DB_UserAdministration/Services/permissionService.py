@@ -24,5 +24,5 @@ class permissionService:
     def update_permission(self, permission_id: int, action:Action, resource: Resource ):
         return self.dal.update_permission(permission_id, action, resource)
 
-    # def get_permission(self, permission_id: int):
-    #     return self.dal.get_permission(permission_id)
+    def get_permission(self, permission_id: int):
+        return self.dal.get_permission(permission_id)

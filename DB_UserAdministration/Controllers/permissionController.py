@@ -12,3 +12,6 @@ class permissionController:
     
     def list_permissions(self):
         return self.service.list_permissions()
+
+    def get_permission(self, permission_id:int):
+        return self.service.get_permission(permission_id)

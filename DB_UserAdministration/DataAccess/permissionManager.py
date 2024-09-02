@@ -38,5 +38,8 @@ class permissionManager:
 
     def list_permissions(self):
         return self.db_manager.select()
-
+    
+    def get_permission(self, permission_id:int):
+        criteria = f'object_id = {permission_id}'
+        return self.db_manager.select(criteria)
 
