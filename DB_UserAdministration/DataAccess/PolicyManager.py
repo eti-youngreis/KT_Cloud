@@ -1,6 +1,6 @@
 from typing import Dict, Any
 import json
-from DBManager import DBManager
+from DB.DataAccess.DBManager import DBManager
 
 class PolicyManager:
     def __init__(self, db_file: str):
