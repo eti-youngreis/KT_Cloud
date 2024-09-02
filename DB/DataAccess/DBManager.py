@@ -7,14 +7,14 @@ class DBManager:
     def __init__(self, db_file: str):
         '''Initialize the database connection and create tables if they do not exist.'''
         self.connection = sqlite3.connect(db_file)
- 
-    def create_table(self, table_name, table_schema):
-            '''create a table in a given db by given table_schema'''
-            with self.connection:
-                self.connection.execute(f'''
-                    CREATE TABLE IF NOT EXISTS {table_name} ({table_schema})
-                ''')
     
+    def create_table(self, table_name, table_schema):
+        '''create a table in a given db by given table_schema'''
+        with self.connection:
+            self.connection.execute(f'''
+                CREATE TABLE IF NOT EXISTS {table_name} ({table_schema})
+            ''')
+
     def insert(self, table_name: str, metadata: Dict[str, Any]) -> None:
         '''Insert a new record into the specified table.'''
         metadata_json = json.dumps(metadata)
@@ -27,6 +27,7 @@ class DBManager:
             self.connection.commit()
         except sqlite3.OperationalError as e:
             raise Exception(f'Error inserting into {table_name}: {e}')
+
 
     def update(self, table_name: str, updates: Dict[str, Any], criteria: str) -> None:
         '''Update records in the specified table based on criteria.'''
