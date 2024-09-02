@@ -8,36 +8,35 @@ class Action(Enum):
     EXECUTE = 'execute'
 
 class Resource(Enum):
-    FILE = 'file'
     BUCKET = 'bucket'
     DATABASE = 'database'
-    SERVICE = 'service'
+
+class Effect(Enum):
+    DENY = "deny"
+    ALLOW = "allow"
 
 
 class Permission:
-    def __init__(self, action: Action, resource: Resource, effect:str):
+    def __init__(self, action: Action, resource: Resource, effect:Effect):
         self.action = action
         self.resource = resource
-        # if Validation.string_in_dict(effect, {'Allow','Deny'}) :
-        #     self.effect = effect
-        # else
+        self.effect = effect
+       
 
-
-        Allow 
-    Deny
-   
     def to_dict(self):
         return {
-            "permission_id": self.permission_id,
             "action": self.action.value,
-            "resource": self.resource.value
+            "resource": self.resource.value,
+            "effect":self.effect.value
         }
 
     def __repr__(self):
         return f"Permission(id={self.permission_id}, action='{self.action.value}', resource='{self.resource.value}')"
 
-    def update_permission(self, action: Action = None, resource: Resource = None):
+    def update_permission(self, action: Action = None, resource: Resource = None, effect:Effect = None):
         if action:
             self.action = action
         if resource:
             self.resource = resource
+        if effect:
+            self.effect = effect

@@ -1,4 +1,4 @@
-from permissionModel import Permission, Action, Resource
+from permissionModel import Permission, Action, Resource, Effect
 from DataAccess import permissionManager
 
 class permissionService:
@@ -6,8 +6,9 @@ class permissionService:
     def __init__(self, dal:permissionManager) -> None:
         self.dal = dal
 
-    def create_permission(self, permission_id: int, action:Action, resource: Resource) -> Permission:
-        return self.dal.create_permission(permission_id, action, resource)
+    def create_permission(self, action:Action, resource: Resource, effect:Effect) -> Permission:
+        new_permission = Permission(action, resource, effect)
+        return self.dal.create_permission(new_permission.to_dict())
 
     def delete_permission(self, permission_id: int):
         return self.dal.delete_permission(permission_id)
