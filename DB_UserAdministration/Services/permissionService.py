@@ -16,10 +16,10 @@ class permissionService:
         return self.list_permissions()
 
     def update_permission(self, permission_id: int, action:Action, resource: Resource ):
-        return self.dal.updte_
+        return self.dal.update_permission(permission_id, action, resource)
 
     def get_permission(self, permission_id: int):
-        pass
+        return self.dal.get_permission(permission_id)
 
     def has_permission(self, action:Action, resource: Resource):
-        pass
+        return self.dal.has_permission(action, resource)
