@@ -18,8 +18,8 @@ class permissionService:
     def delete_permission(self, permission_id: int):
         return self.dal.delete_permission(permission_id)
 
-    # def list_permissions(self):
-    #     return self.list_permissions()
+    def list_permissions(self):
+        return self.dal.list_permissions()
 
     def update_permission(self, permission_id: int, action:Action, resource: Resource ):
         return self.dal.update_permission(permission_id, action, resource)

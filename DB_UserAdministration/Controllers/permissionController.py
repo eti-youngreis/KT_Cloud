@@ -9,3 +9,6 @@ class permissionController:
     
     def delete_permission(self, permission_id: int):
         return self.service.delete_permission(permission_id)
+    
+    def list_permissions(self):
+        return self.service.list_permissions()

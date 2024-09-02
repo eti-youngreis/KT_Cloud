@@ -24,17 +24,19 @@ class permissionManager:
             return result is not None
         except sqlite3.OperationalError as e:
             raise Exception(f'Error checking for permission existence: {e}')
-        finally:
 
 
     def create_table(self):
         '''create objects table in the database'''
         table_schema = 'object_id INTEGER PRIMARY KEY AUTOINCREMENT ,metadata TEXT NOT NULL'
-        self.db_manager.create_table(self.table_name, table_schema)
+        return self.db_manager.create_table(self.table_name, table_schema)
 
     
     def delete_permission(self, permission_id):
         criteria = f'object_id = {permission_id}'
-        self.dal.delete(self.table_name, criteria)
+        return self.dal.delete(self.table_name, criteria)
+
+    def list_permissions(self):
+        return self.db_manager.select()
 
 
