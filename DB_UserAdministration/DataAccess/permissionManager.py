@@ -1,4 +1,5 @@
 import sqlite3  
+from permissionModel import Action, Resource, Effect
 # from DataAccess import DBManager  
 
 class PermissionManager:
@@ -68,6 +69,10 @@ class PermissionManager:
         """
         criteria = f'object_id = {permission_id}'
         return self.db_manager.delete(self.table_name, criteria) 
+    
+    def update_permission(self,permission_id: int, action: Action = None, resource: Resource = None, effect: Effect = None):
+        criteria = f'object_id = {permission_id}' 
+        return self.db_manager.update(self.table_name, criteria)
 
     def list_permissions(self):
         """

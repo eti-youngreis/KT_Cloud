@@ -51,6 +51,7 @@ class permissionService:
         :return: The result of the deletion operation from the DAL.
         """
         return self.dal.delete_permission(permission_id)
+    
 
     def list_permissions(self):
         """
@@ -60,7 +61,7 @@ class permissionService:
         """
         return self.dal.list_permissions()
 
-    def update_permission(self, permission_id: int, action: Action, resource: Resource):
+    def update_permission(self, permission_id: int, action: Action, resource: Resource, effect: Effect):
         """
         Update an existing permission's action and resource based on its ID.
         
