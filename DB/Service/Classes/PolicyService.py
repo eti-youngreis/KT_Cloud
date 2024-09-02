@@ -45,14 +45,18 @@ class PolicyService:
             return self.policies
         except OperationalError as ex:
             return 'policy list couldn\'t be retrieved'
-        
-    def evaluate(self, action, resource, conditions):
+    
+    # this function might be useless   
+    def evaluate(self, name, action, resource): # name is the policy name
         allowed = False
-        denied = False
-        for policy in self.policies:
-            for permission in policy.permissions:
-                if permission.evaluate(action, resource, conditions):
-                    allowed = True
-                else:
-                    denied = True
-        return allowed or not denied
+        try:
+            allowed = self.policies[name].evaluate(action, resource)
+        except KeyError:
+            self.policies = self.policy_manager.list_policies()
+            try:
+                allowed = self.policies[name].evaluate(action, resource)
+            except KeyError:
+                pass
+            
+        return allowed
+     
