@@ -1,4 +1,4 @@
-from DB.Service.Classes import PolicyService
+from DB_UserAdministration.Services import PolicyService
 
 
 class PolicyController:

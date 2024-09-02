@@ -1,7 +1,7 @@
 from sqlite3 import OperationalError
 from typing import Dict, List
-from DB.DataAccess import PolicyManager
-from DB.Models.PolicyModel import Policy
+from DB_UserAdministration.DataAccess import PolicyManager
+from DB_UserAdministration.Models.PolicyModel import Policy
 
 
 class PolicyService:
