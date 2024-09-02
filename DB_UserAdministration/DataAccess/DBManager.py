@@ -25,6 +25,7 @@ class DBManager:
             self.connection.execute(f'''
                 CREATE TABLE IF NOT EXISTS {table_name} ({table_schema})
            ''')
+        
 
     def insert(self, table_name: str, object_type: str, metadata: Dict[str, Any]) -> None:
         """Insert a new record into the specified table."""
@@ -150,18 +151,6 @@ class DBManager:
             c.execute(f'''
             SELECT COUNT(*) FROM {table_name}
             WHERE object_id LIKE ?
-            ''', (value,))
-            return c.fetchone()[0] > 0
-        except OperationalError as e:
-            print(f'Error: {e}')
-
-    def is_value_exit_in_column(self, table_name: str, column: str, value: str) -> bool:
-        '''Check if a specific value exists within a column in the given table.'''
-        try:
-            c = self.connection.cursor()
-            c.execute(f'''
-            SELECT COUNT(*) FROM {table_name}
-            WHERE {column} LIKE ?
             ''', (value,))
             return c.fetchone()[0] > 0
         except OperationalError as e:
