@@ -1,9 +1,10 @@
 from typing import List
 
-from DataAccess.policyManager import PolicyStorage
-from Models.PermissionModel import Permission
-from Models.PolicyModel import PolicyModel
-from Services.PolicyService import PolicyService
+from Storage_UserAdministration.DataAccess.policyManager import PolicyManager
+from Storage_UserAdministration.Models.PolicyModel import PolicyModel
+
+from Storage_UserAdministration.Models.PermissionModel import Permission
+from Storage_UserAdministration.Services.PolicyService import PolicyService
 
 
 class PolicyController:
@@ -46,7 +47,7 @@ class PolicyController:
 def maim():
 
     # יצירת אחסון עבור המדיניות
-    storage = PolicyStorage()
+    storage = PolicyManager()
 
     # יצירת שירות עבור המדיניות
     service = PolicyService(storage)
@@ -63,7 +64,7 @@ def maim():
     # print("Created Policy:", new_policy.to_dict())
 
     # עדכון המדיניות הקיימת
-    updated_policy = controller.update_policy(policy_name="ExamplePolicy", version="2024-09-02", permissions=[permission1])
+    updated_policy = controller.update_policy(policy_name="ExamplePolicy", version="2024-09-03", permissions=[permission1])
     print("Updated Policy:", updated_policy)
 
     # continue from here
@@ -73,8 +74,8 @@ def maim():
     # קבלת מדיניות לפי שם
     policy = controller.get_policy(policy_name="ExamplePolicy")
     print("Retrieved Policy:", policy.to_dict())
-
-    # מחיקת מדיניות
+    #
+    # # מחיקת מדיניות
     controller.delete_policy(policy_name="ExamplePolicy")
     print("Policy deleted.")
 maim()
