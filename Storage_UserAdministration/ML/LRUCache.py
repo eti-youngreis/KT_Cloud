@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from typing import Dict, Optional
-from s3.KT_Cloud.Storage_UserAdministration.Models.PolicyModel import PolicyModel
+from Storage_UserAdministration.Models.PolicyModel import PolicyModel
 class LRUCache:
     def __init__(self, capacity: int):
         self.cache = OrderedDict()
