@@ -5,37 +5,37 @@ import datetime
 import aiofiles
 
 class JsonManager:
-    def __init__(self, metadata_file="C:\\Users\\The user\\Downloads\\metadata.json"):
-        self.metadata_file = metadata_file
-        self.metadata = self._load_metadata()
+    def __init__(self, info_file="s3 project/KT_Cloud/Storage/server/metadata.json"):
+        self.info_file = info_file
+        self.info = self._load_info()
         
-    def _load_metadata(self) -> Dict[str, Any]:
-        """Load metadata from file if it exists, otherwise return an empty dictionary."""
-        if os.path.exists(self.metadata_file):
-            with open(self.metadata_file, 'r', encoding='utf-8') as f:
+    def _load_info(self) -> Dict[str, Any]:
+        """Load info from file if it exists, otherwise return an empty dictionary."""
+        if os.path.exists(self.info_file):
+            with open(self.info_file, 'r', encoding='utf-8') as f:
                 return json.load(f)
         return {}
     
-    async def _save_metadata(self,sync_flag)->Any:
-        """Save the updated metadata to the file"""
+    async def _save_info(self,sync_flag)->Any:
+        """Save the updated info to the file"""
         if sync_flag:
-            with open(self.metadata_file, 'w', encoding='utf-8') as f:
-                json.dump(self.metadata, f, indent=4, ensure_ascii=False)
+            with open(self.info_file, 'w', encoding='utf-8') as f:
+                json.dump(self.info, f, indent=4, ensure_ascii=False)
         else:
-            async with aiofiles.open(self.metadata_file, 'w', encoding='utf-8') as f:
-                await f.write(json.dumps(self.metadata, indent=4, ensure_ascii=False))
+            async with aiofiles.open(self.info_file, 'w', encoding='utf-8') as f:
+                await f.write(json.dumps(self.info, indent=4, ensure_ascii=False))
     
-    def get_metadata(self, key: str) -> dict:
+    def get_info(self, key: str) -> dict:
         """
-        Retrieve a value by a nested key from metadata.
-        For example: jsonManager_object.get_metadata("server.users.user1.bucket1)
+        Retrieve a value by a nested key from info.
+        For example: jsonManager_object.get_info("server.users.user1.bucket1)
         -> Return bucket1 for user1.
         
         """
 
         keys = key.split(".")
 
-        data = self.metadata
+        data = self.info
         for k in keys:
             if isinstance(data, dict) and k in data:
                 data = data[k]
@@ -44,19 +44,19 @@ class JsonManager:
         return data
     
     
-    async def update_metadata(self, key: str, value: Any, sync_flag:bool=True)->bool:
+    async def update_info(self, key: str, value: Any, sync_flag:bool=True)->bool:
         """
-        Update metadata and save it to file, synchronously or asynchronously.
+        Update info and save it to file, synchronously or asynchronously.
         
-        For example: await jsonManager_object.update_metadata("server.users.user7.buckets.bucket1.policies",['a','b'])
+        For example: await jsonManager_object.update_info("server.users.user7.buckets.bucket1.policies",['a','b'])
         -> Update the permissions list in Bucket1 for User7 to ['a','b'].
         
         """
         
         keys = key.split(".")
 
-        # Update the metadata dictionary
-        data = self.metadata
+        # Update the info dictionary
+        data = self.info
         for k in keys[:-1]:
             if isinstance(data, dict) and k in data:
                 data = data[k]
@@ -64,17 +64,17 @@ class JsonManager:
                 return False
         data[keys[-1]] = value
         
-        # Save the updated metadata to the file
-        await self._save_metadata(sync_flag)
+        # Save the updated info to the file
+        await self._save_info(sync_flag)
         return True
     
-    async def insert_metadata(self, key:str, value: Any={}, sync_flag:bool=True)->bool:
+    async def insert_info(self, key:str, value: Any={}, sync_flag:bool=True)->bool:
             """
-            Insert metadata and save it to file, synchronously or asynchronously.
+            Insert info and save it to file, synchronously or asynchronously.
             
-            For example: await jsonManager_object.insert_metadata("server.users.user7")
+            For example: await jsonManager_object.insert_info("server.users.user7")
             -> Adding a new user named user7 with an empty variable under them.
-            await jsonManager_object.insert_metadata("server.users.user7.buckets.bucket1",{"policies": [
+            await jsonManager_object.insert_info("server.users.user7.buckets.bucket1",{"policies": [
                     "myPolicy",
                     "policy2"
                 ]})
@@ -82,29 +82,29 @@ class JsonManager:
             """
             keys = key.split(".")
 
-            # insert the metadata dictionary
-            data = self.metadata
+            # insert the info dictionary
+            data = self.info
             for k in keys[:-1]:
                 if k not in data or not isinstance(data[k], dict):
                     return False
                 data = data[k]
             data[keys[-1]] = value
 
-            # Save the updated metadata to the file
-            await self._save_metadata(sync_flag)
+            # Save the updated info to the file
+            await self._save_info(sync_flag)
             return True
                     
-    async def delete_metadata(self, key: str, sync_flag:bool=True) -> bool:
+    async def delete_info(self, key: str, sync_flag:bool=True) -> bool:
         """
-        Delete a value by a nested key from metadata.
-        for example: await jsonManager_object.delete_metadata("server.users.user1.bucket1.objects.aa")
+        Delete a value by a nested key from info.
+        for example: await jsonManager_object.delete_info("server.users.user1.bucket1.objects.aa")
         ->Deleting the file aa located in bucket1 of user user1 if it exists.
         
         """
 
         keys = key.split(".")
 
-        data = self.metadata
+        data = self.info
         for k in keys[:-1]:
             if isinstance(data, dict) and k in data:
                 data = data[k]
@@ -115,8 +115,8 @@ class JsonManager:
         if isinstance(data, dict) and keys[-1] in data:
             del data[keys[-1]]
             
-            # Save the updated metadata to the file
-            await self._save_metadata(sync_flag)
+            # Save the updated info to the file
+            await self._save_info(sync_flag)
             
             return True
         else:
