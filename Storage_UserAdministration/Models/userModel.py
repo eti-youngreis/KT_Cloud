@@ -33,7 +33,6 @@ class User:
         return self.password_hash == self.hash_password(password)
 
     def can(self, action, resource):
-        # role.has_permission לברר מה החתימה של
         return any(
             policy.evaluate(policy_name, permissions) for policy in self.policies
         ) or self.role.has_permission(permissions)
