@@ -1,56 +1,63 @@
 import sqlite3
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Optional
 import json
+from sqlite3 import OperationalError
 
 class DBManager:
     def __init__(self, db_file: str):
-        """Initialize the database connection and create tables if they do not exist."""
+        '''Initialize the database connection and create tables if they do not exist.'''
         self.connection = sqlite3.connect(db_file)
-        self.create_tables()
-
-    def create_tables(self):
-        """Create tables in the database if they do not exist."""
+    
+    def create_table(self, table_name, table_schema):
+        '''create a table in a given db by given table_schema'''
         with self.connection:
-            self.connection.execute("""
-                CREATE TABLE IF NOT EXISTS objects (
-                    object_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    type_object TEXT NOT NULL,
-                    metadata TEXT NOT NULL
-                )
-            """)
+            self.connection.execute(f'''
+                CREATE TABLE IF NOT EXISTS {table_name} ({table_schema})
+            ''')
 
-    def insert(self, table_name: str, object_type: str, metadata: Dict[str, Any]) -> None:
-        """Insert a new record into the specified table."""
+    def insert(self, table_name: str, metadata: Dict[str, Any], object_id: Optional[Any] = None) -> None:
+        '''Insert a new record into the specified table.'''
         metadata_json = json.dumps(metadata)
         try:
             c = self.connection.cursor()
-            c.execute(f'''
-                INSERT INTO {table_name} (type_object, metadata)
-                VALUES (?, ?)
-            ''', (object_type, metadata_json))
+            if object_id is not None:
+                # Assuming the ID column is named 'id' and it's the first column
+                c.execute(f'''
+                    INSERT INTO {table_name} (id, metadata)
+                    VALUES (?, ?)
+                ''', (object_id, metadata_json))
+            else:
+                # Insert without the ID, assuming the ID is auto-increment
+                c.execute(f'''
+                    INSERT INTO {table_name} (metadata)
+                    VALUES (?)
+                ''', (metadata_json,))
             self.connection.commit()
-        except sqlite3.OperationalError as e:
-            raise Exception(f"Error inserting into {table_name}: {e}")
+        except OperationalError as e:
+            raise Exception(f'Error inserting into {table_name}: {e}')
+
+
 
     def update(self, table_name: str, updates: Dict[str, Any], criteria: str) -> None:
-        """Update records in the specified table based on criteria."""
-        set_clause = ', '.join([f"{k} = ?" for k in updates.keys()])
+        '''Update records in the specified table based on criteria.'''
+        set_clause = ', '.join([f'{k} = ?' for k in updates.keys()])
         values = list(updates.values())
         
+        query = f'''
+            UPDATE {table_name}
+            SET {set_clause}
+            WHERE {criteria}
+        '''
         try:
             c = self.connection.cursor()
-            c.execute(f'''
-                UPDATE {table_name}
-                SET {set_clause}
-                WHERE {criteria}
-            ''', values)
+            c.execute(query, values)
             self.connection.commit()
-        except sqlite3.OperationalError as e:
-            raise Exception(f"Error updating {table_name}: {e}")
+        except OperationalError as e:
+            raise Exception(f'Error updating {table_name}: {e}')
+
 
     def select(self, table_name: str, columns: List[str] = ['*'], criteria: str = '') -> Dict[int, Dict[str, Any]]:
-        """Select records from the specified table based on criteria.
- 
+        '''Select records from the specified table based on criteria.
         
         Args:
             table_name (str): The name of the table.
@@ -59,10 +66,9 @@ class DBManager:
         
         Returns:
             Dict[int, Dict[str, Any]]: A dictionary where keys are object_ids and values are metadata.
-        """
-
+        '''
         columns_clause = ', '.join(columns)
-        query = f'SELECT object_id, {columns_clause} FROM {table_name}'
+        query = f'SELECT {columns_clause} FROM {table_name}'
         if criteria:
             query += f' WHERE {criteria}'
         
@@ -71,12 +77,11 @@ class DBManager:
             c.execute(query)
             results = c.fetchall()
             return {result[0]: dict(zip(columns, result[1:])) for result in results}
-        except sqlite3.OperationalError as e:
-            raise Exception(f"Error selecting from {table_name}: {e}")
+        except OperationalError as e:
+            raise Exception(f'Error selecting from {table_name}: {e}')
 
     def delete(self, table_name: str, criteria: str) -> None:
-        """Delete a record from the specified table based on criteria."""
-
+        '''Delete a record from the specified table based on criteria.'''
         try:
             c = self.connection.cursor()
             c.execute(f'''
@@ -84,8 +89,7 @@ class DBManager:
                 WHERE {criteria}
             ''')
             self.connection.commit()
-        except sqlite3.OperationalError as e:
-
+        except OperationalError as e:
             raise Exception(f'Error deleting from {table_name}: {e}')
 
     def describe(self, table_name: str) -> Dict[str, str]:
@@ -95,7 +99,7 @@ class DBManager:
             c.execute(f'PRAGMA table_info({table_name})')
             columns = c.fetchall()
             return {col[1]: col[2] for col in columns}
-        except sqlite3.OperationalError as e:
+        except OperationalError as e:
             raise Exception(f'Error describing table {table_name}: {e}')
     
     
@@ -107,7 +111,7 @@ class DBManager:
             c.execute(query)
             results = c.fetchall()
             return results if results else None
-        except sqlite3.OperationalError as e:
+        except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
 
     def execute_query_with_single_result(self, query: str) -> Optional[Tuple]:
@@ -117,7 +121,7 @@ class DBManager:
             c.execute(query)
             result = c.fetchone()
             return result if result else None
-        except sqlite3.OperationalError as e:
+        except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
         
     def is_json_column_contains_key_and_value(self, table_name: str, key: str, value: str) -> bool:
@@ -148,9 +152,7 @@ class DBManager:
         except OperationalError as e:
             print(f'Error: {e}')
     
-    
-
-
     def close(self):
         '''Close the database connection.'''
         self.connection.close()
+        

@@ -129,4 +129,3 @@ class QuotaManager:
                 roles=quota_data.get('roles', [])
             )
         return quotas
-

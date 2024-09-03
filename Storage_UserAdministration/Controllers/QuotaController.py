@@ -47,4 +47,6 @@ class QuotaController:
         """Check if a quota is exceeded."""
         return self.service.check_exceeded(name)
     
-    
+    def update_usage(self, quota_name:str, usage: int) -> Quota:
+            """Update an existing quota."""
+            return self.service.update_usage(quota_name,usage)

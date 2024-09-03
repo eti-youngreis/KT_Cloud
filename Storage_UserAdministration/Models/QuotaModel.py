@@ -36,19 +36,6 @@ class QuotaModel:
         return self.usage >= self.limit
 
     def __str__(self):
-        return f"Quota(name={self.name}, resource_type={self.resource_type}, restriction_type={self.restriction_type}, limit={self.limit}, period={self.period}, usage={self.usage})"
-
-    def to_dict(self) -> dict:
-            return {
-                'name': self.name,
-                'resource_type': self.resource_type,
-                'restriction_type': self.restriction_type,
-                'limit': self.limit,
-                'period': self.period,
-                'usage': self.usage
-            }
-            
-    def __str__(self):
         return (f"Quota(name={self.name}, resource_type={self.resource_type}, restriction_type={self.restriction_type}, "
                 f"limit={self.limit}, period={self.period}, usage={self.usage}, users={self.users}, "
                 f"groups={self.groups}, roles={self.roles})")
@@ -103,4 +90,4 @@ class QuotaModel:
                 self.roles.remove(entity_id)
         else:
             raise ValueError(f"Invalid entity type: {entity_type}")
-    
+
