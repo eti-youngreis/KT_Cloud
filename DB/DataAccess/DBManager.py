@@ -15,18 +15,27 @@ class DBManager:
                 CREATE TABLE IF NOT EXISTS {table_name} ({table_schema})
             ''')
 
-    def insert(self, table_name: str, metadata: Dict[str, Any]) -> None:
+    def insert(self, table_name: str, metadata: Dict[str, Any], object_id: Optional[Any] = None) -> None:
         '''Insert a new record into the specified table.'''
         metadata_json = json.dumps(metadata)
         try:
             c = self.connection.cursor()
-            c.execute(f'''
-                INSERT INTO {table_name} (metadata)
-                VALUES (?)
-            ''', (metadata_json,))
+            if object_id is not None:
+                # Assuming the ID column is named 'id' and it's the first column
+                c.execute(f'''
+                    INSERT INTO {table_name} (id, metadata)
+                    VALUES (?, ?)
+                ''', (object_id, metadata_json))
+            else:
+                # Insert without the ID, assuming the ID is auto-increment
+                c.execute(f'''
+                    INSERT INTO {table_name} (metadata)
+                    VALUES (?)
+                ''', (metadata_json,))
             self.connection.commit()
         except sqlite3.OperationalError as e:
             raise Exception(f'Error inserting into {table_name}: {e}')
+
 
 
     def update(self, table_name: str, updates: Dict[str, Any], criteria: str) -> None:
