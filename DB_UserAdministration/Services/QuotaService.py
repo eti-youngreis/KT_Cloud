@@ -1,7 +1,9 @@
+from sqlite3 import OperationalError
 from QuotaModel import Quota
 from typing import Dict
 from DataAccess.QuotaManager import QuotaManager
 from Exceptions.QuotaException import *
+from Exceptions.exception import ParamValidationFault
 
 class QuotaService:
     def __init__(self, dal: QuotaManager) -> None:
@@ -12,6 +14,7 @@ class QuotaService:
             dal (QuotaManager): An instance of QuotaManager for interacting with quota data storage.
         """
         self.dal: QuotaManager = dal
+        self.quotas:Dict[str: Quota] = {}
     
     def create_quota(self, owner_id: str, resource_type: str, limit: int) -> Dict:
         """
@@ -23,14 +26,21 @@ class QuotaService:
             limit (int): The maximum allowed usage for the quota.
 
         Returns:
-            Dict
+            dict: A dictionary containing new quota details.
         """
         quota_id = owner_id + "_" + resource_type
+        if quota_id in self.quotas:
+            raise QuotaAlreadyExistFault(f'quota with owner id {owner_id} and resource type {resource_type} already exist')
         quota = Quota(quota_id, resource_type, limit)
-        self.dal.create(quota.to_dict())
-        return quota.to_dict()
+        self.quotas[quota_id] = quota
+        try:
+            self.dal.create(quota.to_dict())
+        except OperationalError as e:
+            raise ValueError(f'An internal error occurred: {str(e)}')
+        
+        return {quota_id: quota.to_dict()}
 
-    def delete_quota(self, quota_id: str):
+    def delete_quota(self, quota_id: str) -> Dict:
         """
         Deletes an existing quota based on its unique identifier.
 
@@ -41,11 +51,18 @@ class QuotaService:
             QuotaNotFoundFault: If the quota with the specified ID does not exist.
 
         Returns:
-            None
+            dict: A dictionary containing deleted quota details.
         """
-        if quota_id not in self.dal.get_all_quotas():
+        if quota_id not in self.quotas:
             raise QuotaNotFoundFault(f'Quota with id {quota_id} not found')
-        self.dal.delete(quota_id)
+        quota_description = self.quotas[quota_id].to_dict()
+        del self.quotas[quota_id]
+        try:
+            self.dal.delete(quota_id)
+        except OperationalError as e:
+            raise ValueError(f'An internal error occurred: {str(e)}')
+        return {quota_id: quota_description}
+        
         
     def update_quota(self, quota_id: str, limit: int) -> Dict:
         """
@@ -59,14 +76,18 @@ class QuotaService:
             QuotaNotFoundFault: If the quota with the specified ID does not exist.
 
         Returns:
-            None
+            dict: A dictionary containing updated quota details.
         """
-        if quota_id not in self.dal.get_all_quotas():
+        if quota_id not in self.quotas:
             raise QuotaNotFoundFault(f'Quota with id {quota_id} not found')
-        quota_dict = self.dal.get(quota_id)
-        quota_dict['limit'] = limit
-        self.dal.update(quota_id, quota_dict)
-        return quota_dict
+        quota:Quota = self.quotas[quota_id]
+        quota.modify(limit)
+        try:
+            self.dal.update(quota_id, quota.to_dict())
+        except OperationalError as e:
+            raise ValueError(f'An internal error occurred: {str(e)}')
+        
+        return {quota_id: quota.to_dict()}
 
     def get_quota(self, quota_id: str):
         """
@@ -81,9 +102,9 @@ class QuotaService:
         Returns:
             dict: A dictionary containing quota details.
         """
-        if quota_id not in self.dal.get_all_quotas():
+        if quota_id not in self.quotas:
             raise QuotaNotFoundFault(f'Quota with id {quota_id} not found')
-        return self.dal.get(quota_id)
+        return {quota_id: self.quotas[quota_id].to_dict()}
     
     def list_quotas(self, owner_id: str) -> Dict:
         """
@@ -107,36 +128,50 @@ class QuotaService:
         Args:
             quota_id (str): The unique identifier of the quota to check.
 
+        Raises:
+            QuotaNotFoundFault: If the quota with the specified quota_id is not found.
+
         Returns:
             bool: True if the usage has exceeded the limit, False otherwise.
         """
-        pass
+        if quota_id not in self.quotas:
+            raise QuotaNotFoundFault(f'Quota with id {quota_id} not found')
+        quota: Quota = self.quotas[quota_id]
+        return quota.check_exceeded()
 
-    def add_to_usage(self, quota_id: str, amount: int) -> None:
+        
+
+    def update_usage(self, quota_id: str, amount: int = 1) -> None:
         """
-        Increases the current usage of a quota by a specified amount.
+        Updates the current usage of a quota by adding or subtracting a specified amount.
 
         Args:
-            quota_id (str): The unique identifier of the quota whose usage is to be increased.
-            amount (int): The amount to add to the current usage.
+            quota_id (str): The unique identifier of the quota whose usage is to be updated.
+            amount (int): The amount to add to or subtract from the current usage. A positive value increases usage,
+                        while a negative value decreases it.
+
+        Raises:
+            QuotaNotFoundFault: If the quota with the specified quota_id is not found.
+            ValueError: If an internal error occurs while updating the quota.
 
         Returns:
             None
         """
-        pass
-    
-    def sub_from_usage(self, quota_id: str, amount: int) -> None:
-        """
-        Decreases the current usage of a quota by a specified amount.
+        if quota_id not in self.quotas:
+            raise QuotaNotFoundFault(f'Quota with id {quota_id} not found')
+        quota: Quota = self.quotas[quota_id]
+        if amount > 0:
+            quota.add_to_usage(amount)
+        elif amount < 0:
+            quota.sub_from_usage(amount)
+        try:
+            self.dal.update(quota_id, quota.to_dict())
+        except OperationalError as e:
+            raise ValueError(f'An internal error occurred: {str(e)}')
 
-        Args:
-            quota_id (str): The unique identifier of the quota whose usage is to be decreased.
-            amount (int): The amount to subtract from the current usage.
+        
+        
 
-        Returns:
-            None
-        """
-        pass
 
     def reset_usage(self, quota_id: str) -> None:
         """
@@ -148,4 +183,13 @@ class QuotaService:
         Returns:
             None
         """
-        pass
+        if quota_id not in self.quotas:
+            raise QuotaNotFoundFault(f'Quota with id {quota_id} not found')
+        quota:Quota = self.quotas[quota_id]
+        quota.reset_usage()
+        try:
+            self.dal.update(quota_id, quota.to_dict())
+        except OperationalError as e:
+            raise ValueError(f'An internal error occurred: {str(e)}')
+        
+        
