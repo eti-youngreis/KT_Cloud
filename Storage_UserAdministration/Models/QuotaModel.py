@@ -26,11 +26,14 @@ class QuotaModel:
 
     def add_usage(self, amount: int):
         self.usage += amount
-        if self.usage > self.limit:
-            raise ValueError(f"Quota exceeded for {self.name}! Resource: {self.resource_type}, Restriction: {self.restriction_type}, Limit: {self.limit}, Usage: {self.usage}")
+        if self.check_exceeded():
+            raise Exception(f"Quota exceeded for {self.name}! Resource: {self.resource_type}, Restriction: {self.restriction_type}, Limit: {self.limit}, Usage: {self.usage}")
 
     def reset_usage(self):
         self.usage = 0
+        
+    def check_exceeded(self) -> bool:
+        return self.usage >= self.limit
 
     def __str__(self):
         return (f"Quota(name={self.name}, resource_type={self.resource_type}, restriction_type={self.restriction_type}, "
@@ -87,4 +90,4 @@ class QuotaModel:
                 self.roles.remove(entity_id)
         else:
             raise ValueError(f"Invalid entity type: {entity_type}")
-        
+
