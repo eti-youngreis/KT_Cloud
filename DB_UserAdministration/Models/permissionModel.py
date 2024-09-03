@@ -94,3 +94,10 @@ class Permission:
             self.resource = resource  # Update the resource if a new one is provided
         if effect:
             self.effect = effect  # Update the effect if a new one is provided
+
+    @staticmethod
+    def build_from_dict(dict):
+        try:
+            return Permission(dict[0], dict[1], dict[2])
+        except:
+            pass

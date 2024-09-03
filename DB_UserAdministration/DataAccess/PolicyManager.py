@@ -1,23 +1,33 @@
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import json
-from DB.DataAccess.DBManager import DBManager
+
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from DB_UserAdministration.Models.PolicyModel import Policy
+
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+from DB_UserAdministration.DataAccess.DBManager import DBManager
 
 # commit
-class PolicyManager:
+class PolicyManager(DBManager):
     def __init__(self, db_file: str):
         '''Initialize PolicyManager with the database connection.'''
-        self.db_manager = DBManager(db_file)
         self.table_name = 'policy_management'
-        self.create_table()
+        self.identifier_param = 'policy_id'
+        self.columns = [self.identifier_param, 'permissions']
+        super().__init__(db_file=db_file)
 
     def create_table(self):
         '''Create policies table in the database.'''
-        table_schema = 'policy_id TEXT NOT NULL PRIMARY KEY, metadata TEXT NOT NULL'
-        self.db_manager.create_table(self.table_name, table_schema)
+        table_schema = f'{self.identifier_param} TEXT NOT NULL PRIMARY KEY, permissions TEXT'
+        super().create_table(self.table_name, table_schema)
 
-    def create(self, metadata: Dict[str, Any]) -> None:
+    def insert(self, metadata: Dict[str, Any], object_id:Optional[Any] = None) -> None:
         '''Create a new policy in the database.'''
-        self.db_manager.insert(self.table_name, metadata)
+        super().insert(metadata, object_id)
 
     def is_json_column_contains_key_and_value(self, key: str, value: str) -> bool:
         '''Check if the JSON column contains the specified key and value.'''
@@ -38,14 +48,15 @@ class PolicyManager:
             return result[policy_id]
         else:
             raise FileNotFoundError(f'Policy with ID {policy_id} not found.')
-
+        
+    def list_policies(self) -> Dict[str, Policy]:
+        result = self.select()
+        print(result)
+        return list(Policy.build_from_dict(policy) for policy in result)
+    
     def delete(self, policy_id: int) -> None:
         '''Delete a policy from the database.'''
         self.db_manager.delete(self.table_name, f'policy_id = {policy_id}')
-
-    def get_all_policies(self) -> Dict[int, Any]:
-        '''Retrieve all policies from the database.'''
-        return self.db_manager.select(self.table_name, ['policy_id', 'metadata'])
 
     def describe_table(self) -> Dict[str, str]:
         '''Describe the schema of the table.'''

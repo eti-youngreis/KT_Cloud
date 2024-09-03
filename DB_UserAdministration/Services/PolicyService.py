@@ -8,12 +8,12 @@ from DB_UserAdministration.Validation.PolicyValidation import validate_policy_na
 class PolicyService:
     def __init__(self, policy_manager: PolicyManager):
         self.policy_manager = policy_manager
-        self.policies: Dict[str, Policy] = {}
+        self.policies: Dict[str, Policy] = self.policy_manager.list_policies()
 
     def create(self, name):
         new_policy = Policy(name)
         try:
-            self.policy_manager.create(new_policy.to_dict())
+            self.policy_manager.insert(new_policy.to_dict())
         except OperationalError as e:
             raise ValueError(f'An internal error occurred: {str(e)}')
         self.policies[name] = new_policy

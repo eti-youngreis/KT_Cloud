@@ -1,6 +1,7 @@
+import json
 from typing import List
 
-from permissionModel import Permission
+from Models.permissionModel import Permission
 
 # commit
 class Policy:
@@ -14,9 +15,12 @@ class Policy:
             "permissions": [perm.to_dict() for perm in self.permissions],
         }
 
+    def __repr__(self):
+        permissions_repr = ', '.join(repr(p) for p in self.permissions)
+        return f"Policy(name={self.name!r}, permissions=[{permissions_repr}])"
+    
     def evaluate(self, action, resource):
         allowed = False
-        denied = False
         # a permission (statement) can either allow or deny an action
         # the evaluate function returns wether non of the policy permissions deny access
         # and at least one permits access
@@ -28,3 +32,7 @@ class Policy:
                     allowed = True
 
         return allowed
+    
+    @staticmethod
+    def build_from_dict(dict):
+        return Policy(dict['policy_id'], list(Permission.build_from_dict(per) for per in dict['permissions']))
