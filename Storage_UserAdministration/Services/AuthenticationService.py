@@ -1,3 +1,4 @@
+# service.py
 import hashlib
 import uuid
 import sys
@@ -5,49 +6,43 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from DataAccess.UserDAL import UserDAL
-from Models.userModel import User
+from DataAccess.userManager import UserNanager
+
 class AuthenticationService:
-    def __init__(self):
-        self.data_access =UserDAL()
+    def __init__(self,data_file_path):
+        self.data_access =UserNanager(data_file_path)
+        self.logged_in_users = {}
 
     def hash_password(self, password):
         return hashlib.sha256(password.encode()).hexdigest()
 
     def login(self, username, password):
-        users = self.data_access.users
+        users = self.data_access.load_users()
         user_data = users.get(username)
         if user_data and user_data.get('password') == self.hash_password(password):
             session_id = self.generate_session_id()
-            user_data['logged_in']=True
-            user_data['token']=session_id
-            self.data_access.save_users_to_file()
+            self.logged_in_users[session_id] = username
             return session_id
         else:
             return None
 
-    def logout(self, username):
-        users = self.data_access.users
-        user_data = users.get(username)
-        user_data['logged_in']=False
-        user_data['token']=None
-        self.data_access.save_users_to_file()
-
+    def logout(self, session_id):
+        if session_id in self.logged_in_users:
+            self.logged_in_users.pop(session_id)
 
     def generate_session_id(self):
         return str(uuid.uuid4())
 
-    def is_authenticated(self, username):
-        users = self.data_access.users
-        user_data = users.get(username)
-        return user_data['logged_in']==True
+    def is_authenticated(self, session_id):
+        return session_id in self.logged_in_users
 
     def register(self, username, password):
-        users = self.data_access.users
+        users = self.data_access.load_users()
         if username in users:
+            print(f"User {username} already exists.")
             return False
         hashed_password = self.hash_password(password)
-        new_user =User(username=username,password=password)
-        users[username] = {'password': hashed_password,'logged_in':False,'token':None}
-        self.data_access.save_users_to_file()
-        return new_user
+        users[username] = {'password': hashed_password}
+        self.data_access.save_users(users)
+        print(f"User {username} registered successfully.")
+        return True

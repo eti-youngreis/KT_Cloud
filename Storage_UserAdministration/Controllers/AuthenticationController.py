@@ -7,8 +7,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from Services.AuthenticationService import AuthenticationService
 
 class AuthenticationController:
-    def __init__(self):
-        self.auth_service = AuthenticationService()
+    def __init__(self, data_file_path):
+        self.auth_service = AuthenticationService(data_file_path)
 
     def login(self, username, password):
         session_id = self.auth_service.login(username, password)
@@ -41,12 +41,13 @@ class AuthenticationController:
 
 # Example usage
 if __name__ == "__main__":
-    controller = AuthenticationController()
-    # # Register a user
-    controller.register('user', 'password123')
-    # # Login a user
-    session_id = controller.login('user', 'password123')
+    controller = AuthenticationController('users.json')
+    # Register a user
+    controller.register('user1', 'password123')
+    # Login a user
+    session_id = controller.login('user1', 'password123')
     # Check if the user is authenticated
-    controller.check_authentication('user')
-    # Logout the user
-    controller.logout('user')
+    if session_id:
+        controller.check_authentication(session_id)
+        # Logout the user
+        controller.logout(session_id)
