@@ -1,8 +1,7 @@
 from typing import Dict, Any
 import json
 import sqlite3
-from DBManager import DBManager
-
+from DB.DataAccess import DBManager
 class UserManager:
 
     def __init__(self, db_file: str):
@@ -36,7 +35,7 @@ class UserManager:
     def delete(self, user_id: str) -> None:
         '''Delete an user from the database.'''
         self.db_manager.delete(self.table_name, f'user_id = {user_id}')
-        
+
     def get(self, user_id: int) -> Dict[str, Any]:
         '''Retrieve an user from the database.'''
         result = self.db_manager.select(self.table_name, ['metadata'], f'user_id = {user_id}')
