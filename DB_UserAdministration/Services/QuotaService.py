@@ -15,6 +15,15 @@ class QuotaService:
         """
         self.dal: QuotaManager = dal
         self.quotas:Dict[str: Quota] = {}
+        self.limits = {
+            'DB_INSTANCE':40,
+            'BUCKET':100,
+            'API_REQUESTS':50,
+            'OBJECT':300
+        }
+    
+    def _hash_quota_id(owner_id:str, resource_type:str):
+        return owner_id + "_" + resource_type
     
     def create_quota(self, owner_id: str, resource_type: str, limit: int) -> Dict:
         """
@@ -28,7 +37,7 @@ class QuotaService:
         Returns:
             dict: A dictionary containing new quota details.
         """
-        quota_id = owner_id + "_" + resource_type
+        quota_id = self._hash_quota_id(owner_id, resource_type)
         if quota_id in self.quotas:
             raise QuotaAlreadyExistFault(f'quota with owner id {owner_id} and resource type {resource_type} already exist')
         quota = Quota(quota_id, resource_type, limit)
@@ -40,7 +49,7 @@ class QuotaService:
         
         return {quota_id: quota.to_dict()}
 
-    def delete_quota(self, quota_id: str) -> Dict:
+    def delete_quota(self, owner_id: str, resource_type:str) -> Dict:
         """
         Deletes an existing quota based on its unique identifier.
 
@@ -53,6 +62,7 @@ class QuotaService:
         Returns:
             dict: A dictionary containing deleted quota details.
         """
+        quota_id = self._hash_quota_id(owner_id, resource_type)
         if quota_id not in self.quotas:
             raise QuotaNotFoundFault(f'Quota with id {quota_id} not found')
         quota_description = self.quotas[quota_id].to_dict()
@@ -64,7 +74,7 @@ class QuotaService:
         return {quota_id: quota_description}
         
         
-    def update_quota(self, quota_id: str, limit: int) -> Dict:
+    def update_quota(self, owner_id: str, resource_type:str, limit: int) -> Dict:
         """
         Updates the limit of an existing quota.
 
@@ -78,6 +88,7 @@ class QuotaService:
         Returns:
             dict: A dictionary containing updated quota details.
         """
+        quota_id = self._hash_quota_id(owner_id, resource_type)
         if quota_id not in self.quotas:
             raise QuotaNotFoundFault(f'Quota with id {quota_id} not found')
         quota:Quota = self.quotas[quota_id]
@@ -89,7 +100,7 @@ class QuotaService:
         
         return {quota_id: quota.to_dict()}
 
-    def get_quota(self, quota_id: str):
+    def get_quota(self, owner_id: str, resource_type:str):
         """
         Retrieves details of a specific quota based on its unique identifier.
 
@@ -102,6 +113,7 @@ class QuotaService:
         Returns:
             dict: A dictionary containing quota details.
         """
+        quota_id = self._hash_quota_id(owner_id, resource_type)
         if quota_id not in self.quotas:
             raise QuotaNotFoundFault(f'Quota with id {quota_id} not found')
         return {quota_id: self.quotas[quota_id].to_dict()}
@@ -121,7 +133,7 @@ class QuotaService:
             raise OwnerNotFoundFault(f'owner with id {owner_id} does not have quotas')  
         return res
       
-    def check_exceeded(self, quota_id: str) -> bool:
+    def check_exceeded(self, owner_id: str, resource_type:str) -> bool:
         """
         Checks if the current usage of a quota has exceeded its limit.
 
@@ -134,6 +146,7 @@ class QuotaService:
         Returns:
             bool: True if the usage has exceeded the limit, False otherwise.
         """
+        quota_id = self._hash_quota_id(owner_id, resource_type)
         if quota_id not in self.quotas:
             raise QuotaNotFoundFault(f'Quota with id {quota_id} not found')
         quota: Quota = self.quotas[quota_id]
@@ -141,7 +154,7 @@ class QuotaService:
 
         
 
-    def update_usage(self, quota_id: str, amount: int = 1) -> None:
+    def update_usage(self, owner_id: str, resource_type:str, amount: int = 1) -> None:
         """
         Updates the current usage of a quota by adding or subtracting a specified amount.
 
@@ -157,6 +170,7 @@ class QuotaService:
         Returns:
             None
         """
+        quota_id = self._hash_quota_id(owner_id, resource_type)
         if quota_id not in self.quotas:
             raise QuotaNotFoundFault(f'Quota with id {quota_id} not found')
         quota: Quota = self.quotas[quota_id]
@@ -173,7 +187,7 @@ class QuotaService:
         
 
 
-    def reset_usage(self, quota_id: str) -> None:
+    def reset_usage(self, owner_id: str, resource_type:str) -> None:
         """
         Resets the current usage of a quota to zero.
 
@@ -183,6 +197,7 @@ class QuotaService:
         Returns:
             None
         """
+        quota_id = self._hash_quota_id(owner_id, resource_type)
         if quota_id not in self.quotas:
             raise QuotaNotFoundFault(f'Quota with id {quota_id} not found')
         quota:Quota = self.quotas[quota_id]
