@@ -2,9 +2,6 @@ from typing import Dict, List
 
 from Storage_UserAdministration.Models.PermissionModel import Permission
 
-
-# from Storage.Models.PermissionModel import Permission
-
 class PolicyModel:
     def __init__(self,policy_name:str, version: str, permissions: List[Permission]=None):
         self.policy_name = policy_name

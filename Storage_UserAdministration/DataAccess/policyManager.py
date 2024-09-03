@@ -1,7 +1,6 @@
 import json
 import os
 from typing import Dict,  Optional
-
 from Storage_UserAdministration.Models.PermissionModel import Permission
 from Storage_UserAdministration.Models.PolicyModel import PolicyModel
 
