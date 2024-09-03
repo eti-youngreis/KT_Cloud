@@ -47,7 +47,7 @@ class AuthenticationService:
         if username in users:
             return False
         hashed_password = self.hash_password(password)
-        new_user =User(username=username,password=password)
+        new_user =User(username=username,password=hashed_password)
         users[username] = {'password': hashed_password,'logged_in':False,'token':None}
         self.data_access.save_users_to_file()
         return new_user
