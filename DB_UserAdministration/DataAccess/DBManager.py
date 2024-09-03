@@ -27,6 +27,7 @@ class DBManager:
         if object_id != None:
             obj.self.identifier_param = object_id
         
+        print(obj)
         """Insert a new record into the specified table."""
         columns = ", ".join(self.columns)
         placeholders = ", ".join(["?" for _ in self.columns])
@@ -34,14 +35,16 @@ class DBManager:
 
 
         values = [str(value) for value in values]
-
+        
+        query = f"""
+                INSERT INTO {self.table_name} ({columns})
+                VALUES ({placeholders})
+                """
+                
         try:
             c = self.connection.cursor()
             c.execute(
-                f"""
-                INSERT INTO {self.table_name} ({columns})
-                VALUES ({placeholders})
-                """,
+                query,
                 values,
             )
             self.connection.commit()

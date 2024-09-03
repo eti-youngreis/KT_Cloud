@@ -1,23 +1,25 @@
 import json
-from typing import List
-
-from Models.permissionModel import Permission
+from typing import Dict, List
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+from DB_UserAdministration.Models.permissionModel import Action, Effect, Permission, Resource
 
 # commit
 class Policy:
-    def __init__(self, policy_id: str, permissions: List[Permission] = None):
+    def __init__(self, policy_id: str, permissions: List[int] = None):
         self.policy_id = policy_id
-        self.permissions = permissions if permissions != None else []
-
+        self.permissions = permissions
+        
+        
     def to_dict(self):
         return {
             "policy_id": self.policy_id,
-            "permissions": [perm.to_dict() for perm in self.permissions],
+            "permissions": self.permissions,
         }
 
     def __repr__(self):
-        permissions_repr = ', '.join(p.__repr__() for p in self.permissions) if len(self.permissions) > 0 else ""
-        return f"Policy(policy_id={self.policy_id!r}, permissions=[{permissions_repr}])"
+        return f"Policy(policy_id={self.policy_id!r}, permissions={self.permissions})"
     
     def evaluate(self, action, resource):
         allowed = False
@@ -25,10 +27,11 @@ class Policy:
         # the evaluate function returns wether non of the policy permissions deny access
         # and at least one permits access
         for permission in self.permissions:
-            if (permission.resource == resource or permission.resource == '*') and permission.action == action:
-                if permission.effect == "Deny":
+            perm = Permission._permissions[permission]
+            if (perm.resource == resource or perm.resource == '*') and perm.action == action:
+                if perm.effect == Effect.DENY:
                     return False
-                elif permission.effect == "Allow":
+                elif perm.effect == Effect.ALLOW:
                     allowed = True
 
         return allowed
@@ -36,8 +39,8 @@ class Policy:
     @staticmethod
     def build_from_dict(dict):
         id = dict['policy_id']
-        permissions = [Permission.build_from_dict(perm) for perm in json.loads(dict['permissions'])]
+        permissions = [Permission.get_permission_by_id(perm) for perm in json.loads(dict['permissions'])]
         return Policy(id, permissions)
 
-    def add_permission(self, permission: Permission):
-        self.permissions.append(permission)
+    def add_permission(self, permission: tuple):
+        self.permissions.append(Permission.get_id_by_permission(permission[0], permission[1], permission[2]))

@@ -25,17 +25,18 @@ if __name__ == "__main__":
     #     Policy(
     #         "policy1",
     #         [
-    #             Permission(Action.DELETE, Resource.BUCKET, Effect.ALLOW),
-    #             Permission(Action.EXECUTE, Resource.DATABASE, Effect.DENY),
+    #             (Action.READ, Resource.BUCKET, Effect.DENY),
+    #             (Action.READ, Resource.DATABASE, Effect.ALLOW)
     #         ],
     #     )
     # )
 
     
-    # print(controller.list_policies())
+    print(controller.list_policies())
     policy1 = controller.get_policy('policy1')
+    print(policy1.permissions)
     policy1.permissions = []
-    policy1.add_permission(Permission(Action.READ, Resource.BUCKET, Effect.ALLOW))
+    policy1.add_permission((Action.WRITE, Resource.BUCKET, Effect.ALLOW))
     controller.subscribe(policy1)
     policy1 = controller.get_policy('policy1')
     print(policy1)
