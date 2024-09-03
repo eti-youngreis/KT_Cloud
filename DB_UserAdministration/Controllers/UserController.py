@@ -11,3 +11,6 @@ class UserController:
 
     def update_user_name(self, user_id, user_name):
         self.service.update(user_id, user_name)
+
+    def get_user_details(self, user_id):
+        self.service.get_user(user_id)

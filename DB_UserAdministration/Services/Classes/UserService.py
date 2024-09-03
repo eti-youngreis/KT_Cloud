@@ -57,6 +57,13 @@ class userService(DBO):
         except OperationalError as e:
             raise ValueError(f'An internal error occurred: {str(e)}')
 
-        
-        
+    def get_user(self, user_id):
+        if not self.is_exist_user_id(user_id):
+            raise ValueError("Invalid email address.")   
 
+        try:
+            details = self.dal.get(user_id)
+            return details
+        except OperationalError as e:
+            raise ValueError(f'An internal error occurred: {str(e)}') 
+        

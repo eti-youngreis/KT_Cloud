@@ -36,8 +36,6 @@ class DBManager:
         except sqlite3.OperationalError as e:
             raise Exception(f'Error inserting into {table_name}: {e}')
 
-
-
     def update(self, table_name: str, updates: Dict[str, Any], criteria: str) -> None:
         '''Update records in the specified table based on criteria.'''
         set_clause = ', '.join([f'{k} = ?' for k in updates.keys()])
@@ -55,7 +53,6 @@ class DBManager:
         except sqlite3.OperationalError as e:
             raise Exception(f'Error updating {table_name}: {e}')
 
-
     def select(self, table_name: str, columns: List[str] = ['*'], criteria: str = '') -> Dict[int, Dict[str, Any]]:
         '''Select records from the specified table based on criteria.
         
@@ -68,7 +65,7 @@ class DBManager:
             Dict[int, Dict[str, Any]]: A dictionary where keys are object_ids and values are metadata.
         '''
         columns_clause = ', '.join(columns)
-        query = f'SELECT object_id, {columns_clause} FROM {table_name}'
+        query = f'SELECT {columns_clause} FROM {table_name}'
         if criteria:
             query += f' WHERE {criteria}'
         
