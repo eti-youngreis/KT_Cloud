@@ -1,5 +1,5 @@
 from typing import Optional, List
-
+from Models.UserModel import User
 from Models.PermissionModel import Permission
 from Models.PolicyModel import Policy
 from Models.GroupModel import Group
