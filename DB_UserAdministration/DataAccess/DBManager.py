@@ -69,15 +69,15 @@ class DBManager:
         """Select records from the specified table based on criteria.
 
         Args:
-            table_name (str): The name of the table.
             columns (List[str]): The columns to select. Default is all columns ('*').
             criteria (str): SQL condition for filtering records. Default is no filter.
 
         Returns:
             Dict[int, Dict[str, Any]]: A dictionary where keys are object_ids and values are metadata.
         """
-        columns_clause = ", ".join(columns)
-        query = f"SELECT {self.identifier_param}, {columns_clause} FROM {self.table_name}"
+        columns_list = [self.identifier_param].extend(columns) if columns != ['*'] else self.columns
+        columns_clause = ", ".join(columns_list)
+        query = f"SELECT {columns_clause} FROM {self.table_name}"
         if criteria:
             query += f" WHERE {criteria}"
 
@@ -85,7 +85,7 @@ class DBManager:
             c = self.connection.cursor()
             c.execute(query)
             results = c.fetchall()
-            return [dict(zip(columns if columns != ['*'] else self.columns, result[1:])) for result in results]
+            return [dict(zip(columns_list, result)) for result in results]
         except sqlite3.OperationalError as e:
             raise Exception(f"Error selecting from {self.table_name}: {e}")
 

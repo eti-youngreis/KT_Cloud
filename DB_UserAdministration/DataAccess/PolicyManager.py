@@ -43,15 +43,15 @@ class PolicyManager(DBManager):
 
     def get(self, policy_id: str) -> Dict[str, Any]:
         '''Retrieve a policy from the database.'''
-        result = self.db_manager.select(self.table_name, ['metadata'], f'policy_id = {policy_id}')
+        criteria = f'{self.identifier_param} == \'{policy_id}\''
+        result = self.select(columns=['*'], criteria=criteria)
         if result:
-            return result[policy_id]
+            return list(Policy.build_from_dict(res) for res in result)
         else:
             raise FileNotFoundError(f'Policy with ID {policy_id} not found.')
         
     def list_policies(self) -> Dict[str, Policy]:
         result = self.select()
-        print(result)
         return list(Policy.build_from_dict(policy) for policy in result)
     
     def delete(self, policy_id: int) -> None:

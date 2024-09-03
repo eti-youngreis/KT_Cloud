@@ -10,11 +10,10 @@ from DB_UserAdministration.Services.PolicyService import PolicyService
 
 
 if __name__ == "__main__":
-    manager = PolicyManager("./DB/DataAccess/data_access_architecture_test.db")
+    manager = PolicyManager("./DB_UserAdministration/DataAccess/data_access_architecture_test.db")
     service = PolicyService(manager)
     controller = PolicyController(service)
     
     #controller.create_policy('policy_1')
     print(controller.list_policies())
-    controller.delete_policy('policy_1')
-    print(controller.list_policies())
+    print(controller.get_policy('object_2'))
