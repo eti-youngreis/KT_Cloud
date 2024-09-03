@@ -65,5 +65,12 @@ class userService(DBO):
             details = self.dal.get(user_id)
             return details
         except OperationalError as e:
+            raise ValueError(f'An internal error occurred: {str(e)}')
+
+    def get_all_users(self):
+
+        try:
+            self.dal.get_all_users()
+        except OperationalError as e:
             raise ValueError(f'An internal error occurred: {str(e)}') 
         

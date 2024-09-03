@@ -14,3 +14,6 @@ class UserController:
 
     def get_user_details(self, user_id):
         self.service.get_user(user_id)
+
+    def list_users(self):
+        self.service.get_all_users()
