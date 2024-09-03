@@ -2,7 +2,15 @@
     "python.analysis.extraPaths": [
         "./DB_UserAdministration/Models"
     ],
+<<<<<<< HEAD
     "cSpell.words": [
         "bidict"
     ]
+=======
+    "python.testing.pytestArgs": [
+        "DB_UserAdministration"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+>>>>>>> b929f9bfe658513eba8dc5a375fc03f35080cee4
 }
