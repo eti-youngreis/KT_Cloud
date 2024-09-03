@@ -33,7 +33,7 @@ class DBManager:
                     VALUES (?)
                 ''', (metadata_json,))
             self.connection.commit()
-        except sqlite3.OperationalError as e:
+        except OperationalError as e:
             raise Exception(f'Error inserting into {table_name}: {e}')
 
 
@@ -52,7 +52,7 @@ class DBManager:
             c = self.connection.cursor()
             c.execute(query, values)
             self.connection.commit()
-        except sqlite3.OperationalError as e:
+        except OperationalError as e:
             raise Exception(f'Error updating {table_name}: {e}')
 
 
@@ -77,7 +77,7 @@ class DBManager:
             c.execute(query)
             results = c.fetchall()
             return {result[0]: dict(zip(columns, result[1:])) for result in results}
-        except sqlite3.OperationalError as e:
+        except OperationalError as e:
             raise Exception(f'Error selecting from {table_name}: {e}')
 
     def delete(self, table_name: str, criteria: str) -> None:
@@ -89,7 +89,7 @@ class DBManager:
                 WHERE {criteria}
             ''')
             self.connection.commit()
-        except sqlite3.OperationalError as e:
+        except OperationalError as e:
             raise Exception(f'Error deleting from {table_name}: {e}')
 
     def describe(self, table_name: str) -> Dict[str, str]:
@@ -99,29 +99,29 @@ class DBManager:
             c.execute(f'PRAGMA table_info({table_name})')
             columns = c.fetchall()
             return {col[1]: col[2] for col in columns}
-        except sqlite3.OperationalError as e:
+        except OperationalError as e:
             raise Exception(f'Error describing table {table_name}: {e}')
     
     
 
-    def execute_query(self, query: str, params:Tuple = ()) -> Optional[List[Tuple]]:
+    def execute_query(self, query: str) -> Optional[List[Tuple]]:
         '''Execute a given query and return the results.'''
         try:
             c = self.connection.cursor()
-            c.execute(query, params)
+            c.execute(query)
             results = c.fetchall()
             return results if results else None
-        except sqlite3.OperationalError as e:
+        except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
 
-    def execute_query_with_single_result(self, query: str, params:Tuple = ()) -> Optional[Tuple]:
+    def execute_query_with_single_result(self, query: str) -> Optional[Tuple]:
         '''Execute a given query and return a single result.'''
         try:
             c = self.connection.cursor()
-            c.execute(query, params)
+            c.execute(query)
             result = c.fetchone()
             return result if result else None
-        except sqlite3.OperationalError as e:
+        except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
         
     def is_json_column_contains_key_and_value(self, table_name: str, key: str, value: str) -> bool:
@@ -136,11 +136,11 @@ class DBManager:
             ''', (f'%"{key}": "{value}"%',))
             # Check if the count is greater than 0, indicating the key-value pair exists
             return c.fetchone()[0] > 0
-        except sqlite3.OperationalError as e:
+        except OperationalError as e:
             print(f'Error: {e}')
             return False
 
-    def is_identifier_exist(self, table_name: str, value: str) -> bool:
+    def is_identifier_exit(self, table_name: str, value: str) -> bool:
         '''Check if a specific value exists within a column in the given table.'''
         try:
             c = self.connection.cursor()
@@ -149,7 +149,7 @@ class DBManager:
             WHERE object_id LIKE ?
             ''', (value,))
             return c.fetchone()[0] > 0
-        except sqlite3.OperationalError as e:
+        except OperationalError as e:
             print(f'Error: {e}')
     
     def close(self):

@@ -1,9 +1,10 @@
 from typing import List
 
-from DataAccess.policyManager import PolicyStorage
-from Models.PermissionModel import Permission
-from Models.PolicyModel import PolicyModel
-from Services.PolicyService import PolicyService
+from Storage_UserAdministration.DataAccess.policyManager import PolicyManager
+from Storage_UserAdministration.Models.PolicyModel import PolicyModel
+
+from Storage_UserAdministration.Models.PermissionModel import Permission
+from Storage_UserAdministration.Services.PolicyService import PolicyService
 
 
 class PolicyController:
@@ -28,53 +29,46 @@ class PolicyController:
         """Get a policy by name."""
         return self.service.get(policy_name)
 
-    # working on it
     def list_policies(self) -> List[PolicyModel]:
         """List all policies."""
         return self.service.list_policies()
 
-    # working on it
     def add_permission(self, policy_name: str, permission: Permission):
         """Add a permission to an existing policy."""
         self.service.add_permission(policy_name, permission)
 
-    # working on it
     def evaluate_policy(self, policy_name: str, permissions: List[Permission]) -> bool:
         """Evaluate if a policy allows the required permissions."""
         return self.service.evaluate(policy_name, permissions)
 
 def maim():
 
-    # יצירת אחסון עבור המדיניות
-    storage = PolicyStorage()
+    storage = PolicyManager()
 
-    # יצירת שירות עבור המדיניות
     service = PolicyService(storage)
 
-    # יצירת בקר עבור המדיניות
     controller = PolicyController(service=service)
 
-    # יצירת הרשאה חדשה
+    # create a new permission
     permission1 = Permission(action="s3:GetObject", resource="arn:aws:s3:::bucket1/*", effect="Allow")
     permission2 = Permission(action="s3:PutObject", resource="arn:aws:s3:::bucket1/*", effect="Deny")
 
-    # יצירת מדיניות חדשה
-    # new_policy = controller.create_policy(policy_name="ExamplePolicy", version="2024-09-01", permissions=[permission1, permission2])
-    # print("Created Policy:", new_policy.to_dict())
+    # create a new policy
+    new_policy = controller.create_policy(policy_name="ExamplePolicy", version="2024-09-01", permissions=[permission1, permission2])
+    print("Created Policy:", new_policy.to_dict())
 
-    # עדכון המדיניות הקיימת
-    updated_policy = controller.update_policy(policy_name="ExamplePolicy", version="2024-09-02", permissions=[permission1])
+    # update a policy
+    updated_policy = controller.update_policy(policy_name="ExamplePolicy", version="2024-09-03", permissions=[permission1])
     print("Updated Policy:", updated_policy)
 
-    # continue from here
-    # הוספת הרשאה למדיניות קיימת
+    # add permisiion to policy
     controller.add_permission(policy_name="ExamplePolicy", permission=permission2)
 
-    # קבלת מדיניות לפי שם
+    # get policy  by name
     policy = controller.get_policy(policy_name="ExamplePolicy")
     print("Retrieved Policy:", policy.to_dict())
 
-    # מחיקת מדיניות
+    # delete policy
     controller.delete_policy(policy_name="ExamplePolicy")
     print("Policy deleted.")
 maim()

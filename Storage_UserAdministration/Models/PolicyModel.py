@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from Models.PermissionModel import Permission
+from Storage_UserAdministration.Models.PermissionModel import Permission
 
 
 # from Storage.Models.PermissionModel import Permission
@@ -15,5 +15,10 @@ class PolicyModel:
         return {
             "version": self.version,
             "policyName": self.policy_name,
-            "permissions": [permission.to_dict() for permission in self.permissions]
+            "permissions": [
+                permission.to_dict() if isinstance(permission, Permission) else permission
+                for permission in self.permissions
+            ]
         }
+
+
