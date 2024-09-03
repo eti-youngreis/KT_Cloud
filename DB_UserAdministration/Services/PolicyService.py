@@ -53,8 +53,6 @@ class PolicyService:
             return 'policy list couldn\'t be retrieved'
 
     def add_permission(self, policy_name, permission):
-        print(policy_name)
-        print(permission)
         #validate_policy_name(policy_name)
         policy = self.policy_manager.get_by_id(policy_name)
         policy.add_permission(permission)
