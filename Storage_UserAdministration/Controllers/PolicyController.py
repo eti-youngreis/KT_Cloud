@@ -2,7 +2,6 @@ from typing import List
 
 from Storage_UserAdministration.DataAccess.policyManager import PolicyManager
 from Storage_UserAdministration.Models.PolicyModel import PolicyModel
-
 from Storage_UserAdministration.Models.PermissionModel import Permission
 from Storage_UserAdministration.Services.PolicyService import PolicyService
 
@@ -67,6 +66,7 @@ def maim():
     # get policy  by name
     policy = controller.get_policy(policy_name="ExamplePolicy")
     print("Retrieved Policy:", policy.to_dict())
+
 
     # delete policy
     controller.delete_policy(policy_name="ExamplePolicy")
