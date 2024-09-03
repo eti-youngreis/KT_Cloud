@@ -13,7 +13,7 @@ class UserManager:
     
     def create_table(self):
         '''create objects table in the database'''
-        table_schema = 'user_id TEXT NOT NULL PRIMARY KEY AUTOINCREMENT , userName TEXT NOT NULL, metadata TEXT NOT NULL,'
+        table_schema = 'user_id TEXT NOT NULL PRIMARY KEY AUTOINCREMENT, metadata TEXT NOT NULL'
         self.db_manager.create_table(self.table_name, table_schema)
   
     def create(self, metadata: Dict[str, Any]) -> None:
@@ -25,13 +25,13 @@ class UserManager:
 
     def is_identifier_exit(self, value: str):
         self.db_manager.is_identifier_exit(self.table_name, value)
-        
+    
     def is_value_exit_in_column(self, table_name: str, column: str, value: str):
         self.db_manager.is_value_exit_in_column( table_name, column, value)
 
-    def update(self, object_id: int, metadata: Dict[str, Any]) -> None:
+    def update(self, user_id: str, user_name: str) -> None:
         '''Update an existing object in the database.'''
-        self.db_manager.update(self.table_name, {'metadata': json.dumps(metadata)}, f'object_id = {object_id}')
+        self.db_manager.update(self.table_name, {'metadata': json.dumps({'user_name': user_name})}, f'user_id = {user_id}')
 
 
     def get(self, object_id: int) -> Dict[str, Any]:
@@ -43,9 +43,9 @@ class UserManager:
             raise FileNotFoundError(f'Object with ID {object_id} not found.')
 
 
-    def delete(self, object_id: int) -> None:
+    def delete(self, user_id: str) -> None:
         '''Delete an object from the database.'''
-        self.db_manager.delete(self.table_name, f'object_id = {object_id}')
+        self.db_manager.delete(self.table_name, f'user_id = {user_id}')
 
     def get_all_objects(self) -> Dict[int, Any]:
         '''Retrieve all objects from the database.'''

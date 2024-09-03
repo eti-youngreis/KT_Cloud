@@ -3,31 +3,60 @@ from Models import UserModel
 from Abc import DBO
 from Validations import validation 
 import hashlib
+from sqlite3 import OperationalError
 
 class userService(DBO):
     def __init__(self, dal: UserManager):
         self.dal = dal
 
-    def create(self, userName, password, roles = [], policies = [], quotas = None ):
-       
-        if not self.is_valid_userName(userName):
+    def create(self, user_name, password, roles = [], policies = [], quotas = None ):
+        if not self.is_valid_user_name(user_name):
             raise ValueError("Invalid email address.")
         
         hashed_password = self.hash_password(password)
 
-        user = UserModel.User(userName, hashed_password, roles, policies, quotas)
+        user = UserModel.User(user_name, hashed_password, roles, policies, quotas)
 
-        # dal
+        try:
+            self.dal.create(user.to_dict())
+        except OperationalError as e:
+            raise ValueError(f'An internal error occurred: {str(e)}') 
         
-
-    def is_valid_userName(self, userName):
-        
-        if not validation.is_valid_email(userName):
+    def is_valid_user_name(self, user_name):
+        if not validation.is_valid_email(user_name):
             return False
-        if not self.dal.is_value_exit_in_column("users", "userName", userName):
+        if not self.dal.is_value_exit_in_column("users", "user_name", user_name):
             return False
         return True
 
-    
     def hash_password(self, password):
         return hashlib.sha256(password.encode()).hexdigest()
+    
+    def delete(self, user_id):
+        if not self.is_exist_user_id(user_id):
+            raise ValueError("Invalid email address.")
+        try:
+            self.dal.delete(user_id)
+        except OperationalError as e:
+            raise ValueError(f'An internal error occurred: {str(e)}')
+        
+    def is_exist_user_id(self, user_id):
+        if not self.dal.is_value_exit_in_column("users", "user_id", user_id):
+            return False
+        return True
+    
+    def update(self, user_id, user_name):
+        if not self.is_exist_user_id(user_id):
+            raise ValueError("Invalid email address.")
+        
+        if not self.is_valid_user_name(user_name):
+            raise ValueError("Invalid email address.")
+        
+        try:
+            self.dal.update(user_id, user_name)
+        except OperationalError as e:
+            raise ValueError(f'An internal error occurred: {str(e)}')
+
+        
+        
+
