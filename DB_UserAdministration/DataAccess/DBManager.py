@@ -103,15 +103,15 @@ class DBManager:
         except sqlite3.OperationalError as e:
             raise Exception(f"Error deleting from {self.table_name}: {e}")
 
-    def describe(self, table_name: str) -> Dict[str, str]:
+    def describe(self) -> Dict[str, str]:
         """Describe the schema of the specified table."""
         try:
             c = self.connection.cursor()
-            c.execute(f"PRAGMA table_info({table_name})")
+            c.execute(f"PRAGMA table_info({self.table_name})")
             columns = c.fetchall()
             return {col[1]: col[2] for col in columns}
         except sqlite3.OperationalError as e:
-            raise Exception(f"Error describing table {table_name}: {e}")
+            raise Exception(f"Error describing table {self.table_name}: {e}")
 
     def execute_query(self, query: str) -> Optional[List[Tuple]]:
         """Execute a given query and return the results."""

@@ -58,10 +58,6 @@ class PolicyManager(DBManager):
         '''Delete a policy from the database.'''
         super().delete(f'{self.identifier_param} == \'{policy_id}\'')
 
-    def describe_table(self) -> Dict[str, str]:
-        '''Describe the schema of the table.'''
-        return self.db_manager.describe(self.table_name)
-
     def close(self):
         '''Close the database connection.'''
         self.db_manager.close()

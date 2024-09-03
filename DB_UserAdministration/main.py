@@ -15,6 +15,7 @@ if __name__ == "__main__":
     controller = PolicyController(service)
     
     #controller.create_policy('policy_1')
-    print(controller.list_policies())
-    print(controller.get_policy('object_2'))
-    controller.delete_policy('object_2')
+    # print(controller.list_policies())
+    # print(controller.get_policy('object_2'))
+    # controller.delete_policy('object_2')
+    print(manager.describe())
