@@ -1,5 +1,1 @@
-{
-    "user1": {
-        "password": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"
-    }
-}
+{"user1": {"password": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"}, "user": {"password": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f", "logged_in": false, "token": null}}
