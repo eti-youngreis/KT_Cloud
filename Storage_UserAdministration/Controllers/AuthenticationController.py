@@ -43,10 +43,10 @@ class AuthenticationController:
 if __name__ == "__main__":
     controller = AuthenticationController()
     # # Register a user
-    controller.register('user', 'password123')
+    controller.register('user1', 'password123')
     # # Login a user
-    session_id = controller.login('user', 'password123')
+    session_id = controller.login('user1', 'password123')
     # Check if the user is authenticated
-    controller.check_authentication('user')
+    controller.check_authentication('user1')
     # Logout the user
-    controller.logout('user')
+    controller.logout('user1')
