@@ -1,9 +1,8 @@
 from sqlite3 import OperationalError
-from QuotaModel import Quota
+from DB_UserAdministration.Models.QuotaModel import Quota
 from typing import Dict
-from DataAccess.QuotaManager import QuotaManager
-from Exceptions.QuotaException import *
-from Exceptions.exception import ParamValidationFault
+from DB_UserAdministration.DataAccess.QuotaManager import QuotaManager
+from DB_UserAdministration.Exceptions.QuotaException import *
 
 class QuotaService:
     def __init__(self, dal: QuotaManager) -> None:
@@ -18,13 +17,17 @@ class QuotaService:
         self.limits = {
             'DB_INSTANCE':40,
             'BUCKET':100,
-            'API_REQUESTS':50,
-            'OBJECT':300
+            'OBJECT':300,
+            'SNAPSHOT':50,
         }
     
-    def _hash_quota_id(owner_id:str, resource_type:str):
+    def _hash_quota_id(self, owner_id:str, resource_type:str):
         return owner_id + "_" + resource_type
     
+    def create_default_quotas(self, owner_id:str):
+        for type in self.limits.keys():
+            self.create_quota(owner_id, type, self.limits[type])
+        
     def create_quota(self, owner_id: str, resource_type: str, limit: int) -> Dict:
         """
         Creates a new quota for a specific owner and resource type.
@@ -40,10 +43,10 @@ class QuotaService:
         quota_id = self._hash_quota_id(owner_id, resource_type)
         if quota_id in self.quotas:
             raise QuotaAlreadyExistFault(f'quota with owner id {owner_id} and resource type {resource_type} already exist')
-        quota = Quota(quota_id, resource_type, limit)
+        quota = Quota(quota_id, resource_type, owner_id, limit)
         self.quotas[quota_id] = quota
         try:
-            self.dal.create(quota.to_dict())
+            self.dal.create(quota_id, quota.to_dict())
         except OperationalError as e:
             raise ValueError(f'An internal error occurred: {str(e)}')
         

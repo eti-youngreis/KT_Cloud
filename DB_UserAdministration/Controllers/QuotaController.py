@@ -1,4 +1,4 @@
-from Services.QuotaService import QuotaService
+from DB_UserAdministration.Services.QuotaService import QuotaService
 from typing import Dict, Optional
 class QuotaController:
     def __init__(self, service:QuotaService) -> None:

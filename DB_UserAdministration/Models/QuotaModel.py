@@ -1,18 +1,18 @@
 from typing import Optional
 class Quota:
-    def __init__(self, name:str, resource_type:str, owner_id:str, limit:int, period:Optional[str] = None):
-        self.name = name
-        self.resource_type = resource_type,
-        self.owner_id = owner_id 
-        self.limit = limit
+    def __init__(self, id:str, resource_type:str, owner_id:str, limit:int, period:Optional[str] = None):
+        self.id:str = id
+        self.resource_type:str = resource_type,
+        self.owner_id:str = owner_id 
+        self.limit:int = limit
         self.period = period
-        self.usage = 0
+        self.usage:int = 0
 
     
     def to_dict(self):
         return {
-            "name": self.name,
-            "resource_type":self.resource_type,
+            "quota_id": self.id,
+            "resource_type":"".join(self.resource_type),
             "owner_id":self.owner_id,
             "limit": self.limit,
             "period": self.period,
