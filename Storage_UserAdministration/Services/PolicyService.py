@@ -1,7 +1,6 @@
 from typing import List
 
 from DataAccess.policyManager import PolicyStorage
-from Models.PermissionModel import Permission
 from Models.PolicyModel import PolicyModel
 
 
