@@ -15,6 +15,7 @@ from DB_UserAdministration.DataAccess.DBManager import DBManager
 class PolicyManager(DBManager):
     def __init__(self, db_file: str):
         '''Initialize PolicyManager with the database connection.'''
+        self.object_type = Policy
         self.table_name = 'policy_management'
         self.identifier_param = 'policy_id'
         self.columns = [self.identifier_param, 'permissions']
@@ -25,39 +26,7 @@ class PolicyManager(DBManager):
         table_schema = f'{self.identifier_param} TEXT NOT NULL PRIMARY KEY, permissions TEXT'
         super().create_table(self.table_name, table_schema)
 
-    def insert(self, metadata: Dict[str, Any], object_id:Optional[Any] = None) -> None:
-        '''Create a new policy in the database.'''
-        super().insert(metadata, object_id)
-
-    def is_json_column_contains_key_and_value(self, key: str, value: str) -> bool:
-        '''Check if the JSON column contains the specified key and value.'''
-        return self.db_manager.is_json_column_contains_key_and_value(self.table_name, key, value)
-
-    def is_identifier_exist(self, value: str) -> bool:
-        '''Check if a policy with the specified ID exists in the database.'''
-        return self.db_manager.is_identifier_exist(self.table_name, value)
-
-    def update(self, policy_id: str, metadata: Dict[str, Any]) -> None:
-        '''Update an existing policy in the database.'''
-        self.db_manager.update(self.table_name, {'metadata': json.dumps(metadata)}, f'policy_id = {policy_id}')
-
-    def get(self, policy_id: str) -> Dict[str, Any]:
-        '''Retrieve a policy from the database.'''
-        criteria = f'{self.identifier_param} == \'{policy_id}\''
-        result = self.select(columns=['*'], criteria=criteria)
-        if result:
-            return list(Policy.build_from_dict(res) for res in result)
-        else:
-            raise FileNotFoundError(f'Policy with ID {policy_id} not found.')
-        
-    def list_policies(self) -> Dict[str, Policy]:
-        result = super().select()
-        return list(Policy.build_from_dict(policy) for policy in result)
     
-    def delete(self, policy_id: int) -> None:
-        '''Delete a policy from the database.'''
-        super().delete(f'{self.identifier_param} == \'{policy_id}\'')
 
-    def close(self):
-        '''Close the database connection.'''
-        self.db_manager.close()
+
+

@@ -20,19 +20,21 @@ class DBManager:
             """
             )
 
-    def insert(self, metadata: Dict[str, Any], object_id: Optional[Any] = None
-    ) -> None:
+    def insert(self, obj: Any, object_id: Optional[Any] = None) -> None:
+        if type(obj) != self.object_type:
+            raise ValueError("Invalid object to add")
+        
+        if object_id != None:
+            obj.self.identifier_param = object_id
+        
         """Insert a new record into the specified table."""
-        columns = ", ".join(metadata.keys())
-        placeholders = ", ".join(["?" for _ in metadata])
-        values = list(metadata.values())
+        columns = ", ".join(self.columns)
+        placeholders = ", ".join(["?" for _ in self.columns])
+        values = list(obj.to_dict().values())
 
-        if object_id is not None:
-            columns = self.identifier_param + ", " + columns
-            placeholders = "?, " + placeholders
-            values.insert(0, object_id)
 
         values = [str(value) for value in values]
+
         try:
             c = self.connection.cursor()
             c.execute(
@@ -46,23 +48,38 @@ class DBManager:
         except sqlite3.OperationalError as e:
             raise Exception(f"Error inserting into {self.table_name}: {e}")
 
-    def update(self, table_name: str, updates: Dict[str, Any], criteria: str) -> None:
+    def update(self, updates: Dict[str, Any], criteria: str) -> None:
         """Update records in the specified table based on criteria."""
         set_clause = ", ".join([f"{k} = ?" for k in updates.keys()])
-        values = list(updates.values())
+        values = tuple(json.dumps(val) if isinstance(val, list) else val for val in updates.values())
+
 
         query = f"""
-            UPDATE {table_name}
+            UPDATE {self.table_name}
             SET {set_clause}
             WHERE {criteria}
         """
+
         try:
             c = self.connection.cursor()
             c.execute(query, values)
             self.connection.commit()
         except sqlite3.OperationalError as e:
-            raise Exception(f"Error updating {table_name}: {e}")
+            raise Exception(f"Error updating {self.table_name}: {e}")
 
+    def update_by_id(self, id, updates):
+        self.update(updates, f'{self.identifier_param} == \'{id}\'')
+    
+    def subscribe(self, obj):
+        if type(obj) != self.object_type:
+            raise ValueError("Invalid object type to subscribe")
+        
+        updates = obj.to_dict()
+        criteria = f'{self.identifier_param} == \'{updates[self.identifier_param]}\''
+        del updates[self.identifier_param]
+
+        self.update(updates, criteria)
+        
     def select(
         self, columns: List[str] = ["*"], criteria: str = ""
     ) -> Dict[int, Dict[str, Any]]:
@@ -88,7 +105,18 @@ class DBManager:
             return [dict(zip(columns_list, result)) for result in results]
         except sqlite3.OperationalError as e:
             raise Exception(f"Error selecting from {self.table_name}: {e}")
-
+    
+    def get_by_id(self, id):
+        criteria = f'{self.identifier_param} == \'{id}\''
+        result = self.select(columns=['*'], criteria=criteria)  
+        if result:
+            return list(self.object_type.build_from_dict(res) for res in result)[0]
+        else:
+            raise FileNotFoundError(f'Policy with ID {id} not found.')
+    
+    def get_all(self):
+        return list(self.object_type.build_from_dict(obj) for obj in self.select())
+    
     def delete(self, criteria: str) -> None:
         """Delete a record from the specified table based on criteria."""
         try:
@@ -103,6 +131,9 @@ class DBManager:
         except sqlite3.OperationalError as e:
             raise Exception(f"Error deleting from {self.table_name}: {e}")
 
+    def delete_by_id(self, id):
+        self.delete(f'{self.identifier_param} == \'{id}\'')
+    
     def describe(self) -> Dict[str, str]:
         """Describe the schema of the specified table."""
         try:
@@ -134,7 +165,7 @@ class DBManager:
             raise Exception(f"Error executing query {query}: {e}")
 
     def is_json_column_contains_key_and_value(
-        self, table_name: str, key: str, value: str
+        self, key: str, value: str
     ) -> bool:
         """Check if a specific key-value pair exists within a JSON column in the given table."""
         try:
@@ -142,7 +173,7 @@ class DBManager:
             # Properly format the LIKE clause with escaped quotes for key and value
             c.execute(
                 f"""
-            SELECT COUNT(*) FROM {table_name}
+            SELECT COUNT(*) FROM {self.table_name}
             WHERE metadata LIKE ?
             LIMIT 1
             """,
@@ -154,13 +185,13 @@ class DBManager:
             print(f"Error: {e}")
             return False
 
-    def is_identifier_exit(self, table_name: str, value: str) -> bool:
+    def is_identifier_exit(self, value: str) -> bool:
         """Check if a specific value exists within a column in the given table."""
         try:
             c = self.connection.cursor()
             c.execute(
                 f"""
-            SELECT COUNT(*) FROM {table_name}
+            SELECT COUNT(*) FROM {self.table_name}
             WHERE object_id LIKE ?
             """,
                 (value,),
@@ -173,5 +204,5 @@ class DBManager:
         """Close the database connection."""
         self.connection.close()
 
-
+    
 

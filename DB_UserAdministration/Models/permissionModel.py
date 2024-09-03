@@ -1,4 +1,6 @@
 from enum import Enum
+import json
+from typing import List
 
 class Action(Enum):
     """
@@ -95,9 +97,16 @@ class Permission:
         if effect:
             self.effect = effect  # Update the effect if a new one is provided
 
-    @staticmethod
-    def build_from_dict(dict):
+    @classmethod
+    def build_from_dict(cls, dict):
         try:
-            return Permission(dict[0], dict[1], dict[2])
-        except:
-            pass
+            return cls(
+                action=Action(dict['action'].upper()),
+                resource=Resource(dict['resource'].upper()),
+                effect=Effect(dict['effect'].upper())
+            )
+        except Exception as ex:
+            raise ex
+        
+        
+   
