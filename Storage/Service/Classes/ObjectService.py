@@ -28,6 +28,11 @@ class ObjectService(STOE):
             elif version_id not in self.object_manager.get_versions(bucket, key):
                 raise FileNotFoundError("version id not exist")
         
+
+
+
+
+        
             return self.object_manager.get_object_by_version(bucket, key, version_id)
         except FileNotFoundError as e:
             print(f"Error: The file or directory was not found: {e}")
