@@ -101,9 +101,9 @@ class Permission:
     def build_from_dict(cls, dict):
         try:
             return cls(
-                action=Action(dict['action'].upper()),
-                resource=Resource(dict['resource'].upper()),
-                effect=Effect(dict['effect'].upper())
+                action=Action(dict['action']),
+                resource=Resource(dict['resource']),
+                effect=Effect(dict['effect'])
             )
         except Exception as ex:
             raise ex
