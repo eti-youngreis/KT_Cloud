@@ -1,10 +1,11 @@
 import json
 import os
 from typing import Dict,  Optional
-from Models.PolicyModel import PolicyModel
-from Models.PermissionModel import Permission
+from Storage_UserAdministration.Models.PermissionModel import Permission
+from Storage_UserAdministration.Models.PolicyModel import PolicyModel
 
-class PolicyStorage:
+
+class PolicyManager:
     def __init__(self, file_path: str="D:\\בוטקמפ\\server\\metadata.json"):
         self.file_path = file_path
         if not os.path.exists(self.file_path):
@@ -50,9 +51,13 @@ class PolicyStorage:
     def update(self, policy: PolicyModel):
         """Update an existing policy."""
         data = self._load_data()
+
+        # בדיקה אם שם המדיניות קיים במילון של המדיניות
         if policy.policy_name not in data["server"]["policies"]:
             raise ValueError(f"Policy '{policy.policy_name}' does not exist.")
+
         data["server"]["policies"][policy.policy_name] = policy.to_dict()
+
         self._save_data(data)
 
     def select(self, policy_name: str) -> Optional[PolicyModel]:
