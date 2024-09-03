@@ -89,19 +89,19 @@ class DBManager:
         except sqlite3.OperationalError as e:
             raise Exception(f"Error selecting from {self.table_name}: {e}")
 
-    def delete(self, table_name: str, criteria: str) -> None:
+    def delete(self, criteria: str) -> None:
         """Delete a record from the specified table based on criteria."""
         try:
             c = self.connection.cursor()
             c.execute(
                 f"""
-                DELETE FROM {table_name}
+                DELETE FROM {self.table_name}
                 WHERE {criteria}
             """
             )
             self.connection.commit()
         except sqlite3.OperationalError as e:
-            raise Exception(f"Error deleting from {table_name}: {e}")
+            raise Exception(f"Error deleting from {self.table_name}: {e}")
 
     def describe(self, table_name: str) -> Dict[str, str]:
         """Describe the schema of the specified table."""

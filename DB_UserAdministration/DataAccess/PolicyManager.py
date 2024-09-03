@@ -51,12 +51,12 @@ class PolicyManager(DBManager):
             raise FileNotFoundError(f'Policy with ID {policy_id} not found.')
         
     def list_policies(self) -> Dict[str, Policy]:
-        result = self.select()
+        result = super().select()
         return list(Policy.build_from_dict(policy) for policy in result)
     
     def delete(self, policy_id: int) -> None:
         '''Delete a policy from the database.'''
-        self.db_manager.delete(self.table_name, f'policy_id = {policy_id}')
+        super().delete(f'{self.identifier_param} == \'{policy_id}\'')
 
     def describe_table(self) -> Dict[str, str]:
         '''Describe the schema of the table.'''

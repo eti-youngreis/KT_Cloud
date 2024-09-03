@@ -8,7 +8,7 @@ from DB_UserAdministration.Validation.PolicyValidation import validate_policy_na
 class PolicyService:
     def __init__(self, policy_manager: PolicyManager):
         self.policy_manager = policy_manager
-        self.policies: Dict[str, Policy] = self.policy_manager.list_policies()
+        self.policies: Dict[str, Policy] = {policy.name: policy for policy in self.policy_manager.list_policies()}
 
     def create(self, name):
         new_policy = Policy(name)
