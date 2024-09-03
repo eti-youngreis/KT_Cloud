@@ -3,7 +3,7 @@ import uuid
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from DataAccess.UserDAL import UserDAL
 from Models.userModel import User
@@ -11,13 +11,13 @@ class AuthenticationService:
     def __init__(self):
         self.data_access =UserDAL()
 
-    def hash_password(self, password):
+    def hash_password(self, password: str) -> str:
         return hashlib.sha256(password.encode()).hexdigest()
 
     def login(self, username, password):
         users = self.data_access.users
         user_data = users.get(username)
-        if user_data and user_data.get('password') == self.hash_password(password):
+        if user_data and user_data.get("password") == self.hash_password(password):
             session_id = self.generate_session_id()
             user_data['logged_in']=True
             user_data['token']=session_id
