@@ -13,8 +13,7 @@ class permissionService:
     perform CRUD operations on permissions.
     """
 
-    def __init__(self,  db_file) -> None:
-        # dal: permissionManager
+    def __init__(self, dal: PermissionManager) -> None:
         """
         Initialize the permissionService with a data access layer instance.
         

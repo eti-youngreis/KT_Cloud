@@ -1,0 +1,2 @@
+class ParamValidationFault(Exception):
+    pass
