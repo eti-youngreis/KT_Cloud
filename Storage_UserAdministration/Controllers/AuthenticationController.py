@@ -19,15 +19,15 @@ class AuthenticationController:
             print("Invalid username or password.")
             raise ValueError("Invalid username or password.")
 
-    def logout(self, session_id: str):
+    def logout(self, username: str):
         try:
-            self.auth_service.logout(session_id)
+            self.auth_service.logout(username)
             print("User logged out successfully.")
         except KeyError:
             raise ValueError("Invalid session ID.")
 
-    def check_authentication(self, session_id):
-        if self.auth_service.is_authenticated(session_id):
+    def check_authentication(self, username):
+        if self.auth_service.is_authenticated(username):
             print("User is authenticated.")
         else:
             print("User is not authenticated.")
