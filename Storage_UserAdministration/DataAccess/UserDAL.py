@@ -17,7 +17,6 @@ class UserDAL:
                         email=user_info.get("email"),
                         logged_in=user_info.get("logged_in", False),
                         token=user_info.get("token"),
-                        # ----------------------------
                         # role=user_info.get("role"),
                         # policies=user_info.get("policies"),
                         # quota=user_info.get("quota"),
