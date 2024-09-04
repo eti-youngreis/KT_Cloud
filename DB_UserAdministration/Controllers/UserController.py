@@ -10,10 +10,10 @@ class UserController:
         self.service.delete(user_id)
 
     def update_user_name(self, user_id, user_name):
-        self.service.update(user_id, user_name)
+        self.service.modify(user_id, user_name)
 
     def get_user_details(self, user_id):
-        self.service.get_user(user_id)
+        self.service.describe(user_id)
 
     def list_users(self):
         self.service.get_all_users()
