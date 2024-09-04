@@ -1,7 +1,7 @@
-from DataAccess import UserManager
-from Models import UserModel
-from DB.Service.Abc import DBO
-from Validations import validation 
+from DB_UserAdministration.DataAccess.UserManager import UserManager
+from DB_UserAdministration.Models import UserModel
+from DB.Service.Abc.DBO import DBO
+from DB_UserAdministration.Validations import validation
 import hashlib
 from sqlite3 import OperationalError
 
@@ -25,7 +25,7 @@ class userService(DBO):
     def is_valid_user_name(self, user_name):
         if not validation.is_valid_email(user_name):
             return False
-        if not self.dal.is_value_exit_in_column("users", "user_name", user_name):
+        if not self.dal.is_value_exist_in_column("users", "user_name", user_name):
             return False
         return True
 
@@ -41,7 +41,7 @@ class userService(DBO):
             raise ValueError(f'An internal error occurred: {str(e)}')
         
     def is_exist_user_id(self, user_id):
-        if not self.dal.is_value_exit_in_column("users", "user_id", user_id):
+        if not self.dal.is_value_exist_in_column("users", "user_id", user_id):
             return False
         return True
     

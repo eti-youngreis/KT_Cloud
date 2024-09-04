@@ -1,5 +1,5 @@
 import sqlite3
-from typing import Dict, Any, List, Tuple, Optional
+from typing import Dict, Any, List, Optional, Tuple
 import json
 from sqlite3 import OperationalError
 
@@ -58,12 +58,10 @@ class DBManager:
 
     def select(self, table_name: str, columns: List[str] = ['*'], criteria: str = '') -> Dict[int, Dict[str, Any]]:
         '''Select records from the specified table based on criteria.
-        
         Args:
             table_name (str): The name of the table.
             columns (List[str]): The columns to select. Default is all columns ('*').
             criteria (str): SQL condition for filtering records. Default is no filter.
-        
         Returns:
             Dict[int, Dict[str, Any]]: A dictionary where keys are object_ids and values are metadata.
         '''
@@ -71,7 +69,6 @@ class DBManager:
         query = f'SELECT {columns_clause} FROM {table_name}'
         if criteria:
             query += f' WHERE {criteria}'
-        
         try:
             c = self.connection.cursor()
             c.execute(query)
@@ -79,7 +76,7 @@ class DBManager:
             return {result[0]: dict(zip(columns, result[1:])) for result in results}
         except OperationalError as e:
             raise Exception(f'Error selecting from {table_name}: {e}')
-
+        
     def delete(self, table_name: str, criteria: str) -> None:
         '''Delete a record from the specified table based on criteria.'''
         try:
@@ -136,20 +133,20 @@ class DBManager:
             ''', (f'%"{key}": "{value}"%',))
             # Check if the count is greater than 0, indicating the key-value pair exists
             return c.fetchone()[0] > 0
-        except OperationalError as e:
+        except sqlite3.OperationalError as e:
             print(f'Error: {e}')
             return False
 
-    def is_identifier_exit(self, table_name: str, value: str) -> bool:
+    def is_identifier_exist(self, table_name: str, value: str) -> bool:
         '''Check if a specific value exists within a column in the given table.'''
         try:
             c = self.connection.cursor()
             c.execute(f'''
             SELECT COUNT(*) FROM {table_name}
-            WHERE object_id LIKE ?
+            WHERE id LIKE ?
             ''', (value,))
             return c.fetchone()[0] > 0
-        except OperationalError as e:
+        except sqlite3.OperationalError as e:
             print(f'Error: {e}')
     
     def close(self):

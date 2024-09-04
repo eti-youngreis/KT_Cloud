@@ -1,5 +1,5 @@
-from permissionModel import Permission, Action, Resource, Effect  
-from DataAccess import permissionManager 
+from DB_UserAdministration.Models.permissionModel import Permission, Action, Resource, Effect  
+from DB_UserAdministration.DataAccess.permissionManager import PermissionManager 
 
 class permissionService:
     """
@@ -7,7 +7,7 @@ class permissionService:
     perform CRUD operations on permissions.
     """
 
-    def __init__(self, dal: permissionManager) -> None:
+    def __init__(self, dal: PermissionManager) -> None:
         """
         Initialize the permissionService with a data access layer instance.
         
