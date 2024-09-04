@@ -40,10 +40,10 @@ class UserDAL:
         self.save_users_to_file()
         return user
 
-    def get_user(self, username: str) -> Optional[User]:
+    def get_user(self, user_id: str) -> Optional[User]:
         return self.users.get(username)
 
-    def delete_user(self, username: str) -> Optional[User]:
+    def delete_user(self, user_id: str) -> Optional[User]:
         deleted_user = self.users.pop(username, None)
         self.save_users_to_file()
         return deleted_user
@@ -54,22 +54,9 @@ class UserDAL:
         )
 
     def update_user(self, user_update: User) -> Optional[User]:
-        """Modify a user's attributes and persist changes."""
-        user = self.get_user(user_update.username)
-        if user:
-            # Update the user's attributes
-            user.username = user_update.username
-            user.password = user_update.password
-            user.email = user_update.email
-            user.logged_in = user_update.logged_in
-            user.token = user_update.token
-            # Add or update any other attributes like policies, quota, groups, etc.
-            self.users[user_update.username] = user
-            self.save_users_to_file()
-            return user
-        return None
+        return self.modify_user(user_update)
 
-    def add_to_group(self, username: str, group: Group) -> Optional[User]:
+    def add_to_group(self, user_id: str, group: Group) -> Optional[User]:
         """Add a group to the user's groups."""
         user = self.get_user(username)
         if user:
@@ -90,9 +77,9 @@ class UserDAL:
             return user
         return None
 
-    def add_permission(self, username: str, permission: Permission) -> Optional[User]:
+    def add_permission(self, user_id: str, permission: Permission) -> Optional[User]:
         """Add a permission to the user."""
-        user = self.get_user(username)
+        user = self.get_user(user_id)
         if user:
             if not hasattr(user, "permissions"):
                 user.permissions = []
@@ -116,14 +103,13 @@ class UserDAL:
         user = self.get_user(username)
         if user:
             user.quota = quota
-            self.users[user_update.username] = user
             self.save_users_to_file()
             return user
         return None
 
-    def add_policy(self, username: str, policy: Policy) -> Optional[User]:
+    def add_policy(self, user_id: str, policy: Policy) -> Optional[User]:
         """Add a policy to the user."""
-        user = self.get_user(username)
+        user = self.get_user(user_id)
         if user:
             if not hasattr(user, "policies"):
                 user.policies = []
@@ -133,4 +119,18 @@ class UserDAL:
             return user
         return None
 
-
+    def modify_user(self, user_update: User) -> Optional[User]:
+        """Modify a user's attributes and persist changes."""
+        user = self.get_user(user_update.user_id)
+        if user:
+            # Update the user's attributes
+            user.username = user_update.username
+            user.password = user_update.password
+            user.email = user_update.email
+            user.logged_in = user_update.logged_in
+            user.token = user_update.token
+            # Add or update any other attributes like policies, quota, groups, etc.
+            self.users[user_update.user_id] = user
+            self.save_users_to_file()
+            return user
+        return None
