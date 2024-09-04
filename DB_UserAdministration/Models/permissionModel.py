@@ -1,16 +1,9 @@
 from enum import Enum
+from bidict import bidict
+from itertools import product
 
 class Action(Enum):
-    """
-    Enumeration of possible actions for permissions.
-    
-    Attributes:
-        READ: Represents a read action.
-        WRITE: Represents a write action.
-        DELETE: Represents a delete action.
-        UPDATE: Represents an update action.
-        EXECUTE: Represents an execute action.
-    """
+    """Enumeration of possible actions for permissions."""
     READ = 'read'
     WRITE = 'write'
     DELETE = 'delete'
@@ -18,79 +11,68 @@ class Action(Enum):
     EXECUTE = 'execute'
 
 class Resource(Enum):
-    """
-    Enumeration of resources that permissions can apply to.
-    
-    Attributes:
-        BUCKET: Represents a bucket resource.
-        DATABASE: Represents a database resource.
-    """
+    """Enumeration of resources that permissions can apply to."""
     BUCKET = 'bucket'
     DATABASE = 'database'
 
 class Effect(Enum):
-    """
-    Enumeration of effects that a permission can have.
-    
-    Attributes:
-        DENY: Represents a deny effect, restricting access.
-        ALLOW: Represents an allow effect, granting access.
-    """
+    """Enumeration of effects that a permission can have."""
     DENY = "deny"
     ALLOW = "allow"
 
 class Permission:
     """
-    Represents a permission with an action, resource, and effect.
-    
-    Attributes:
-        action: The action associated with the permission (e.g., read, write).
-        resource: The resource that the permission applies to (e.g., bucket, database).
-        effect: The effect of the permission (e.g., allow, deny).
+    Manages permissions with a bidirectional map for quick lookup by ID or permission details.
+    Methods:
+        get_permission_by_id(permission_id: int) -> dict[str, str]:
+            Returns the permission details for the given ID.
+        get_id_by_permission(action: Action, resource: Resource, effect: Effect) -> int:
+            Returns the ID for the given permission details.
     """
-    def __init__(self, action: Action, resource: Resource, effect: Effect):
+    # Create permissions dynamically with combinations of enums
+    _permissions = bidict({
+        idx: (action, resource, effect)
+        for idx, (action, resource, effect) in enumerate(
+            product(Action, Resource, Effect), start=1
+        )
+    })
+
+    @classmethod
+    def get_permission_by_id(cls, permission_id: int) -> dict[str, str]:
         """
-        Initialize a Permission object.
-        
-        :param action: The action for the permission.
-        :param resource: The resource the permission applies to.
-        :param effect: The effect of the permission.
+        Get the details of the permission associated with the given ID.
+        :param permission_id: The ID of the permission.
+        :return: A dictionary with the permission details (action, resource, effect).
+        :raises PermissionNotFoundError: If the ID is not found in the permissions map.
         """
-        self.action = action
-        self.resource = resource
-        self.effect = effect
-       
-    def to_dict(self):
-        """
-        Convert the permission object to a dictionary format.
-        
-        :return: A dictionary with the permission's action, resource, and effect.
-        """
+
+        action, resource, effect = cls._permissions[permission_id]
         return {
-            "action": self.action.value,  # Get the string value of the action enum
-            "resource": self.resource.value,  # Get the string value of the resource enum
-            "effect": self.effect.value  # Get the string value of the effect enum
+            "action": action.value,
+            "resource": resource.value,
+            "effect": effect.value
         }
 
-    def __repr__(self):
+    @classmethod
+    def get_id_by_permission(cls, action: Action, resource: Resource, effect: Effect) -> int:
         """
-        Return a string representation of the permission object.
+        Get the ID associated with the given permission details using strings.
+        :param action_str: The action of the permission as a string (e.g., 'read').
+        :param resource_str: The resource of the permission as a string (e.g., 'bucket').
+        :param effect_str: The effect of the permission as a string (e.g., 'allow').
+        :return: The ID of the permission.
+        :raises ValueError: If the permission details are not found in the map.
+        """
+        try:
+            action = Action(str(action.value))
+            resource = Resource(str(resource.value))
+            effect = Effect(str(effect.value))
+        except ValueError as e:
+            raise ValueError(f"Invalid permission details: {e}")
         
-        :return: A formatted string displaying the permission's details.
-        """
-        return f"Permission(action='{self.action.value}', resource='{self.resource.value}', effect='{self.effect.value}')"
-
-    def update_permission(self, action: Action = None, resource: Resource = None, effect: Effect = None):
-        """
-        Update the permission's action, resource, or effect.
+        permission = (action, resource, effect)
         
-        :param action: The new action for the permission (optional).
-        :param resource: The new resource for the permission (optional).
-        :param effect: The new effect for the permission (optional).
-        """
-        if action:
-            self.action = action  # Update the action if a new one is provided
-        if resource:
-            self.resource = resource  # Update the resource if a new one is provided
-        if effect:
-            self.effect = effect  # Update the effect if a new one is provided
+        if permission not in cls._permissions.inv:
+            raise ValueError("Permission not found.")
+        
+        return cls._permissions.inv[permission]
