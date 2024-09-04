@@ -22,8 +22,8 @@ class UserManager:
     def is_json_column_contains_key_and_value(self, key: str, value: str) -> bool:
         self.db_manager.is_json_column_contains_key_and_value(self.table_name, key, value)
 
-    def is_identifier_exit(self, value: str):
-        self.db_manager.is_identifier_exit(self.table_name, value)
+    def is_identifier_exist(self, value: str):
+        self.db_manager.is_identifier_exist(self.table_name, value)
     
     def is_value_exist_in_column(self, table_name: str, column: str, value: str):
         self.db_manager.is_value_exit_in_column( table_name, column, value)
