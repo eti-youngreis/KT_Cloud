@@ -23,8 +23,8 @@ class DBClusterService(DBO):
         }
         return Validation.string_in_dict(engine_name, valid_engine_names)
     
-    def is_identifier_exit(self, db_cluster_identifier):
-        return self.dal.is_identifier_exit(db_cluster_identifier)
+    def is_identifier_exist(self, db_cluster_identifier):
+        return self.dal.is_identifier_exist(db_cluster_identifier)
     
     def check_parameters_constarins(self, conn, **kwargs):
         """checks all the cluster parameters constrains"""
@@ -81,7 +81,7 @@ class DBClusterService(DBO):
         if not self.is_valid_engineName(engine):
             raise ValueError(f"Invalid engineName: {engine}")
 
-        if self.is_identifier_exit(db_cluster_identifier):
+        if self.is_identifier_exist(db_cluster_identifier):
             raise ValueError("Cluster identifier already exists")
 
         self.check_parameters_constraints(**kwargs)
