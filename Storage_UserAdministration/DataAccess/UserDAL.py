@@ -89,56 +89,56 @@ class UserDAL:
             return user
         return None
 
-    def remove_from_group(self, username: str, group: Group) -> Optional[User]:
-        """Remove a group from the user's groups."""
-        user = self.get_user(username)
-        if user and hasattr(user, "groups") and group in user.groups:
-            user.groups.remove(group)
-            self.save_users_to_file()
-            return user
-        return None
+    # def remove_from_group(self, username: str, group: Group) -> Optional[User]:
+    #     """Remove a group from the user's groups."""
+    #     user = self.get_user(username)
+    #     if user and hasattr(user, "groups") and group in user.groups:
+    #         user.groups.remove(group)
+    #         self.save_users_to_file()
+    #         return user
+    #     return None
 
-    def add_permission(self, username: str, permission: Permission) -> Optional[User]:
-        """Add a permission to the user."""
-        user = self.get_user(username)
-        if user:
-            if not hasattr(user, "permissions"):
-                user.permissions = []
-            if permission not in user.permissions:
-                user.permissions.append(permission)
-            self.save_users_to_file()
-            return user
-        return None
+    # def add_permission(self, username: str, permission: Permission) -> Optional[User]:
+    #     """Add a permission to the user."""
+    #     user = self.get_user(username)
+    #     if user:
+    #         if not hasattr(user, "permissions"):
+    #             user.permissions = []
+    #         if permission not in user.permissions:
+    #             user.permissions.append(permission)
+    #         self.save_users_to_file()
+    #         return user
+    #     return None
 
-    def remove_permission(self, username: str, permission: Permission) -> Optional[User]:
-        """Remove a permission from the user."""
-        user = self.get_user(username)
-        if user and hasattr(user, "permissions") and permission in user.permissions:
-            user.permissions.remove(permission)
-            self.save_users_to_file()
-            return user
-        return None
+    # def remove_permission(self, username: str, permission: Permission) -> Optional[User]:
+    #     """Remove a permission from the user."""
+    #     user = self.get_user(username)
+    #     if user and hasattr(user, "permissions") and permission in user.permissions:
+    #         user.permissions.remove(permission)
+    #         self.save_users_to_file()
+    #         return user
+    #     return None
 
-    def set_quota(self, username: str, quota: Quota) -> Optional[User]:
-        """Set the quota for the user."""
-        user = self.get_user(username)
-        if user:
-            user.quota = quota
-            self.users[user_update.username] = user
-            self.save_users_to_file()
-            return user
-        return None
+    # def set_quota(self, username: str, quota: Quota) -> Optional[User]:
+    #     """Set the quota for the user."""
+    #     user = self.get_user(username)
+    #     if user:
+    #         user.quota = quota
+    #         self.users[user_update.username] = user
+    #         self.save_users_to_file()
+    #         return user
+    #     return None
 
-    def add_policy(self, username: str, policy: Policy) -> Optional[User]:
-        """Add a policy to the user."""
-        user = self.get_user(username)
-        if user:
-            if not hasattr(user, "policies"):
-                user.policies = []
-            if policy not in user.policies:
-                user.policies.append(policy)
-            self.save_users_to_file()
-            return user
-        return None
+    # def add_policy(self, username: str, policy: Policy) -> Optional[User]:
+    #     """Add a policy to the user."""
+    #     user = self.get_user(username)
+    #     if user:
+    #         if not hasattr(user, "policies"):
+    #             user.policies = []
+    #         if policy not in user.policies:
+    #             user.policies.append(policy)
+    #         self.save_users_to_file()
+    #         return user
+    #     return None
 
 
