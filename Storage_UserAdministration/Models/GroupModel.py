@@ -8,7 +8,6 @@ class Group:
         self.roles = []  
         self.permissions = []  
         self.file_path = file_path
-
         self.load_group()
 
     def load_data(self):
