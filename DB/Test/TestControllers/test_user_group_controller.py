@@ -3,28 +3,9 @@ import sys
 import pytest
 import sqlite3
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
-# sys.path.append(os.path.abspath(os.path.join(
-#     os.path.dirname(__file__), '..')))
+
 from DB_UserAdministration.Controllers.DBUserGroupController import UserGroupController,UserGroupService
 from DB_UserAdministration.DataAccess.UserGroupManager import UserGroupManager
-
-# Fixtures to set up the in-memory SQLite database and sample data
-# @pytest.fixture
-# def setup_db():
-#     conn = sqlite3.connect(':memory:')
-#     cursor = conn.cursor()
-#     cursor.execute('''
-#         CREATE TABLE IF NOT EXISTS UserGroups (
-#             group_id TEXT PRIMARY KEY,
-#             name TEXT NOT NULL,
-#             users TEXT,
-#             policies TEXT,
-#             create_date TEXT
-#         )
-#     ''')
-#     conn.commit()
-#     yield conn
-#     conn.close()
 
 @pytest.fixture
 def user_group_manager():
@@ -38,7 +19,6 @@ def user_group_service(user_group_manager):
 def user_group_controller(user_group_service):
     return UserGroupController(user_group_service)
 
-# Tests for UserGroupController methods
 
 def test_create_group(user_group_controller):
     group_name = "TestGroup"

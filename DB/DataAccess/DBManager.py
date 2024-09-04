@@ -56,31 +56,6 @@ class DBManager:
             raise Exception(f'Error updating {table_name}: {e}')
 
 
-    # def select(self, table_name: str, columns: List[str] = ['*'], criteria: str = '') -> Dict[int, Dict[str, Any]]:
-    #     '''Select records from the specified table based on criteria.
-        
-    #     Args:
-    #         table_name (str): The name of the table.
-    #         columns (List[str]): The columns to select. Default is all columns ('*').
-    #         criteria (str): SQL condition for filtering records. Default is no filter.
-        
-    #     Returns:
-    #         Dict[int, Dict[str, Any]]: A dictionary where keys are object_ids and values are metadata.
-    #     '''
-    #     columns_clause = ', '.join(columns)
-    #     query = f'SELECT object_id, {columns_clause} FROM {table_name}'
-    #     if criteria:
-    #         query += f' WHERE {criteria}'
-        
-    #     try:
-    #         c = self.connection.cursor()
-    #         c.execute(query)
-    #         results = c.fetchall()
-    #         return {result[0]: dict(zip(columns, result[1:])) for result in results}
-    #     except sqlite3.OperationalError as e:
-    #         raise Exception(f'Error selecting from {table_name}: {e}')
-
-
     def select(self, table_name: str, columns: List[str] = ['*'], criteria: str = '') -> Dict[int, Dict[str, Any]]:
         '''Select records from the specified table based on criteria.
         Args:
