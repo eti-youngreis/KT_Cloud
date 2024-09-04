@@ -3,6 +3,7 @@
 # from Models.GroupModel import Group
 # from Models.QuotaModel import Quota
 # from Models.RoleModel import Role
+from typing import Optional
 import uuid
 
 class User:
@@ -14,7 +15,7 @@ class User:
         
         # role: Optional[Role] = None,
         # policies: Optional[List[Policy]] = None,
-        # quota: Optional[Quota] = None,
+        quotas: Optional[dict] = None,
         # groups: Optional[List[Group]] = None
     ):
         self.user_id = str(uuid.uuid4())  # Unique identifier
@@ -25,7 +26,7 @@ class User:
         self.token=None
         # self.role = role
         # self.policies = policies
-        # self.quota =quota
+        self.quotas =quotas
         # self.groups = groups
 
 
