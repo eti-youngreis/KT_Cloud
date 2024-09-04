@@ -46,4 +46,3 @@ class User:
     def check_quota(self):
         return self.quota.check_exceeded()
 
-
