@@ -24,16 +24,12 @@ class QuotaModel:
         self.groups = groups if groups is not None else []
         self.roles = roles if roles is not None else []
 
-    def add_usage(self, amount: int):
-        self.usage += amount
-        if self.check_exceeded():
-            raise Exception(f"Quota exceeded for {self.name}! Resource: {self.resource_type}, Restriction: {self.restriction_type}, Limit: {self.limit}, Usage: {self.usage}")
-
+    
     def reset_usage(self):
         self.usage = 0
         
-    def check_exceeded(self) -> bool:
-        return self.usage >= self.limit
+    def check_exceeded(self, usage: int) -> bool:
+        return usage>= self.limit
 
     def __str__(self):
         return (f"Quota(name={self.name}, resource_type={self.resource_type}, restriction_type={self.restriction_type}, "

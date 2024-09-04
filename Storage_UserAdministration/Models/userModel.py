@@ -4,6 +4,7 @@ from Models.PolicyModel import Policy
 from Models.GroupModel import Group
 from Models.QuotaModel import Quota
 from Models.RoleModel import Role
+
 import uuid
 
 class User:
@@ -19,6 +20,7 @@ class User:
         policies: Optional[List[Policy]] = None,
         quota: Optional[Quota] = None,
         groups: Optional[List[Group]] = None
+
     ):
         self.user_id = str(uuid.uuid4())  # Unique identifier
         self.username = username
