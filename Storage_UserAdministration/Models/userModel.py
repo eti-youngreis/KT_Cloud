@@ -43,6 +43,6 @@ class User:
     # def update_quota(self, quota: Quota):
     #     self.quota = quota
 
-    def check_quota(self):
-        return self.quota.check_exceeded()
+    # def check_quota(self):
+    #     return self.quota.check_exceeded()
 
