@@ -1,4 +1,4 @@
-from Models.UserModel import User
+from Models.userModel import User
 from Models.PermissionModel import Permission
 from Models.PolicyModel import Policy
 from Models.GroupModel import Group
@@ -9,10 +9,6 @@ from Services.UserService import UserService
 class UserController:
     def __init__(self, user_service):
         self.user_service = user_service
-
-    def create_user(self, username: str, password: str, email: str):
-        """Create a new user."""
-        return self.user_service.create_user(username, password, email)
 
     def delete_user(self, user_id: str):
         """Delete a user by their user ID."""
