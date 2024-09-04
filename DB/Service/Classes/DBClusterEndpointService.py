@@ -25,7 +25,7 @@ class DBClusterEndpointService(DBO):
                               not in excluded_members]
         endpoint = DBClusterEndpointModel(cluster_identifier, endpoint_identifier, endpoint_type, static_members, excluded_members)
         self.dal.insert( endpoint.to_dict(), endpoint_identifier)
-        return self.describe('creating')
+        return self.describe(endpoint_identifier, 'creating')
 
     def delete(self, endpoint_identifier: str):
         """Delete an existing DB Cluster Endpoint."""
