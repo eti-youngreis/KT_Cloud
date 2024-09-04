@@ -73,6 +73,11 @@ class Permission:
         permission = (action, resource, effect)
         
         if permission not in cls._permissions.inv:
-            raise ValueError("Permission not found.")
+            raise PermissionNotFoundError("Permission not found.")
         
-        return cls._permissions.inv[permission]
+        return cls._permissions.inv[permission]   
+    
+class PermissionNotFoundError(KeyError):
+    def __init__(self, message):
+        super().__init__(message)
+        
