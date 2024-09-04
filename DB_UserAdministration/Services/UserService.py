@@ -5,7 +5,7 @@ from DB_UserAdministration.Validations import validation
 import hashlib
 from sqlite3 import OperationalError
 
-class userService():
+class userService(DBO):
     def __init__(self, dal: UserManager):
         self.dal = dal
 

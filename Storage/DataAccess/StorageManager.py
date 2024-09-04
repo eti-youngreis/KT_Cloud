@@ -5,7 +5,7 @@ import aiofiles
 import shutil
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
-import base6import ObjectManager
+import base6import
 
 
 URL_SERVER = 's3/KT_cloud/Storage/server'
