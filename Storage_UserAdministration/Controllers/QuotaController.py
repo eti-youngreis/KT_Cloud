@@ -1,6 +1,6 @@
 from typing import List, Optional
 from Models.QuotaModel import QuotaModel as Quota
-from Services.QuotaServices import QuotaService
+from Services.QuotaService import QuotaService
 
 
 class QuotaController:
@@ -39,14 +39,21 @@ class QuotaController:
             raise ValueError(f"Quota '{name}' does not exist.")
         return quota
     
-    def reset_usage(self, name: str):
-        """Reset the usage of a quota."""
-        self.service.reset_usage(name)
+    # def reset_usage(self, name: str):
+    #     """Reset the usage of a quota."""
+    #     self.service.reset_usage(name)
 
-    def check_exceeded(self, name: str) -> bool:
-        """Check if a quota is exceeded."""
-        return self.service.check_exceeded(name)
-    
-    def update_usage(self, quota_name:str, usage: int) -> Quota:
-            """Update an existing quota."""
-            return self.service.update_usage(quota_name,usage)
+    def delete(self, name: str):
+        """Delete an existing Quota."""
+        # Check if the quota exists
+        if not self.dal.exists(name):
+            raise ValueError(f"Quota '{name}' does not exist.")
+        quota = self.dal.select(name)
+        for user in quota.users:
+            self.dal.delete(user, "users", quota.name)
+        for group in quota.groups:
+            self.dal.delete(group, "groups")
+        for role in quota.roles:
+            self.dal.delete(role, "roles")
+        # Perform the deletion
+        self.dal.delete_quota(name)
