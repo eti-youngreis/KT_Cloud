@@ -7,7 +7,6 @@ class PolicyModel:
         self.policy_name = policy_name
         self.version = version
         self.permissions = permissions or []
-
     def to_dict(self) -> Dict:
         return {
             "version": self.version,
