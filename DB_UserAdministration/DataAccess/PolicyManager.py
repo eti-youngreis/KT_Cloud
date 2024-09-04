@@ -8,9 +8,9 @@ class PolicyManager:
         '''Initialize PolicyManager with the database connection.'''
         self.db_manager = DBManager(db_file)
         self.table_name = 'policy_management'
-        self.create_table()
+        self._create_table()
 
-    def create_table(self):
+    def _create_table(self):
         '''Create policies table in the database.'''
         table_schema = 'policy_id TEXT NOT NULL PRIMARY KEY, metadata TEXT NOT NULL'
         self.db_manager.create_table(self.table_name, table_schema)
