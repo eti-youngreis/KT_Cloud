@@ -19,10 +19,7 @@ def is_json_column_contains_key_and_value(conn: sqlite3.Connection, table_name: 
     '''Check if a specific key-value pair exists within a JSON column in the given table.'''
     try:
         c = conn.cursor()
-        c.execute(f'''
-        SELECT COUNT(*) FROM {table_name}
-        WHERE {column_name} LIKE ?
-        ''', (f'%'{key}': '{value}'%',))
+        c.execute(f'''SELECT COUNT(*) FROM {table_name}WHERE {column_name} LIKE ?''', (f'%{key}: {value}%',))
         return c.fetchone()[0] > 0
     except OperationalError as e:
         print(f'Error: {e}')

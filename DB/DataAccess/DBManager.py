@@ -15,18 +15,27 @@ class DBManager:
                 CREATE TABLE IF NOT EXISTS {table_name} ({table_schema})
             ''')
 
-    def insert(self, table_name: str, metadata: Dict[str, Any]) -> None:
+    def insert(self, table_name: str, metadata: Dict[str, Any], object_id: Optional[Any] = None) -> None:
         '''Insert a new record into the specified table.'''
         metadata_json = json.dumps(metadata)
         try:
             c = self.connection.cursor()
-            c.execute(f'''
-                INSERT INTO {table_name} (metadata)
-                VALUES (?)
-            ''', (metadata_json,))
+            if object_id is not None:
+                # Assuming the ID column is named 'id' and it's the first column
+                c.execute(f'''
+                    INSERT INTO {table_name} (id, metadata)
+                    VALUES (?, ?)
+                ''', (object_id, metadata_json))
+            else:
+                # Insert without the ID, assuming the ID is auto-increment
+                c.execute(f'''
+                    INSERT INTO {table_name} (metadata)
+                    VALUES (?)
+                ''', (metadata_json,))
             self.connection.commit()
         except sqlite3.OperationalError as e:
             raise Exception(f'Error inserting into {table_name}: {e}')
+
 
 
     def update(self, table_name: str, updates: Dict[str, Any], criteria: str) -> None:
@@ -47,22 +56,44 @@ class DBManager:
             raise Exception(f'Error updating {table_name}: {e}')
 
 
+    # def select(self, table_name: str, columns: List[str] = ['*'], criteria: str = '') -> Dict[int, Dict[str, Any]]:
+    #     '''Select records from the specified table based on criteria.
+        
+    #     Args:
+    #         table_name (str): The name of the table.
+    #         columns (List[str]): The columns to select. Default is all columns ('*').
+    #         criteria (str): SQL condition for filtering records. Default is no filter.
+        
+    #     Returns:
+    #         Dict[int, Dict[str, Any]]: A dictionary where keys are object_ids and values are metadata.
+    #     '''
+    #     columns_clause = ', '.join(columns)
+    #     query = f'SELECT object_id, {columns_clause} FROM {table_name}'
+    #     if criteria:
+    #         query += f' WHERE {criteria}'
+        
+    #     try:
+    #         c = self.connection.cursor()
+    #         c.execute(query)
+    #         results = c.fetchall()
+    #         return {result[0]: dict(zip(columns, result[1:])) for result in results}
+    #     except sqlite3.OperationalError as e:
+    #         raise Exception(f'Error selecting from {table_name}: {e}')
+
+
     def select(self, table_name: str, columns: List[str] = ['*'], criteria: str = '') -> Dict[int, Dict[str, Any]]:
         '''Select records from the specified table based on criteria.
-        
         Args:
             table_name (str): The name of the table.
             columns (List[str]): The columns to select. Default is all columns ('*').
             criteria (str): SQL condition for filtering records. Default is no filter.
-        
         Returns:
             Dict[int, Dict[str, Any]]: A dictionary where keys are object_ids and values are metadata.
         '''
         columns_clause = ', '.join(columns)
-        query = f'SELECT object_id, {columns_clause} FROM {table_name}'
+        query = f'SELECT {columns_clause} FROM {table_name}'
         if criteria:
             query += f' WHERE {criteria}'
-        
         try:
             c = self.connection.cursor()
             c.execute(query)
@@ -70,7 +101,7 @@ class DBManager:
             return {result[0]: dict(zip(columns, result[1:])) for result in results}
         except sqlite3.OperationalError as e:
             raise Exception(f'Error selecting from {table_name}: {e}')
-
+        
     def delete(self, table_name: str, criteria: str) -> None:
         '''Delete a record from the specified table based on criteria.'''
         try:
@@ -131,13 +162,13 @@ class DBManager:
             print(f'Error: {e}')
             return False
 
-    def is_identifier_exit(self, table_name: str, value: str) -> bool:
+    def is_identifier_exist(self, table_name: str, value: str) -> bool:
         '''Check if a specific value exists within a column in the given table.'''
         try:
             c = self.connection.cursor()
             c.execute(f'''
             SELECT COUNT(*) FROM {table_name}
-            WHERE object_id LIKE ?
+            WHERE id LIKE ?
             ''', (value,))
             return c.fetchone()[0] > 0
         except sqlite3.OperationalError as e:

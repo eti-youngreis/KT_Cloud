@@ -29,19 +29,19 @@ class PolicyManager:
 
     def update(self, policy_id: str, metadata: Dict[str, Any]) -> None:
         '''Update an existing policy in the database.'''
-        self.db_manager.update(self.table_name, {'metadata': json.dumps(metadata)}, f'policy_id = {policy_id}')
+        self.db_manager.update(self.table_name, {'metadata': json.dumps(metadata)}, f"policy_id = '{policy_id}'")
 
     def get(self, policy_id: str) -> Dict[str, Any]:
         '''Retrieve a policy from the database.'''
-        result = self.db_manager.select(self.table_name, ['metadata'], f'policy_id = {policy_id}')
+        result = self.db_manager.select(self.table_name, ['metadata'], f"policy_id = '{policy_id}'")
         if result:
-            return result[policy_id]
+            return json.loads(result[policy_id].get('policy_id'))
         else:
             raise FileNotFoundError(f'Policy with ID {policy_id} not found.')
 
     def delete(self, policy_id: int) -> None:
         '''Delete a policy from the database.'''
-        self.db_manager.delete(self.table_name, f'policy_id = {policy_id}')
+        self.db_manager.delete(self.table_name, f"policy_id = '{policy_id}'")
 
     def get_all_policies(self) -> Dict[int, Any]:
         '''Retrieve all policies from the database.'''

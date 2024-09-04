@@ -1,6 +1,6 @@
 from typing import List
 
-from permissionModel import Permission
+from DB_UserAdministration.Models.permissionModel import Permission
 
 # commit
 class Policy:

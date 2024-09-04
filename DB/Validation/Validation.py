@@ -67,3 +67,8 @@ def is_valid_db_instance_identifier(identifier, length):
     pattern = r'^[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]$'
     return ((1 <= len(identifier) <= length) and re.match(pattern, identifier) and '--' not in identifier)
 
+def is_valid_user_group_name(input_string):
+    if len(input_string) < 1 or len(input_string) > 128:
+        return False
+    pattern = r'^[a-zA-Z0-9_+=,.@-]+$'
+    return re.match(pattern, input_string)
