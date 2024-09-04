@@ -1,5 +1,8 @@
-import sqlite3  
-# from DataAccess import DBManager  
+import sqlite3
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'DB', 'DataAccess')))
+from DBManager import DBManager
 
 class PermissionManager:
     """
@@ -24,27 +27,58 @@ class PermissionManager:
         
         :param permission: A dictionary containing the permission data to be inserted.
         """
-        self.db_manager.insert(self.table_name, permission)  
-
-    def is_exist_permission(self, action, resource, effect):
+        return self.db_manager.insert(self.table_name, permission)  
+    
+    def is_permission_exists(self, action: str, resource: str, effect: str) -> bool:
         """
-        Check if a permission exists in the database based on action, resource, and effect.
+        Check if a permission exists in the database with exact match of action, resource, and effect.
         
         :param action: Action associated with the permission (e.g., 'read', 'write').
         :param resource: Resource associated with the permission (e.g., 'bucket_name').
         :param effect: Effect of the permission (e.g., 'allow', 'deny').
         :return: True if the permission exists, otherwise False.
         """
-        query = f'SELECT 1 FROM {self.table_name} WHERE metadata LIKE ? LIMIT 1'  
-        search_pattern = f"%'action': '{action}'%'resource': '{resource}'%'effect': '{effect}'%" 
+        query = f"""
+            SELECT 1 
+            FROM {self.table_name} 
+            WHERE metadata = ?
+            LIMIT 1
+        """
+        
+        # Create the JSON string to match against
+        search_pattern = json.dumps({
+            "action": action,
+            "resource": resource,
+            "effect": effect
+        })
         
         try:
-            c = self.db_manager.connection.cursor() 
-            c.execute(query, (search_pattern,))  
-            result = c.fetchone()  
-            return result is not None  
+            c = self.db_manager.connection.cursor()
+            c.execute(query, (search_pattern,))
+            result = c.fetchone()
+            return result is not None  # Check if a row was found
         except sqlite3.OperationalError as e:
             raise Exception(f'Error checking for permission existence: {e}')
+
+    # def is_exist_permission(self, action, resource, effect):
+    #     """
+    #     Check if a permission exists in the database based on action, resource, and effect.
+        
+    #     :param action: Action associated with the permission (e.g., 'read', 'write').
+    #     :param resource: Resource associated with the permission (e.g., 'bucket_name').
+    #     :param effect: Effect of the permission (e.g., 'allow', 'deny').
+    #     :return: True if the permission exists, otherwise False.
+    #     """
+    #     query = f'SELECT 1 FROM {self.table_name} WHERE metadata LIKE ? LIMIT 1'  
+    #     search_pattern = f"%'action': '{action}'%'resource': '{resource}'%'effect': '{effect}'%" 
+        
+    #     try:
+    #         c = self.db_manager.connection.cursor() 
+    #         c.execute(query, (search_pattern,))  
+    #         result = c.fetchone()  
+    #         return result is not None
+    #     except sqlite3.OperationalError as e:
+    #         raise Exception(f'Error checking for permission existence: {e}')
 
     def create_table(self):
         """

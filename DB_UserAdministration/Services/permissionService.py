@@ -1,5 +1,11 @@
-from permissionModel import Permission, Action, Resource, Effect  
-from DataAccess import permissionManager 
+# from permissionModel import Permission, Action, Resource, Effect  
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from Models.permissionModel import Action, Resource, Effect, Permission
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# from DataAccess import permissionManager 
+from DataAccess.permissionManager import PermissionManager
 
 class permissionService:
     """
@@ -7,13 +13,16 @@ class permissionService:
     perform CRUD operations on permissions.
     """
 
-    def __init__(self, dal: permissionManager) -> None:
+    def __init__(self,  db_file) -> None:
+        # dal: permissionManager
         """
         Initialize the permissionService with a data access layer instance.
         
         :param dal: An instance of permissionManager that handles data access for permissions.
         """
-        self.dal = dal
+        # db_file = 'permissions.db'
+
+        self.dal = PermissionManager(db_file)
 
     def create_permission(self, action: Action, resource: Resource, effect: Effect):
         """
@@ -24,9 +33,10 @@ class permissionService:
         :param effect: The effect (e.g., allow or deny) of the permission.
         :raises ValueError: If the permission already exists.
         :return: The created permission data.
-        """
-        if self.is_exit_permission(action, resource, effect):
+        # """
+        if self.is_permission_exists(action.value, resource.value, effect.value):
             raise ValueError(f'Permission \'{action}, {resource}, {effect}\' already exists.')
+    
         
         # Create a new permission object and pass it to the DAL for creation
         new_permission = Permission(action, resource, effect)
