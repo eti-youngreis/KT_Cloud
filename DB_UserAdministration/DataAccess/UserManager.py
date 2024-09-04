@@ -1,7 +1,7 @@
 from typing import Dict, Any
 import json
 import sqlite3
-from DB.DataAccess import DBManager
+from DB.DataAccess.DBManager import DBManager
 class UserManager:
 
     def __init__(self, db_file: str):
@@ -12,7 +12,7 @@ class UserManager:
     
     def create_table(self):
         '''create users table in the database'''
-        table_schema = 'user_id TEXT NOT NULL PRIMARY KEY AUTOINCREMENT, metadata TEXT NOT NULL'
+        table_schema = 'user_id TEXT NOT NULL PRIMARY KEY, metadata TEXT NOT NULL'
         self.db_manager.create_table(self.table_name, table_schema)
   
     def create(self, metadata: Dict[str, Any]) -> None:
@@ -22,10 +22,10 @@ class UserManager:
     def is_json_column_contains_key_and_value(self, key: str, value: str) -> bool:
         self.db_manager.is_json_column_contains_key_and_value(self.table_name, key, value)
 
-    def is_identifier_exit(self, value: str):
-        self.db_manager.is_identifier_exit(self.table_name, value)
+    def is_identifier_exist(self, value: str):
+        self.db_manager.is_identifier_exist(self.table_name, value)
     
-    def is_value_exit_in_column(self, table_name: str, column: str, value: str):
+    def is_value_exist_in_column(self, table_name: str, column: str, value: str):
         self.db_manager.is_value_exit_in_column( table_name, column, value)
 
     def update(self, user_id: str, user_name: str) -> None:
@@ -57,4 +57,3 @@ class UserManager:
     def close(self):
         '''Close the database connection.'''
         self.db_manager.close()
-

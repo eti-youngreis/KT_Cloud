@@ -1,5 +1,5 @@
 import sqlite3  
-# from DataAccess import DBManager  
+from DB.DataAccess.DBManager import DBManager  
 
 class PermissionManager:
     """

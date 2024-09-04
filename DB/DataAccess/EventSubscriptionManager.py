@@ -33,8 +33,7 @@ class EventSubscriptionManager:
             updates['source_type'] = source_type
 
         if updates:
-            self.db_manager.update(self.table_name, updates, f"subscription_name = '{
-                                   subscription_name}'")
+            self.db_manager.update(self.table_name, updates, f"subscription_name = {subscription_name}")
 
     def get(self, subscription_name: str) -> Dict[str, Any]:
         """Retrieve an event subscription from the database."""
@@ -47,13 +46,11 @@ class EventSubscriptionManager:
                 result[subscription_name]['event_categories'])
             return result[subscription_name]
         else:
-            raise FileNotFoundError(f"Subscription with name '{
-                                    subscription_name}' not found.")
+            raise FileNotFoundError(f'Subscription with name {subscription_name} not found.')
 
     def delete(self, subscription_name: str) -> None:
         """Delete an event subscription from the database."""
-        self.db_manager.delete(self.table_name, f"subscription_name = '{
-                               subscription_name}'")
+        self.db_manager.delete(self.table_name, f'subscription_name = {subscription_name}')
 
     def get_all_subscriptions(self) -> Dict[str, Dict[str, Any]]:
         """Retrieve all event subscriptions from the database."""
