@@ -45,7 +45,7 @@ class userService(DBO):
             return False
         return True
     
-    def update(self, user_id, user_name):
+    def modify(self, user_id, user_name):
         if not self.is_exist_user_id(user_id):
             raise ValueError("Invalid email address.")
         
@@ -57,7 +57,7 @@ class userService(DBO):
         except OperationalError as e:
             raise ValueError(f'An internal error occurred: {str(e)}')
 
-    def get_user(self, user_id):
+    def describe(self, user_id):
         if not self.is_exist_user_id(user_id):
             raise ValueError("Invalid email address.")   
 
