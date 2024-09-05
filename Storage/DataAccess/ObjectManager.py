@@ -141,8 +141,8 @@ class ObjectManager:
         destination_metadata['lastModified'] = datetime.utcnow().isoformat() + 'Z'
          
         # Update destination metadata
-        await self.write_metadata_to_object(destination_bucket, destination_key, version_id, destination_metadata,sync_flag=sync_flag)
-        self.storage_maneger.copy(source_bucket, source_key, destination_bucket, destination_key, version_id)
+        await self.put(destination_bucket, destination_key, version_id, destination_metadata,sync_flag=sync_flag)
+        self.storage_maneger.copy(source_bucket, source_key, destination_metadata,sync_flag=sync_flag)
 
     async def read(self, bucket: str, key: str, version_id = None):
         try:
