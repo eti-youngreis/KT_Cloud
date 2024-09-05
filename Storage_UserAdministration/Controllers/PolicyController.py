@@ -8,9 +8,9 @@ class PolicyController:
     def __init__(self, service: PolicyService):
         self.service = service
 
-    def create_policy(self, policy_name: str, version: str, permissions: list[int]) -> PolicyModel:
+    def create_policy(self, policy_name: str, version: str, permissions, users=None,groups=None, roles=None) -> PolicyModel:
         """Create a new policy."""
-        return self.service.create(policy_name, version, permissions)
+        return self.service.create(policy_name, version, permissions, users,groups=groups,roles=roles)
 
     def delete_policy(self, policy_name: str) -> str:
         """Delete an existing policy."""
@@ -28,13 +28,16 @@ class PolicyController:
         """List all policies."""
         return self.service.list_policies()
 
-    def add_permission(self, policy_name: str, permission: Permission):
+    def add_permission(self, policy_name: str, action, resource, effect):
         """Add a permission to an existing policy."""
-        self.service.add_permission(policy_name, permission)
+        self.service.add_permission(policy_name, action, resource, effect)
 
     def evaluate_policy(self, policy_name: str, action: Action, resource: Resource) -> bool:
         """Evaluate if a policy allows the required permissions."""
         return self.service.evaluate(policy_name, action, resource)
+    def add_user(self, policy_name, user):
+        """add user to policy"""
+        self.service.add_user(policy_name, user)
 
 def main():
     storage = PolicyManager()
@@ -42,10 +45,10 @@ def main():
     controller = PolicyController(service=service)
 
     # New permission by Enum
-    permission1 = Permission.get_id_by_permission(Action.READ, Resource.BUCKET, Effect.ALLOW)
-    permission2 = Permission.get_id_by_permission(Action.WRITE, Resource.BUCKET, Effect.DENY)
+    permission1 = (Action.READ, Resource.BUCKET, Effect.ALLOW)
+    permission2 = (Action.WRITE, Resource.BUCKET, Effect.DENY)
 
-    # create policy
+    # create policy which receives an array of permission tuples
     new_policy = controller.create_policy(policy_name="ExamplePolicy", version="2024-09-01", permissions=[permission1, permission2])
     print("Created Policy:", new_policy.to_dict())
 
@@ -54,7 +57,7 @@ def main():
     print("Updated Policy:", updated_policy)
 
     # add permission to policy
-    controller.add_permission(policy_name="ExamplePolicy", permission=permission2)
+    controller.add_permission(policy_name="ExamplePolicy", action=Action.WRITE, resource=Resource.BUCKET, effect=Effect.DENY)
 
     # get policy by name
     policy = controller.get_policy(policy_name="ExamplePolicy")
@@ -73,5 +76,8 @@ def main():
     can_write = controller.evaluate_policy(policy_name="ExamplePolicy", action=Action.WRITE, resource=Resource.BUCKET)
     print(f"Can read: {can_read}")
     print(f"Can write: {can_write}")
+
+    # add user
+    controller.add_user(policy_name="ExamplePolicy", user="Yosef")
 main()
 
