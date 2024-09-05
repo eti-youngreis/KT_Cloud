@@ -63,6 +63,8 @@ class PolicyService:
     def add_permission(self, policy_name: str, action, resource, effect):
         """Add a permission to an existing policy."""
         permission = Permission.get_id_by_permission(action, resource, effect)
+        opposite_effect = Effect.value if effect.value == Effect.DENY else Effect.DENY
+        opposite_permission = Permission.get_id_by_permission(action,resource,opposite_effect)
         if not self.dal.exists(policy_name):
             raise ValueError(f"Policy '{policy_name}' does not exist.")
         current_data = self.dal.select(policy_name)
@@ -70,7 +72,10 @@ class PolicyService:
         permissions = current_data.permissions
         users = current_data.users or []
         if permission not in permissions:
+            if opposite_permission in permissions:
+                permissions.remove(opposite_permission)
             permissions.append(permission)
+
             # Create a new updated policy object with the new list of permissions
             updated_policy = PolicyModel(policy_name, current_data.version, permissions, users)
             # Update the policy in the data access layer
@@ -89,26 +94,35 @@ class PolicyService:
                 return True
         return False
 
-    def add_user(self, policy_name: str, user: str):
-        """Add a user to an existing policy."""
+    def add_entity(self, policy_name: str, entity_type: str, entity: str):
+        """Add an entity (user, group, or role) to an existing policy."""
         policy = self.dal.select(policy_name)
         if not policy:
             raise ValueError(f"Policy '{policy_name}' does not exist.")
-        if user not in policy.users:
-            policy.users.append(user)
+        if entity_type == "user" and entity not in policy.users:
+            policy.users.append(entity)
+        elif entity_type == "group" and entity not in policy.groups:
+            policy.groups.append(entity)
+        elif entity_type == "role" and entity not in policy.roles:
+            policy.roles.append(entity)
+        else:
+            raise ValueError(f"Invalid entity type '{entity_type}' or entity already exists.")
         updated_policy = self.dal.update(policy)
         self.cache.put(policy_name, updated_policy)
 
-    def delete_user(self,policy_name, user):
-        """delete user from a policy"""
+    def delete_entity(self, policy_name: str, entity_type: str, entity: str):
+        """Delete an entity (user, group, or role) from policy."""
         policy = self.dal.select(policy_name)
         if not policy:
             raise ValueError(f"Policy '{policy_name}' does not exist.")
-        if user not in policy.users:
-            raise ValueError(f"user '{user}' does not exist in policy.")
-        policy.users.remove(user)
+        if entity_type == "user" and entity in policy.users:
+            policy.users.remove(entity)
+        elif entity_type == "group" and entity in policy.groups:
+            policy.groups.remove(entity)
+        elif entity_type == "role" and entity in policy.roles:
+            policy.roles.remove(entity)
+        else:
+            raise ValueError(f"Invalid entity type '{entity_type}' or entity already exists.")
         updated_policy = self.dal.update(policy)
         self.cache.put(policy_name, updated_policy)
-
-
 
