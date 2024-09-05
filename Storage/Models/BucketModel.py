@@ -19,6 +19,7 @@ class Bucket:
     
     # def update_encryption(self, is_encrypted):
     #     self.encrypt_mode = is_encrypted
+
     # def to_dict(self):
     #     return{
     #         "name":self.name,
@@ -28,7 +29,5 @@ class Bucket:
     #         "Policy":self.policy,
     #         "name":self.name,
     #         "name":self.name,
-
-
     #     }
 

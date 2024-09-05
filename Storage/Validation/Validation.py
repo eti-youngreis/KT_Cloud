@@ -53,3 +53,11 @@ def validate_cors_configuration(self, cors_configuration):
         return False
     
     return True
+
+def validate_required_params(self, **kwargs):
+    """Validate that all required parameters are provided."""
+    for param_name, value in kwargs.items():
+        if value is None or value == "":
+            raise ValueError(f"Missing required parameter: {param_name}")
+
+
