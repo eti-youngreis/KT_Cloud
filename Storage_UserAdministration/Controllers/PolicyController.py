@@ -1,29 +1,25 @@
 from typing import List
-
 from Storage_UserAdministration.DataAccess.policyManager import PolicyManager
 from Storage_UserAdministration.Models.PolicyModel import PolicyModel
-from Storage_UserAdministration.Models.PermissionModel import Permission
+from Storage_UserAdministration.Models.PermissionModel import Permission, Action, Resource, Effect
 from Storage_UserAdministration.Services.PolicyService import PolicyService
-
 
 class PolicyController:
     def __init__(self, service: PolicyService):
         self.service = service
 
-    def create_policy(self, policy_name: str, version: str, permissions: List[Permission] = None) -> PolicyModel:
+    def create_policy(self, policy_name: str, version: str, permissions, users=None,groups=None, roles=None) -> PolicyModel:
         """Create a new policy."""
-        return self.service.create(policy_name, version, permissions)
+        return self.service.create(policy_name, version, permissions, users,groups=groups,roles=roles)
 
-    
     def delete_policy(self, policy_name: str) -> str:
         """Delete an existing policy."""
         return self.service.delete(policy_name)
 
-    def update_policy(self, policy_name: str, version: str = None, permissions: List[Permission] = None) -> (str, PolicyModel):
-        """Update an existing policy."""
-        return self.service.update(policy_name, version, permissions)
+    def update_policy(self, policy_name: str, version: str, permissions: List[Permission]) -> PolicyModel:
+        updated_policy = self.service.update(policy_name, version, permissions)
+        return updated_policy
 
-    # working on it
     def get_policy(self, policy_name: str) -> PolicyModel:
         """Get a policy by name."""
         return self.service.get(policy_name)
@@ -32,43 +28,56 @@ class PolicyController:
         """List all policies."""
         return self.service.list_policies()
 
-    def add_permission(self, policy_name: str, permission: Permission):
+    def add_permission(self, policy_name: str, action, resource, effect):
         """Add a permission to an existing policy."""
-        self.service.add_permission(policy_name, permission)
+        self.service.add_permission(policy_name, action, resource, effect)
 
-    def evaluate_policy(self, policy_name: str, permissions: List[Permission]) -> bool:
+    def evaluate_policy(self, policy_name: str, action: Action, resource: Resource) -> bool:
         """Evaluate if a policy allows the required permissions."""
-        return self.service.evaluate(policy_name, permissions)
+        return self.service.evaluate(policy_name, action, resource)
+    def add_user(self, policy_name, user):
+        """add user to policy"""
+        self.service.add_user(policy_name, user)
 
-def maim():
-
+def main():
     storage = PolicyManager()
-
     service = PolicyService(storage)
-
     controller = PolicyController(service=service)
 
-    # create a new permission
-    permission1 = Permission(action="s3:GetObject", resource="arn:aws:s3:::bucket1/*", effect="Allow")
-    permission2 = Permission(action="s3:PutObject", resource="arn:aws:s3:::bucket1/*", effect="Deny")
+    # New permission by Enum
+    permission1 = (Action.READ, Resource.BUCKET, Effect.ALLOW)
+    permission2 = (Action.WRITE, Resource.BUCKET, Effect.DENY)
 
-    # create a new policy
+    # create policy which receives an array of permission tuples
     new_policy = controller.create_policy(policy_name="ExamplePolicy", version="2024-09-01", permissions=[permission1, permission2])
     print("Created Policy:", new_policy.to_dict())
 
-    # update a policy
+    # update policy
     updated_policy = controller.update_policy(policy_name="ExamplePolicy", version="2024-09-03", permissions=[permission1])
     print("Updated Policy:", updated_policy)
 
-    # add permisiion to policy
-    controller.add_permission(policy_name="ExamplePolicy", permission=permission2)
+    # add permission to policy
+    controller.add_permission(policy_name="ExamplePolicy", action=Action.WRITE, resource=Resource.BUCKET, effect=Effect.DENY)
 
-    # get policy  by name
+    # get policy by name
     policy = controller.get_policy(policy_name="ExamplePolicy")
     print("Retrieved Policy:", policy.to_dict())
-
 
     # delete policy
     controller.delete_policy(policy_name="ExamplePolicy")
     print("Policy deleted.")
-maim()
+
+    # list policy
+    list_policies = controller.list_policies()
+    print("all policies: ", list_policies)
+
+    # evaluate
+    can_read = controller.evaluate_policy(policy_name="ExamplePolicy", action=Action.READ, resource=Resource.BUCKET)
+    can_write = controller.evaluate_policy(policy_name="ExamplePolicy", action=Action.WRITE, resource=Resource.BUCKET)
+    print(f"Can read: {can_read}")
+    print(f"Can write: {can_write}")
+
+    # add user
+    controller.add_user(policy_name="ExamplePolicy", user="Yosef")
+main()
+

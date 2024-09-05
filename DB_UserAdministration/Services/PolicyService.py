@@ -24,7 +24,7 @@ class PolicyService:
         except OperationalError as ex:
             return 'policy couldn\'t be deleted'
 
-        del self.policies[name]
+        self.policies.pop(name, None)
 
     def update(self, name, permissions):
         updated_policy = Policy(name, permissions=permissions)
