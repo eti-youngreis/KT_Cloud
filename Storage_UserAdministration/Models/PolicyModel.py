@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from Storage_UserAdministration.Models.PermissionModel import Permission
+from KT_Cloud.Storage_UserAdministration.Models.PermissionModel import Permission
 
 class PolicyModel:
     def __init__(self,policy_name:str, version: str, permissions: List[Permission]=None):

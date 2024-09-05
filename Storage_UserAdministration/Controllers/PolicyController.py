@@ -1,9 +1,8 @@
 from typing import List
-
-from Storage_UserAdministration.DataAccess.policyManager import PolicyManager
-from Storage_UserAdministration.Models.PolicyModel import PolicyModel
-from Storage_UserAdministration.Models.PermissionModel import Permission
-from Storage_UserAdministration.Services.PolicyService import PolicyService
+from KT_Cloud.Storage_UserAdministration.DataAccess.policyManager import PolicyManager
+from KT_Cloud.Storage_UserAdministration.Models.PolicyModel import PolicyModel
+from KT_Cloud.Storage_UserAdministration.Models.PermissionModel import Permission, Action, Resource, Effect
+from KT_Cloud.Storage_UserAdministration.Services.PolicyService import PolicyService
 
 
 class PolicyController:

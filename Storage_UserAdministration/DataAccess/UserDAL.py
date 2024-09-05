@@ -77,17 +77,17 @@ class UserDAL:
             return user
         return None
 
-    def add_to_group(self, username: str, group: Group) -> Optional[User]:
-        """Add a group to the user's groups."""
-        user = self.get_user(username)
-        if user:
-            if not hasattr(user, "groups"):
-                user.groups = []
-            if group not in user.groups:
-                user.groups.append(group)
-            self.save_users_to_file()
-            return user
-        return None
+    # def add_to_group(self, username: str, group: Group) -> Optional[User]:
+    #     """Add a group to the user's groups."""
+    #     user = self.get_user(username)
+    #     if user:
+    #         if not hasattr(user, "groups"):
+    #             user.groups = []
+    #         if group not in user.groups:
+    #             user.groups.append(group)
+    #         self.save_users_to_file()
+    #         return user
+    #     return None
 
     # def remove_from_group(self, username: str, group: Group) -> Optional[User]:
     #     """Remove a group from the user's groups."""
