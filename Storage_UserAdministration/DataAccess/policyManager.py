@@ -70,7 +70,9 @@ class PolicyManager:
         if policy_data:
             permissions = [item for item in policy_data['permissions'] if isinstance(item, (int, float))]
             users = [u for u in policy_data["users"]] or []
-            return PolicyModel(policy_name, policy_data['version'], permissions, users)
+            roles = [r for r in policy_data["roles"]] or []
+            groups = [g for g in policy_data["groups"]] or []
+            return PolicyModel(policy_name, policy_data['version'], permissions, users,groups,roles)
         return None
 
     def list_all(self) -> Dict[str, PolicyModel]:

@@ -35,13 +35,16 @@ class PolicyController:
     def evaluate_policy(self, policy_name: str, action: Action, resource: Resource) -> bool:
         """Evaluate if a policy allows the required permissions."""
         return self.service.evaluate(policy_name, action, resource)
-    def add_user(self, policy_name, user):
-        """add user to policy"""
-        self.service.add_user(policy_name, user)
 
-    def delete_user(self, policy_name, user):
-        """delete user from a policy"""
-        self.service.delete_user(policy_name, user)
+    def add_entity(self, policy_name, entity_type, entity):
+        """Add entity (user, group, or role) to policy"""
+        self.service.add_entity(policy_name, entity_type, entity)
+
+    def delete_entity(self, policy_name, entity_type, entity):
+        """Delete entity (user, group, or role) from policy"""
+        self.service.delete_entity(policy_name, entity_type, entity)
+
+
 def main():
     storage = PolicyManager()
     service = PolicyService(storage)
@@ -80,10 +83,5 @@ def main():
     print(f"Can read: {can_read}")
     print(f"Can write: {can_write}")
 
-    # add user
-    controller.add_user(policy_name="ExamplePolicy", user="Natan")
-
-    # delete user
-    controller.delete_user(policy_name="ExamplePolicy", user="Natan")
 main()
 
