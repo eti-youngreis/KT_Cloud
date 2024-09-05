@@ -1,10 +1,7 @@
 import os
 import sys
-
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-
-from Services.AuthenticationService import AuthenticationService
+from KT_Cloud.Storage_UserAdministration.Services.AuthenticationService import AuthenticationService
 
 class AuthenticationController:
     def __init__(self):
@@ -43,10 +40,10 @@ class AuthenticationController:
 if __name__ == "__main__":
     controller = AuthenticationController()
     # # Register a user
-    # controller.register('user2', 'password123')
+    # controller.register('user5', 'password3')
     # # Login a user
-    # session_id = controller.login('user2', 'password123')
+    session_id = controller.login('user5', 'password3')
     # Check if the user is authenticated
-    # controller.check_authentication('user2')
+    controller.check_authentication('user5')
     # Logout the user
-    controller.logout('user2')
+    controller.logout('user5')

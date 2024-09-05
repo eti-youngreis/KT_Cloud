@@ -1,8 +1,8 @@
 from typing import List
-from Storage_UserAdministration.DataAccess.policyManager import PolicyManager
-from Storage_UserAdministration.Models.PolicyModel import PolicyModel
-from Storage_UserAdministration.Models.PermissionModel import Permission, Action, Resource, Effect
-from Storage_UserAdministration.Services.PolicyService import PolicyService
+from KT_Cloud.Storage_UserAdministration.DataAccess.policyManager import PolicyManager
+from KT_Cloud.Storage_UserAdministration.Models.PolicyModel import PolicyModel
+from KT_Cloud.Storage_UserAdministration.Models.PermissionModel import Permission, Action, Resource, Effect
+from KT_Cloud.Storage_UserAdministration.Services.PolicyService import PolicyService
 
 class PolicyController:
     def __init__(self, service: PolicyService):
@@ -42,48 +42,34 @@ class PolicyController:
     def delete_user(self, policy_name, user):
         """delete user from a policy"""
         self.service.delete_user(policy_name, user)
-def main():
-    storage = PolicyManager()
-    service = PolicyService(storage)
-    controller = PolicyController(service=service)
+    #def main():
+        #storage = PolicyManager()
+        #service = PolicyService(storage)
+        #controller = PolicyController(service=service)
 
-    # New permission by Enum
-    permission1 = (Action.READ, Resource.BUCKET, Effect.ALLOW)
-    permission2 = (Action.WRITE, Resource.BUCKET, Effect.DENY)
+        #permission1 = (Action.READ, Resource.BUCKET, Effect.ALLOW)
+        #permission2 = (Action.WRITE, Resource.BUCKET, Effect.DENY)
 
-    # create policy which receives an array of permission tuples
-    new_policy = controller.create_policy(policy_name="ExamplePolicy", version="2024-09-01", permissions=[permission1, permission2])
-    print("Created Policy:", new_policy.to_dict())
+        #new_policy = controller.create_policy(policy_name="ExamplePolicy", version="2024-09-01", permissions=[permission1, permission2])
+        #print("Created Policy:", new_policy.to_dict())
+        #updated_policy = controller.update_policy(policy_name="ExamplePolicy", version="2024-09-03", permissions=[permission1])
+        #print("Updated Policy:", updated_policy)
 
-    # update policy
-    updated_policy = controller.update_policy(policy_name="ExamplePolicy", version="2024-09-03", permissions=[permission1])
-    print("Updated Policy:", updated_policy)
+        #controller.add_permission(policy_name="ExamplePolicy", action=Action.WRITE, resource=Resource.BUCKET, effect=Effect.DENY)
 
-    # add permission to policy
-    controller.add_permission(policy_name="ExamplePolicy", action=Action.WRITE, resource=Resource.BUCKET, effect=Effect.DENY)
+        #policy = controller.get_policy(policy_name="ExamplePolicy")
+        #print("Retrieved Policy:", policy.to_dict())
+        #controller.delete_policy(policy_name="ExamplePolicy")
+        #print("Policy deleted.")
+        #list_policies = controller.list_policies()
+        #print("all policies: ", list_policies)
+        #can_read = controller.evaluate_policy(policy_name="ExamplePolicy", action=Action.READ, resource=Resource.BUCKET)
+        #can_write = controller.evaluate_policy(policy_name="ExamplePolicy", action=Action.WRITE, resource=Resource.BUCKET)
+        #print(f"Can read: {can_read}")
+        #print(f"Can write: {can_write}")
 
-    # get policy by name
-    policy = controller.get_policy(policy_name="ExamplePolicy")
-    print("Retrieved Policy:", policy.to_dict())
+        #controller.add_user(policy_name="ExamplePolicy", user="Natan")
 
-    # delete policy
-    controller.delete_policy(policy_name="ExamplePolicy")
-    print("Policy deleted.")
+        #controller.delete_user(policy_name="ExamplePolicy", user="Natan")
 
-    # list policy
-    list_policies = controller.list_policies()
-    print("all policies: ", list_policies)
-
-    # evaluate
-    can_read = controller.evaluate_policy(policy_name="ExamplePolicy", action=Action.READ, resource=Resource.BUCKET)
-    can_write = controller.evaluate_policy(policy_name="ExamplePolicy", action=Action.WRITE, resource=Resource.BUCKET)
-    print(f"Can read: {can_read}")
-    print(f"Can write: {can_write}")
-
-    # add user
-    controller.add_user(policy_name="ExamplePolicy", user="Natan")
-
-    # delete user
-    controller.delete_user(policy_name="ExamplePolicy", user="Natan")
-main()
 

@@ -1,8 +1,8 @@
 from typing import List
-from Storage_UserAdministration.DataAccess.policyManager import PolicyManager
-from Storage_UserAdministration.Models.PermissionModel import Permission, Action, Resource, Effect
-from Storage_UserAdministration.Models.PolicyModel import PolicyModel
-from Storage_UserAdministration.Storage_ML.LRUCache import LRUCache
+from KT_Cloud.Storage_UserAdministration.DataAccess.policyManager import PolicyManager
+from KT_Cloud.Storage_UserAdministration.Models.PermissionModel import Permission, Action, Resource, Effect
+from KT_Cloud.Storage_UserAdministration.Models.PolicyModel import PolicyModel
+from KT_Cloud.Storage_UserAdministration.Storage_ML.LRUCache import LRUCache
 
 class PolicyService:
     def __init__(self, dal: PolicyManager, cache_capacity: int = 100):

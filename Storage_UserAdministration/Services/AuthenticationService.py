@@ -5,8 +5,8 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from DataAccess.UserDAL import UserDAL
-from Models.userModel import User
+from KT_Cloud.Storage_UserAdministration.DataAccess.UserDAL import UserDAL
+from KT_Cloud.Storage_UserAdministration.Models.userModel import User
 class AuthenticationService:
     def __init__(self):
         self.data_access =UserDAL()
@@ -27,8 +27,8 @@ class AuthenticationService:
 
     def logout(self, username):
         user:User = self.data_access.get_user(username)
-        user.logged_in=False
-        user.token=None
+        user.logged_in = False
+        user.token = None
         self.data_access.save_user(user)
 
 

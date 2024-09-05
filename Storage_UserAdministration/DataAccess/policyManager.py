@@ -1,14 +1,14 @@
 import json
 import os
 from typing import Dict, Optional, List
-from Storage_UserAdministration.Models.PermissionModel import Permission, Action, Resource, Effect
-from Storage_UserAdministration.Models.PolicyModel import PolicyModel
+from KT_Cloud.Storage_UserAdministration.Models.PermissionModel import Permission, Action, Resource, Effect
+from KT_Cloud.Storage_UserAdministration.Models.PolicyModel import PolicyModel
 
 class PolicyManager:
-    def __init__(self, file_path: str = "KT_Cloud\\server\\metadata.json"):
+    def __init__(self, file_path: str = "C://Users//User//Downloads//metadata.json"):
         self.file_path = file_path
         if not os.path.exists(self.file_path):
-            with open(self.file_path, 'w') as file:
+            with open(file_path, 'w') as file:
                 json.dump({"server": {"policies": {}}, "users": {}}, file, indent=4)
 
     def _load_data(self) -> Dict:
