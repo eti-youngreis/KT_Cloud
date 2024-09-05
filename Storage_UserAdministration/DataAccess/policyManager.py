@@ -32,11 +32,14 @@ class PolicyManager:
         if policy["policyName"] in data["server"]["policies"]:
             raise ValueError(f"Policy '{policy['policyName']}' already exists.")
 
-        permission_ids = policy['permissions']  # הרשאות כבר מועברות כ-IDs, ולכן אין צורך במיפוי נוסף
+        permission_ids = policy['permissions']
         policy_data = {
             "version": policy["version"],
             "policyName": policy["policyName"],
-            "permissions": permission_ids
+            "permissions": permission_ids,
+            "users": [],
+            "groups": [],
+            "roles": []
         }
         data["server"]["policies"][policy["policyName"]] = policy_data
         self._save_data(data)
@@ -52,10 +55,9 @@ class PolicyManager:
 
     def update(self, policy: PolicyModel):
         data = self._load_data()
-        # שימוש בגישה ישירה למאפיינים של האובייקט PolicyModel
         if policy.policy_name not in data["server"]["policies"]:
             raise KeyError(f"Policy '{policy.policy_name}' not found.")
-        print("policy.to_dict()",policy.to_dict())
+        print("policy.to_dict()", policy.to_dict())
         # update the policy
         data["server"]["policies"][policy.policy_name] = policy.to_dict()
         self._save_data(data)
@@ -78,4 +80,14 @@ class PolicyManager:
             permissions = [Permission.get_permission_by_id(p_id) for p_id in policy_data.get("permissions", {})]
             policies.append(PolicyModel(policy_name, policy_data.get("version", {}), permissions))
         return policies
+    def add_user(self, policy_name: str, user: str):
+        policy = self.select(policy_name)
+        if not policy:
+            raise ValueError(f"Policy '{policy_name}' does not exist.")
+        if policy.users is None:
+            policy.users = []
+        if user not in policy.users:
+            policy.users.append(user)
+        self.update(policy)
+
 
