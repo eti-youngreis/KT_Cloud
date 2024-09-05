@@ -69,7 +69,8 @@ class PolicyManager:
         policy_data = data.get("server", {}).get("policies", {}).get(policy_name)
         if policy_data:
             permissions = [item for item in policy_data['permissions'] if isinstance(item, (int, float))]
-            return PolicyModel(policy_name, policy_data['version'], permissions)
+            users = [u for u in policy_data["users"]] or []
+            return PolicyModel(policy_name, policy_data['version'], permissions, users)
         return None
 
     def list_all(self) -> Dict[str, PolicyModel]:
@@ -80,14 +81,6 @@ class PolicyManager:
             permissions = [Permission.get_permission_by_id(p_id) for p_id in policy_data.get("permissions", {})]
             policies.append(PolicyModel(policy_name, policy_data.get("version", {}), permissions))
         return policies
-    def add_user(self, policy_name: str, user: str):
-        policy = self.select(policy_name)
-        if not policy:
-            raise ValueError(f"Policy '{policy_name}' does not exist.")
-        if policy.users is None:
-            policy.users = []
-        if user not in policy.users:
-            policy.users.append(user)
-        self.update(policy)
+
 
 

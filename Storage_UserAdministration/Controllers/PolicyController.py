@@ -39,6 +39,9 @@ class PolicyController:
         """add user to policy"""
         self.service.add_user(policy_name, user)
 
+    def delete_user(self, policy_name, user):
+        """delete user from a policy"""
+        self.service.delete_user(policy_name, user)
 def main():
     storage = PolicyManager()
     service = PolicyService(storage)
@@ -78,6 +81,9 @@ def main():
     print(f"Can write: {can_write}")
 
     # add user
-    controller.add_user(policy_name="ExamplePolicy", user="Yosef")
+    controller.add_user(policy_name="ExamplePolicy", user="Natan")
+
+    # delete user
+    controller.delete_user(policy_name="ExamplePolicy", user="Natan")
 main()
 
