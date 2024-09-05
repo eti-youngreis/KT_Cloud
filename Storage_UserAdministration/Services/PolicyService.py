@@ -50,7 +50,8 @@ class PolicyService:
             data = self.dal.select(policy_name)
             if data is None:
                 raise ValueError(f"Policy '{policy_name}' does not exist.")
-            policy = PolicyModel(data.policy_name, data.version, [Permission.get_permission_by_id(per) for per in data.permissions])
+            users = data.users or []
+            policy = PolicyModel(data.policy_name, data.version, [Permission.get_permission_by_id(per) for per in data.permissions], users)
             self.cache.put(policy_name, policy)
         return policy
 
@@ -67,10 +68,11 @@ class PolicyService:
         current_data = self.dal.select(policy_name)
         # Append the new permission to the existing permissions
         permissions = current_data.permissions
+        users = current_data.users or []
         if permission not in permissions:
             permissions.append(permission)
             # Create a new updated policy object with the new list of permissions
-            updated_policy = PolicyModel(policy_name, current_data.version, permissions)
+            updated_policy = PolicyModel(policy_name, current_data.version, permissions, users)
             # Update the policy in the data access layer
             self.dal.update(updated_policy)
             self.cache.put(policy_name, updated_policy)
@@ -96,5 +98,17 @@ class PolicyService:
             policy.users.append(user)
         updated_policy = self.dal.update(policy)
         self.cache.put(policy_name, updated_policy)
+
+    def delete_user(self,policy_name, user):
+        """delete user from a policy"""
+        policy = self.dal.select(policy_name)
+        if not policy:
+            raise ValueError(f"Policy '{policy_name}' does not exist.")
+        if user not in policy.users:
+            raise ValueError(f"user '{user}' does not exist in policy.")
+        policy.users.remove(user)
+        updated_policy = self.dal.update(policy)
+        self.cache.put(policy_name, updated_policy)
+
 
 
