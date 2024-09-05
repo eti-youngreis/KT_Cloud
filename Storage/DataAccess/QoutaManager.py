@@ -1,7 +1,9 @@
 import json
 import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from typing import Dict,  Optional
-from Models.PolicyModel import PolicyModel
+from Models.PolicyModelOld import PolicyModel
 from Storage.Models.QuotaModel import QuotaModel
 
 class QuotaManager:
