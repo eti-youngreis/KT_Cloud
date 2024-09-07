@@ -5,7 +5,7 @@ from KT_Cloud.Storage_UserAdministration.Models.userModel import User
 from KT_Cloud.Storage_UserAdministration.Models.PermissionModel import Permission
 
 class UserDAL:
-    def __init__(self, file_path= "C://Users//User//Downloads//users.json"):
+    def __init__(self, file_path = "C://Users//User//Downloads//users.json"):
         self.file_path = file_path
         self.users: Dict[str, User] = {}
         self.load_users_from_file()
@@ -14,7 +14,7 @@ class UserDAL:
         if os.path.exists(self.file_path):
             with open(self.file_path, "r") as file:
                 users_data = json.load(file)
-                for username, user_info in users_data.items():
+                for username, user_info in users_data["server"]["users"].items():
                     user = User(
                         username=user_info["username"],
                         password=user_info["password"],
@@ -30,11 +30,16 @@ class UserDAL:
                     self.users[username] = user
 
     def save_users_to_file(self):
-        with open(self.file_path, "w") as file:
-            users_data = {
-                username: user.__dict__ for username, user in self.users.items()
-            }
-            json.dump(users_data, file, indent=4)
+        with open(self.file_path, 'r') as file:
+            data = json.load(file)
+
+        users_data = {
+            username: user.__dict__ for username, user in self.users.items()
+        }
+        data['server']['users'] = users_data
+        with open(self.file_path, 'w') as file:
+            json.dump(data, file, indent=4)
+        print(f"Users data updated successfully in {self.file_path}.")
   
     def get_all_users(self) -> Dict[str, User]:
         return self.users
