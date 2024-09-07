@@ -115,55 +115,47 @@ class ObjectService:
         return hashlib.md5(content).hexdigest()
 
     # naive implementation
-    async def delete_object(self, bucket, key, version_id=None, flag_sync=True):
 
+    #naive implementation
+    async def delete(self,obj:ObjectModel, version_id=None, flag_sync=True):
+        bucket = obj.bucket
+        key = obj.key
         version_status = self.object_manager.get_versioning_status(bucket)
         # If the versioning is not enabled, delete the object
-        if version_status == "not enabled":
-            self.object_manager.delete_object(bucket, key)
-            return {"DeleteMarker": False, "VersionId": "null"}
+        if version_status == 'not enabled':
+            self.object_manager.delete_object(bucket,key)
+            return {'DeleteMarker': False, 'VersionId': 'null'}
         # If the versionId is given or the versioning id suspended, put deleteMarker on specific version
-        elif version_id or version_status == "suspended":
-            if version_status == "suspended":
+        elif version_id or version_status == 'suspended':
+            if version_status == 'suspended':
                 version_id = self.object_manager.get_latest_version(bucket, key)
-            await self.object_manager.put_deleteMarker(
-                bucket, key, version_id, flag_sync=flag_sync
-            )
-            return {"DeleteMarker": True, "VersionId": version_id}
+            await self.object_manager.put_deleteMarker(bucket, key, version_id, flag_sync=flag_sync)
+            return {'DeleteMarker': True, 'VersionId': version_id}
         return {}
 
-    async def delete_objects(self, bucket, delete, flag_sync=True):
+    async def delete_objects(self, obj: ObjectModel, delete, flag_sync=True):
+        bucket = obj.bucket
         deleted = []
         errors = []
-        for object in delete["Objects"]:
-            version_id = object.get("VersionId", None)
-            key = object["Key"]
-            obj = ObjectModel(bucket, object["Key"])
+        for object in delete['Objects']:
+            version_id = object.get('VersionId', None)
+            key = object['Key']
+            obj = ObjectModel(bucket, object['Key'])
 
             try:
                 delete_result = await self.delete(obj, version_id, flag_sync=flag_sync)
                 if delete_result is not {}:
-                    deleted.append({"Key": key, "VersionId": version_id})
+                    deleted.append({'Key': key, 'VersionId': version_id})
                 else:
                     errors.append(
-                        {
-                            "Key": key,
-                            "VersionId": version_id,
-                            "Code": "InternalError",
-                            "Message": "Deletion failed",
-                        }
-                    )
+                        {'Key': key, 'VersionId': version_id, 'Code': 'InternalError', 'Message': 'Deletion failed'})
             except Exception as e:
-                errors.append(
-                    {
-                        "Key": key,
-                        "VersionId": version_id,
-                        "Code": "InternalError",
-                        "Message": str(e),
-                    }
-                )
+                errors.append({'Key': key, 'VersionId': version_id, 'Code': 'InternalError', 'Message': str(e)})
 
-        return {"Deleted": deleted, "Errors": errors}
+        return {
+            'Deleted': deleted,
+            'Errors': errors
+        }
 
     async def copy_object(
         self,
