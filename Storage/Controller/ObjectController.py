@@ -17,17 +17,16 @@ class ObjectController:
         self.object_service = ObjectService()
 
     async def get_object(
-        self, user_name: str, bucket: str, key: str, version_id: str = None
+        self, bucket: str, key: str, version_id: str = None
     ) -> ObjectModel:
         """Retrieve an object."""
-        validate_required_params(user_name=user_name, bucket=bucket, key=key)
+        validate_required_params(bucket=bucket, key=key)
         return await self.object_service.get_object(
-            user_name=user_name, bucket=bucket, key=key, version_id=version_id
+            bucket=bucket, key=key, version_id=version_id
         )
 
     async def put_object(
         self,
-        user_name: str,
         bucket: str,
         key: str,
         body: bytes,
@@ -37,9 +36,8 @@ class ObjectController:
         content_type: str = None,
     ):
         """Upload an object."""
-        validate_required_params(user_name=user_name, bucket=bucket, key=key, body=body)
+        validate_required_params(bucket=bucket, key=key, body=body)
         return await self.object_service.put_object(
-            user_name=user_name,
             bucket=bucket,
             key=key,
             body=body,
@@ -49,28 +47,20 @@ class ObjectController:
             content_type=content_type,
         )
 
-    async def delete_object(
-        self, user_name: str, bucket: str, key: str, version_id: str = None
-    ):
+    async def delete_object(self, bucket: str, key: str, version_id: str = None):
         """Delete an object."""
-        validate_required_params(user_name=user_name, bucket=bucket, key=key)
+        validate_required_params(bucket=bucket, key=key)
         return await self.object_service.delete_object(
-            user_name=user_name, bucket=bucket, key=key, version_id=version_id
+            bucket=bucket, key=key, version_id=version_id
         )
 
-    async def delete_objects(self, user_name: str, bucket: str, delete):
+    async def delete_objects(self, bucket: str, delete):
         """Delete an object."""
-        validate_required_params(user_name=user_name, bucket=bucket, delete=delete)
-        user_name, bucket, key = ObjectModel(
-            bucket,
-        )
-        return await self.object_service.delete_object(
-            user_name=user_name, bucket=bucket, delete=delete
-        )
+        validate_required_params(bucket=bucket, delete=delete)
+        return await self.object_service.delete_object(bucket=bucket, delete=delete)
 
     async def copy_object(
         self,
-        user_name: str,
         bucket,
         key,
         destination_bucket,
@@ -79,13 +69,12 @@ class ObjectController:
         sync_flag=True,
     ):
         validate_required_params(
-            user_name=user_name,
             bucket=bucket,
             key=key,
             destination_bucket=destination_bucket,
         )
         return await self.object_service.copy_object(
-            user_name,
+             
             bucket,
             key,
             destination_bucket,
@@ -95,29 +84,26 @@ class ObjectController:
         )
 
     async def put_object_tagging(
-        self, user_name: str, bucket: str, key: str, tags: dict, version_id: str = None
+        self, bucket: str, key: str, tags: dict, version_id: str = None
     ):
         """Add or update object tags."""
-        validate_required_params(user_name=user_name, bucket=bucket, key=key, tags=tags)
+        validate_required_params(bucket=bucket, key=key, tags=tags)
         tag_obj = Tag()
         for tag_key, tag_value in tags.items():
             tag_obj.add_tag(tag_key, tag_value)
         return await self.object_service.put_object_tagging(
-            user_name, bucket, key, tags, version_id
+              bucket, key, tags, version_id
         )
 
-    async def get_object_tagging(
-        self, user_name: str, bucket: str, key: str, version_id: str = None
-    ):
+    async def get_object_tagging(self, bucket: str, key: str, version_id: str = None):
         """Retrieve object tags."""
-        validate_required_params(user_name=user_name, bucket=bucket, key=key)
+        validate_required_params(bucket=bucket, key=key)
         return await self.object_service.get_object_tagging(
-            user_name, bucket, key, version_id
+              bucket, key, version_id
         )
 
     async def put_object_acl(
         self,
-        user_name: str,
         bucket: str,
         key: str,
         owner: str,
@@ -126,7 +112,6 @@ class ObjectController:
     ):
         """Set object access control list (ACL)."""
         validate_required_params(
-            user_name=user_name,
             bucket=bucket,
             key=key,
             owner=owner,
@@ -136,32 +121,28 @@ class ObjectController:
         for perm in permissions:
             acl.add_permission(perm)
         return await self.object_service.put_object_acl(
-            user_name, bucket, key, acl, version_id
+              bucket, key, acl, version_id
         )
 
-    async def get_object_acl(
-        self, user_name: str, bucket: str, key: str, version_id: str = None
-    ):
+    async def get_object_acl(self, bucket: str, key: str, version_id: str = None):
         """Retrieve object access control list (ACL)."""
-        validate_required_params(user_name=user_name, bucket=bucket, key=key)
+        validate_required_params(bucket=bucket, key=key)
         return await self.object_service.get_object_acl(
-            user_name, bucket, key, version_id
+              bucket, key, version_id
         )
 
-    async def head_object(
-        self, user_name: str, bucket: str, key: str, version_id: str = None
-    ):
+    async def head_object(self, bucket: str, key: str, version_id: str = None):
         """Retrieve object metadata (without the actual content)."""
-        validate_required_params(user_name=user_name, bucket=bucket, key=key)
-        return await self.object_service.head_object(user_name, bucket, key, version_id)
+        validate_required_params(bucket=bucket, key=key)
+        return await self.object_service.head_object(  bucket, key, version_id)
 
     async def get_object_attributes(
-        self, user_name: str, bucket: str, key: str, version_id: str = None
+        self, bucket: str, key: str, version_id: str = None
     ):
         """Retrieve specific attributes of an object."""
-        validate_required_params(user_name=user_name, bucket=bucket, key=key)
+        validate_required_params(bucket=bucket, key=key)
         return await self.object_service.get_object_attributes(
-            user_name, bucket, key, version_id
+              bucket, key, version_id
         )
 
     def list(self, *args, **kwargs):
@@ -174,7 +155,6 @@ class ObjectController:
 
     async def put_object_legal_hold(
         self,
-        user_name: str,
         bucket: str,
         key: str,
         legal_hold_status: str,
