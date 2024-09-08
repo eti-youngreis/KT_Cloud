@@ -31,17 +31,9 @@ class ObjectService:
                 version_id = self.object_manager.get_latest_version(bucket, key)
             elif version_id not in self.object_manager.get_versions(bucket, key):
                 raise FileNotFoundError("version id not exist")
-<<<<<<< HEAD:Storage/Service/Classes/ObjectService.py
-        
 
-
-
-
-        
-=======
-
->>>>>>> cf31d0e1771299135fcbd0fd27acbe3cbd6bcd88:Storage/KT_Storage/Service/Classes/ObjectService.py
-            return self.object_manager.get_object_by_version(bucket, key, version_id)
+        return self.object_manager.get_object_by_version(bucket, key, version_id)
+    
         except FileNotFoundError as e:
             print(f"Error: The file or directory was not found: {e}")
         except PermissionError as e:
@@ -500,8 +492,7 @@ class ObjectService:
 
   
 
-<<<<<<< HEAD:Storage/Service/Classes/ObjectService.py
-    #naive Implementation
+   #naive Implementation
     async def put_object_legal_hold(self, obj: ObjectModel, legal_hold_status, version_id=None, is_sync=True):
         bucket = obj.bucket
         key = obj.key
@@ -684,7 +675,7 @@ class ObjectService:
             return {
                 'Error': str(e)
             }
-=======
+
     async def put_object_legal_hold(
         self,
         bucket: str,
