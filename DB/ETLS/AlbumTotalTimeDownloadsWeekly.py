@@ -20,9 +20,7 @@ def load():
     spark = SparkSession.builder.appName("ETL Template with SQLite").getOrCreate()
 
     try:
-        
         # connect to database
-        
         conn = sqlite3.connect(base_path + "database.db")
         
         # extract data from csv files
@@ -38,30 +36,23 @@ def load():
         )
 
         # total downloads per album
-        joined_track_invoice_line_table = track_table.join(
+        total_downloads_per_album = track_table.join(
             invoice_line_table,
             track_table["TrackId"] == invoice_line_table["TrackId"],
             "left",
-        ).drop(invoice_line_table["TrackId"])
-        
-        total_downloads_per_album = joined_track_invoice_line_table.groupBy("AlbumId").agg(
+        ).drop(invoice_line_table["TrackId"]).groupBy("AlbumId").agg(
             F.sum("Quantity").alias("total_album_downloads"),
         )
-
     
-        # join derived conclusions to final data
+        # join derived conclusions to final data and add metadata
         final_data = total_time_per_album.join(total_downloads_per_album, total_time_per_album["AlbumId"] ==\
-            total_downloads_per_album["AlbumId"]).drop(total_downloads_per_album["AlbumId"])
-        
-        
-        # transformed data including metadata 
-        final_data = final_data.withColumn("created_at", F.current_date()) \
+            total_downloads_per_album["AlbumId"]).drop(total_downloads_per_album["AlbumId"])\
+            .withColumn("created_at", F.current_date()) \
             .withColumn("updated_at", F.current_date()) \
             .withColumn("updated_by", F.lit(f"DailyAlbumETL:{current_user}"))
     
         # load data to database
         final_data = final_data.toPandas()
-        
         
         final_data['AlbumId'] = final_data['AlbumId'].astype(int)
     
