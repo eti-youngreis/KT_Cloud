@@ -1,7 +1,7 @@
 from typing import Dict, Any
 import json
 import sqlite3
-from DB.DataAccess.DBManager import DBManager
+from DB.KT_DB.DataAccess.DBManager import DBManager
 class UserManager:
 
     def __init__(self, db_file: str):
@@ -31,7 +31,10 @@ class UserManager:
     def update(self, user_id: str, user_name: str) -> None:
         '''Update an existing user in the database.'''
         self.db_manager.update(self.table_name, {'metadata': json.dumps({'user_name': user_name})}, f'user_id = {user_id}')
-
+   
+    def update_metadata(self, user_id: int, key: str, new_value: Any, action: str = 'set') -> None:
+        self.db_manager.update_metadata(self.table_name, user_id, key, new_value, action)
+        
     def delete(self, user_id: str) -> None:
         '''Delete an user from the database.'''
         self.db_manager.delete(self.table_name, f'user_id = {user_id}')

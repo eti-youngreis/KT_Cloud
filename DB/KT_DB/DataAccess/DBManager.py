@@ -152,4 +152,71 @@ class DBManager:
     def close(self):
         '''Close the database connection.'''
         self.connection.close()
+
+
+    def update_metadata(self, table_name: str, user_id: int, key: str, value: Any, action: str = 'set') -> None:
+        """
+        Generic function to update a specific part of the metadata for a given user.
+        
+        Parameters:
+        - table_name: The name of the table containing the metadata.
+        - user_id: The ID of the user whose metadata needs to be updated.
+        - key: The specific part of the metadata to update (e.g., 'password', 'roles', 'policies', 'quotas').
+        - value: The value to update, append, or delete (could be a new policy, role, password, etc.).
+        - action: The type of update to perform ('set' for replacing, 'append' for adding to lists, 'update' for dicts, 'delete' for removing).
+        """
+        
+        # Step 1: Retrieve the current metadata for the user
+        query = f"SELECT metadata FROM {table_name} WHERE user_id = ?"
+        try:
+            c = self.connection.cursor()
+            c.execute(query, (user_id,))
+            row = c.fetchone()
+            if row:
+                metadata = json.loads(row[0])  # Assuming metadata is stored as a JSON string
+            else:
+                raise Exception(f"User with id {user_id} not found.")
+        except OperationalError as e:
+            raise Exception(f'Error fetching metadata: {e}')
+        
+        # Step 2: Modify the relevant part of the metadata
+        if key not in metadata:
+            raise KeyError(f"Key '{key}' not found in metadata.")
+        
+        if action == 'set':
+            # Replace the value of the key directly
+            metadata[key] = value
+        elif action == 'append' and isinstance(metadata[key], list):
+            # Append to the list (for roles, policies, etc.)
+            metadata[key].append(value)
+        elif action == 'update' and isinstance(metadata[key], dict):
+            # Update a dictionary (for quotas or nested data)
+            metadata[key].update(value)
+        elif action == 'delete':
+            if isinstance(metadata[key], list):
+                # Remove an item from a list
+                if value in metadata[key]:
+                    metadata[key].remove(value)
+                else:
+                    raise ValueError(f"Value '{value}' not found in list '{key}'.")
+            elif isinstance(metadata[key], dict):
+                # Remove a key from a dictionary
+                if value in metadata[key]:
+                    del metadata[key][value]
+                else:
+                    raise ValueError(f"Key '{value}' not found in dictionary '{key}'.")
+            else:
+                raise ValueError(f"Action 'delete' is not supported for the data type of key '{key}'.")
+        else:
+            raise ValueError(f"Invalid action '{action}' or incompatible data type for key '{key}'.")
+        
+        # Step 3: Serialize metadata back to JSON string
+        updated_metadata = json.dumps(metadata)
+        
+        # Step 4: Use your update function to write the new metadata back to the database
+        updates = {"metadata": updated_metadata}
+        criteria = f"user_id = {user_id}"
+        self.update(table_name, updates, criteria)
+
+
         
