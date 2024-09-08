@@ -49,8 +49,10 @@ def load():
     
         final_data = final_data.toPandas()
         
+        # handle incrementally
         try:
-            existing_data = pd.read_sql(f'select * from {etl_table_name}', con = conn)  
+            existing_data = pd.read_sql(f'select * from {etl_table_name}', con = conn)
+            
         except:
             pass
         
