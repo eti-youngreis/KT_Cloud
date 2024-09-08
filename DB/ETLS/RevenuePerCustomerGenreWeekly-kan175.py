@@ -49,6 +49,7 @@ def load():
         final_data = final_data.toPandas()
         
         # handle incrementally
+        # code in comment doesn't work properly
         # try: 
         #     existing_data = pd.read_sql(f'select * from {etl_table_name}', con = conn)
         # except:
@@ -84,7 +85,7 @@ def load():
             
         # except:
         #     final_data.reset_index(inplace=True)
-        #     updated_data = final_data
+        #     final_data = updated_data
         
         
         final_data.to_sql(name=etl_table_name, con = conn, if_exists='replace', index=False)   
