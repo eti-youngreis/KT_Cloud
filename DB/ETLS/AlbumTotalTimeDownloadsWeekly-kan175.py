@@ -11,7 +11,7 @@ def load():
 
     current_user = "User" # when IAM is implemented, get current user for session details
     
-    etl_table_name = 'daily_album_etl'
+    etl_table_name = 'album_total_time_downloads'
     
     base_path = "../etl_files/"
     spark = SparkSession.builder.appName("ETL Template with SQLite").getOrCreate()
