@@ -1,7 +1,7 @@
 import uuid
 from Abc import DBO
 from typing import Optional, List
-from DB.Validation.ValiditionDBClusterEndpoint import is_valid_identifier
+from KT_DB.Validation.ValiditionDBClusterEndpoint import is_valid_identifier
 from Models import DBClusterEndpointModel
 from DataAccess import DBClusterEndpointManager
 from typing import Dict, Optional

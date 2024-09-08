@@ -1,8 +1,8 @@
 from typing import Optional, Dict
-from DB.Models.DBClusterParameterGroupModel import DBClusterParameterGroupModel
-from DB.Service.Classes.ParameterGroupService import ParameterGroupService
+from KT_DB.Models.DBClusterParameterGroupModel import DBClusterParameterGroupModel
+from KT_DB.Service.Classes.ParameterGroupService import ParameterGroupService
 from DataAccess import DBClusterParameterGroupManager
-from DB.Validation.Validation import is_valid_user_group_name, is_valid_number
+from KT_DB.Validation.Validation import is_valid_user_group_name, is_valid_number
 
 class DBClusterParameterGroupService(ParameterGroupService):
     """
