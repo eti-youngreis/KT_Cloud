@@ -62,6 +62,6 @@ class PolicyService:
             try:
                 allowed = self.policies[name].evaluate(action, resource)
             except KeyError:
-                pass
+                return None
 
         return allowed
