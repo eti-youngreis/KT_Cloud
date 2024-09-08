@@ -16,9 +16,9 @@ def load():
     base_path = "../etl_files/"
     spark = SparkSession.builder.appName("ETL Template with SQLite").getOrCreate()
 
-    conn = sqlite3.connect(base_path + "database.db")
-
     try:
+        
+        conn = sqlite3.connect(base_path + "database.db")
         album_table = spark.read.option("header", "true").csv(base_path + "Album.csv")
 
         track_table = spark.read.option("header", "true").csv(base_path + "Track.csv")
@@ -49,7 +49,10 @@ def load():
     
         final_data = final_data.toPandas()
         
-        existing_data = pd.read_sql(f'select * from {etl_table_name}', con = conn)
+        try:
+            existing_data = pd.read_sql(f'select * from {etl_table_name}', con = conn)  
+        except:
+            pass
         
         try:
             existing_data.set_index('AlbumId', inplace=True)
@@ -88,3 +91,6 @@ def load():
         conn.close()
         spark.stop()
 
+
+if __name__ == "__main__":
+    load()
