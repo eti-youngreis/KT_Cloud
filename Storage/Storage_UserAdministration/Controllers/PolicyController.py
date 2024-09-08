@@ -1,8 +1,8 @@
 from typing import List
-from Storage_UserAdministration.DataAccess.policyManager import PolicyManager
-from Storage_UserAdministration.Models.PolicyModel import PolicyModel
-from Storage_UserAdministration.Models.PermissionModel import Permission, Action, Resource, Effect
-from Storage_UserAdministration.Services.PolicyService import PolicyService
+from Storage.Storage_UserAdministration.DataAccess.policyManager import PolicyManager
+from Storage.Storage_UserAdministration.Models.PolicyModel import PolicyModel
+from Storage.Storage_UserAdministration.Models.PermissionModel import Permission, Action, Resource, Effect
+from Storage.Storage_UserAdministration.Services.PolicyService import PolicyService
 
 class PolicyController:
     def __init__(self, service: PolicyService):
