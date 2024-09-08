@@ -2,9 +2,12 @@ import hashlib
 import os
 import sys
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 
 from Models.ObjectModel import ObjectModel
 
@@ -116,46 +119,58 @@ class ObjectService:
 
     # naive implementation
 
-    #naive implementation
-    async def delete(self,obj:ObjectModel, version_id=None, flag_sync=True):
+    # naive implementation
+    async def delete(self, obj: ObjectModel, version_id=None, flag_sync=True):
         bucket = obj.bucket
         key = obj.key
         version_status = self.object_manager.get_versioning_status(bucket)
         # If the versioning is not enabled, delete the object
-        if version_status == 'not enabled':
-            self.object_manager.delete_object(bucket,key)
-            return {'DeleteMarker': False, 'VersionId': 'null'}
+        if version_status == "not enabled":
+            self.object_manager.delete_object(bucket, key)
+            return {"DeleteMarker": False, "VersionId": "null"}
         # If the versionId is given or the versioning id suspended, put deleteMarker on specific version
-        elif version_id or version_status == 'suspended':
-            if version_status == 'suspended':
+        elif version_id or version_status == "suspended":
+            if version_status == "suspended":
                 version_id = self.object_manager.get_latest_version(bucket, key)
-            await self.object_manager.put_deleteMarker(bucket, key, version_id, flag_sync=flag_sync)
-            return {'DeleteMarker': True, 'VersionId': version_id}
+            await self.object_manager.put_deleteMarker(
+                bucket, key, version_id, flag_sync=flag_sync
+            )
+            return {"DeleteMarker": True, "VersionId": version_id}
         return {}
 
     async def delete_objects(self, obj: ObjectModel, delete, flag_sync=True):
         bucket = obj.bucket
         deleted = []
         errors = []
-        for object in delete['Objects']:
-            version_id = object.get('VersionId', None)
-            key = object['Key']
-            obj = ObjectModel(bucket, object['Key'])
+        for object in delete["Objects"]:
+            version_id = object.get("VersionId", None)
+            key = object["Key"]
+            obj = ObjectModel(bucket, object["Key"])
 
             try:
                 delete_result = await self.delete(obj, version_id, flag_sync=flag_sync)
                 if delete_result is not {}:
-                    deleted.append({'Key': key, 'VersionId': version_id})
+                    deleted.append({"Key": key, "VersionId": version_id})
                 else:
                     errors.append(
-                        {'Key': key, 'VersionId': version_id, 'Code': 'InternalError', 'Message': 'Deletion failed'})
+                        {
+                            "Key": key,
+                            "VersionId": version_id,
+                            "Code": "InternalError",
+                            "Message": "Deletion failed",
+                        }
+                    )
             except Exception as e:
-                errors.append({'Key': key, 'VersionId': version_id, 'Code': 'InternalError', 'Message': str(e)})
+                errors.append(
+                    {
+                        "Key": key,
+                        "VersionId": version_id,
+                        "Code": "InternalError",
+                        "Message": str(e),
+                    }
+                )
 
-        return {
-            'Deleted': deleted,
-            'Errors': errors
-        }
+        return {"Deleted": deleted, "Errors": errors}
 
     async def copy_object(
         self,
@@ -489,18 +504,8 @@ class ObjectService:
         """check if object exists and is accessible with the appropriate user permissions."""
         pass
 
-    async def get_object_legal_hold(
-        self, legal_hold_status, version_id=None, is_sync=True
-    ):
-        pass
-
     async def put_object_legal_hold(
-        self,
-        bucket: str,
-        key: str,
-        legal_hold_status: str,
-        version_id: str = None,
-        is_sync: bool = True,
+        self, bucket, key, legal_hold_status, version_id=None, is_sync=True
     ):
         try:
             if legal_hold_status not in ["ON", "OFF"]:
@@ -511,7 +516,7 @@ class ObjectService:
             if not isinstance(key, str) or not key:
                 raise ValueError("Object key must be a non-empty string")
 
-            metadata = self.object_manager.get_bucket_metadata(bucket, key)
+            metadata = self.object_manager.get_object(bucket, key)
             if not metadata:
                 raise KeyError(f"Object key '{key}' not found in metadata")
 
@@ -529,7 +534,7 @@ class ObjectService:
             metadata["versions"][version_id]["LegalHold"]["Status"] = legal_hold_status
 
             # Save the updated metadata based on sync/asynchronous mode
-            await self.object_manager.save_metadata(is_sync)
+            await self.object_manager.update(is_sync)
 
             return {"LegalHold": {"Status": legal_hold_status}}
 
@@ -540,18 +545,196 @@ class ObjectService:
         except Exception as e:
             return {"Error": f"Unexpected error: {str(e)}"}
 
+    async def get_object_legal_hold(self, bucket, key, version_id=None, is_async=True):
+        try:
+            if not isinstance(bucket, str) or not bucket:
+                raise ValueError("Bucket name must be a non-empty string")
+            if not isinstance(key, str) or not key:
+                raise ValueError("Object key must be a non-empty string")
+
+            metadata = self.object_manager.get_object(bucket, key)
+            if not metadata:
+                raise KeyError(f"Object key '{key}' not found in metadata")
+
+            if "versions" not in metadata:
+                raise KeyError(f"Versions not found for object key '{key}' in metadata")
+
+            if version_id is None:
+                version_id = self.object_manager.get_latest_version(bucket, key)
+
+            if version_id not in metadata["versions"]:
+                raise KeyError(
+                    f"Version id '{version_id}' not found for object key '{key}' in metadata"
+                )
+
+            legal_hold = metadata["versions"][version_id].get(
+                "LegalHold", {"Status": "OFF"}
+            )
+            return {"LegalHold": legal_hold}
+
+        except ValueError as e:
+            return {"Error": f"Invalid value: {str(e)}"}
+        except KeyError as e:
+            return {"Error": f"Metadata issue: {str(e)}"}
+        except Exception as e:
+            return {"Error": f"Unexpected error: {str(e)}"}
+
     async def put_object_retention(
-        self, retention_mode, retain_until_date, version_id=None, is_sync=True
+        self,
+        bucket,
+        key,
+        retention_mode,
+        retain_until_date,
+        version_id=None,
+        is_sync=True,
     ):
-        pass
+        try:
+            if retention_mode not in ["GOVERNANCE", "COMPLIANCE"]:
+                raise ValueError(
+                    "Retention mode must be either 'GOVERNANCE' or 'COMPLIANCE'"
+                )
 
-    async def get_object_retention(self, version_id=None, is_sync=True):
-        pass
+            try:
+                datetime.strptime(retain_until_date, "%Y-%m-%dT%H:%M:%SZ")
+            except ValueError:
+                raise ValueError(
+                    "Retain until date must be a valid date in the format YYYY-MM-DDTHH:MM:SSZ"
+                )
 
+            if not isinstance(bucket, str) or not bucket:
+                raise ValueError("Bucket name must be a non-empty string")
+            if not isinstance(key, str) or not key:
+                raise ValueError("Object key must be a non-empty string")
+
+            metadata = self.object_manager.get_object(bucket, key)
+            if not metadata:
+                raise KeyError(f"Object key '{key}' not found in metadata")
+
+            if "versions" not in metadata:
+                metadata["versions"] = {}
+
+            if version_id is None:
+                version_id = self.object_manager.get_latest_version(bucket, key)
+
+            if version_id not in metadata["versions"]:
+                metadata["versions"][version_id] = {}
+
+            if "Retention" not in metadata["versions"][version_id]:
+                metadata["versions"][version_id]["Retention"] = {}
+            metadata["versions"][version_id]["Retention"]["Mode"] = retention_mode
+            metadata["versions"][version_id]["Retention"][
+                "RetainUntilDate"
+            ] = retain_until_date
+
+            # Save the updated metadata based on sync/asynchronous mode
+            await self.object_manager.update(is_sync)
+
+            return {
+                "Retention": {
+                    "Mode": retention_mode,
+                    "RetainUntilDate": retain_until_date,
+                }
+            }
+
+        except ValueError as e:
+            return {"Error": f"Invalid value: {str(e)}"}
+        except KeyError as e:
+            return {"Error": f"Metadata issue: {str(e)}"}
+        except Exception as e:
+            return {"Error": f"Unexpected error: {str(e)}"}
+
+    async def get_object_retention(self, bucket, key, version_id=None, is_sync=True):
+        try:
+            if not isinstance(bucket, str) or not bucket:
+                raise ValueError("Bucket name must be a non-empty string")
+            if not isinstance(key, str) or not key:
+                raise ValueError("Object key must be a non-empty string")
+
+            metadata = self.object_manager.get_object(bucket, key)
+            if not metadata:
+                raise KeyError(f"Object key '{key}' not found in metadata")
+
+            if "versions" not in metadata:
+                raise KeyError(f"Versions not found for object key '{key}' in metadata")
+
+            if version_id is None:
+                version_id = self.object_manager.get_latest_version(bucket, key)
+
+            if version_id not in metadata["versions"]:
+                raise KeyError(
+                    f"Version id '{version_id}' not found for object key '{key}' in metadata"
+                )
+
+            retention = metadata["versions"][version_id].get(
+                "Retention", {"Mode": "GOVERNANCE"}
+            )
+            return {"Retention": retention}
+
+        except ValueError as e:
+            return {"Error": f"Invalid value: {str(e)}"}
+        except KeyError as e:
+            return {"Error": f"Metadata issue: {str(e)}"}
+        except Exception as e:
+            return {"Error": f"Unexpected error: {str(e)}"}
+
+   
     async def put_object_lock_configuration(
-        self, object_lock_enabled, mode="GOVERNANCE", days=30, years=0, is_sync=True
+        self,
+        bucket,
+        object_lock_enabled,
+        mode="GOVERNANCE",
+        days=30,
+        years=0,
+        is_sync=True,
     ):
-        pass
+        try:
+            if mode not in ["GOVERNANCE", "COMPLIANCE"]:
+                raise ValueError(
+                    "Retention mode must be either 'GOVERNANCE' or 'COMPLIANCE'"
+                )
+
+            if not isinstance(bucket, str) or not bucket:
+                raise ValueError("Bucket name must be a non-empty string")
+            if object_lock_enabled not in ["Enabled", "Disabled"]:
+                raise ValueError(
+                    "Object lock enabled must be either 'Enabled' or 'Disabled'"
+                )
+            if days < 0:
+                raise ValueError("Days must be a positive integer")
+            if years < 0:
+                raise ValueError("Years must be a positive integer")
+
+            object_lock_config = {"ObjectLockEnabled": object_lock_enabled}
+            if mode:
+                retention = {"Mode": mode}
+
+                # Calculate the retention date
+                date = datetime.utcnow()
+                new_date = date + timedelta(days=days) + relativedelta(years=years)
+                # Calculate the number of days until the retention date
+                days_until_retention = (new_date - date).days
+
+                retention["Days"] = days_until_retention
+                object_lock_config["Rule"] = {"DefaultRetention": retention}
+
+            metadata = self.object_manager.get_bucket(bucket)
+            if not metadata:
+                raise KeyError(f"Bucket '{bucket}' not found in metadata")
+
+            metadata["ObjectLock"] = object_lock_config
+
+            # Save the updated metadata based on sync/asynchronous mode
+            await self.object_manager.update(is_sync)
+
+            return {"ObjectLock": object_lock_config}
+
+        except ValueError as e:
+            return {"Error": f"Invalid value: {str(e)}"}
+        except KeyError as e:
+            return {"Error": f"Metadata issue: {str(e)}"}
+        except Exception as e:
+            return {"Error": f"Unexpected error: {str(e)}"}
+
 
     async def get_object_lock_configuration(self):
         pass
