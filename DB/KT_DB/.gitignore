@@ -1,0 +1,6 @@
+.venv/
+.vscode/
+*.pyc
+*.pyo
+*.pyd
+*.db
