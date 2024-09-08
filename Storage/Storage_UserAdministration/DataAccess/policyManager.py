@@ -1,8 +1,8 @@
 import json
 import os
 from typing import Dict, Optional, List
-from Storage_UserAdministration.Models.PermissionModel import Permission, Action, Resource, Effect
-from Storage_UserAdministration.Models.PolicyModel import PolicyModel
+from Storage.Storage_UserAdministration.Models.PermissionModel import Permission, Action, Resource, Effect
+from Storage.Storage_UserAdministration.Models.PolicyModel import PolicyModel
 
 class PolicyManager:
     def __init__(self, file_path: str = "KT_Cloud\\server\\metadata.json"):
