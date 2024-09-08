@@ -16,7 +16,6 @@ class Policy:
 
     def evaluate(self, action: Action, resource: Resource, effect: Effect):
         allowed = False
-        denied = False
         # a permission (statement) can either allow or deny an action
         # the evaluate function returns wether non of the policy permissions deny access
         # and at least one permits access
