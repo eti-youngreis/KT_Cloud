@@ -23,35 +23,24 @@ def load():
         conn = sqlite3.connect(base_path + "database.db")
         
         # extract data from csv files
-        customer_table = spark.read.option("header", "true").csv(base_path + "Customer.csv")
         invoice_table = spark.read.option("header", "true").csv(base_path + "Invoice.csv")
         invoice_line_table = spark.read.option("header", "true").csv(base_path + "InvoiceLine.csv")
         track_table = spark.read.option("header", "true").csv(base_path + "Track.csv")
-        genre_table = spark.read.option("header", "true").csv(base_path + "Genre.csv")
         
-        # join tables in order to transform data
-        customer_invoices_table = customer_table.join(invoice_table, customer_table['CustomerId'] == \
-            invoice_table['CustomerId']).drop(invoice_table['CustomerId'])
-            
-        customer_invoice_line = customer_invoices_table.join(invoice_line_table, customer_invoices_table[ \
+        # join tables in order to transform dat
+        customer_invoice_line = invoice_table.join(invoice_line_table, invoice_table[ \
             'InvoiceId'] == invoice_line_table['InvoiceId']).drop(invoice_line_table['InvoiceId'])
         
-        customer_track_table = customer_invoice_line.join(track_table, customer_invoice_line['TrackId'] == track_table['TrackId']).drop(customer_invoice_line['TrackId']).drop(customer_invoice_line['UnitPrice'])
-        
-        customer_genre_table = customer_track_table.join(genre_table, customer_track_table['GenreId'] == genre_table['GenreId']).drop(customer_track_table['GenreId'])
-
-        # aggregate data
-        customer_genre_table = customer_genre_table.withColumn(
+        customer_track_table = customer_invoice_line.join(track_table, customer_invoice_line['TrackId'] == \
+            track_table['TrackId']).drop(customer_invoice_line['TrackId']).drop(track_table['UnitPrice'])\
+        .withColumn(
             'invoice_line_total', 
             F.col('UnitPrice') * F.col('Quantity')
         )    
         
-        aggregated_data = customer_genre_table.groupBy("CustomerId", "GenreId").agg(
+        final_data = customer_track_table.groupBy("CustomerId", "GenreId").agg(
             F.sum("invoice_line_total").alias("revenue_overall")
-        )
-        
-        # transformed data including metadata 
-        final_data = aggregated_data.withColumn("created_at", F.current_date()) \
+        ).withColumn("created_at", F.current_date()) \
             .withColumn("updated_at", F.current_date()) \
             .withColumn("updated_by", F.lit(f"WeeklyCustomerRevenuePerGenre:{current_user}"))
 
