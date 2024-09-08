@@ -21,3 +21,6 @@ class PolicyController:
 
     def list_policies(self):
         return self.service.list_policies()
+    
+    def evaluate(self, name, action, resource):
+        return self.service.evaluate(name, action, resource)
