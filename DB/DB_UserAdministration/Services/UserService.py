@@ -1,6 +1,6 @@
 from DB_UserAdministration.DataAccess.UserManager import UserManager
 from DB_UserAdministration.Models import UserModel
-from DB.Service.Abc.DBO import DBO
+from DB.KT_DB.Service.Abc.DBO import DBO
 from DB_UserAdministration.Validations import validation
 import hashlib
 import json

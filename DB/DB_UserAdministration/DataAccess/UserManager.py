@@ -1,7 +1,7 @@
 from typing import Dict, Any
 import json
 import sqlite3
-from DB.DataAccess.DBManager import DBManager
+from DB.KT_DB.DataAccess.DBManager import DBManager
 class UserManager:
 
     def __init__(self, db_file: str):
