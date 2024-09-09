@@ -12,9 +12,10 @@ def etl_process():
     conn = sqlite3.connect("C:\\Users\\User\\Desktop\\p_database.db")
 
     try:
-        # Create customer_ltv table if it doesn't exist
+        # Drop and Create customer_ltv table
+        conn.execute("DROP TABLE IF EXISTS customer_ltv")
         conn.execute("""
-            CREATE TABLE IF NOT EXISTS customer_ltv (
+            CREATE TABLE customer_ltv (
                 CustomerId INTEGER,
                 FirstName TEXT,
                 LastName TEXT,
@@ -55,21 +56,7 @@ def etl_process():
         result_pandas = ranked_df.toPandas()
 
         # Perform full loading into SQLite
-        for index, row in result_pandas.iterrows():
-            cursor = conn.execute("SELECT * FROM customer_ltv WHERE CustomerId = ? AND Country = ?",
-                                  (row['CustomerId'], row['Country']))
-            data = cursor.fetchone()
-
-            if data:
-                # Update existing record
-                conn.execute("""
-                    UPDATE customer_ltv
-                    SET CustomerLTV = ?, Rank = ?, updated_at = ?, updated_by = ?
-                    WHERE CustomerId = ? AND Country = ?
-                """, (row['CustomerLTV'], row['Rank'], row['updated_at'], row['updated_by'], row['CustomerId'], row['Country']))
-            else:
-                # Insert new record
-                row.to_frame().T.to_sql('customer_ltv', conn, if_exists='append', index=False)
+        result_pandas.to_sql('customer_ltv', conn, if_exists='append', index=False)
 
         # Commit the transaction
         conn.commit()
