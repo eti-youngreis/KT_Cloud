@@ -39,6 +39,8 @@ def load_average_purchase_value():
 
         # Save transformed data to SQLite
         transformed_data.toPandas().to_sql('customer_invoice_avg', conn, if_exists='replace', index=False)
+        
+        conn.commit()
 
         # Print results
         print("customer_invoice_avg:", conn.execute("SELECT * FROM 'customer_invoice_avg'").fetchall())
