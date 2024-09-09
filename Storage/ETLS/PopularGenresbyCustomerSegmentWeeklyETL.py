@@ -51,7 +51,7 @@ def load_popular_genres_by_city():
                            .withColumn("updated_by", F.lit("process:user_name"))
 
     # Load data into SQLite using sqlite3
-    conn = sqlite3.connect('C:/Users/user1/Desktop/0809/Genre.db')
+    conn = sqlite3.connect('C:/Users/user1/Desktop/0909/Genre.db')
     cursor = conn.cursor()
 
     # Create table if not exists
@@ -73,21 +73,6 @@ def load_popular_genres_by_city():
                            row['created_at'], row['updated_at'], row['updated_by']))
 
     conn.commit()
-    conn.close()
-
-    # Query the newly inserted data from SQLite
-    conn = sqlite3.connect('C:/Users/user1/Desktop/0809/Genre.db')
-    cursor = conn.cursor()
-
-    # Retrieve the newly inserted data
-    cursor.execute('''SELECT * FROM PopularGenresByCity''')
-    rows = cursor.fetchall()
-
-    # Print the retrieved data
-    print("Retrieved Data from SQLite Database:")
-    for row in rows:
-        print(row)
-
     conn.close()
 
     # Stop Spark session
