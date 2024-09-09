@@ -35,7 +35,7 @@ def load_average_purchase_value():
         # Apply window function to rank customers by spending
         window_spec = Window.partitionBy().orderBy(F.desc("avgCustomerInvoices"))
         transformed_data = customers_invoices.withColumn("rank", F.rank().over(window_spec))
-        transformed_data.show(200)
+        transformed_data.show(50)
 
         # Save transformed data to SQLite
         transformed_data.toPandas().to_sql('customer_invoice_avg', conn, if_exists='replace', index=False)
