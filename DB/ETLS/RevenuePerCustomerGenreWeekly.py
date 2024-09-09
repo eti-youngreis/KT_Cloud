@@ -50,6 +50,8 @@ def load():
         final_data.to_sql(name=etl_table_name, con = conn, if_exists='replace', index=False)   
 
     finally:
-        pass
+        conn.close()
+        spark.stop()
 
+        
         

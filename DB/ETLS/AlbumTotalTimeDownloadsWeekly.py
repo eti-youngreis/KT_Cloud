@@ -50,7 +50,7 @@ def load():
             total_downloads_per_album["AlbumId"]).drop(total_downloads_per_album["AlbumId"])\
             .withColumn("created_at", F.current_date()) \
             .withColumn("updated_at", F.current_date()) \
-            .withColumn("updated_by", F.lit(f"DailyAlbumETL:{current_user}"))
+            .withColumn("updated_by", F.lit(f"DailyAlbumTotalsETL:{current_user}"))
     
         # load data to database
         final_data = final_data.toPandas()
