@@ -36,44 +36,50 @@ def load():
                 .agg(F.count("InvoiceId").alias("InvoiceCount"))\
                     .filter(F.col("InvoiceCount") > 1)
 
-        customer_satisfaction_df = employees.join(repeat_customers, employees["EmployeeId"] == repeat_customers["SupportRepId"], "left")\
-            .groupBy("EmployeeId", "EmployeeFirstName", "EmployeeLastName")\
-                    .agg(F.count("CustomerId").alias("RepeatCustomerCount"))
+        customer_satisfaction_df = repeat_customers.groupBy("SupportRepId") \
+            .agg(F.countDistinct("CustomerID").alias("CustomerSatisfaction"))
+        customer_satisfaction_df.show()
         
-        # Join InvoiceLine with Invoice to calculate sales value per invoice          
-        avg_sales_df = invoice_line.groupBy("InvoiceId")\
-            .agg(F.avg(F.col("UnitPrice") * F.col("Quantity")).alias("AvgSalesValue"))
-        
-        # Join Invoices with the calculated Average Sales and with Employees
-        avg_sales_by_employee = customer_invoices_df.join(avg_sales_df, "InvoiceId")\
-            .join(employees, customer_invoices_df["SupportRepId"] == employees["EmployeeId"], "left")\
-                .groupBy("EmployeeId", "EmployeeFirstName", "EmployeeLastName")\
-                    .agg(F.avg("AvgSalesValue").alias("AvgSalesPerInvoice"))
-                    
-        # Combine both Customer Satisfaction and Average Sales Value
-        final_df = customer_satisfaction_df.join(avg_sales_by_employee, ["EmployeeId", "EmployeeFirstName", "EmployeeLastName"], "left")
+        # Join Invoices with InvoiceLines to calculate Average Sales Value
+        sales_data = invoices.join(invoice_line, "InvoiceID", "inner")
 
-        # Apply window function to rank employees by customer satisfaction
-        
-        window_spec = Window.orderBy(F.desc("RepeatCustomerCount"))
-        final_df = final_df.withColumn("rank", F.rank().over(window_spec))
+        avg_sales = sales_data.groupBy("InvoiceID", "Total") \
+            .agg(F.sum("Quantity").alias("QuantitySum")) \
+            .withColumn("AverageSalesValue", F.col("Total") / F.col("QuantitySum"))
 
-        # Add Metadata
+        avg_sales.show()
+        
+        employees_data = employees.join(customer_satisfaction_df, employees["EmployeeId"] == customer_satisfaction_df["SupportRepId"], "left")\
+            .select("EmployeeId", "EmployeeLastName", "EmployeeFirstName", "CustomerSatisfaction")
+        
+        employees_customer_satisfaction = employees_data\
+            .join(customers, employees_data["EmployeeId"] == customers["SupportRepId"], "left")\
+                .select("EmployeeId", "EmployeeLastName", "EmployeeFirstName", "CustomerId", "CustomerSatisfaction")
+        employees_customer_satisfaction.show()
+    
+        final_df = employees_customer_satisfaction.join(invoices.alias("inv"), employees_customer_satisfaction["CustomerId"] == invoices["CustomerId"], "left") \
+            .select("EmployeeId", "EmployeeLastName", "EmployeeFirstName", "CustomerSatisfaction", "inv.CustomerId", "InvoiceID")\
+                .join(avg_sales, "InvoiceID", "left")
+
+        # # Apply window function to rank employees by customer satisfaction
+        
+        # window_spec = Window.orderBy(F.desc("RepeatCustomerCount"))
+        # final_df = final_df.withColumn("rank", F.rank().over(window_spec))
+
+        final_df.show()
+        # # Add Metadata
         final_df = final_df.withColumn("created_at", F.current_timestamp())\
                         .withColumn("updated_at", F.current_timestamp())\
                         .withColumn("updated_by", F.lit("process:user_name"))
-
         
-        #  Show the result
-        final_df.show(200)
         final_df_pandas = final_df.toPandas()
         final_df_pandas.to_sql('employee_customer_satisfaction', conn, if_exists='replace', index=False)
 
+        final_df.toPandas().to_sql('employee_customer_satisfication', conn, if_exists='replace', index=False)
+        # # Insert transformed data into a new table in SQLite using KT_DB
+        # # KT_DB.insert_dataframe(conn, 'final_table', final_data_df)
 
-        # Insert transformed data into a new table in SQLite using KT_DB
-        # KT_DB.insert_dataframe(conn, 'final_table', final_data_df)
-
-        # Commit the changes to the database using KT_DB's commit() function
+        # # Commit the changes to the database using KT_DB's commit() function
         conn.commit()
 
     finally:
