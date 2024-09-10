@@ -7,9 +7,6 @@ import pytest
 etl_table_name = 'revenue_per_customer_genre'
 base_path = "../etl_files/"
 
-def load_etl_data():
-    RevenuePerCustomerGenreWeekly.load()
-
 def get_sqlite_data(conn):
     # Fetch ETL results from the database
     return pd.read_sql(f'select * from {etl_table_name}', con=conn)
@@ -18,7 +15,8 @@ def load_invoice_data():
     return pd.read_csv(base_path + "Invoice.csv")[['InvoiceId', 'CustomerId']]
 
 def load_invoice_line_data():
-    return pd.read_csv(base_path + "InvoiceLine.csv")[['InvoiceId', 'TrackId', 'Quantity', 'UnitPrice']]
+    invoice_lines = pd.read_csv(base_path + "InvoiceLine.csv")[['InvoiceId', 'TrackId', 'Quantity', 'UnitPrice','status']]
+    return invoice_lines[invoice_lines['status'] != 'deleted']
 
 def load_track_data():
     return pd.read_csv(base_path + "Track.csv")[['TrackId', 'GenreId']]
@@ -53,8 +51,6 @@ def sqlite_connection():
 
 @pytest.fixture
 def comparison_data(sqlite_connection):
-    # Load ETL data
-    load_etl_data()
     
     # Fetch ETL result from SQLite database
     etl_result = get_sqlite_data(sqlite_connection)
@@ -79,4 +75,4 @@ def test_revenue_per_customer_genre(index, comparison_data):
     revenue_overall = row['revenue_overall'] if pd.notna(row['revenue_overall']) else 0.0
     revenue_pandas = row['revenue'] if pd.notna(row['revenue']) else 0.0
 
-    assert int64(revenue_overall) == int64(revenue_pandas), f"Mismatch found for CustomerId {row['CustomerId']}, GenreId {row['GenreId']}"
+    assert int64(revenue_overall) == int64(revenue_pandas), f"Mismatch found for CustomerId {row['CustomerId']}, GenreId {row['GenreId']} pandas:{revenue_pandas} != etl:{revenue_overall}"

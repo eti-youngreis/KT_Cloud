@@ -2,13 +2,11 @@ import AlbumTotalTimeDownloadsWeekly
 import sqlite3
 import pandas as pd
 import pytest
+import AlbumTotalTimeDownloadsDaily
 
 etl_table_name = 'album_total_time_downloads'
 base_path = "../etl_files/"
 
-def load_etl_data():
-    # Load ETL data
-    AlbumTotalTimeDownloadsWeekly.load()
 
 def get_sqlite_data(conn):
     # Fetch data from SQLite table
@@ -24,15 +22,21 @@ def get_invoice_line_table():
 
 def calculate_total_track_time(track_table):
     # Calculate total album length
-    return track_table.groupby('AlbumId').agg(
+    active_tracks = track_table[track_table['status'] != 'deleted']
+
+    # Group by 'AlbumId' and aggregate the 'Milliseconds' column
+    return active_tracks.groupby('AlbumId').agg(
         total_album_length_pandas=pd.NamedAgg(column='Milliseconds', aggfunc='sum')
-    ).reset_index('AlbumId')
+    ).reset_index()
 
 def calculate_total_downloads(track_table, invoice_line_table):
     # Calculate total downloads
-    return pd.merge(track_table, invoice_line_table, on='TrackId', how='left').groupby('AlbumId').agg(
+    active_invoice_lines = invoice_line_table[invoice_line_table['status'] != 'deleted']
+
+    # Merge track table with active invoice lines on 'TrackId' and group by 'AlbumId'
+    return pd.merge(track_table, active_invoice_lines, on='TrackId', how='left').groupby('AlbumId').agg(
         total_downloads_pandas=pd.NamedAgg(column='Quantity', aggfunc='sum')
-    ).reset_index('AlbumId')
+    ).reset_index()
 
 def merge_dataframes(total_track_time_per_album, total_downloads_per_album, etl_result):
     # Merge the two DataFrames and compare with ETL result
@@ -48,9 +52,7 @@ def sqlite_connection():
 
 @pytest.fixture
 def comparison_data(sqlite_connection):
-    # Load the ETL process
-    load_etl_data()
-
+    
     # Fetch data from SQLite
     etl_result = get_sqlite_data(sqlite_connection)
     
@@ -77,8 +79,8 @@ def test_each_row(row, comparison_data):
     downloads_pandas = data_row['total_downloads_pandas'] if not pd.isna(data_row['total_downloads_pandas']) else 0.0
     downloads_etl = data_row['total_album_downloads'] if not pd.isna(data_row['total_album_downloads']) else 0.0
 
-    assert compare_album_length(album_length_pandas, album_length_etl), f"Mismatch in album length for AlbumId {data_row['AlbumId']}"
-    assert compare_total_downloads(downloads_pandas, downloads_etl), f"Mismatch in downloads for AlbumId {data_row['AlbumId']}"
+    assert compare_album_length(album_length_pandas, album_length_etl), f"Mismatch in album length for AlbumId {data_row['AlbumId']} pandas:{album_length_pandas} != etl:{album_length_etl}"
+    assert compare_total_downloads(downloads_pandas, downloads_etl), f"Mismatch in downloads for AlbumId {data_row['AlbumId']} pandas:{downloads_pandas} != etl:{downloads_etl}"
     
 def compare_album_length(album_length_pandas, album_length_etl):
     return album_length_pandas == album_length_etl
