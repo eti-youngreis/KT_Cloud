@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
@@ -16,9 +17,9 @@ def load():
         try:
             # EXTRACT (Loading CSVs from local storage)
             print("Loading CSV files...")
-            albums_df = spark.read.csv("D:\\csv_files\\Album.csv", header=True, inferSchema=True)
-            tracks_df = spark.read.csv("D:\\csv_files\\Track.csv", header=True, inferSchema=True)
-            invoice_lines_df = spark.read.csv("D:\\csv_files\\InvoiceLine.csv", header=True, inferSchema=True)
+            albums_df = spark.read.csv("D:\\csvFiles\\Album.csv", header=True, inferSchema=True)
+            tracks_df = spark.read.csv("D:\\csvFiles\\Track.csv", header=True, inferSchema=True)
+            invoice_lines_df = spark.read.csv("D:\\csvFiles\\InvoiceLine.csv", header=True, inferSchema=True)
 
             # TRANSFORM (Apply joins, groupings, and window functions)
             print("Transforming data...")
@@ -27,14 +28,14 @@ def load():
             tracks_df = tracks_df.withColumnRenamed("AlbumId", "AlbumId_Tracks")
 
             album_lengths_df = albums_df.join(
-                tracks_df, albums_df["AlbumId_Albums"] == tracks_df["AlbumId_Tracks"], "inner"
+                tracks_df, albums_df["AlbumId_Albums"] == tracks_df["AlbumId_Tracks"], "left"
             ).groupBy("AlbumId_Albums", "Title", "ArtistId") \
             .agg(F.sum("Milliseconds").alias("TotalAlbumLength"))
-
+            
             album_downloads_df = albums_df.join(
-                tracks_df, albums_df["AlbumId_Albums"] == tracks_df["AlbumId_Tracks"], "inner"
+                tracks_df, albums_df["AlbumId_Albums"] == tracks_df["AlbumId_Tracks"], "left"
             ).join(
-                invoice_lines_df, tracks_df["TrackId"] == invoice_lines_df["TrackId"], "inner"
+                invoice_lines_df, tracks_df["TrackId"] == invoice_lines_df["TrackId"], "left"
             ).groupBy("AlbumId_Albums", "Title", "ArtistId") \
             .agg(F.count("InvoiceLineId").alias("TotalDownloads"))
 
@@ -44,8 +45,7 @@ def load():
                 "inner"
             ).withColumn("created_at", F.current_timestamp()) \
             .withColumn("updated_at", F.current_timestamp()) \
-            .withColumn("updated_by", F.lit("process:user_name"))
-
+            .withColumn("updated_by", F.lit("process:user_name"))            
             final_albums_pd = final_albums_df.toPandas()
 
             # LOAD (Save transformed data into SQLite)
@@ -69,7 +69,7 @@ def load():
 
             # SELECT query to retrieve data
             print("Executing SELECT query...")
-            cursor.execute("SELECT * FROM albums_summary LIMIT 10")
+            cursor.execute("SELECT * FROM albums_summary ORDER BY AlbumId_Albums LIMIT 10")
             rows = cursor.fetchall()
 
             for row in rows:
