@@ -3,7 +3,7 @@ from pyspark.sql import functions as F
 from pyspark.sql.window import Window
 import KT_DB  # Assuming KT_DB is the library for SQLite operations
 
-def incremental_load():
+def incremental_load(): 
     # Step 1: Initialize Spark session
     spark = SparkSession.builder \
         .appName("Incremental ETL with KT_DB") \
@@ -69,7 +69,7 @@ def incremental_load():
         KT_DB.insert_dataframe(conn, 'final_table', final_data_df, mode='append')  # Assuming 'append' mode is supported
 
         # Commit the changes to the database using KT_DB's commit() function
-        KT_DB.commit(conn)
+        KT_DB.commit(conn) 
 
     finally:
         # Step 4: Close the SQLite connection and stop Spark session
