@@ -50,17 +50,23 @@ def load_Track_Length_and_Download_Frequency():
 
         # Calculate Download Quantity using Window
         track_downloads_df = track_downloads_df \
-        .withColumn("DownloadQuantity", F.sum("Quantity").over(window_track)) \
+        .withColumn("DownloadFrequency", F.sum("Quantity").over(window_track)) \
 
         # track_downloads_df = track_downloads_df \
         #     .withColumn("DownloadFrequency", F.count("InvoiceLineId").over(window_track))
-  
-
+        print("tracks_albums_df.columns:")
+        print(tracks_albums_df.columns)
+        print("track_downloads_df.columns:")
+        print(track_downloads_df.columns)
+        # שמירה על עמודות ספציפיות בלבד
+        tracks_albums_df = tracks_albums_df.select("AlbumId","AverageTrackLength")
+        track_downloads_df = track_downloads_df.select("TrackId", "DownloadFrequency")
         # Combine final data and add metadata columns
         final_data = tracks_df \
             .join(tracks_albums_df, "AlbumId", "left") \
             .join(track_downloads_df, "TrackId", "left")
-
+        print("final_data.columns:")    
+        print(final_data.columns)
         # Select only relevant columns
         final_data = final_data.select(
             tracks_df.TrackId.alias("TrackId"),
@@ -84,6 +90,7 @@ def load_Track_Length_and_Download_Frequency():
         print(final_data_df.columns)
 
         try:
+            cursor.execute('DROP TABLE IF EXISTS final_table')
             # Create table in SQLite if it doesn't exist
             cursor.execute('''
                     CREATE TABLE IF NOT EXISTS final_table (
@@ -106,7 +113,7 @@ def load_Track_Length_and_Download_Frequency():
 
             # Insert transformed data into final_table
             final_data_df.to_sql('final_table', conn,
-                                 if_exists='append', index=False)
+                                 if_exists='replace', index=False)
 
             # Commit the changes to the database
             conn.commit()
