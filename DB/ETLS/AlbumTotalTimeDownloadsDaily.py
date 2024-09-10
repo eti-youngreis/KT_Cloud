@@ -38,7 +38,6 @@ def incremental_load():
         
         track_table = track_table.filter(track_table["created_at"] > latest_timestamp)
     
-        
         invoice_line_table = spark.read.option("header", "true").csv(base_path + "InvoiceLine.csv", 
                                                                      header=True, inferSchema=True)
         invoice_line_table = invoice_line_table.withColumn("created_at", F.to_timestamp(invoice_line_table["created_at"], "yyyy-MM-dd"))
@@ -53,45 +52,55 @@ def incremental_load():
             ).alias("total_album_length")
         ).drop(track_table['status'])
 
-        track_table = track_table.filter(F.col("status") == F.lit('active'))
-        track_table = track_table.drop(track_table['status'])
-        
-        # total downloads per album
-        joined_table = track_table.join(
-            invoice_line_table,
-            track_table["TrackId"] == invoice_line_table["TrackId"],
-            "left"
-        ).drop(invoice_line_table["TrackId"])
+        track_table = spark.read.option("header", "true").csv(base_path + "Track.csv", header=True, 
+                                                              inferSchema=True)
+        track_table = track_table.drop(track_table["status"])
 
+        # total downloads per album
+        joined_table = invoice_line_table.join(
+            track_table,
+            track_table["TrackId"] == invoice_line_table["TrackId"],
+            how="left"
+        ).drop(track_table["TrackId"], track_table["UnitPrice"]).select("AlbumId", "TrackId", "Quantity", "UnitPrice", "status")
+
+        
         # Compute total_downloads_per_album with status-based conditional logic
         total_downloads_per_album = joined_table.groupBy("AlbumId").agg(
             F.sum(
                 F.when(F.col("status") == "active", F.col("Quantity"))
                 .otherwise(-F.col("Quantity"))
             ).alias("total_album_downloads")
-        )
+        ).select("AlbumId", "total_album_downloads")
         
         final_data = total_downloads_per_album.join(total_time_per_album, total_time_per_album["AlbumId"] ==\
-            total_downloads_per_album["AlbumId"]).drop(total_time_per_album["AlbumId"])\
+            total_downloads_per_album["AlbumId"], how = "outer")\
                 .withColumn("created_at", F.current_date()) \
                 .withColumn("updated_at", F.current_date()) \
-                .withColumn("updated_by", F.lit(f"DailyAlbumTotalsDailyETL:{current_user}"))
+                .withColumn("updated_by", F.lit(f"DailyAlbumTotalsDailyETL:{current_user}"))\
+                .withColumn( "NewAlbumId", F.coalesce(total_time_per_album["AlbumId"], total_downloads_per_album["AlbumId"]))\
+                .drop(total_time_per_album["AlbumId"])
         
+        final_data = final_data.select('NewAlbumId', 'total_album_downloads', 'total_album_length', 'created_at', 'updated_at', 'updated_by')
+        final_data = final_data.withColumn(
+            'AlbumId', F.col('NewAlbumId')
+        ).drop('NewAlbumId')
         final_data = final_data.toPandas()
         
+        pd.set_option('display.max_rows', None)  # Show all rows
+        pd.set_option('display.max_columns', None)
+
         engine = create_engine('sqlite:///' + base_path + 'database.db')
         metadata = MetaData()
         table = Table(etl_table_name, metadata, autoload_with=engine)
-        
+        print(final_data)
         with engine.connect() as connection:
+            
             for index, row in final_data.iterrows():
-                row = row.to_dict()
                 
-                print(row['total_album_downloads'])
+                print(index)
                 select_stmt = select(table).where(table.c.AlbumId == row['AlbumId'])
                 result = connection.execute(select_stmt).fetchone()
-                
-                
+
                 if result:
                     # Record exists, update it
                     update_stmt = (
@@ -116,3 +125,5 @@ def incremental_load():
         spark.stop()
 
 
+if __name__ == "__main__":
+    incremental_load()

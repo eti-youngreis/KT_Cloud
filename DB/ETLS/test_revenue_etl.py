@@ -16,16 +16,18 @@ def load_invoice_data():
 
 def load_invoice_line_data():
     invoice_lines = pd.read_csv(base_path + "InvoiceLine.csv")[['InvoiceId', 'TrackId', 'Quantity', 'UnitPrice','status']]
-    return invoice_lines[invoice_lines['status'] != 'deleted']
+    return invoice_lines[invoice_lines['status'] == 'active']
 
 def load_track_data():
-    return pd.read_csv(base_path + "Track.csv")[['TrackId', 'GenreId']]
+    tracks = pd.read_csv(base_path + "Track.csv")[['TrackId', 'GenreId', 'status']]
+    return tracks[tracks['status'] == 'active']
 
 def calculate_revenue_per_customer_and_genre(invoice_data, invoice_line_data, track_data):
-    invoices_with_details = pd.merge(invoice_data, invoice_line_data)
-    invoices_with_details_and_tracks = pd.merge(invoices_with_details, track_data)
+    invoices_with_details = pd.merge(invoice_data, invoice_line_data, how = "left")
+    invoices_with_details_and_tracks = pd.merge(invoices_with_details, track_data, how="left")
     
-    invoices_with_details_and_tracks['total_for_track'] = invoices_with_details_and_tracks['Quantity'] * invoices_with_details_and_tracks['UnitPrice']
+    invoices_with_details_and_tracks['total_for_track'] = invoices_with_details_and_tracks['Quantity'] * \
+        invoices_with_details_and_tracks['UnitPrice']
 
     # Group by CustomerId and GenreId to get revenue
     return invoices_with_details_and_tracks.groupby(['CustomerId', 'GenreId']).agg(
@@ -40,7 +42,7 @@ def prepare_comparison_df(etl_result, revenue_per_customer_and_genre):
     revenue_per_customer_and_genre['GenreId'] = revenue_per_customer_and_genre['GenreId'].astype(int)
 
     # Merge the ETL and pandas-generated data
-    return pd.merge(etl_result[['CustomerId', 'GenreId', 'revenue_overall']], revenue_per_customer_and_genre, on=['CustomerId', 'GenreId'], how='outer')
+    return pd.merge(etl_result[['CustomerId', 'GenreId', 'revenue_overall']], revenue_per_customer_and_genre, on=['CustomerId', 'GenreId'], how='left')
 
 @pytest.fixture
 def sqlite_connection():

@@ -64,3 +64,6 @@ def load():
     finally:
         conn.close()
         spark.stop()
+
+if __name__ == "__main__":
+    load()

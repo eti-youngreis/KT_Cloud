@@ -71,6 +71,8 @@ def incremental_load():
         
         final_data = final_data.toPandas()
         
+        print(final_data)
+        
         engine = create_engine('sqlite:///' + base_path + 'database.db')
         metadata = MetaData()
         table = Table(etl_table_name, metadata, autoload_with=engine)
