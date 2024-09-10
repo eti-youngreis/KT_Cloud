@@ -1,6 +1,6 @@
 from typing import Dict, Any,Optional
 import json
-from DB.DataAccess.DBManager import DBManager
+from DB.KT_DB.DataAccess.DBManager import DBManager
 
 
 class DBParameterGroupManager:
