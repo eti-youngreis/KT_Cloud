@@ -64,6 +64,26 @@ class DBClusterParameterGroupService(ParameterGroupService):
             'DBClusterParameterGroupArn': f'arn:aws:rds:region:account:dbcluster-parameter_group/{self.parameter_group_name}'
         }
         return describe
+        
+    def describe_parameters(self, group_name: str, source: str, max_records: int, marker: str)->Dict:
+        data=self.get(group_name)
+        parameters_local = []
+        count = 0
+        for p in data['parameters']:
+            if p.parameter_name == marker or marker is None:
+                marker = None
+                if p.source == source:
+                    count += 1
+                    if count <= max_records:
+                        parameters_local.append(p.describe())
+                    else:
+                        marker = p.parameter_name
+                        break
+
+        result = {'Parameters': parameters_local}
+        if marker is not None:
+            result['Marker'] = marker
+        return result    
 
     def get(self, group_name: str) -> Dict:
         """

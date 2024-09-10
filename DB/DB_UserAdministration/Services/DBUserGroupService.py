@@ -1,6 +1,6 @@
 from typing import List, Dict
 from DB_UserAdministration.Models.DBUserGroupModel import UserGroupModel
-from DB.Validation.Validation import is_valid_user_group_name, is_valid_number
+from KT_DB.Validation.Validation import is_valid_user_group_name, is_valid_number
 from DB_UserAdministration.DataAccess.UserGroupManager import UserGroupManager
 from DB_UserAdministration.Services.PolicyService import PolicyService
 from DB_UserAdministration.DataAccess.PolicyManager import PolicyManager
