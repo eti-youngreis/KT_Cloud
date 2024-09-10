@@ -10,7 +10,7 @@ def load():
         .getOrCreate()
 
     # Establish SQLite connection using sqlite3
-    conn = sqlite3.connect('D:\\בוטקמפ\\s3\\KT_Cloud\\Customer.db')
+    conn = sqlite3.connect('D:\\בוטקמפ\\s3\\KT_Cloud\\CustomerETL.db')
     cursor = conn.cursor()
 
     try:

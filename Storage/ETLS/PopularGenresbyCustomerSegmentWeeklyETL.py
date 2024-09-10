@@ -18,11 +18,9 @@ def load_popular_genres_by_city():
     genres = spark.read.csv("C:/Users/user1/Downloads/KAN-134_attachments/Genre.csv", header=True, inferSchema=True)
 
     # Rename columns to avoid ambiguity
-    invoice_lines = invoice_lines.withColumnRenamed("TrackId", "TrackId_InvoiceLines")
-    tracks = tracks.withColumnRenamed("TrackId", "TrackId_Tracks")
-    genres = genres.withColumnRenamed("GenreId", "GenreId_Genres")
-    tracks = tracks.withColumnRenamed("Name", "TrackName")
-    genres = genres.withColumnRenamed("Name", "GenreName")
+    invoice_lines = invoice_lines.withColumnRenamed("TrackId", "TrackId_InvoiceLines").withColumnRenamed("Quantity", "Invoice_Quantity")
+    tracks = tracks.withColumnRenamed("TrackId", "TrackId_Tracks").withColumnRenamed("AlbumId", "AlbumId_Tracks").withColumnRenamed("UnitPrice", "Track_UnitPrice")
+    genres = genres.withColumnRenamed("GenreId", "GenreId_Genres").withColumnRenamed("Name", "GenreName")
 
     # TRANSFORM
     # Join customers with invoices to get customer purchases
@@ -33,9 +31,9 @@ def load_popular_genres_by_city():
                                        .join(tracks, invoice_lines["TrackId_InvoiceLines"] == tracks["TrackId_Tracks"], "inner") \
                                        .join(genres, tracks["GenreId"] == genres["GenreId_Genres"], "inner")
 
-    # Group by City and Genre and count the number of tracks per genre
+    # Group by City and Genre and sum the quantity to get genre popularity
     genre_popularity = customer_tracks.groupBy("City", "GenreName") \
-                                      .agg(F.count("TrackId_Tracks").alias("TrackCount"))
+                                      .agg(F.sum("Invoice_Quantity").alias("TrackCount"))
 
     # Rank genres by popularity within each city using window function
     window_spec = Window.partitionBy("City").orderBy(F.desc("TrackCount"))
@@ -51,11 +49,13 @@ def load_popular_genres_by_city():
                            .withColumn("updated_by", F.lit("process:user_name"))
 
     # Load data into SQLite using sqlite3
-    conn = sqlite3.connect('C:/Users/user1/Desktop/0809/Genre.db')
+    conn = sqlite3.connect('C:/Users/user1/Desktop/0909/Genre.db')
     cursor = conn.cursor()
 
+    cursor.execute('DROP TABLE IF EXISTS PopularGenresByCity')
+
     # Create table if not exists
-    cursor.execute('''CREATE TABLE IF NOT EXISTS PopularGenresByCity (
+    cursor.execute('''CREATE TABLE  PopularGenresByCity (
                       City TEXT,
                       GenreName TEXT,
                       TrackCount INTEGER,
@@ -73,21 +73,6 @@ def load_popular_genres_by_city():
                            row['created_at'], row['updated_at'], row['updated_by']))
 
     conn.commit()
-    conn.close()
-
-    # Query the newly inserted data from SQLite
-    conn = sqlite3.connect('C:/Users/user1/Desktop/0809/Genre.db')
-    cursor = conn.cursor()
-
-    # Retrieve the newly inserted data
-    cursor.execute('''SELECT * FROM PopularGenresByCity''')
-    rows = cursor.fetchall()
-
-    # Print the retrieved data
-    print("Retrieved Data from SQLite Database:")
-    for row in rows:
-        print(row)
-
     conn.close()
 
     # Stop Spark session
