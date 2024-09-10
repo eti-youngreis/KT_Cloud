@@ -79,4 +79,4 @@ def test_revenue_per_customer_genre(index, comparison_data):
     revenue_overall = row['revenue_overall'] if pd.notna(row['revenue_overall']) else 0.0
     revenue_pandas = row['revenue'] if pd.notna(row['revenue']) else 0.0
 
-    assert int64(revenue_overall) == int64(revenue_pandas), f"Mismatch found for CustomerId {row['CustomerId']}, GenreId {row['GenreId']}"
+    assert int64(revenue_overall) == int64(revenue_pandas), f"Mismatch found for CustomerId {row['CustomerId']}, GenreId {row['GenreId']} etl:{revenue_overall} != pandas:{revenue_pandas}"

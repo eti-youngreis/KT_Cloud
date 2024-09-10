@@ -51,7 +51,7 @@ def load():
                     CURRENT_DATE AS updated_at, 
                     'WeeklyAlbumTotalsELT:{current_user}' AS updated_by    
                 FROM invoiceLines il
-                JOIN tracks t ON il.TrackId = t.TrackId
+                right JOIN tracks t ON il.TrackId = t.TrackId
                 JOIN (
                     SELECT AlbumId, 
                         SUM(Milliseconds) AS total_album_length

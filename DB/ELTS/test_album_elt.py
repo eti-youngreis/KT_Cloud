@@ -37,7 +37,7 @@ def calculate_total_downloads(track_table, invoice_line_table):
 def merge_dataframes(total_track_time_per_album, total_downloads_per_album, etl_result):
     # Merge the two DataFrames and compare with ETL result
     pandas_data = pd.merge(total_track_time_per_album, total_downloads_per_album, on='AlbumId', how='outer')
-    return pd.merge(pandas_data, etl_result)
+    return pd.merge(pandas_data, etl_result, on = 'AlbumId', how='outer')
 
 @pytest.fixture
 def sqlite_connection():
@@ -70,6 +70,8 @@ def comparison_data(sqlite_connection):
 def test_each_row(row, comparison_data):
     
     comparison_data.set_index('AlbumId', inplace=True)
+    
+    print(comparison_data)
     # For each row, compare pandas and ETL results
     data_row = comparison_data.iloc[row]
 
@@ -79,8 +81,8 @@ def test_each_row(row, comparison_data):
     downloads_pandas = data_row['total_downloads_pandas'] if not pd.isna(data_row['total_downloads_pandas']) else 0.0
     downloads_etl = data_row['total_album_downloads'] if not pd.isna(data_row['total_album_downloads']) else 0.0
 
-    assert compare_album_length(album_length_pandas, album_length_etl), f"Mismatch in album length for AlbumId {data_row['AlbumId']}"
-    assert compare_total_downloads(downloads_pandas, downloads_etl), f"Mismatch in downloads for AlbumId {data_row['AlbumId']}"
+    assert compare_album_length(album_length_pandas, album_length_etl), f"Mismatch in album length for AlbumId {row+1} {album_length_pandas} != {album_length_etl}"
+    assert compare_total_downloads(downloads_pandas, downloads_etl), f"Mismatch in downloads for AlbumId {row + 1} {downloads_pandas} != {downloads_etl}"
     
 def compare_album_length(album_length_pandas, album_length_etl):
     return album_length_pandas == album_length_etl
