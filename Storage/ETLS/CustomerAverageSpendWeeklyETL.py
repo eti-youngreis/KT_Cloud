@@ -7,13 +7,12 @@ def load():
     # Step 1: Initialize Spark session
     # Create a Spark session to enable Spark SQL functionality
     spark = SparkSession.builder \
-        .appName("Customer Average Spend and Lifetime Value") \
-        .config("spark.driver.bindAddress", "127.0.0.1") \
+        .appName("ETL - Customer Average Spend and Lifetime Value") \
         .getOrCreate()
 
     # Step 2: Establish SQLite connection
     # Connect to SQLite database (or create it if it does not exist)
-    conn = sqlite3.connect("customer_data.db")
+    conn = sqlite3.connect("./ETL_customer_data.db")
 
     # Define the path to the CSV files
     path = "D:\\בוטקאמפ\\vastProject\\csv\\"
