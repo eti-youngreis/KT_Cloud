@@ -26,11 +26,6 @@ def load():
         invoice_line_table = spark.read.option("header", "true").csv(
             base_path + "InvoiceLine.csv"
         )
-        
-        # track_table = track_table.withColumn("TrackId", F.col("TrackId").cast("int"))
-
-        # invoice_line_table = invoice_line_table.withColumn("InvoiceId", F.col("InvoiceId").cast("int")) \
-        #                                  .withColumn("TrackId", F.col("TrackId").cast("int"))
                                  
         track_table.toPandas().to_sql('tracks', con = conn, if_exists='replace', index=False)
         
@@ -40,18 +35,18 @@ def load():
         conn.execute(f"""
                     CREATE TABLE {elt_table_name} (
                     AlbumId INTEGER,
-                    total_downloads INTEGER,
-                    total_time INTEGER,
+                    total_album_downloads INTEGER,
+                    total_album_length INTEGER,
                     created_at DATE,
                     updated_at DATE,
                     updated_by TEXT
                 );""")
         transformation_query = f"""
-                INSERT INTO {elt_table_name} (AlbumId, total_downloads, total_time, created_at, updated_at, updated_by)
+                INSERT INTO {elt_table_name} (AlbumId, total_album_downloads, total_album_length, created_at, updated_at, updated_by)
                 SELECT 
                     t.AlbumId, 
-                    SUM(il.Quantity) AS total_downloads, 
-                    temp.total_time,
+                    SUM(il.Quantity) AS total_album_downloads, 
+                    temp.total_album_length,
                     CURRENT_DATE AS created_at,  
                     CURRENT_DATE AS updated_at, 
                     'WeeklyAlbumTotalsELT:{current_user}' AS updated_by    
@@ -59,11 +54,11 @@ def load():
                 JOIN tracks t ON il.TrackId = t.TrackId
                 JOIN (
                     SELECT AlbumId, 
-                        SUM(Milliseconds) AS total_time
+                        SUM(Milliseconds) AS total_album_length
                     FROM tracks
                     GROUP BY AlbumId
                 ) AS temp ON t.AlbumId = temp.AlbumId
-                GROUP BY t.AlbumId, temp.total_time;
+                GROUP BY t.AlbumId, temp.total_album_length;
                 """
         conn.execute(transformation_query)
         conn.commit()
@@ -72,3 +67,5 @@ def load():
         conn.close()
         spark.stop()
         
+if __name__ == "__main__":
+    load()
