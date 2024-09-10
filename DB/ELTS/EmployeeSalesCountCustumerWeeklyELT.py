@@ -21,43 +21,18 @@ def load_employee_sales_and_customer_elt():
         # -----------------------------------------------
         # Load the main table (e.g., customers, tracks, albums)
         employees_df = spark.read.csv(
-            'C:/Users/Owner/Documents/vast_data/KT_Cloud/database/Employee.csv', header=True, inferSchema=True)
+            'C:/Users/Owner/Desktop/ETL/Employee.csv', header=True, inferSchema=True)
         # Load other related tables
         customers_df = spark.read.csv(
-            'C:/Users/Owner/Documents/vast_data/KT_Cloud/database/Customer.csv', header=True, inferSchema=True)
+            'C:/Users/Owner/Desktop/ETL/Customer.csv', header=True, inferSchema=True)
         invoices_df = spark.read.csv(
-            'C:/Users/Owner/Documents/vast_data/KT_Cloud/database/Invoice.csv', header=True, inferSchema=True)
+            'C:/Users/Owner/Desktop/ETL/Invoice.csv', header=True, inferSchema=True)
 
         employees_df = employees_df.withColumn('HireDate', F.col('HireDate').cast(StringType()))
         employees_df = employees_df.withColumn('BirthDate', F.col('BirthDate').cast(StringType()))
         # TRANSFORM (Apply joins, groupings, and window functions)
         # --------------------------------------------------------
         # Join the main table with related_table_1
-        # employees_join_customers = employees_df.join(customers_df, employees_df['EmployeeId'] == customers_df['SupportRepId'], "inner").select(
-        #     employees_df["EmployeeId"],
-        #     employees_df["FirstName"].alias("EmployeeFirstName"),
-        #     customers_df["FirstName"].alias("CustomerFirstName"),
-        #     employees_df["LastName"].alias("EmployeeLastName"),
-        #     customers_df["LastName"].alias("CustomerLastName"),
-        #     customers_df["CustomerId"]
-
-        # )
-
-        # customers_invoices = invoices_df.join(invoiceLines_df, 'InvoiceId', "inner").join(
-        #     employees_join_customers, 'CustomerId', "inner")
-        # employees_sales_df = customers_invoices.groupBy("EmployeeId", "EmployeeFirstName", "EmployeeLastName") \
-        #     .agg(F.sum(F.col("UnitPrice") * F.col("Quantity")).alias("TotalSales"))
-        # employees_customers_df = employees_join_customers.groupBy("EmployeeId", "EmployeeFirstName", "EmployeeLastName") \
-        #     .agg(F.count("CustomerId").alias("CustomersInteractions"))
-
-        # final_employee_combined_df = employees_sales_df.join(employees_customers_df,
-        #                                                      ["EmployeeId", "EmployeeFirstName",
-        #                                                          "EmployeeLastName"]
-        #                                                      ).withColumn("created_at", F.current_date()) \
-        #     .withColumn("updated_at", F.current_date()) \
-        #     .withColumn("updated_by", F.lit(f"process:yael_karo_{F.current_date()}")).toPandas()
-        # Apply window function (e.g., rank customers by spend)
-
         # LOAD (Save transformed data into SQLite using KT_DB)
         # ----------------------------------------------------
         # Convert Spark DataFrame to Pandas DataFrame for SQLite insertion
