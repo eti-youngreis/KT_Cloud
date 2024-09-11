@@ -1,18 +1,24 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import count, avg, current_timestamp, lit, date_format
+from pyspark.sql.functions import count, avg, current_timestamp, lit, date_format, col
 import sqlite3
 import pandas as pd
 
-def load():
+def incremental_load():
     # Initialize Spark session
-    spark = SparkSession.builder.appName("CustomerLoyaltyETL_FullLoad").getOrCreate()
+    spark = SparkSession.builder.appName("CustomerLoyaltyETL_Incremental").getOrCreate()
 
     # Open SQLite connection
-    conn = sqlite3.connect("C:\\Users\\User\\Desktop\\database.db")
+    conn = sqlite3.connect("C:\\Users\\User\\Desktop\\customer_loyalty.db")
+    cursor = conn.cursor()
 
-    try:
-        # Drop and create customer_loyalty table
-        conn.execute("DROP TABLE IF EXISTS customer_loyalty")
+    # Check if customer_loyalty table exists
+    cursor.execute("""
+        SELECT name FROM sqlite_master WHERE type='table' AND name='customer_loyalty'
+    """)
+    table_exists = cursor.fetchone() is not None
+
+    if not table_exists:
+        # Create customer_loyalty table if it doesn't exist
         conn.execute("""
             CREATE TABLE customer_loyalty (
                 CustomerId INTEGER PRIMARY KEY,
@@ -26,33 +32,39 @@ def load():
             )
         """)
 
+    # Get the latest updated_at timestamp
+    if table_exists:
+        cursor.execute("SELECT MAX(updated_at) FROM customer_loyalty")
+        latest_updated_at = cursor.fetchone()[0]
+        if latest_updated_at is None:
+            latest_updated_at = '1900-01-01 00:00:00'
+    else:
+        latest_updated_at = '1900-01-01 00:00:00'
+
+    try:
         # Step 1: Extraction - Read CSV files into DataFrames
-        # Read customer data from CSV
         customers_df = spark.read.csv("C:\\Users\\User\\Desktop\\Customer.csv", header=True, inferSchema=True)
-        # Read invoice line data from CSV
         invoice_lines_df = spark.read.csv("C:\\Users\\User\\Desktop\\InvoiceLine.csv", header=True, inferSchema=True)
-        # Read invoice data from CSV
         invoices_df = spark.read.csv("C:\\Users\\User\\Desktop\\Invoice.csv", header=True, inferSchema=True)
 
         # Step 2: Transformation - Calculate loyalty score and average invoice size
+        # Filter invoices and invoice lines by the latest update date
+        invoices_df = invoices_df.filter(col("InvoiceDate") > lit(latest_updated_at))
 
-        # Join customer data with invoice data to calculate loyalty score
-        # This aggregates the number of invoices per customer to determine loyalty score
+        # Calculate loyalty score
         loyalty_score_df = customers_df.join(invoices_df, "CustomerId") \
             .groupBy("CustomerId", "FirstName", "LastName") \
             .agg(count("InvoiceId").alias("LoyaltyScore"))
 
-        # Join invoice data with invoice line data to calculate average invoice size
-        # This computes the average total amount of invoices for each customer
+        # Calculate average invoice size
         average_invoice_size_df = invoices_df.join(invoice_lines_df, "InvoiceId") \
             .groupBy("CustomerId") \
             .agg(avg("Total").alias("AverageInvoiceSize"))
 
-        # Combine the results of loyalty score and average invoice size into a single DataFrame
+        # Combine loyalty score and average invoice size
         result_df = loyalty_score_df.join(average_invoice_size_df, "CustomerId")
 
-        # Add metadata columns to the DataFrame
-        # This includes creation and update timestamps and the user who updated the data
+        # Add metadata columns
         result_df = result_df.withColumn("created_at", date_format(current_timestamp(), "yyyy-MM-dd HH:mm:ss")) \
             .withColumn("updated_at", date_format(current_timestamp(), "yyyy-MM-dd HH:mm:ss")) \
             .withColumn("updated_by", lit("process:your_user_name"))
@@ -60,12 +72,19 @@ def load():
         # Convert the Spark DataFrame to a pandas DataFrame for loading into SQLite
         new_data = result_df.toPandas()
 
-        # Step 3: Full Load - Insert data into SQLite
-        # Insert or append the data into the customer_loyalty table
-        new_data.to_sql('customer_loyalty', conn, if_exists='append', index=False)
+        # Step 3: Incremental Load
+        if not new_data.empty:
+            # Delete the updated rows from the customer_loyalty table
+            customer_ids = tuple(new_data['CustomerId'].values)
+            if len(customer_ids) == 1:
+                customer_ids = f"({customer_ids[0]})"
+            cursor.execute(f"DELETE FROM customer_loyalty WHERE CustomerId IN {customer_ids}")
 
-        # Commit the transaction to save changes
-        conn.commit()
+            # Insert new and updated rows
+            new_data.to_sql('customer_loyalty', conn, if_exists='append', index=False)
+
+            # Commit the transaction
+            conn.commit()
 
     finally:
         # Stop the Spark session
@@ -73,4 +92,4 @@ def load():
         # Close the SQLite connection
         conn.close()
 
-load()
+incremental_load()
