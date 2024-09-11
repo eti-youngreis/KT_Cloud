@@ -44,15 +44,10 @@ def loadELT():
             JOIN genres g ON t.GenreId = g.GenreId
             GROUP BY c.CustomerId, c.FirstName, c.LastName, g.Name
             ''')
-        # # Check the content of temp_revenue
-        # # cursor.execute("SELECT * FROM temp_revenue ORDER BY CustomerId LIMIT 20")
-        # # temp_rows = cursor.fetchall()
-        # # print("Temp Revenue Table:")
-        # # for row in temp_rows:
-        # #     print(row)
             
         cursor.execute('''DROP TABLE IF EXISTS customer_genre_revenue''')
-        # # **Create the final table with separate columns for each genre**
+        
+        # Create the final table with separate columns for each genre
         
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS customer_genre_revenue AS

@@ -52,12 +52,13 @@ def load_incremental_ETL():
         tracks_df = spark.read.csv("D:\\csvFiles\\Track_with_created_at.csv", header=True, inferSchema=True)
         genres_df = spark.read.csv("D:\\csvFiles\\Genre_with_created_at.csv", header=True, inferSchema=True)
 
+        # TRANSFORM:
         # Perform FULL OUTER JOIN to include all records
         joined_df = customers_df.alias("c") \
-            .join(invoices_df.alias("i"), F.col("c.CustomerId") == F.col("i.CustomerId"), "outer") \
-            .join(invoice_lines_df.alias("il"), F.col("i.InvoiceId") == F.col("il.InvoiceId"), "outer") \
-            .join(tracks_df.alias("t"), F.col("il.TrackId") == F.col("t.TrackId"), "outer") \
-            .join(genres_df.alias("g"), F.col("t.GenreId") == F.col("g.GenreId"), "outer")
+            .join(invoices_df.alias("i"), F.col("c.CustomerId") == F.col("i.CustomerId"), "left") \
+            .join(invoice_lines_df.alias("il"), F.col("i.InvoiceId") == F.col("il.InvoiceId"), "left") \
+            .join(tracks_df.alias("t"), F.col("il.TrackId") == F.col("t.TrackId"), "left") \
+            .join(genres_df.alias("g"), F.col("t.GenreId") == F.col("g.GenreId"), "left")
 
         # Filter records that have been updated since the latest timestamp
         updated_records_df = joined_df.filter(
@@ -134,11 +135,11 @@ def update_updated_at_column(file_path):
 
 def main():
     # Add created_at column to CSV files
-    # add_created_at_column("D:\\csvFiles\\Customer_with_created_at.csv")
-    # add_created_at_column("D:\\csvFiles\\Invoice_with_created_at.csv")
-    # add_created_at_column("D:\\csvFiles\\InvoiceLine_with_created_at.csv")
-    update_updated_at_column("D:\\csvFiles\\Track_with_created_at.csv")
-    # add_created_at_column("D:\\csvFiles\\Genre_with_created_at.csv")
+    update_updated_at_column("D:\\csvFiles\\Customer_with_created_at.csv")
+    # update_updated_at_column("D:\\csvFiles\\Invoice_with_created_at.csv")
+    # update_updated_at_column("D:\\csvFiles\\InvoiceLine_with_created_at.csv")
+    # update_updated_at_column("D:\\csvFiles\\Track_with_created_at.csv")
+    # update_updated_at_column("D:\\csvFiles\\Genre_with_created_at.csv")
     load_incremental_ETL()
 
 if __name__ == "__main__":
