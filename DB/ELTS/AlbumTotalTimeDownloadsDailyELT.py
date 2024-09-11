@@ -1,8 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 import sqlite3
-from sqlalchemy import create_engine, Table, MetaData, select, update
-from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+from sqlalchemy import create_engine
 from sqlalchemy import inspect, text
 import pandas as pd
 

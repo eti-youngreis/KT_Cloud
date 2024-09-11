@@ -14,8 +14,6 @@ def load():
     # establish sparkSession
     spark = SparkSession.builder.appName("ELT Template with SQLite").getOrCreate()
     
-    conn = sqlite3.connect(base_path + 'database.db')
-    
     try:
         conn = sqlite3.connect(base_path + "database.db")
         
@@ -43,8 +41,8 @@ def load():
                      );""")
         
         transformation_query = f"""
-                     insert into {elt_table_name} (CustomerId, GenreId, revenue_overall, created_at, updated_at, updated_by)
-                     SELECT 
+                    insert into {elt_table_name} (CustomerId, GenreId, revenue_overall, created_at, updated_at, updated_by)
+                    SELECT 
                         i.CustomerId, 
                         t.GenreId, 
                         SUM(il.UnitPrice * il.Quantity) AS revenue_overall,
