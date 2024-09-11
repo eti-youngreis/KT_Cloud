@@ -8,12 +8,12 @@ import sqlite3
 def load():
     # Step 1: Initialize Spark session
     spark = SparkSession.builder \
-        .appName("ETL Template with KT_DB") \
+        .appName("Repeat customer analysis Weekly ETL") \
         .getOrCreate()
 
     # Step 2: Establish SQLite connection using KT_DB
     # conn = KT_DB.connect('/path_to_sqlite.db')
-    conn = sqlite3.connect('KT_Cloud/Storage/ETLS/etl_db.db')
+    conn = sqlite3.connect('KT_Cloud/Storage/ETLS/db/repeat_customer_analysis.db')
     try:
         # EXTRACT (Loading CSVs from S3 or local storage)
         # -----------------------------------------------

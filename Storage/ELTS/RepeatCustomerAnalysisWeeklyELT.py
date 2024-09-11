@@ -1,5 +1,4 @@
 from pyspark.sql import SparkSession
-from pyspark.sql import functions as F
 from datetime import datetime
 import sqlite3
 # import KT_DB  # Assuming KT_DB is the library for SQLite operations
@@ -7,7 +6,7 @@ import sqlite3
 def load():
     # Step 1: Initialize Spark session
     spark = SparkSession.builder \
-        .appName("ELT Template with KT_DB") \
+        .appName("Repeat customer analysis Weekly ELT") \
         .getOrCreate()
 
     # Step 2: Establish SQLite connection using KT_DB
