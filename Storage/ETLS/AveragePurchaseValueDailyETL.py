@@ -72,13 +72,13 @@ def load_customer_invoices_count_etl_increment():
             ).withColumn(
                 "updated_at", F.current_date()
             ).withColumn(
-                "updated_by", F.lit(f"process:yael_karo_{datetime.now().strftime('%Y-%m-%d')}")
+                "updated_by", F.lit(f"process:shana_levovitz_{datetime.now().strftime('%Y-%m-%d')}")
             )
 
         else:
             transformed_data = customers_invoices.withColumn("created_at", F.current_date()) \
                 .withColumn("updated_at", F.current_date()) \
-                .withColumn("updated_by", F.lit(f"process:yael_karo_{datetime.now().strftime('%Y-%m-%d')}"))
+                .withColumn("updated_by", F.lit(f"process:shana_levovitz_{datetime.now().strftime('%Y-%m-%d')}"))
 
         transformed_data = transformed_data.withColumn("created_at", F.date_format(F.col("created_at"), "yyyy-MM-dd")) \
             .withColumn("updated_at", F.date_format(F.col("updated_at"), "yyyy-MM-dd"))
