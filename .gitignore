@@ -1,0 +1,15 @@
+".idea/workspace.xml" 
+.venv/
+.vscode/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.env
+/DB/csvs
+*.csv
+*.xlsx
+*.iml
+*.xml
+*.ipynb
+.idea
