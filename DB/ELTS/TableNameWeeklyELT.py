@@ -27,7 +27,7 @@ def load():
         related_table_1_df = related_table_1.toPandas()
         related_table_2_df = related_table_2.toPandas()
 
-        # Assuming KT_DB has a method to insert Pandas DataFrames into SQLite
+
         KT_DB.insert_dataframe(conn, 'main_table', main_table_df)  # Insert raw main_table
         KT_DB.insert_dataframe(conn, 'related_table_1', related_table_1_df)  # Insert raw related_table_1
         KT_DB.insert_dataframe(conn, 'related_table_2', related_table_2_df)  # Insert raw related_table_2
