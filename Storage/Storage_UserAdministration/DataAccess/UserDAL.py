@@ -1,15 +1,21 @@
-class UserDAL:
-    FILE_PATH = "users.json"
+import json
+import os
+from typing import List, Optional, Dict
+from Storage.Storage_UserAdministration.Models.userModel import User
+from Storage.Storage_UserAdministration.Models.PermissionModel import Permission
 
-    def __init__(self):
+
+class UserDAL:
+    def __init__(self, file_path="C://Users//User//Downloads//users.json"):
+        self.file_path = file_path
         self.users: Dict[str, User] = {}
         self.load_users_from_file()
 
     def load_users_from_file(self):
-        if os.path.exists(self.FILE_PATH):
-            with open(self.FILE_PATH, "r") as file:
+        if os.path.exists(self.file_path):
+            with open(self.file_path, "r") as file:
                 users_data = json.load(file)
-                for username, user_info in users_data.items():
+                for username, user_info in users_data["server"]["users"].items():
                     user = User(
                         username=user_info["username"],
                         password=user_info["password"],
@@ -17,22 +23,26 @@ class UserDAL:
                         email=user_info.get("email"),
                         logged_in=user_info.get("logged_in", False),
                         token=user_info.get("token"),
-                        # ----------------------------
-                        # role=user_info.get("role"),
-                        # policies=user_info.get("policies"),
-                        # quota=user_info.get("quota"),
-                        # groups=user_info.get("groups"),
+                        role=user_info.get("role"),
+                        policies=user_info.get("policies"),
+                        quotas=user_info.get("quotas"),
+                        groups=user_info.get("groups"),
                     )
                     self.users[username] = user
 
     def save_users_to_file(self):
-        with open(self.FILE_PATH, "w") as file:
-            users_data = {
-                username: user.__dict__ for username, user in self.users.items()
-            }
-            json.dump(users_data, file, indent=4)
+        with open(self.file_path, 'r') as file:
+            data = json.load(file)
 
-    def get_all_users(self) -> Dict[str, User]:
+        users_data = {
+            username: user.__dict__ for username, user in self.users.items()
+        }
+        data['server']['users'] = users_data
+        with open(self.file_path, 'w') as file:
+            json.dump(data, file, indent=4)
+        print(f"Users data updated successfully in {self.file_path}.")
+
+    def list_users(self) -> Dict[str, User]:
         return self.users
 
     def save_user(self, user: User) -> User:
@@ -69,7 +79,7 @@ class UserDAL:
             return user
         return None
 
-    def add_to_group(self, username: str, group: Group) -> Optional[User]:
+    def add_to_group(self, username: str, group: str) -> Optional[User]:
         """Add a group to the user's groups."""
         user = self.get_user(username)
         if user:
@@ -81,7 +91,7 @@ class UserDAL:
             return user
         return None
 
-    def remove_from_group(self, username: str, group: Group) -> Optional[User]:
+    def remove_from_group(self, username: str, group: str) -> Optional[User]:
         """Remove a group from the user's groups."""
         user = self.get_user(username)
         if user and hasattr(user, "groups") and group in user.groups:
@@ -90,7 +100,7 @@ class UserDAL:
             return user
         return None
 
-    def add_permission(self, username: str, permission: Permission) -> Optional[User]:
+    def assign_permission(self, username: str, permission: Dict[str, int]) -> Optional[User]:
         """Add a permission to the user."""
         user = self.get_user(username)
         if user:
@@ -111,26 +121,20 @@ class UserDAL:
             return user
         return None
 
-    def set_quota(self, username: str, quota: Quota) -> Optional[User]:
+    def set_quota(self, username: str, quota_name: str) -> Optional[User]:
         """Set the quota for the user."""
         user = self.get_user(username)
         if user:
-            user.quota = quota
-            self.users[user_update.username] = user
+            self.users[user.username] = user
             self.save_users_to_file()
             return user
         return None
 
-    def add_policy(self, username: str, policy: Policy) -> Optional[User]:
+    def add_policy(self, username: str, policy: str) -> Optional[User]:
         """Add a policy to the user."""
         user = self.get_user(username)
         if user:
-            if not hasattr(user, "policies"):
-                user.policies = []
-            if policy not in user.policies:
-                user.policies.append(policy)
+            self.users[user.username] = user
             self.save_users_to_file()
             return user
         return None
-
-
