@@ -23,20 +23,21 @@ def load():
         conn = sqlite3.connect(base_path + "database.db")
         
         # extract data from csv files
+        # only consider active invoice_lines toward total
         invoice_table = spark.read.option("header", "true").csv(base_path + "Invoice.csv", 
                                                                 header=True, inferSchema=True)
-        invoice_table = invoice_table.filter(invoice_table['status'] == F.lit('active'))
         invoice_line_table = spark.read.option("header", "true").csv(base_path + "InvoiceLine.csv", 
                                                                 header=True, inferSchema=True)
         invoice_line_table = invoice_line_table.filter(invoice_line_table['status'] == F.lit('active'))
         track_table = spark.read.option("header", "true").csv(base_path + "Track.csv", 
                                                                 header=True, inferSchema=True)
-        track_table = track_table.filter(track_table['status'] == F.lit('active'))
         
-        # join tables in order to transform dat
+        # assign customerId to each invoice line
         customer_invoice_line = invoice_table.join(invoice_line_table, invoice_table[ \
             'InvoiceId'] == invoice_line_table['InvoiceId']).drop(invoice_line_table['InvoiceId'])
         
+        # assign the tracks a customer purchased to their id, and calculate how much they paid for each 
+        # invoice line
         customer_track_table = customer_invoice_line.join(track_table, customer_invoice_line['TrackId'] == \
             track_table['TrackId']).drop(customer_invoice_line['TrackId']).drop(track_table['UnitPrice'])\
         .withColumn(
@@ -44,6 +45,7 @@ def load():
             F.col('UnitPrice') * F.col('Quantity')
         )    
         
+        # group the overall payment for each customer in each genre
         final_data = customer_track_table.groupBy("CustomerId", "GenreId").agg(
             F.sum("invoice_line_total").alias("revenue_overall")
         ).withColumn("created_at", F.current_date()) \
@@ -55,10 +57,8 @@ def load():
         
         final_data.to_sql(name=etl_table_name, con = conn, if_exists='replace', index=False)   
 
+        
+        
     finally:
         conn.close()
         spark.stop()
-
-
-if __name__ == "__main__":
-    load()
