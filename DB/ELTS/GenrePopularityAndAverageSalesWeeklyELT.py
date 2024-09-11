@@ -36,7 +36,7 @@ def load():
                 AVG(IL.UnitPrice) AS AverageSalesPrice,
                 '{datetime.now()}' AS created_at,
                 '{datetime.now()}' AS updated_at,
-                'process:SL' AS updated_by
+                'GILI BOLAK' AS updated_by
             FROM
                 Genres G
             LEFT JOIN Tracks T ON G.GenreId = T.GenreId
