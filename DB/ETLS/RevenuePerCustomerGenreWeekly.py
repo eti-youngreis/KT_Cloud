@@ -23,9 +23,15 @@ def load():
         conn = sqlite3.connect(base_path + "database.db")
         
         # extract data from csv files
-        invoice_table = spark.read.option("header", "true").csv(base_path + "Invoice.csv")
-        invoice_line_table = spark.read.option("header", "true").csv(base_path + "InvoiceLine.csv")
-        track_table = spark.read.option("header", "true").csv(base_path + "Track.csv")
+        invoice_table = spark.read.option("header", "true").csv(base_path + "Invoice.csv", 
+                                                                header=True, inferSchema=True)
+        invoice_table = invoice_table.filter(invoice_table['status'] == F.lit('active'))
+        invoice_line_table = spark.read.option("header", "true").csv(base_path + "InvoiceLine.csv", 
+                                                                header=True, inferSchema=True)
+        invoice_line_table = invoice_line_table.filter(invoice_line_table['status'] == F.lit('active'))
+        track_table = spark.read.option("header", "true").csv(base_path + "Track.csv", 
+                                                                header=True, inferSchema=True)
+        track_table = track_table.filter(track_table['status'] == F.lit('active'))
         
         # join tables in order to transform dat
         customer_invoice_line = invoice_table.join(invoice_line_table, invoice_table[ \
@@ -50,6 +56,9 @@ def load():
         final_data.to_sql(name=etl_table_name, con = conn, if_exists='replace', index=False)   
 
     finally:
-        pass
+        conn.close()
+        spark.stop()
 
-        
+
+if __name__ == "__main__":
+    load()

@@ -36,7 +36,7 @@ def load():
         
         final_df = final_result.toPandas()
 
-        conn = sqlite3.connect('../../../Customers.db')
+        conn = sqlite3.connect('../../../Customers_ETL.db')
         final_df.to_sql('customer_loyalty_and_invoice_size', conn, if_exists='replace', index=False)
         conn.commit()
         conn.close()

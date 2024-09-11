@@ -11,7 +11,7 @@ def load():
         .getOrCreate()
     
     # Step 2: Establish SQLite connection
-    conn = sqlite3.connect('../../../Customers.db')
+    conn = sqlite3.connect('../../../Customers_ETL.db')
 
     try:
         customers = spark.read.csv("../../../Customer.csv", header=True, inferSchema=True)

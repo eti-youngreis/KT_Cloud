@@ -45,13 +45,13 @@ def load_employees_sales_customer_interactions():
                                       .withColumn("updated_by", F.lit(f"process:shoshana_levovitz_{F.current_date()}")).toPandas()
         
         # Save combined employee data to SQLite
-        final_employee_df.to_sql('employee_performance', conn, if_exists='replace', index=False)
+        final_employee_df.to_sql('employee_sales_and_count', conn, if_exists='replace', index=False)
 
         # Commit the changes to the database
         conn.commit()
         
         # Print results
-        print("employee_performance:", conn.execute("SELECT * FROM 'employee_performance'").fetchall())
+        print("employee_sales_and_count:", conn.execute("SELECT * FROM 'employee_sales_and_count'").fetchall())
     
     finally:
         # Step 3: Close the SQLite connection and stop Spark session

@@ -37,6 +37,10 @@ def load():
         # final_data = transformed_data.withColumn("last_transaction_date", F.max("transaction_date").over(window_spec))
 
         # Add metadata columns
+        aggregated_data.select(
+            "TrackId", "Name", "total_play_count", "revenue_contribution"
+        ).show(truncate=False)
+        
         current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         user_name = "tamar_koledetzky"  # Replace this with a method to fetch the current user's name if needed
 
@@ -52,7 +56,7 @@ def load():
         if final_data_df.empty:
             print("DataFrame is empty. No data to write.")
         else:
-             create_table_sql = """
+            create_table_sql = """
         CREATE TABLE IF NOT EXISTS Track_Play_Count_and_Revenue_Contribution (
             TrackId INT,
             Name TEXT,

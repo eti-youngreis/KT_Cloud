@@ -15,7 +15,7 @@ def incremental_load():
     try:
         # Step 3: Get the latest processed timestamp from the target table
         # Assuming KT_DB has a method to execute a query and fetch the result
-        latest_timestamp_query = "SELECT MAX(created_at) FROM final_table"
+        latest_timestamp_query = "SELECT MAX(updated_at) FROM final_table"
         latest_timestamp = KT_DB.execute_and_fetch(conn, latest_timestamp_query)
 
         # Handle case where no data exists yet (initial load)
@@ -26,17 +26,20 @@ def incremental_load():
 
         # EXTRACT (Loading CSVs from S3 or local storage)
         # -----------------------------------------------
-        # Load the main table with only new records (based on created_at column)
+        # Load the main table with only new records (based on updated_at column)
         main_table = spark.read.csv("s3://path_to_bucket/main_table.csv", header=True, inferSchema=True)
-        new_data_main_table = main_table.filter(main_table["created_at"] > latest_timestamp)
+        new_data_main_table = main_table.filter(main_table["updated_at"] > latest_timestamp)
 
         # Load other related tables with new records
         related_table_1 = spark.read.csv("s3://path_to_bucket/related_table_1.csv", header=True, inferSchema=True)
         related_table_2 = spark.read.csv("s3://path_to_bucket/related_table_2.csv", header=True, inferSchema=True)
 
-        # Optionally, apply filtering based on created_at for related tables if necessary
-        new_data_related_table_1 = related_table_1.filter(related_table_1["created_at"] > latest_timestamp)
-        new_data_related_table_2 = related_table_2.filter(related_table_2["created_at"] > latest_timestamp)
+        # Optionally, apply filtering based on updated_at for related tables if necessary
+        new_data_related_table_1 = related_table_1.filter(related_table_1["updated_at"] > latest_timestamp)
+        new_data_related_table_2 = related_table_2.filter(related_table_2["updated_at"] > latest_timestamp)
+
+        # if you need to filter only one table and bring from the other all the new records plus related data
+        # to table_1 new records- do it using full outer join with special where condition as performed in ELT
 
         # TRANSFORM (Apply joins, groupings, and window functions)
         # --------------------------------------------------------
@@ -57,8 +60,12 @@ def incremental_load():
         window_spec = Window.partitionBy().orderBy(F.desc("total_spend"))
         transformed_data = aggregated_data.withColumn("rank", F.rank().over(window_spec))
 
-        # Calculate metadata (e.g., date of the last transaction)
-        final_data = transformed_data.withColumn("last_transaction_date", F.max("transaction_date").over(window_spec))
+        # add metadata to transformed_data
+
+        # Get original created time from target table
+        transformed_data = transformed_data.join(target_table, by=key)[created_at]
+        transformed_data[created_at].fill_zero_if_null()
+
 
         # LOAD (Append new transformed data to the SQLite database using KT_DB)
         # ---------------------------------------------------------------------
@@ -66,7 +73,7 @@ def incremental_load():
         final_data_df = final_data.toPandas()
 
         # Insert transformed data into the SQLite database (append mode) using KT_DB
-        KT_DB.insert_dataframe(conn, 'final_table', final_data_df, mode='append')  # Assuming 'append' mode is supported
+        KT_DB.insert_dataframe(conn, 'final_table', final_data_df, mode='replace')  # Assuming 'append' mode is supported
 
         # Commit the changes to the database using KT_DB's commit() function
         KT_DB.commit(conn)
