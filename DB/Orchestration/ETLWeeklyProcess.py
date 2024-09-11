@@ -1,7 +1,10 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
+
 # from ETLS import X
+from ETLS import AlbumTotalTimeDownloadsWeekly
+from ETLS import RevenuePerCustomerGenreWeekly
 
 # Define your Python functions here
 def run_table_1():
@@ -17,7 +20,12 @@ def run_table_3():
     pass
 
 # More functions for other tasks as necessary
-
+def run_album_totals():
+    AlbumTotalTimeDownloadsWeekly.load()
+    
+def run_customer_genre_revenue():
+    RevenuePerCustomerGenreWeekly.load()
+    
 # Define default arguments for the DAG
 default_args = {
     'owner': 'airflow',
@@ -53,13 +61,23 @@ with DAG(
         task_id='run_table_5',
         python_callable=run_table_5,
     )
+    
+    task_album_totals = PythonOperator(
+        task_id = 'task_album_totals_weekly',
+        python_callable=run_album_totals
+    )
+    
+    task_revenue_customer_genre = PythonOperator(
+        task_id = 'task_revenue_customer_genre_weekly',
+        python_callable=run_customer_genre_revenue
+    )
 
     # Dependent tasks that run after Table 1, 3, 5
     task_2 = PythonOperator(
         task_id='run_table_2',
         python_callable=run_table_2,
     )
-
+    
     # Define dependencies
     task_1 >> task_2
     task_3 >> task_4
