@@ -18,7 +18,7 @@ def load():
         .getOrCreate()
 
     # Step 2: Establish SQLite connection using KT_DB
-    conn = sqlite3.connect('DB/ETLS/etl_db.db')  # Assuming KT_DB has a connect() method
+    conn = sqlite3.connect('DB/etl_db.db')  # Assuming KT_DB has a connect() method
 
     try:
         cursor = conn.cursor()
