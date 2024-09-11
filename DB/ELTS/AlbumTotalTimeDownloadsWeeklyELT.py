@@ -2,8 +2,6 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 import sqlite3
 
-import sqlalchemy
-
 def load():
     
     current_user = "User" # when IAM is implemented, get current user for session details
