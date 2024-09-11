@@ -2,7 +2,7 @@ import sqlite3
 from datetime import datetime
 import pandas as pd
 
-def load_popular_genres_by_city():
+def load_popular_genres_by_city_ELT():
     # EXTRACT and LOAD (Loading CSVs and storing into SQLite using pandas)
     customers_df = pd.read_csv("C:/Users/user1/Downloads/KAN-134_attachments/Customer.csv")
     invoices_df = pd.read_csv("C:/Users/user1/Downloads/KAN-134_attachments/Invoice.csv")
@@ -53,4 +53,4 @@ def load_popular_genres_by_city():
     conn.close()
 
 if __name__ == "__main__":
-    load_popular_genres_by_city()
+    load_popular_genres_by_city_ELT()

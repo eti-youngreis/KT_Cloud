@@ -91,7 +91,6 @@ def loadETL():
             print("Executing SELECT query...")
             cursor.execute("SELECT * FROM customer_genre_revenue order by CustomerId LIMIT 10")
             rows = cursor.fetchall()
-
             for row in rows:
                 print(row)
 
