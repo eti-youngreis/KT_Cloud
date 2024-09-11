@@ -1,7 +1,7 @@
 import json
 import os
 from typing import Dict,  Optional
-from Models.QuotaModel import QuotaModel
+from Storage.Storage_UserAdministration.Models.QuotaModel import QuotaModel
 
 class QuotaManager:
     def __init__(self, file_path: str="D:/boto3 project/metadata.json"):

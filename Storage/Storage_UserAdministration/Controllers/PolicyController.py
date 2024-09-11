@@ -83,5 +83,5 @@ def main():
     print(f"Can read: {can_read}")
     print(f"Can write: {can_write}")
 
-main()
+# main()
 

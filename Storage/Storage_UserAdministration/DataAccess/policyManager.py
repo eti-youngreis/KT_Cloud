@@ -5,7 +5,7 @@ from Storage.Storage_UserAdministration.Models.PermissionModel import Permission
 from Storage.Storage_UserAdministration.Models.PolicyModel import PolicyModel
 
 class PolicyManager:
-    def __init__(self, file_path: str = "D:\\בוטקמפ\\server\\metadata.json"):
+    def __init__(self, file_path: str = "C://Users//User//Downloads//users.json"):
         self.file_path = file_path
         if not os.path.exists(self.file_path):
             with open(self.file_path, 'w') as file:

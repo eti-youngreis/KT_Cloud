@@ -1,9 +1,9 @@
 from typing import Dict, List, Optional
-from DataAccess.QuotaManager import QuotaManager
-from Models.QuotaModel import QuotaModel as Quota
+from Storage.Storage_UserAdministration.DataAccess.QuotaManager import QuotaManager
+from Storage.Storage_UserAdministration.Models.QuotaModel import QuotaModel as Quota
 from typing import Dict, List, Optional
-from DataAccess.QuotaManager import QuotaManager
-from Models.QuotaModel import QuotaModel as Quota
+from Storage.Storage_UserAdministration.DataAccess.QuotaManager import QuotaManager
+from Storage.Storage_UserAdministration.Models.QuotaModel import QuotaModel as Quota
 
 class QuotaService:
     def __init__(self, dal: QuotaManager):

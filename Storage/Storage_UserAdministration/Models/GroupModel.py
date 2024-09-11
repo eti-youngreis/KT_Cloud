@@ -1,6 +1,6 @@
 import json
 import os
-from userModel import User
+from KT_Cloud.Storage.Storage_UserAdministration.Models.userModel import User
 class Group:
     def __init__(self, group_name:str, file_path:str='groups.json'):
         self.name:str = group_name
@@ -116,20 +116,20 @@ class Group:
 
 
 # שימוש לדוגמה:
-group = Group("Developers")
-group.create_group()
+# group = Group("Developers")
+# group.create_group()
 
 # הוספת משתמש לקבוצה
-group.add_member("user123")
+# group.add_member("user123")
 
 # הקצאת תפקיד לקבוצה
-group.assign_role("Admin")
+# group.assign_role("Admin")
 
 # רשימת כל הקבוצות
-print(group.list_groups())
+# print(group.list_groups())
 
 # קבלת פרטי קבוצה
-print(group.get_group())
+# print(group.get_group())
 
 # מחיקת קבוצה
-group.delete_group()
+# group.delete_group()

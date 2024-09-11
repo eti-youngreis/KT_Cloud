@@ -1,6 +1,6 @@
 from typing import List, Optional
-from Models.QuotaModel import QuotaModel as Quota
-from Services.QuotaService import QuotaService
+from Storage.Storage_UserAdministration.Models.QuotaModel import QuotaModel as Quota
+from Storage.Storage_UserAdministration.Services.QuotaService import QuotaService
 
 
 class QuotaController:
