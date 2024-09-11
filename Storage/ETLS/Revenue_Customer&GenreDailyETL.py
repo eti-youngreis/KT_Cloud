@@ -1,8 +1,9 @@
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
+from pyspark.sql.window import Window
 import sqlite3
 from datetime import datetime
-import pandas as pd
+import pandas
 
 def load_incremental_ETL():
     # Step 1: Initialize Spark session
@@ -10,7 +11,7 @@ def load_incremental_ETL():
         .appName("Revenue per Customer and Genre ETL incremental") \
         .getOrCreate()
 
-    # Step 2: Establish SQLite connection
+    # Step 2: Establish SQLite connection using KT_DB
     conn = sqlite3.connect('D:\\b\\CustomerRevenueETL.db')
     cursor = conn.cursor()
 
@@ -18,9 +19,10 @@ def load_incremental_ETL():
         # Step 3: Check if the table exists
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='customer_genre_revenue'")
         if cursor.fetchone() is None:
+            # Create the table if it doesn't exist
             cursor.execute('''
-            CREATE TABLE customer_genre_revenue (
-                CustomerId INTEGER PRIMARY KEY,
+            CREATE TABLE IF NOT EXISTS customer_genre_revenue (
+                CustomerId INTEGER,
                 FirstName TEXT,
                 LastName TEXT,
                 RockRevenue REAL,
@@ -35,39 +37,39 @@ def load_incremental_ETL():
             ''')
             print("Table 'customer_genre_revenue' created.")
         
-        # Step 4: Get the latest processed timestamp
+        # Get the latest processed timestamp from the target table
         cursor.execute("SELECT MAX(updated_at) FROM customer_genre_revenue")
-        latest_timestamp = cursor.fetchone()[0] or '1900-01-01 00:00:00'
+        latest_timestamp = cursor.fetchone()[0]
 
-        # EXTRACT: Load only the new or updated records
-        def load_df(file_path):
-            return spark.read.csv(file_path, header=True, inferSchema=True)
+        # Handle case where no data exists yet (initial load)
+        if latest_timestamp is None:
+            latest_timestamp = '1900-01-01 00:00:00'  # A very old timestamp to ensure all data is loaded initially
 
-        # Read CSV files
-        customers_df = load_df("D:\\csvFiles\\Customer_with_created_at.csv")
-        invoices_df = load_df("D:\\csvFiles\\Invoice_with_created_at.csv")
-        invoice_lines_df = load_df("D:\\csvFiles\\InvoiceLine_with_created_at.csv")
-        tracks_df = load_df("D:\\csvFiles\\Track_with_created_at.csv")
-        genres_df = load_df("D:\\csvFiles\\Genre_with_created_at.csv")
+        # EXTRACT: 
+        customers_df = spark.read.csv("D:\\csvFiles\\Customer_with_created_at.csv", header=True, inferSchema=True)
+        invoices_df = spark.read.csv("D:\\csvFiles\\Invoice_with_created_at.csv", header=True, inferSchema=True)
+        invoice_lines_df = spark.read.csv("D:\\csvFiles\\InvoiceLine_with_created_at.csv", header=True, inferSchema=True)
+        tracks_df = spark.read.csv("D:\\csvFiles\\Track_with_created_at.csv", header=True, inferSchema=True)
+        genres_df = spark.read.csv("D:\\csvFiles\\Genre_with_created_at.csv", header=True, inferSchema=True)
 
-        # Filter new or updated records
-        def filter_df(df, timestamp_col):
-            return df.filter(F.col(timestamp_col) > latest_timestamp)
+        # Perform FULL OUTER JOIN to include all records
+        joined_df = customers_df.alias("c") \
+            .join(invoices_df.alias("i"), F.col("c.CustomerId") == F.col("i.CustomerId"), "outer") \
+            .join(invoice_lines_df.alias("il"), F.col("i.InvoiceId") == F.col("il.InvoiceId"), "outer") \
+            .join(tracks_df.alias("t"), F.col("il.TrackId") == F.col("t.TrackId"), "outer") \
+            .join(genres_df.alias("g"), F.col("t.GenreId") == F.col("g.GenreId"), "outer")
 
-        new_customers_df = filter_df(customers_df, "updated_at")
-        new_invoices_df = filter_df(invoices_df, "updated_at")
-        new_invoice_lines_df = filter_df(invoice_lines_df, "updated_at")
-        new_tracks_df = filter_df(tracks_df, "updated_at")
-        new_genres_df = filter_df(genres_df, "updated_at")
+        # Filter records that have been updated since the latest timestamp
+        updated_records_df = joined_df.filter(
+            (F.col("c.updated_at") > latest_timestamp) |
+            (F.col("i.updated_at") > latest_timestamp) |
+            (F.col("il.updated_at") > latest_timestamp) |
+            (F.col("t.updated_at") > latest_timestamp) |
+            (F.col("g.updated_at") > latest_timestamp)
+        )
 
-        # Join and transform data
-        joined_df = new_customers_df.alias("c") \
-            .join(new_invoices_df.alias("i"), F.col("c.CustomerId") == F.col("i.CustomerId")) \
-            .join(new_invoice_lines_df.alias("il"), F.col("i.InvoiceId") == F.col("il.InvoiceId")) \
-            .join(new_tracks_df.alias("t"), F.col("il.TrackId") == F.col("t.TrackId")) \
-            .join(new_genres_df.alias("g"), F.col("t.GenreId") == F.col("g.GenreId"))
-
-        transformed_data = joined_df.groupBy(
+        # Aggregation - Calculate the revenue for each genre with explicit references to the genre name column
+        transformed_data = updated_records_df.groupBy(
             F.col("c.CustomerId"), F.col("c.FirstName"), F.col("c.LastName")
         ).agg(
             F.sum(F.when(F.col("g.Name") == "Rock", F.col("il.UnitPrice") * F.col("il.Quantity")).otherwise(0)).alias("RockRevenue"),
@@ -76,68 +78,67 @@ def load_incremental_ETL():
             F.sum(F.when(F.col("g.Name") == "Reggae", F.col("il.UnitPrice") * F.col("il.Quantity")).otherwise(0)).alias("ReggaeRevenue"),
             F.sum(F.when(F.col("g.Name") == "Pop", F.col("il.UnitPrice") * F.col("il.Quantity")).otherwise(0)).alias("PopRevenue")
         )
+
+        # Add metadata columns
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        transformed_data = transformed_data.withColumn("created_at", F.lit(current_time)) \
+                                            .withColumn("updated_at", F.lit(current_time)) \
+                                            .withColumn("updated_by", F.lit("process:user_name"))
         
         # Convert to Pandas DataFrame for SQLite insertion
         print(f"Total transformed records: {transformed_data.count()}")
-        print(transformed_data.toPandas())
         final_df = transformed_data.toPandas()
-
-        # Step 5: Update or insert records
+        
         if not final_df.empty:
-           for index, row in final_df.iterrows():
-            cursor.execute("SELECT created_at FROM customer_genre_revenue WHERE CustomerId = ?", (row.CustomerId,))
-            existing_record = cursor.fetchone()
+                
+            final_df.to_sql('temp_table', conn, if_exists='replace', index=False)
 
-            if existing_record:
-                cursor.execute('''
-                    UPDATE customer_genre_revenue
-                    SET RockRevenue = ?, MetalRevenue = ?, LatinRevenue = ?, ReggaeRevenue = ?, PopRevenue = ?, updated_at = ?, updated_by = ?
-                    WHERE CustomerId = ?
-                ''', (row.RockRevenue, row.MetalRevenue, row.LatinRevenue, row.ReggaeRevenue, row.PopRevenue, row.updated_at, row.updated_by, row.CustomerId))
-            else:
-                # For new records, insert the current created_at
-                cursor.execute('''
-                    INSERT INTO customer_genre_revenue (CustomerId, FirstName, LastName, RockRevenue, MetalRevenue, LatinRevenue, ReggaeRevenue, PopRevenue, created_at, updated_at, updated_by)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (row.CustomerId, row.FirstName, row.LastName, row.RockRevenue, row.MetalRevenue, row.LatinRevenue, row.ReggaeRevenue, row.PopRevenue, row.created_at, row.updated_at, row.updated_by))
+            delete_query = '''DELETE FROM customer_genre_revenue WHERE CustomerId IN (SELECT CustomerId FROM temp_table)'''
+            cursor.execute(delete_query)
+
+            insert_query = '''INSERT INTO customer_genre_revenue SELECT * FROM temp_table '''
+            cursor.execute(insert_query)
 
             conn.commit()
 
-        # SELECT query to verify results
+            # Delete temp_table
+            cursor.execute('DROP TABLE IF EXISTS temp_table')
+            
+        # SELECT query to retrieve data
         print("Executing SELECT query...")
-        cursor.execute("SELECT * FROM customer_genre_revenue ORDER BY CustomerId LIMIT 10")
+        cursor.execute("SELECT CustomerId, created_at, updated_at FROM customer_genre_revenue ORDER BY CAST(CustomerId AS INTEGER)")
         rows = cursor.fetchall()
+
         for row in rows:
             print(row)
+
+    
     finally:
+        # Step 6: Close the SQLite connection and stop Spark session
         conn.close()
         spark.stop()
 
-def add_created_at_column(file_path):
-    # Read the CSV file
-    df = pd.read_csv(file_path)
+def update_updated_at_column(file_path):
+    # Step 1: Read the CSV file
+    df = pandas.read_csv(file_path)
 
-    # Add created_at column
+    # Step 2: Add created_at column
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    df.loc['updated_at'] = current_time
+    # df.loc['created_at'] = current_time
+    df.loc[:10,'updated_at'] = current_time
 
-    # Save the updated CSV file
+    # Step 3: Save the updated CSV file
     df.to_csv(file_path, index=False)
+
     print(f"Created_at column added to {file_path}")
 
 def main():
     # Add created_at column to CSV files
-    csv_files = [
-        "D:\\csvFiles\\Customer_with_created_at.csv",
-        "D:\\csvFiles\\Invoice_with_created_at.csv",
-        "D:\\csvFiles\\InvoiceLine_with_created_at.csv",
-        "D:\\csvFiles\\Track_with_created_at.csv",
-        "D:\\csvFiles\\Genre_with_created_at.csv"
-    ]
-    for file_path in csv_files:
-        add_created_at_column(file_path)
-    
-    # Load incremental ETL
+    # add_created_at_column("D:\\csvFiles\\Customer_with_created_at.csv")
+    # add_created_at_column("D:\\csvFiles\\Invoice_with_created_at.csv")
+    # add_created_at_column("D:\\csvFiles\\InvoiceLine_with_created_at.csv")
+    update_updated_at_column("D:\\csvFiles\\Track_with_created_at.csv")
+    # add_created_at_column("D:\\csvFiles\\Genre_with_created_at.csv")
     load_incremental_ETL()
 
 if __name__ == "__main__":
