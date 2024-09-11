@@ -4,8 +4,6 @@ from pyspark.sql.window import Window
 import sqlite3
 from datetime import datetime
 
-
-
 def load_top_selling_artists():
     # Initialize Spark session
     spark = SparkSession.builder \

@@ -1,7 +1,7 @@
 import uuid
 from Abc import DBO
 from typing import Optional, List
-from DB.Validation.ValiditionDBClusterEndpoint import is_valid_identifier
+from KT_DB.Validation.ValiditionDBClusterEndpoint import is_valid_identifier
 from Models import DBClusterEndpointModel
 from DataAccess import DBClusterEndpointManager
 from typing import Dict, Optional
@@ -32,6 +32,8 @@ class DBClusterEndpointService(DBO):
         if not self.dal.is_identifier_exist(endpoint_identifier):
             raise ValueError(f"DB Cluster Endpoint '{endpoint_identifier}' does not exist.")
         self.dal.delete(endpoint_identifier)
+        return self.describe(endpoint_identifier, 'deleting')
+
 
     def describe(self, endpoint_identifier: str ,status:str='available') -> Dict:
         """Retrieve the details of a DB Cluster Endpoint."""
