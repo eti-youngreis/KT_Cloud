@@ -39,9 +39,9 @@ def incremental_load():
         invoice_line_table = spark.read.option("header", "true").csv(base_path + "InvoiceLine.csv", 
                                                                 header=True, inferSchema=True)
         
-        invoice_line_table = invoice_line_table.withColumn("created_at", F.to_timestamp(invoice_line_table["created_at"], "yyyy-MM-dd"))
+        invoice_line_table = invoice_line_table.withColumn("updated_at", F.to_timestamp(invoice_line_table["updated_at"], "yyyy-MM-dd"))
         
-        invoice_line_table = invoice_line_table.filter(invoice_line_table["created_at"] > latest_timestamp)
+        invoice_line_table = invoice_line_table.filter(invoice_line_table["updated_at"] > latest_timestamp)
         
         
         track_table = spark.read.option("header", "true").csv(base_path + "Track.csv", 

@@ -34,15 +34,15 @@ def incremental_load():
         # extract data from csv files and filter out old data
         track_table = spark.read.option("header", "true").csv(base_path + "Track.csv", header=True, 
                                                               inferSchema=True)
-        track_table = track_table.withColumn("created_at", F.to_timestamp(track_table["created_at"], "yyyy-MM-dd"))
+        track_table = track_table.withColumn("updated_at", F.to_timestamp(track_table["updated_at"], "yyyy-MM-dd"))
         
-        track_table = track_table.filter(track_table["created_at"] > latest_timestamp)
+        track_table = track_table.filter(track_table["updated_at"] > latest_timestamp)
     
         invoice_line_table = spark.read.option("header", "true").csv(base_path + "InvoiceLine.csv", 
                                                                      header=True, inferSchema=True)
-        invoice_line_table = invoice_line_table.withColumn("created_at", F.to_timestamp(invoice_line_table["created_at"], "yyyy-MM-dd"))
+        invoice_line_table = invoice_line_table.withColumn("updated_at", F.to_timestamp(invoice_line_table["updated_at"], "yyyy-MM-dd"))
         
-        invoice_line_table = invoice_line_table.filter(invoice_line_table["created_at"] >  latest_timestamp)
+        invoice_line_table = invoice_line_table.filter(invoice_line_table["updated_at"] >  latest_timestamp)
         
         # total time per album
         total_time_per_album = track_table.groupBy("AlbumId").agg(
@@ -86,13 +86,10 @@ def incremental_load():
         ).drop('NewAlbumId')
         final_data = final_data.toPandas()
         
-        pd.set_option('display.max_rows', None)  # Show all rows
-        pd.set_option('display.max_columns', None)
-
         engine = create_engine('sqlite:///' + base_path + 'database.db')
         metadata = MetaData()
         table = Table(etl_table_name, metadata, autoload_with=engine)
-        print(final_data)
+        
         with engine.connect() as connection:
             
             for index, row in final_data.iterrows():
