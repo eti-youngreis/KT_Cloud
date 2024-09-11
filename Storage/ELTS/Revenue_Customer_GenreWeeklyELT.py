@@ -1,7 +1,7 @@
 import sqlite3
 import pandas as pd
 
-def loadELT():
+def load_ELT_revenue_customer_genre():
     try:
         # Step 1: Extract
         # Connect to the SQLite database
@@ -86,4 +86,4 @@ def loadELT():
         # Close the SQLite connection
         conn.close()
 
-loadELT()
+load_ELT_revenue_customer_genre()
