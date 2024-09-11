@@ -9,7 +9,7 @@ import pandas as pd
 def incremental_load():
     
     raise NotImplementedError()
-    
+
     current_user = "User" # when IAM is implemented, get current user for session details
     
     elt_table_name = 'album_total_time_downloads_elt'
@@ -31,7 +31,7 @@ def incremental_load():
             
             if inspector.has_table(elt_table_name):
                 result = True
-        print(result)
+        
         # If the table doesn't exists, create it
         if not result:
             print(f"Table '{elt_table_name}' doesn't exists, creating it.")
@@ -68,11 +68,18 @@ def incremental_load():
         invoice_line_table = invoice_line_table.withColumn("updated_at", F.to_timestamp(invoice_line_table["updated_at"], "yyyy-MM-dd"))
         
         invoice_line_table = invoice_line_table.filter(invoice_line_table["updated_at"] >  latest_timestamp)
+        conn = sqlite3.connect(base_path + "database.db")
+
+        track_table.toPandas().to_sql('tracks', con = conn, if_exists='append', index=False)
+        invoice_line_table.toPandas().to_sql('invoiceLines', con = conn, if_exists='append', index=False)
+
+        transformation_query = ""
         
-        track_table.show()
-        invoice_line_table.show()
+        conn.execute(transformation_query)
+        conn.commit()
         
     finally:
+        conn.close()
         spark.stop()
         
         

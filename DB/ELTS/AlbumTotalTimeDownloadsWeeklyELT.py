@@ -59,7 +59,6 @@ def load():
                     GROUP BY AlbumId
                 ) AS temp ON tracks.AlbumId = temp.AlbumId
                 GROUP BY tracks.AlbumId, temp.total_album_length;
-
                 """
         conn.execute(transformation_query)
         conn.commit()
