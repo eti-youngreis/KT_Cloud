@@ -74,7 +74,6 @@ class ObjectController:
             destination_bucket=destination_bucket,
         )
         return await self.object_service.copy_object(
-             
             bucket,
             key,
             destination_bucket,
@@ -92,15 +91,13 @@ class ObjectController:
         for tag_key, tag_value in tags.items():
             tag_obj.add_tag(tag_key, tag_value)
         return await self.object_service.put_object_tagging(
-              bucket, key, tags, version_id
+            bucket, key, tags, version_id
         )
 
     async def get_object_tagging(self, bucket: str, key: str, version_id: str = None):
         """Retrieve object tags."""
         validate_required_params(bucket=bucket, key=key)
-        return await self.object_service.get_object_tagging(
-              bucket, key, version_id
-        )
+        return await self.object_service.get_object_tagging(bucket, key, version_id)
 
     async def put_object_acl(
         self,
@@ -120,30 +117,24 @@ class ObjectController:
         acl = Acl(owner=owner)
         for perm in permissions:
             acl.add_permission(perm)
-        return await self.object_service.put_object_acl(
-              bucket, key, acl, version_id
-        )
+        return await self.object_service.put_object_acl(bucket, key, acl, version_id)
 
     async def get_object_acl(self, bucket: str, key: str, version_id: str = None):
         """Retrieve object access control list (ACL)."""
         validate_required_params(bucket=bucket, key=key)
-        return await self.object_service.get_object_acl(
-              bucket, key, version_id
-        )
+        return await self.object_service.get_object_acl(bucket, key, version_id)
 
     async def head_object(self, bucket: str, key: str, version_id: str = None):
         """Retrieve object metadata (without the actual content)."""
         validate_required_params(bucket=bucket, key=key)
-        return await self.object_service.head_object(  bucket, key, version_id)
+        return await self.object_service.head_object(bucket, key, version_id)
 
     async def get_object_attributes(
         self, bucket: str, key: str, version_id: str = None
     ):
         """Retrieve specific attributes of an object."""
         validate_required_params(bucket=bucket, key=key)
-        return await self.object_service.get_object_attributes(
-              bucket, key, version_id
-        )
+        return await self.object_service.get_object_attributes(bucket, key, version_id)
 
     def list(self, *args, **kwargs):
         """List storage objects."""
@@ -164,21 +155,70 @@ class ObjectController:
         """Set or update the legal hold status of an object."""
         pass
 
+    async def get_object_legal_hold(
+        self,
+        bucket: str,
+        key: str,
+        version_id: str = None,
+        is_sync: bool = True,
+    ):
+        """Set or update the legal hold status of an object."""
+        pass
+
     async def put_object_retention(
-        self, retention_mode, retain_until_date, version_id=None, is_sync=True
+        self,
+        bucket,
+        key,
+        retention_mode,
+        retain_until_date,
+        version_id=None,
+        is_sync=True,
     ):
         """Set or update the retention settings of an object."""
-        pass
+        validate_required_params(
+            bucket=bucket,
+            key=key,
+            retain_until_date=retain_until_date,
+            retention_mode=retention_mode,
+        )
+        return await self.object_service.put_object_retention(
+            bucket,
+            key,
+            retention_mode,
+            retain_until_date,
+            version_id=None,
+            is_sync=True,
+        )
 
-    async def get_object_retention(self, version_id=None, is_sync=True):
+    async def get_object_retention(self, bucket, key, version_id=None, is_sync=True):
         """Retrieve the retention settings of an object."""
-        pass
+        validate_required_params(bucket=bucket, key=key)
+        return await self.object_service.put_object_retention(
+            bucket=bucket,
+            key=key,
+            version_id=version_id,
+            is_sync=is_sync,
+        )
 
     async def put_object_lock_configuration(
-        self, object_lock_enabled, mode="GOVERNANCE", days=30, years=0, is_sync=True
+        self,
+        bucket,
+        object_lock_enabled,
+        mode="GOVERNANCE",
+        days=30,
+        years=0,
+        is_sync=True,
     ):
         """Set or update the object lock configuration."""
-        pass
+        validate_required_params(bucket=bucket, object_lock_enabled=object_lock_enabled)
+        return await self.object_service.put_object_lock_configuration(
+            bucket,
+            object_lock_enabled,
+            mode,
+            days,
+            years,
+            is_sync,
+        )
 
     async def get_object_lock_configuration(self):
         """Retrieve the object lock configuration."""

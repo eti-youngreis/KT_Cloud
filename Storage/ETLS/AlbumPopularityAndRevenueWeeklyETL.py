@@ -46,8 +46,11 @@ def load_album_popularity_and_revenue():
     conn = sqlite3.connect('C:/Users/user1/Desktop/0909/Album.db')
     cursor = conn.cursor()
 
-    # Create table if not exists
-    cursor.execute('''CREATE TABLE IF NOT EXISTS AlbumPopularityAndRevenue (
+    # Drop table if exists
+    cursor.execute('DROP TABLE IF EXISTS AlbumPopularityAndRevenue')
+
+    # Create table
+    cursor.execute('''CREATE TABLE AlbumPopularityAndRevenue (
                       AlbumId INTEGER,
                       Title TEXT,
                       ArtistId INTEGER,
@@ -67,7 +70,6 @@ def load_album_popularity_and_revenue():
 
     conn.commit()
     conn.close()
-
 
     # Stop Spark session
     spark.stop()
