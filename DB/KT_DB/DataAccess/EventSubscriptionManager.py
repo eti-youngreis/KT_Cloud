@@ -1,6 +1,7 @@
 from typing import Dict, Any, List
 import json
-from DB.DataAccess.DBManager import DBManager
+
+from DB.KT_DB.DataAccess.DBManager import DBManager
 
 
 class EventSubscriptionManager:
@@ -33,12 +34,13 @@ class EventSubscriptionManager:
             updates['source_type'] = source_type
 
         if updates:
-            self.db_manager.update(self.table_name, updates, f"subscription_name = {subscription_name}")
+            self.db_manager.update(self.table_name, updates, f'id = "{
+                                   subscription_name}"')
 
     def get(self, subscription_name: str) -> Dict[str, Any]:
         """Retrieve an event subscription from the database."""
-        result = self.db_manager.select(self.table_name, [
-                                        "subscription_name", "sources", "event_categories", "sns_topic_arn", "source_type"], f"subscription_name = '{subscription_name}'")
+        result = self.db_manager.select(table_name=self.table_name, columns=[
+                                        'metadata'], criteria=f'id = "{subscription_name}"')
         if result:
             result[subscription_name]['sources'] = json.loads(
                 result[subscription_name]['sources'])
@@ -46,16 +48,19 @@ class EventSubscriptionManager:
                 result[subscription_name]['event_categories'])
             return result[subscription_name]
         else:
-            raise FileNotFoundError(f'Subscription with name {subscription_name} not found.')
+            raise Exception(f'Subscription with name {
+                subscription_name} not found.')
 
     def delete(self, subscription_name: str) -> None:
         """Delete an event subscription from the database."""
-        self.db_manager.delete(self.table_name, f'subscription_name = {subscription_name}')
+        self.db_manager.delete(self.table_name, f'subscription_name = "{
+                               subscription_name}"')
 
     def get_all_subscriptions(self) -> Dict[str, Dict[str, Any]]:
         """Retrieve all event subscriptions from the database."""
-        results = self.db_manager.select(self.table_name, [
-                                         "subscription_name", "sources", "event_categories", "sns_topic_arn", "source_type"])
+        results = self.db_manager.select(
+            table_name=self.table_name, columns=['metadata'])
+        raise Exception("Check the format of the results")
         for key, value in results.items():
             value['sources'] = json.loads(value['sources'])
             value['event_categories'] = json.loads(value['event_categories'])

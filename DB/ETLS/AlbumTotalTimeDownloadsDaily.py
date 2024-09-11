@@ -45,6 +45,7 @@ def incremental_load():
         invoice_line_table = invoice_line_table.withColumn("updated_at", F.to_timestamp(invoice_line_table["updated_at"], "yyyy-MM-dd"))
         
         invoice_line_table = invoice_line_table.filter(invoice_line_table["updated_at"] >  latest_timestamp)
+        invoice_line_table = invoice_line_table.filter(invoice_line_table["updated_at"] >  latest_timestamp)
         
         # total time per album
         total_time_per_album = track_table.groupBy("AlbumId").agg(

@@ -40,6 +40,7 @@ def incremental_load():
                                                                 header=True, inferSchema=True)
         
         invoice_line_table = invoice_line_table.withColumn("updated_at", F.to_timestamp(invoice_line_table["updated_at"], "yyyy-MM-dd"))
+        invoice_line_table = invoice_line_table.withColumn("updated_at", F.to_timestamp(invoice_line_table["updated_at"], "yyyy-MM-dd"))
         
         # only invoice lines created within the range we are dealing with
         invoice_line_table = invoice_line_table.filter(invoice_line_table["updated_at"] > latest_timestamp)
