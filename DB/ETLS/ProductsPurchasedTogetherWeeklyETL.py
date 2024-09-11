@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 import sqlite3
+import pandas as pd
 from datetime import datetime
 
 # import KT_DB  # Assuming KT_DB is the library for SQLite operations
@@ -28,10 +29,13 @@ def load():
         # -----------------------------------------
         # Load the necessary tables from CSV files into Spark DataFrames.
         # This includes invoice line items, album details, and track details.
+
+        
         invoice_line_table = spark.read.csv(f'{path_to_tables}\\InvoiceLine.csv', header=True, inferSchema=True)
         album_table = spark.read.csv(f'{path_to_tables}\\Album.csv', header=True, inferSchema=True)
         track_table = spark.read.csv(f'{path_to_tables}\\Track.csv', header=True, inferSchema=True)
         
+
         # TRANSFORM (Join tables and identify common product bundles)
         # -----------------------------------------------------------
         # Join the invoice line table with track and album tables to enrich data with album and track information.
