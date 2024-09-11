@@ -94,7 +94,7 @@ def load_average_purchase_value_elt():
                    AVG(i.Total) AS avg_spend,
                    COALESCE(t.created_at, CURRENT_DATE) AS created_at,
                    CURRENT_DATE AS updated_at,
-                   'process:yael_karo_' || CURRENT_DATE AS updated_by
+                   'process:shana_levovitz_' || CURRENT_DATE AS updated_by
             FROM Customers_ELT c
             RIGHT JOIN Invoices_ELT i ON c.CustomerId = i.CustomerId
             LEFT JOIN tableTime t ON c.CustomerId = t.CustomerId
