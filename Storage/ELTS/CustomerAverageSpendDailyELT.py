@@ -3,7 +3,7 @@ from pyspark.sql import functions as F
 import sqlite3
 import pandas as pd
 
-def load_average_purchase_value_elt():
+def incremental_load_average_purchase_value_elt():
     # Step 1: Initialize Spark session
     spark = SparkSession.builder \
         .appName("ELT Template without KT_DB") \
@@ -113,4 +113,4 @@ def load_average_purchase_value_elt():
         spark.stop()  # Stop the Spark session
         
 if __name__ == "__main__":
-    load_average_purchase_value_elt()
+    incremental_load_average_purchase_value_elt()
