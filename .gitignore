@@ -5,4 +5,4 @@
 *.pyd
 *.db
 *.env
-/DB/csv's
+/DB/csvs
