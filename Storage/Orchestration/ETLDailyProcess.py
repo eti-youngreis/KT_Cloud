@@ -1,6 +1,7 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
+from ..ETLS.CustomerPurchaseFrequencyTotalSpendDailyETL import incremental_load
 # from ETLS import X
 
 # Define your Python functions here
@@ -15,6 +16,9 @@ def run_table_2():
 def run_table_3():
     # Code to generate Table 3
     pass
+
+def run_customer_purchase_frequency_total_spend():
+    incremental_load()
 
 # More functions for other tasks as necessary
 
@@ -60,6 +64,10 @@ with DAG(
         python_callable=run_table_2,
     )
 
+    task_run_customer_purchase_frequency_total_spend(
+        task_id='run_customer_purchase_frequency_total_spend',
+        python_callable=run_customer_purchase_frequency_total_spend,
+    )
     # Define dependencies
     task_1 >> task_2
     task_3 >> task_4

@@ -1,6 +1,8 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
+from ..ELTS.CustomerPurchaseFrequencyTotalSpendWeeklyELT import load_elt
+from ..ELTS.topSellingArtistsWeeklyELT import load_and_transform_data
 # from ELTS import X
 
 # Define your Python functions here
@@ -17,6 +19,10 @@ def run_table_3():
     pass
 
 # More functions for other tasks as necessary
+def run_customer_purchase_frequency_total_spend():
+    load_elt()
+def run_top_sell_artists():
+    load_and_transform_data()
 
 # Define default arguments for the DAG
 default_args = {
@@ -60,6 +66,15 @@ with DAG(
         python_callable=run_table_2,
     )
 
+
+    task_customer_purchase_frequency_total_spend(
+        task_id='run_customer_purchase_frequency_total_spend',
+        python_callable=run_customer_purchase_frequency_total_spend,
+    )
+    task_run_top_sell_artists(
+        task_id='run_top_sell_artists',
+        python_callable=run_top_sell_artists,
+    )
     # Define dependencies
     task_1 >> task_2
     task_3 >> task_4
