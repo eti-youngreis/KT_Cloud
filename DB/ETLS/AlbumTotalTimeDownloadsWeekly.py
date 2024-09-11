@@ -34,7 +34,9 @@ def load():
         
         invoice_line_table = invoice_line_table.filter(F.col('status') == F.lit('active'))
         # total time per album
-        total_time_per_album = track_table.groupBy("AlbumId").agg(
+        active_track_table = track_table.filter(track_table['status'] == F.lit('active'))
+        
+        total_time_per_album = active_track_table.groupBy("AlbumId").agg(
             F.sum("Milliseconds").alias("total_album_length")
         )
 
