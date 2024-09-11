@@ -6,6 +6,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from DB.ELTS.TrackPlayCountandRevenueContributionDailyELT import incremental_load as incrementel_load_tk_1
 from DB.ELTS.BestSellingAlbumsandTrackPopularitybyCountryDailyELT import incremental_load as incrementel_load_tk_2
+from DB.ETLS.popularityTrackByRegionWeekly import load_popularity_track
 
 # import DB.ELTS.TrackPlayCountandRevenueContributionDailyELT
 # from ELTS import X
@@ -28,6 +29,9 @@ def  load_track_play_count():
 
 def  load_best_selling_albums():
     incrementel_load_tk_2()
+
+def  load_popularity_track_by_region():
+    load_popularity_track()
 # More functions for other tasks as necessary
 
 # Define default arguments for the DAG
@@ -71,6 +75,10 @@ with DAG(
         python_callable=load_best_selling_albums,
     )
 
+    popularity_track = PythonOperator(
+        task_id='load_popularity_track',
+        python_callable=load_popularity_track_by_region,
+    )
 
     # Dependent tasks that run after Table 1, 3, 5
     task_2 = PythonOperator(
