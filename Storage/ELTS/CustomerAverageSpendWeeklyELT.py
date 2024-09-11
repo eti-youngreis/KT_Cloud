@@ -1,70 +1,63 @@
-from pyspark.sql import SparkSession, functions as F
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
 import sqlite3
-from pyspark.sql.types import StringType
+import pandas as pd
 
-def load_customers_average_spend_lifetime_value_elt():
+def load_average_purchase_value_elt():
     # Step 1: Initialize Spark session
     spark = SparkSession.builder \
-        .appName("ELT - Customer Average Spend and Lifetime Value") \
+        .appName("ELT Template without KT_DB") \
         .getOrCreate()
-
-    # Step 2: Establish SQLite connection
-    conn = sqlite3.connect('./ELT_customer_data.db')  # Connect to SQLite database
-
+    # Step 2: Establish SQLite connection using sqlite3
+    conn = sqlite3.connect('./Chinook.db')  # Connect to the SQLite database
     try:
-        # -----------------------------
-        # E - Extract
-        # -----------------------------
-        # Read the relevant CSV files
-        customers_df = spark.read.csv('D:\\בוטקאמפ\\vastProject\\csv\\Customer.csv', header=True, inferSchema=True)
-        invoices_df = spark.read.csv('D:\\בוטקאמפ\\vastProject\\csv\\Invoice.csv', header=True, inferSchema=True)
-        invoice_lines_df = spark.read.csv('D:\\בוטקאמפ\\vastProject\\csv\\InvoiceLine.csv', header=True, inferSchema=True)
+        # EXTRACT (Loading CSVs from local storage)
+        # -----------------------------------------------
+        # Load the main table (e.g., Customers, Invoices, InvoiceLines)
+        customers_df = spark.read.csv("C:/Users/shana/Desktop/ETL/Customer.csv", header=True, inferSchema=True)
+        invoices_df = spark.read.csv('C:/Users/shana/Desktop/ETL/Invoice.csv', header=True, inferSchema=True)
+  
+        # LOAD (Save the raw data into SQLite without transformation)
+        # -----------------------------------------------------------
+        # Convert Spark DataFrames to Pandas DataFrames before loading to SQLite
+        # invoices_df = invoices_df.withColumn('InvoiceDate', F.to_date(F.col('InvoiceDate'), 'dd/MM/yyyy'))
+        # customers_df = customers_df.withColumn('created_at', F.to_date(F.col('created_at'), 'dd/MM/yyyy')) 
 
-        # Remove the BirthDate casting since that column does not exist
-        # -----------------------------
-        # L - Load
-        # -----------------------------
-        # Load raw data into SQLite (using Pandas to convert Spark DataFrames)
-        customers_df = customers_df.toPandas()
-        customers_df.to_sql('Customers', conn, if_exists='replace', index=False)
-        invoices_df = invoices_df.toPandas()
-        invoices_df.to_sql('Invoices', conn, if_exists='replace', index=False)
-        invoice_lines_df = invoice_lines_df.toPandas()
-        invoice_lines_df.to_sql('InvoiceLines', conn, if_exists='replace', index=False)
+        customers_pd = customers_df.toPandas()
+        invoices_pd = invoices_df.toPandas()
 
-        conn.execute("DROP TABLE IF EXISTS customer_spend_lifetime_value_etl;")
+        customers_pd['created_at'] = pd.to_datetime(customers_pd['created_at'], format='%d/%m/%Y %H:%M')
+        invoices_pd['InvoiceDate'] = pd.to_datetime(invoices_pd['InvoiceDate'], format='%d/%m/%Y %H:%M')
 
-        # -----------------------------
-        # T - Transform
-        # -----------------------------
-        # Write a SQL query to perform transformations (joining and aggregation)
-        transform_query = """
-        CREATE TABLE customer_spend_lifetime_value_etl AS 
-        SELECT c.CustomerId, c.FirstName, c.LastName,
-               AVG(il.UnitPrice * il.Quantity) AS AvgSpendPerInvoice,
-               SUM(il.UnitPrice * il.Quantity) AS LifetimeValue,
-               CURRENT_DATE AS created_at,
-               CURRENT_DATE AS updated_at,
-               'process:yehudit_schwartzman_' || CURRENT_DATE AS updated_by
-        FROM customers c
-        JOIN invoices i ON c.CustomerId = i.CustomerId
-        JOIN invoicelines il ON i.InvoiceId = il.InvoiceId
-        GROUP BY c.CustomerId
-        """
-
-        # Execute the transformation query to create the final table
-        conn.execute(transform_query)
-
-        # Commit the transformation
+        # Load raw data into SQLite
+        customers_pd.to_sql('Customers_ELT', conn, if_exists='replace', index=False)
+        invoices_pd.to_sql('Invoices_ELT', conn, if_exists='replace', index=False)
+        # TRANSFORM (Perform transformations with SQL queries)
+        # ----------------------------------------------------
+        # Join tables and calculate total purchase and average purchase per customer
+        # Apply the transformations using SQLite SQL queries
+        drop_query="""DROP TABLE IF EXISTS customer_invoice_avg_elt"""
+        conn.execute(drop_query)
         conn.commit()
-
-        # Print results to verify the transformed data
-        print("customer_spend_lifetime_value_etl:", conn.execute("SELECT * FROM 'customer_spend_lifetime_value_etl'").fetchall())
-        print()
+        transform_query = """
+            CREATE TABLE customer_invoice_avg_elt AS 
+            SELECT c.CustomerId,strftime('%m', i.InvoiceDate)  as InvoiceMonth,
+                AVG(i.Total) AS avg_spend,
+                CURRENT_DATE AS created_at,
+                CURRENT_DATE AS updated_at,
+                'process:shana_levovitz_' || CURRENT_DATE AS updated_by
+            FROM Customers_ELT c
+            JOIN Invoices_ELT i ON c.CustomerId = i.CustomerId
+            GROUP BY c.CustomerId,InvoiceMonth
+        """
+        # Execute the transformation query
+        conn.execute(transform_query)
+        # Commit the changes to the database
+        conn.commit()
+        print("customer_invoice_avg:", conn.execute("SELECT * FROM 'customer_invoice_avg_elt'").fetchall())
     finally:
         # Step 3: Close the SQLite connection and stop Spark session
         conn.close()  # Close the SQLite connection
         spark.stop()  # Stop the Spark session
-
 if __name__ == "__main__":
-    load_customers_average_spend_lifetime_value_elt()
+    load_average_purchase_value_elt()
