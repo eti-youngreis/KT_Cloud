@@ -27,14 +27,17 @@ def load():
             .join(invoice_df, invoice_line_df.InvoiceId==invoice_df.InvoiceId) \
             .join(customer_df, invoice_df.CustomerId==customer_df.CustomerId)
 
-        sales_contribution = joined_df.groupBy("TrackId", "Name", "AlbumId") \
-            .agg(sum("UnitPrice").alias("SalesContribution"))
+        sales_contribution = joined_df.groupBy("TrackId").sum("UnitPrice").withColumnRenamed("sum(UnitPrice)", "TotalSales")
 
         # Add metadata
         current_user = os.getenv('USER')
         sales_contribution = sales_contribution.withColumn("created_at", current_date()) \
             .withColumn("updated_at", current_date()) \
             .withColumn("updated_by", lit(f"process:{current_user}"))
+
+        # Applying Window function to rank customers by total spend
+        window_spec = Window.orderBy(F.desc("TotalSales"))
+        sales_contribution = sales_contribution.withColumn("rank", F.rank().over(window_spec))
 
         # LOAD (Save transformed data into SQLite using KT_DB)
         # ----------------------------------------------------
@@ -46,4 +49,3 @@ def load():
     finally:
         # Step 3: Close the SQLite connection and stop Spark session
         KT_DB.close(conn)  # Assuming KT_DB has a close() method
-        spark.stop()       
