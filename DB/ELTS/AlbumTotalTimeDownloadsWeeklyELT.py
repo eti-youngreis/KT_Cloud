@@ -42,21 +42,24 @@ def load():
         transformation_query = f"""
                 INSERT INTO {elt_table_name} (AlbumId, total_album_downloads, total_album_length, created_at, updated_at, updated_by)
                 SELECT 
-                    t.AlbumId, 
-                    SUM(il.Quantity) AS total_album_downloads, 
+                    temp.AlbumId, 
+                    SUM(il.Quantity) AS total_album_downloads,
                     temp.total_album_length,
                     CURRENT_DATE AS created_at,  
                     CURRENT_DATE AS updated_at, 
-                    'WeeklyAlbumTotalsELT:{current_user}' AS updated_by    
-                FROM invoiceLines il
-                right JOIN tracks t ON il.TrackId = t.TrackId
-                JOIN (
+                    'WeeklyAlbumTotalsELT:{current_user}' AS updated_by
+                FROM (select * from invoiceLines where status = 'active') as il
+                left JOIN (select DISTINCT(TrackId), AlbumId from tracks) as tracks on
+                il.TrackId = tracks.TrackId
+                right join (
                     SELECT AlbumId, 
                         SUM(Milliseconds) AS total_album_length
                     FROM tracks
+                    where tracks.status = "active"
                     GROUP BY AlbumId
-                ) AS temp ON t.AlbumId = temp.AlbumId
-                GROUP BY t.AlbumId, temp.total_album_length;
+                ) AS temp ON tracks.AlbumId = temp.AlbumId
+                GROUP BY tracks.AlbumId, temp.total_album_length;
+
                 """
         conn.execute(transformation_query)
         conn.commit()

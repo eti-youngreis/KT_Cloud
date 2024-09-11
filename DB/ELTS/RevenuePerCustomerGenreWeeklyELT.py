@@ -51,9 +51,9 @@ def load():
                         CURRENT_DATE AS created_at,  
                         CURRENT_DATE AS updated_at, 
                         'WeeklyCustomerRevenuePerGenre:{current_user}' AS updated_by
-                    FROM invoiceLines il
+                    FROM (select * from invoiceLines where status = 'active') as il
                     JOIN invoice i ON il.InvoiceId = i.InvoiceId
-                    JOIN tracks t ON il.TrackId = t.TrackId
+                    JOIN (select distinct(TrackId), GenreId from tracks) as t on il.TrackId = t.TrackId
                     GROUP BY i.CustomerId, t.GenreId;
                 """
                 
@@ -62,4 +62,6 @@ def load():
     finally:
         conn.close()
         spark.stop()
-        
+
+if __name__== "__main__":
+    load()

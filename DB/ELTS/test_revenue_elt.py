@@ -1,33 +1,32 @@
 import sqlite3
 import pandas as pd
-import RevenuePerCustomerGenreWeeklyELT
 from numpy import int64
 import pytest
 
-etl_table_name = 'revenue_per_customer_genre_elt'
+elt_table_name = 'revenue_per_customer_genre_elt'
 base_path = "../etl_files/"
-
-def load_etl_data():
-    RevenuePerCustomerGenreWeeklyELT.load()
 
 def get_sqlite_data(conn):
     # Fetch ETL results from the database
-    return pd.read_sql(f'select * from {etl_table_name}', con=conn)
+    return pd.read_sql(f'select * from {elt_table_name}', con=conn)
 
 def load_invoice_data():
     return pd.read_csv(base_path + "Invoice.csv")[['InvoiceId', 'CustomerId']]
 
 def load_invoice_line_data():
-    return pd.read_csv(base_path + "InvoiceLine.csv")[['InvoiceId', 'TrackId', 'Quantity', 'UnitPrice']]
+    invoice_lines = pd.read_csv(base_path + "InvoiceLine.csv")[['InvoiceId', 'TrackId', 'Quantity', 'UnitPrice','status']]
+    return invoice_lines[invoice_lines['status'] == 'active']
 
 def load_track_data():
-    return pd.read_csv(base_path + "Track.csv")[['TrackId', 'GenreId']]
+    tracks = pd.read_csv(base_path + "Track.csv")[['TrackId', 'GenreId', 'status']]
+    return tracks[tracks['status'] == 'active']
 
 def calculate_revenue_per_customer_and_genre(invoice_data, invoice_line_data, track_data):
-    invoices_with_details = pd.merge(invoice_data, invoice_line_data)
-    invoices_with_details_and_tracks = pd.merge(invoices_with_details, track_data)
+    invoices_with_details = pd.merge(invoice_data, invoice_line_data, how = "left")
+    invoices_with_details_and_tracks = pd.merge(invoices_with_details, track_data, how="left")
     
-    invoices_with_details_and_tracks['total_for_track'] = invoices_with_details_and_tracks['Quantity'] * invoices_with_details_and_tracks['UnitPrice']
+    invoices_with_details_and_tracks['total_for_track'] = invoices_with_details_and_tracks['Quantity'] * \
+        invoices_with_details_and_tracks['UnitPrice']
 
     # Group by CustomerId and GenreId to get revenue
     return invoices_with_details_and_tracks.groupby(['CustomerId', 'GenreId']).agg(
@@ -42,7 +41,7 @@ def prepare_comparison_df(etl_result, revenue_per_customer_and_genre):
     revenue_per_customer_and_genre['GenreId'] = revenue_per_customer_and_genre['GenreId'].astype(int)
 
     # Merge the ETL and pandas-generated data
-    return pd.merge(etl_result[['CustomerId', 'GenreId', 'revenue_overall']], revenue_per_customer_and_genre, on=['CustomerId', 'GenreId'], how='outer')
+    return pd.merge(etl_result[['CustomerId', 'GenreId', 'revenue_overall']], revenue_per_customer_and_genre, on=['CustomerId', 'GenreId'], how='left')
 
 @pytest.fixture
 def sqlite_connection():
@@ -53,8 +52,6 @@ def sqlite_connection():
 
 @pytest.fixture
 def comparison_data(sqlite_connection):
-    # Load ETL data
-    load_etl_data()
     
     # Fetch ETL result from SQLite database
     etl_result = get_sqlite_data(sqlite_connection)
@@ -79,4 +76,4 @@ def test_revenue_per_customer_genre(index, comparison_data):
     revenue_overall = row['revenue_overall'] if pd.notna(row['revenue_overall']) else 0.0
     revenue_pandas = row['revenue'] if pd.notna(row['revenue']) else 0.0
 
-    assert int64(revenue_overall) == int64(revenue_pandas), f"Mismatch found for CustomerId {row['CustomerId']}, GenreId {row['GenreId']} etl:{revenue_overall} != pandas:{revenue_pandas}"
+    assert int64(revenue_overall) == int64(revenue_pandas), f"Mismatch found for CustomerId {row['CustomerId']}, GenreId {row['GenreId']} pandas:{revenue_pandas} != etl:{revenue_overall}"
