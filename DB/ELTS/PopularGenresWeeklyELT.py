@@ -3,7 +3,7 @@ from datetime import datetime
 import pandas as pd
 
 
-def load_popular_genres_by_city():
+def popular_genres_by_city_full_elt():
     conn = sqlite3.connect('DB/etl_db.db')
     cursor = conn.cursor()
     try:
@@ -62,5 +62,5 @@ def load_popular_genres_by_city():
 
 
 if __name__ == "__main__":
-    load_popular_genres_by_city()
+    popular_genres_by_city_full_elt()
     

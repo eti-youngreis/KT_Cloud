@@ -87,7 +87,6 @@ def album_popularity_incremental_elt():
         create_temp_table_query = create_temp_table_query.strip().replace('\n', '').replace('  ', ' ')
         delete_query = delete_query.strip().replace('\n', '').replace('  ', ' ')
         insert_query = insert_query.strip().replace('\n', '').replace('  ', ' ')
-        print("striped")
         cursor.execute(create_temp_table_query)
         conn.commit()
         cursor.execute(delete_query)

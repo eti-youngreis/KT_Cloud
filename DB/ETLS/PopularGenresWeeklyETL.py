@@ -7,7 +7,7 @@ import sqlite3
 import getpass  # For getting the username for metadata
 
 
-def load():
+def popular_genres_by_city_full_etl():
     """
     ETL process to calculate Most Popular Genres by Customer Segment.
     """
@@ -131,4 +131,5 @@ def load():
         spark.stop()
 
 
-load()
+if __name__  == "__main__":
+    popular_genres_by_city_full_etl()

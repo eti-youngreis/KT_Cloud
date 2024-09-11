@@ -1,6 +1,7 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
+from DB.ETLS import AlbumPopularityDailyETL, PopularGenresDailyETL
 # from ETLS import X
 
 # Define your Python functions here
@@ -15,6 +16,12 @@ def run_table_2():
 def run_table_3():
     # Code to generate Table 3
     pass
+
+def run_album_popularity_and_revenue():
+    AlbumPopularityDailyETL.album_popularity_incremental_etl()
+
+def run_genres_popularity():
+    PopularGenresDailyETL.popular_genres_by_city_incremental_etl()
 
 # More functions for other tasks as necessary
 
@@ -52,6 +59,16 @@ with DAG(
     task_5 = PythonOperator(
         task_id='run_table_5',
         python_callable=run_table_5,
+    )
+    
+    task_album_popularity_and_revenue = PythonOperator(
+        task_id = 'run_album_popularity_and_revenue',
+        python_callable = run_album_popularity_and_revenue
+    )
+    
+    task_genres_popularity = PythonOperator(
+        task_id = 'run_genres_popularity',
+        python_callable = run_genres_popularity
     )
 
     # Dependent tasks that run after Table 1, 3, 5

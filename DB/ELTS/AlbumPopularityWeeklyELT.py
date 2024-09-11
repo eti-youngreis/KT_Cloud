@@ -11,7 +11,7 @@ import pandas as pd
 
 
 
-def load():
+def album_popularity_full_elt():
     """
     ELT process to calculate Album Popularity and Revenue.
     The process extracts data from CSV files, transforms the data by calculating total revenue
@@ -111,4 +111,4 @@ def load():
         spark.stop()
     
 if __name__ == "__main__":
-    load()
+    album_popularity_full_elt()
