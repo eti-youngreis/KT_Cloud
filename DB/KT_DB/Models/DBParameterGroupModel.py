@@ -15,10 +15,10 @@ class DBParameterGroupModel(ParameterGroupModel):
         """
         # Loading default parameters - can be replaced with actual parameters
         parameters = []
-        parameters.append(ParameterModel('max_connections', 100))
-        parameters.append(ParameterModel('innodb_buffer_pool_size', '128M'))
-        parameters.append(ParameterModel('character_set_server', 'utf8'))
-        parameters.append(ParameterModel('time_zone', 'UTC'))
+        parameters.append(ParameterModel('max_connections', 100).to_dict())
+        parameters.append(ParameterModel('innodb_buffer_pool_size', '128M').to_dict())
+        parameters.append(ParameterModel('character_set_server', 'utf8').to_dict())
+        parameters.append(ParameterModel('time_zone', 'UTC').to_dict())
         # for p in parameters:
         #     p.save_to_db(conn)
         return parameters

@@ -1,7 +1,12 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
-# from ETLS import X
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+from DB.ETLS.TrackPlayCountandRevenueContributionWeeklyETL import load as load_tk_1
+from DB.ETLS.BestSellingAlbumsandTrackPopularitybyCountryWeeklyETL import load as load_tk_2
+# from ELTS import X
 
 # Define your Python functions here
 def run_table_1():
@@ -15,7 +20,11 @@ def run_table_2():
 def run_table_3():
     # Code to generate Table 3
     pass
+def  load_track_play_count():
+    load_tk_1()
 
+def  load_best_selling_albums():
+    load_tk_2()
 # More functions for other tasks as necessary
 
 # Define default arguments for the DAG
@@ -49,9 +58,14 @@ with DAG(
     )
     
     # Add more independent tasks here
-    task_5 = PythonOperator(
-        task_id='run_table_5',
-        python_callable=run_table_5,
+    track_play_count = PythonOperator(
+        task_id='load_track_play_count',
+        python_callable=load_track_play_count,
+    )
+
+    best_selling_albums = PythonOperator(
+        task_id='load_best_selling_albums',
+        python_callable=load_best_selling_albums,
     )
 
     # Dependent tasks that run after Table 1, 3, 5
@@ -61,8 +75,8 @@ with DAG(
     )
 
     # Define dependencies
-    task_1 >> task_2
-    task_3 >> task_4
-    task_5 >> task_6
+    # task_1 >> task_2
+    # task_3 >> task_4
+    # task_5 >> task_6
 
     # You can add more tasks and dependencies following this pattern.
