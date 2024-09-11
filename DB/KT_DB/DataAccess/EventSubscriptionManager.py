@@ -1,6 +1,7 @@
 from typing import Dict, Any, List
 import json
-from DB.DataAccess.DBManager import DBManager
+
+from DB.KT_DB.DataAccess.DBManager import DBManager
 
 
 class EventSubscriptionManager:
