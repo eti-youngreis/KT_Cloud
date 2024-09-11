@@ -15,9 +15,9 @@ class DBClusterParameterGroupModel(ParameterGroupModel):
         """
         # Loading default parameters - can be replaced with actual parameters
         parameters = []
-        parameters.append(ParameterModel('backup_retention_period', 7))
-        parameters.append(ParameterModel('preferred_backup_window', '03:00-03:30'))
-        parameters.append(ParameterModel('preferred_maintenance_window', 'Mon:00:00-Mon:00:30'))
+        parameters.append(ParameterModel('backup_retention_period', 7).to_dict())
+        parameters.append(ParameterModel('preferred_backup_window', '03:00-03:30').to_dict())
+        parameters.append(ParameterModel('preferred_maintenance_window', 'Mon:00:00-Mon:00:30').to_dict())
         # for p in parameters:
         #     p.save_to_db(conn)
         return parameters

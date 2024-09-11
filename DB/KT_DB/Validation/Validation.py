@@ -72,3 +72,7 @@ def is_valid_user_group_name(input_string):
         return False
     pattern = r'^[a-zA-Z0-9_+=,.@-]+$'
     return re.match(pattern, input_string)
+
+def is_valid(value, list_valid, name):
+    if not value in list_valid:
+        raise ValueError(f"value {value} is invalid for {name}")

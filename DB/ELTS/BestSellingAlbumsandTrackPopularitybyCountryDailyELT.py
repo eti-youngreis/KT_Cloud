@@ -31,11 +31,11 @@ def incremental_load():
         Albums = spark.read.csv('DB/ETLS/data/Album.csv', header=True, inferSchema=True)
         Customers = spark.read.csv('DB/ETLS/data/Customer.csv', header=True, inferSchema=True)
 
-        Tracks = Tracks.filter(col("created_at") > last_processed_timestamp)
-        InvoiceLines = InvoiceLines.filter(col("created_at") > last_processed_timestamp)
-        Invoices = Invoices.filter(col("created_at") > last_processed_timestamp)
-        Albums = Albums.filter(col("created_at") > last_processed_timestamp)
-        Customers = Customers.filter(col("created_at") > last_processed_timestamp)
+        Tracks = Tracks.filter(col("updated_at") > last_processed_timestamp)
+        InvoiceLines = InvoiceLines.filter(col("updated_at") > last_processed_timestamp)
+        Invoices = Invoices.filter(col("updated_at") > last_processed_timestamp)
+        Albums = Albums.filter(col("updated_at") > last_processed_timestamp)
+        Customers = Customers.filter(col("updated_at") > last_processed_timestamp)
 
 
 
@@ -48,6 +48,7 @@ def incremental_load():
 
         # TRANSFORM (SQL transformation in the database)
         query = """
+        CREATE TEMP TABLE TempDeletedRowsInfo AS
         WITH AlbumSales AS (
             SELECT 
                 c.Country, 
@@ -109,7 +110,24 @@ def incremental_load():
         ORDER BY 
             b.Country, b.total_album_sales DESC;
         """
-        
+        conn.execute(query)
+        conn.commit()
+
+        query_delete = """
+        DELETE FROM Best_Selling_Albums_And_Track_Popularity_By_Country
+        WHERE TrackId IN (SELECT TrackId FROM TempDeletedRowsInfo)
+        """
+        conn.execute(query_delete)
+        conn.commit()
+
+        # INSERT new data into the main table from the temp table
+        query_insert = """
+        INSERT INTO Best_Selling_Albums_And_Track_Popularity_By_Country (TrackId, Name, total_play_count, revenue_contribution)
+        SELECT TrackId, Name, total_play_count, revenue_contribution
+        FROM TempDeletedRowsInfo
+        """
+        conn.execute(query_insert)
+        conn.commit()
         # Execute query to transform the data
         transformed_data = pd.read_sql_query(query, conn)
 
