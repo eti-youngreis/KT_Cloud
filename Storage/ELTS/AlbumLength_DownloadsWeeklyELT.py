@@ -1,7 +1,7 @@
 import sqlite3
 import pandas as pd
 
-def load_and_transform():
+def load_ELT_album_length_downloads():
     try:
         # Step 1: Extract and Load
         print("Loading CSV files into SQLite...")
@@ -97,4 +97,4 @@ def load_and_transform():
         conn.close()
 
 # Run the load and transform function
-load_and_transform()
+load_ELT_album_length_downloads()
