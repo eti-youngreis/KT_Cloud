@@ -3,7 +3,7 @@ from pyspark.sql.functions import count, avg, current_timestamp, lit, date_forma
 import sqlite3
 import pandas as pd
 
-def incremental_load():
+def customer_loyaltyDailyETL():
     # Initialize Spark session
     spark = SparkSession.builder.appName("CustomerLoyaltyETL_Incremental").getOrCreate()
 
@@ -27,14 +27,14 @@ def incremental_load():
                 LoyaltyScore INTEGER,
                 AverageInvoiceSize REAL,
                 created_at TEXT,
-                updated_at TEXT,
+                UpdatedAt TEXT,
                 updated_by TEXT
             )
         """)
 
     # Get the latest updated_at timestamp
     if table_exists:
-        cursor.execute("SELECT MAX(updated_at) FROM customer_loyalty")
+        cursor.execute("SELECT MAX(UpdatedAt) FROM customer_loyalty")
         latest_updated_at = cursor.fetchone()[0]
         if latest_updated_at is None:
             latest_updated_at = '1900-01-01 00:00:00'
@@ -66,7 +66,7 @@ def incremental_load():
 
         # Add metadata columns
         result_df = result_df.withColumn("created_at", date_format(current_timestamp(), "yyyy-MM-dd HH:mm:ss")) \
-            .withColumn("updated_at", date_format(current_timestamp(), "yyyy-MM-dd HH:mm:ss")) \
+            .withColumn("UpdatedAt", date_format(current_timestamp(), "yyyy-MM-dd HH:mm:ss")) \
             .withColumn("updated_by", lit("process:your_user_name"))
 
         # Convert the Spark DataFrame to a pandas DataFrame for loading into SQLite
@@ -92,4 +92,4 @@ def incremental_load():
         # Close the SQLite connection
         conn.close()
 
-incremental_load()
+customer_loyaltyDailyETL()
