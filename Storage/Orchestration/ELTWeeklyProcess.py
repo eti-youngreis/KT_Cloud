@@ -5,6 +5,8 @@ from ..ELTS.CustomerPurchaseFrequencyTotalSpendWeeklyELT import load_elt
 from ..ELTS.topSellingArtistsWeeklyELT import load_and_transform_data
 from ..ELTS.AlbumLength_DownloadsWeeklyELT import load_ELT_album_length_downloads
 from ..ELTS.Revenue_Customer_GenreWeeklyELT import load_ELT_revenue_customer_genre
+from ..ELTS.PopularGenresbyCustomerSegmentWeeklyETL import load_popular_genres_by_city_ETL
+from ..ELTS.AlbumPopularityAndRevenueWeeklyETL import load_album_popularity_and_revenue_ETL
 
 # from ELTS import X
 
@@ -21,6 +23,10 @@ def run_table_3():
     # Code to generate Table 3
     pass
 
+def run_popular_genres_by_city():
+    load_popular_genres_by_city_ETL()
+def run_album_popularity_and_revenue():
+    load_album_popularity_and_revenue_ETL()
 # More functions for other tasks as necessary
 def run_customer_purchase_frequency_total_spend():
     load_elt()
@@ -75,6 +81,14 @@ with DAG(
         python_callable=run_table_2,
     )
 
+    task_popular_genres_by_city= PythonOperator(
+        task_id='run_popular_genres_by_city',
+        python_callable=run_popular_genres_by_city,
+    )
+    task_album_popularity_and_revenue= PythonOperator(
+        task_id='run_album_popularity_and_revenue',
+        python_callable=run_album_popularity_and_revenue,
+    )
 
     task_customer_purchase_frequency_total_spend(
         task_id='run_customer_purchase_frequency_total_spend',
