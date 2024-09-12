@@ -70,7 +70,7 @@ with DAG(
         python_callable=run_table_2,
     )
 
-    task_run_customer_purchase_frequency_total_spend(
+    task_run_customer_purchase_frequency_total_spend=PythonOperator(
         task_id='run_customer_purchase_frequency_total_spend',
         python_callable=run_customer_purchase_frequency_total_spend,
     )
