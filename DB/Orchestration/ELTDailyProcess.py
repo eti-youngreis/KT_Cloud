@@ -1,9 +1,9 @@
-from airflow import DAG
+from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
 # from ELTS import X
-from ELTS import AlbumTotalTimeDownloadsDailyELT
-from ELTS import RevenuePerCustomerGenreDailyELT
+from ..ETLS.AlbumTotalTimeDownloadsDaily import incremental_load
+from ..ELTS.RevenuePerCustomerGenreDailyELT import incremental_load as incremental_load_revenue
 # Define your Python functions here
 def run_table_1():
     # Code to generate Table 1
@@ -19,10 +19,10 @@ def run_table_3():
 
 # More functions for other tasks as necessary
 def run_album_totals():
-    AlbumTotalTimeDownloadsDailyELT.incremental_load()
+    incremental_load()
     
 def run_customer_genre_revenue():
-    RevenuePerCustomerGenreDailyELT.incremental_load()
+    incremental_load_revenue()
     
 # Define default arguments for the DAG
 default_args = {
