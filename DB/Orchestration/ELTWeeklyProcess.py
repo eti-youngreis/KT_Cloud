@@ -6,16 +6,16 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from DB.ELTS.TrackPlayCountandRevenueContributionWeeklyELT import load as load_tk_1
 from DB.ELTS.BestSellingAlbumsandTrackPopularitybyCountryWeeklyELT import load as load_tk_2
+from DB.ELTS.GenrePopularityAndAverageSalesWeeklyELT import load_genre_popularity_and_average_sales
+from DB.ELTS.SalesTrendsWeeklyELT import load_sales_trends
 # from ELTS import X
 
 # Define your Python functions here
-def run_table_1():
-    # Code to generate Table 1
-    pass
+def run_genre_popularity_and_average_sales():
+    load_genre_popularity_and_average_sales()
 
-def run_table_2():
-    # Code to generate Table 2
-    pass
+def run_sales_trends():
+    load_sales_trends()
 
 def run_table_3():
     # Code to generate Table 3
@@ -47,14 +47,14 @@ with DAG(
 ) as dag:
 
     # Task 1 (Independent tasks that run first)
-    task_1 = PythonOperator(
-        task_id='run_table_1',
-        python_callable=run_table_1,
+    task_genre_popularity_and_average_sales = PythonOperator(
+        task_id='run_genre_popularity_and_average_sales',
+        python_callable = run_genre_popularity_and_average_sales,
     )
     
-    task_3 = PythonOperator(
-        task_id='run_table_3',
-        python_callable=run_table_3,
+    task_sales_trends = PythonOperator(
+        task_id='run_sales_trends',
+        python_callable = run_sales_trends,
     )
     
     # Add more independent tasks here

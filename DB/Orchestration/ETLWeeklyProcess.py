@@ -6,12 +6,12 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from DB.ETLS.TrackPlayCountandRevenueContributionWeeklyETL import load as load_tk_1
 from DB.ETLS.BestSellingAlbumsandTrackPopularitybyCountryWeeklyETL import load as load_tk_2
+from DB.ETLS.GenrePopularityAndAverageSalesWeeklyETL import load_genre_popularity_and_average_sales
 # from ELTS import X
 
 # Define your Python functions here
-def run_table_1():
-    # Code to generate Table 1
-    pass
+def run_genre_popularity_and_average_sales():
+    load_genre_popularity_and_average_sales()
 
 def run_table_2():
     # Code to generate Table 2
@@ -47,9 +47,9 @@ with DAG(
 ) as dag:
 
     # Task 1 (Independent tasks that run first)
-    task_1 = PythonOperator(
-        task_id='run_table_1',
-        python_callable=run_table_1,
+    task_run_genre_popularity_and_average_sales = PythonOperator(
+        task_id='run_genre_popularity_and_average_sales',
+        python_callable = run_genre_popularity_and_average_sales,
     )
     
     task_3 = PythonOperator(

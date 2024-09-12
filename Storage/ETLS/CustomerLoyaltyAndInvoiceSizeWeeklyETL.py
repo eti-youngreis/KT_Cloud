@@ -1,14 +1,13 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import count, avg, current_timestamp, lit, date_format
 import sqlite3
-import pandas as pd
 
 def load():
     # Initialize Spark session
     spark = SparkSession.builder.appName("CustomerLoyaltyETL_FullLoad").getOrCreate()
 
     # Open SQLite connection
-    conn = sqlite3.connect("C:\\Users\\User\\Desktop\\database.db")
+    conn = sqlite3.connect("C:\\Users\\User\\Desktop\\customer_loyalty.db")
 
     try:
         # Drop and create customer_loyalty table

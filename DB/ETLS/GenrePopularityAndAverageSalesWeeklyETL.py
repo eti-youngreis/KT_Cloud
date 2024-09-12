@@ -3,7 +3,7 @@ from pyspark.sql import functions as F
 import sqlite3
 from datetime import datetime
 
-def load():
+def load_genre_popularity_and_average_sales():
     # Step 1: Initialize Spark session
     # Create a Spark session to enable Spark SQL functionality
     spark = SparkSession.builder \
