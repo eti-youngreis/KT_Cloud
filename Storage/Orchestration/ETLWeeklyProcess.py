@@ -41,8 +41,8 @@ def run_revenue_customer_genre():
 def run_album_popularity_and_revenue():
     load_album_popularity_and_revenue_ETL()
 
-def run_revenue_customer_genre():
-    load_revenue_customer_genre()
+def run_popular_genres_by_city():
+    load_popular_genres_by_city_ETL()
 
 def run_employees_sales_customer_interactions():
     load_employees_sales_customer_interactions()
@@ -89,9 +89,9 @@ with DAG(
         python_callable=run_customer_loyaltyWeeklyETL,
     )
 
-    task_revenue_customer_genre= PythonOperator(
-        task_id='run_revenue_customer_genre',
-        python_callable=run_revenue_customer_genre,
+    task_popular_genres_by_city= PythonOperator(
+        task_id='run_popular_genres_by_city',
+        python_callable=run_popular_genres_by_city,
     )
     task_album_popularity_and_revenue= PythonOperator(
         task_id='run_album_popularity_and_revenue',
