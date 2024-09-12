@@ -3,9 +3,7 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime
 from ..ELTS.CustomerPurchaseFrequencyTotalSpendWeeklyELT import load_elt
 from ..ELTS.topSellingArtistsWeeklyELT import load_and_transform_data
-from ..ELTS.employeeSalePerformanceCustomerInteractionsWeeklyELT import (
-    load_employees_sales_customer_interactions_elt,
-)
+from ..ELTS.employeeSalePerformanceCustomerInteractionsWeeklyELT import load_employees_sales_customer_interactions_elt
 from ..ELTS.CustomerAverageSpendWeeklyELT import load_average_purchase_value_elt
 from ..ELTS.AlbumLength_DownloadsWeeklyELT import load_ELT_album_length_downloads
 from ..ELTS.Revenue_Customer_GenreWeeklyELT import load_ELT_revenue_customer_genre

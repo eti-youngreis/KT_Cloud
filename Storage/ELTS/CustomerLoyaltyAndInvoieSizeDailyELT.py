@@ -2,74 +2,94 @@ from pyspark.sql import SparkSession
 import sqlite3
 import pandas as pd
 
-def elt_process():
-    # Initialize Spark session
-    spark = SparkSession.builder.appName("CustomerLoyaltyELT_FullLoad").getOrCreate()
 
-    # Open SQLite connection
-    conn = sqlite3.connect("C:\\Users\\User\\Desktop\\database.db")
+def incremental_elt_process():
+    # Initialize Spark session
+    spark = SparkSession.builder.appName("CustomerLoyaltyELT_IncrementalLoad").getOrCreate()
 
     try:
-        # Drop and create raw data tables
-        conn.execute("DROP TABLE IF EXISTS customers")
-        conn.execute("DROP TABLE IF EXISTS invoice_lines")
-        conn.execute("DROP TABLE IF EXISTS invoices")
+        # Open SQLite connection
+        conn = sqlite3.connect("C:\\Users\\User\\Desktop\\customer_loyalty.db")
+        cursor = conn.cursor()
 
-        # Step 1: Extract and Load raw data into SQLite
-        # Read customer data and load it into SQLite
+        # Check if the 'AlbumPopularityAndRevenue' table exists
+        cursor.execute("""
+             SELECT name FROM sqlite_master WHERE type='table' AND name='customer_loyalty';
+         """)
+        table_exists = cursor.fetchone()
+
+        # If the table exists, drop it
+        if table_exists:
+            # Step 1: Get the latest processed updated_at from the customer_loyalty table
+            latest_updated_at_query = "SELECT MAX(UpdatedAt) FROM customer_loyalty"
+            cursor = conn.cursor()
+            cursor.execute(latest_updated_at_query)
+            latest_updated_at = cursor.fetchone()[0]
+
+        if not table_exists or latest_updated_at is None:
+            latest_updated_at = '1900-01-01 00:00:00'  # A very old timestamp to ensure all data is loaded initiallyaded initially
+
+        # Step 2: Extract - Load raw data, but filter to only include updated records
+        # Read customer data and filter by updated_at
         customers_df = spark.read.csv("C:\\Users\\User\\Desktop\\Customer.csv", header=True, inferSchema=True)
-        customers_df.toPandas().to_sql('customers', conn, if_exists='replace', index=False)
+        new_customers_df = customers_df.filter(customers_df["UpdatedAt"] > latest_updated_at)
 
-        # Read invoice line data and load it into SQLite
+        # Read invoice line data and filter by updated_at
         invoice_lines_df = spark.read.csv("C:\\Users\\User\\Desktop\\InvoiceLine.csv", header=True, inferSchema=True)
-        invoice_lines_df.toPandas().to_sql('invoice_lines', conn, if_exists='replace', index=False)
+        new_invoice_lines_df = invoice_lines_df.filter(invoice_lines_df["UpdatedAt"] > latest_updated_at)
 
-        # Read invoice data and load it into SQLite
+        # Read invoice data and filter by updated_at
         invoices_df = spark.read.csv("C:\\Users\\User\\Desktop\\Invoice.csv", header=True, inferSchema=True)
-        invoices_df.toPandas().to_sql('invoices', conn, if_exists='replace', index=False)
+        new_invoices_df = invoices_df.filter(invoices_df["UpdatedAt"] > latest_updated_at)
 
-        # Drop and create the final transformed customer_loyalty table
-        conn.execute("DROP TABLE IF EXISTS customer_loyalty")
-        conn.execute("""
-            CREATE TABLE customer_loyalty (
-                CustomerId INTEGER PRIMARY KEY,
-                FirstName TEXT,
-                LastName TEXT,
-                LoyaltyScore INTEGER,
-                AverageInvoiceSize REAL,
-                created_at TEXT,
-                updated_at TEXT,
-                updated_by TEXT
-            )
-        """)
+        # Step 3: Load the filtered data into SQLite (append mode)
+        new_customers_df.toPandas().to_sql('customers', conn, if_exists='append', index=False)
+        new_invoice_lines_df.toPandas().to_sql('invoice_lines', conn, if_exists='append', index=False)
+        new_invoices_df.toPandas().to_sql('invoices', conn, if_exists='append', index=False)
 
-        # Step 2: Transform - Use SQL for transformations within SQLite
+        if not table_exists:
+            conn.execute("""
+                CREATE TABLE customer_loyalty (
+                    CustomerId INTEGER PRIMARY KEY,
+                    FirstName TEXT,
+                    LastName TEXT,
+                    LoyaltyScore INTEGER,
+                    AverageInvoiceSize REAL,
+                    CreatedAt TEXT,
+                    UpdatedAt TEXT,
+                    UpdatedBy TEXT
+                )
+            """)
+        # Step 4: Transform - Apply the same SQL transformation logic within SQLite
         transformation_query = """
-        INSERT INTO customer_loyalty (CustomerId, FirstName, LastName, LoyaltyScore, AverageInvoiceSize, created_at, updated_at, updated_by)
-        SELECT
-            c.CustomerId,
-            c.FirstName,
-            c.LastName,
-            COUNT(i.InvoiceId) AS LoyaltyScore,
-            AVG(il.Total) AS AverageInvoiceSize,
-            strftime('%Y-%m-%d %H:%M:%S', 'now') AS created_at,
-            strftime('%Y-%m-%d %H:%M:%S', 'now') AS updated_at,
-            'process:your_user_name' AS updated_by
-        FROM
-            customers c
-        JOIN
-            invoices i ON c.CustomerId = i.CustomerId
-        JOIN
-            invoice_lines il ON i.InvoiceId = il.InvoiceId
-        GROUP BY
-            c.CustomerId, c.FirstName, c.LastName
-        ORDER BY
-            c.CustomerId;
+            INSERT OR REPLACE INTO customer_loyalty (CustomerId, FirstName, LastName, LoyaltyScore, AverageInvoiceSize, CreatedAt, UpdatedAt, UpdatedBy)
+            SELECT
+                c.CustomerId,
+                c.FirstName,
+                c.LastName,
+                COUNT(i.InvoiceId) AS LoyaltyScore,
+                AVG(i.Total) AS AverageInvoiceSize,
+                COALESCE(cl.CreatedAt, strftime('%Y-%m-%d %H:%M:%S', 'now')) AS CreatedAt,
+                strftime('%Y-%m-%d %H:%M:%S', 'now') AS UpdatedAt,
+                'process:Efrat_Harush' AS UpdatedBy
+            FROM 
+                customers c
+            JOIN
+                invoices i ON c.CustomerId = i.CustomerId
+            JOIN
+                invoice_lines il ON i.InvoiceId = il.InvoiceId
+            LEFT JOIN
+                customer_loyalty cl ON c.CustomerId = cl.CustomerId
+            WHERE
+                c.UpdatedAt > ?
+            GROUP BY
+                c.CustomerId, c.FirstName, c.LastName
+            ORDER BY
+                c.CustomerId;
         """
 
-        # Execute the transformation query
-        conn.execute(transformation_query)
-
+        # Execute the transformation query using the latest updated_at as a parameter
+        conn.execute(transformation_query, (latest_updated_at,))
         # Commit the transaction to save the data
         conn.commit()
 
@@ -79,4 +99,5 @@ def elt_process():
         # Close the SQLite connection
         conn.close()
 
-elt_process()
+
+incremental_elt_process()

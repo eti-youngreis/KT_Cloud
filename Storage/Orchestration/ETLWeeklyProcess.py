@@ -3,6 +3,8 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime
 from ..ETLS.ProductsPurchasedTogetherWeeklyETL import load
 from ..ETLS.topSellingArtistsWeeklyETL import load_top_selling_artists
+from ..ETLS.employeeSalePerformanceCustomerInteractionsWeeklyETL import load_employees_sales_customer_interactions
+from ..ETLS.AveragePurchaseValueWeeklyETL import load_customer_invoices_count_etl
 from ..ETLS.AlbumLength_DownloadsWeeklyETL import load_ETL_album_length_downloads
 from ..ETLS.Revenue_Customer_GenreWeeklyETL import load_ETL_revenue_customer_genre
 from ..ETLS.AlbumPopularityAndRevenueWeeklyETL import load_album_popularity_and_revenue_ETL
@@ -40,6 +42,12 @@ def run_album_popularity_and_revenue():
 
 def run_revenue_customer_genre():
     load_revenue_customer_genre()
+
+def run_employees_sales_customer_interactions():
+    load_employees_sales_customer_interactions()
+
+def run_customer_invoices_count_etl():
+    load_customer_invoices_count_etl()
 
 # More functions for other tasks as necessary
 
@@ -84,6 +92,7 @@ with DAG(
         task_id='run_table_2',
         python_callable=run_table_2,
     )
+
     task_revenue_customer_genre= PythonOperator(
         task_id='run_revenue_customer_genre',
         python_callable=run_revenue_customer_genre,
@@ -100,6 +109,14 @@ with DAG(
     task_top_sell_artists=PythonOperator(
         task_id='run_top_sell_artists',
         python_callable=run_top_sell_artists,
+    )
+    task_employees_sales_customer_interactions=PythonOperator(
+        task_id='employees_sales_customer_interactions',
+        python_callable=run_employees_sales_customer_interactions,
+    )
+    task_customer_invoices_count_etl=PythonOperator(
+        task_id='customer_invoices_count_etl',
+        python_callable=run_customer_invoices_count_etl,
     )
     
     task_album_length_downloads = PythonOperator(
