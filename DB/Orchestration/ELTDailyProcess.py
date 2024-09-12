@@ -6,6 +6,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from DB.ELTS.TrackPlayCountandRevenueContributionDailyELT import incremental_load as incrementel_load_tk_1
 from DB.ELTS.BestSellingAlbumsandTrackPopularitybyCountryDailyELT import incremental_load as incrementel_load_tk_2
+from DB.ELTS.‏‏‏‏EmployeeCustomerSatisfactionAndAverageSalesValueDailyELT import load as incrementel_load_employee_customer_satisfaction_sales
 
 # import DB.ELTS.TrackPlayCountandRevenueContributionDailyELT
 # from ELTS import X
@@ -28,6 +29,9 @@ def  load_track_play_count():
 
 def  load_best_selling_albums():
     incrementel_load_tk_2()
+    
+def  load_employee_customer_satisfaction_sales():
+    incrementel_load_employee_customer_satisfaction_sales()
 # More functions for other tasks as necessary
 
 # Define default arguments for the DAG
@@ -69,6 +73,11 @@ with DAG(
     best_selling_albums = PythonOperator(
         task_id='load_best_selling_albums',
         python_callable=load_best_selling_albums,
+    )
+    
+    employee_customer_satisfaction_sales = PythonOperator(
+        task_id='employee_customer_satisfaction_sales',
+        python_callable=load_employee_customer_satisfaction_sales,
     )
 
 
