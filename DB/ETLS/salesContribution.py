@@ -1,51 +1,51 @@
 import os
 from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
 from pyspark.sql.window import Window
-from pyspark.sql.functions import col, count, sum, current_date, lit
-import KT_DB # Assuming KT_DB is the library for SQLite operations
+from pyspark.sql.functions import col, hour, count, sum, current_date, lit
+import KT_DB  # Assuming KT_DB is the library for SQLite operations
 
-def load():
+def load_sales_distribution_by_media_type():
     # Step 1: Initialize Spark session
     spark = SparkSession.builder \
-        .appName("Chinook_ETL_Track_Analysis")\
+        .appName("Sales Distribution by Media Type") \
         .getOrCreate()
 
     # Step 2: Establish SQLite connection using KT_DB
     conn = KT_DB.connect('/path_to_sqlite.db')  # Assuming KT_DB has a connect() method
     
     try:
-        # read from csv
-        # main table
-        track_df = spark.read.csv('C:/Users/leabe/Documents/data/Track.csv', header=True, inferSchema=True)
-        
-        # Load other related tables
-        customer_df = spark.read.csv('C:/Users/leabe/Documents/data/Customer.csv', header=True, inferSchema=True)
+        # Read from CSV
         invoice_df = spark.read.csv('C:/Users/leabe/Documents/data/Invoice.csv', header=True, inferSchema=True)
         invoice_line_df = spark.read.csv('C:/Users/leabe/Documents/data/InvoiceLine.csv', header=True, inferSchema=True)
+        track_df = spark.read.csv('C:/Users/leabe/Documents/data/Track.csv', header=True, inferSchema=True)
+        media_type_df = spark.read.csv('C:/Users/leabe/Documents/data/MediaType.csv', header=True, inferSchema=True)
 
-        joined_df = track_df.join(invoice_line_df, track_df.TrackId==invoice_line_df.TrackId) \
-            .join(invoice_df, invoice_line_df.InvoiceId==invoice_df.InvoiceId) \
-            .join(customer_df, invoice_df.CustomerId==customer_df.CustomerId)
+        # Join the data
+        joined_df = invoice_df.join(invoice_line_df, invoice_df.InvoiceId == invoice_line_df.InvoiceId) \
+            .join(track_df, invoice_line_df.TrackId == track_df.TrackId) \
+            .join(media_type_df, track_df.MediaTypeId == media_type_df.MediaTypeId)
 
-        sales_contribution = joined_df.groupBy("TrackId").sum("UnitPrice").withColumnRenamed("sum(UnitPrice)", "TotalSales")
+        # Extract hour from invoice date
+        joined_df = joined_df.withColumn('Hour', hour(col('InvoiceDate')))
+
+        # Group by Media Type and Hour
+        sales_distribution = joined_df.groupBy('MediaType', 'Hour') \
+            .agg(count('InvoiceLineId').alias('Frequency'), sum('Total').alias('TotalSales'))
 
         # Add metadata
         current_user = os.getenv('USER')
-        sales_contribution = sales_contribution.withColumn("created_at", current_date()) \
+        sales_distribution = sales_distribution.withColumn("created_at", current_date()) \
             .withColumn("updated_at", current_date()) \
             .withColumn("updated_by", lit(f"process:{current_user}"))
 
-        # Applying Window function to rank customers by total spend
-        window_spec = Window.orderBy(F.desc("TotalSales"))
-        sales_contribution = sales_contribution.withColumn("rank", F.rank().over(window_spec))
-
         # LOAD (Save transformed data into SQLite using KT_DB)
         # ----------------------------------------------------
-        final_data_df = sales_contribution.toPandas()
-
-        KT_DB.insert_dataframe(conn, 'TrackPopularityByRegion', final_data_df)
+        final_data_df = sales_distribution.toPandas()
+        KT_DB.insert_dataframe(conn, 'SalesDistributionByMediaType', final_data_df)
         KT_DB.commit(conn)
 
     finally:
         # Step 3: Close the SQLite connection and stop Spark session
         KT_DB.close(conn)  # Assuming KT_DB has a close() method
+        spark.stop()

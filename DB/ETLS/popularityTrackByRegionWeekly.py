@@ -5,14 +5,14 @@ from pyspark.sql.window import Window
 import KT_DB  # Assuming KT_DB is the library for SQLite operations
 
 
-def load():
+def load_popularity_track_by_region():
     # Step 1: Initialize Spark session
     spark = SparkSession.builder \
         .appName("Populary Track by region") \
         .getOrCreate()
     
     # Step 2: Establish SQLite connection using KT_DB
-    conn = KT_DB.connect('/path_to_sqlite.db')  # Assuming KT_DB has a connect() method
+    conn = KT_DB.connect('/chinook.db')  # Assuming KT_DB has a connect() method
 
     try:
 
