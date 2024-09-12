@@ -92,11 +92,12 @@ with DAG(
         task_id='run_album_popularity_and_revenue',
         python_callable=run_album_popularity_and_revenue,
     )
-    task_customer_purchase_frequency_total_spend(
+    
+    task_customer_purchase_frequency_total_spend=PythonOperator(
         task_id='run_customer_purchase_frequency_total_spend',
         python_callable=run_customer_purchase_frequency_total_spend,
     )
-    task_top_sell_artists(
+    task_top_sell_artists=PythonOperator(
         task_id='run_top_sell_artists',
         python_callable=run_top_sell_artists,
     )
