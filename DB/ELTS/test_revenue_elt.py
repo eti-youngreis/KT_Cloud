@@ -3,12 +3,12 @@ import pandas as pd
 from numpy import int64
 import pytest
 
-elt_table_name = 'revenue_per_customer_genre_elt'
+etl_table_name = 'revenue_per_customer_genre_elt'
 base_path = "../etl_files/"
 
 def get_sqlite_data(conn):
     # Fetch ETL results from the database
-    return pd.read_sql(f'select * from {elt_table_name}', con=conn)
+    return pd.read_sql(f'select * from {etl_table_name}', con=conn)
 
 def load_invoice_data():
     return pd.read_csv(base_path + "Invoice.csv")[['InvoiceId', 'CustomerId']]

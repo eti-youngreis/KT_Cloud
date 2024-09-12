@@ -5,7 +5,7 @@ from pyspark.sql.window import Window
 import KT_DB  # Assuming KT_DB is the library for SQLite operations
 
 
-def load():
+def load_popularity_track():
     # Step 1: Initialize Spark session
     spark = SparkSession.builder \
         .appName("Populary Track by region ELT") \

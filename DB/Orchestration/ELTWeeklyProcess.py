@@ -8,6 +8,10 @@ from DB.ELTS.TrackPlayCountandRevenueContributionWeeklyELT import load as load_t
 from DB.ELTS.BestSellingAlbumsandTrackPopularitybyCountryWeeklyELT import load as load_tk_2
 from DB.ELTS.GenrePopularityAndAverageSalesWeeklyELT import load_genre_popularity_and_average_sales
 from DB.ELTS.SalesTrendsWeeklyELT import load_sales_trends
+from DB.ELTS.popularityTrackByRegionWeekly import load_popularity_track
+from DB.ELTS.‏‏EmployeeCustomerSatisfactionAndAverageSalesValueWeeklyELT import load as load_weekly_employee_customer_satisfaction_sales
+from DB.ELTS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyWeeklyELT import load as load_weekly_artist_repeat_customer_analysis
+
 # from ELTS import X
 
 # Define your Python functions here
@@ -25,6 +29,16 @@ def  load_track_play_count():
 
 def  load_best_selling_albums():
     load_tk_2()
+
+def  load_popularity_track_by_region():
+    load_popularity_track()
+
+def load_employee_customer_satisfaction_sales():
+    load_weekly_employee_customer_satisfaction_sales()
+
+def load_artist_repeat_customer_analysis():
+    load_weekly_artist_repeat_customer_analysis()
+    
 # More functions for other tasks as necessary
 
 # Define default arguments for the DAG
@@ -66,6 +80,21 @@ with DAG(
     best_selling_albums = PythonOperator(
         task_id='load_best_selling_albums',
         python_callable=load_best_selling_albums,
+    )
+
+    popularity_track = PythonOperator(
+        task_id='load_popularity_track',
+        python_callable=load_popularity_track_by_region,
+    )
+    
+    employee_customer_satisfaction_sales = PythonOperator(
+        task_id='employee_customer_satisfaction_sales',
+        python_callable=load_employee_customer_satisfaction_sales,
+    )
+    
+    artist_repeat_customer_analysis = PythonOperator(
+        task_id='artist_repeat_customer_analysis',
+        python_callable=load_artist_repeat_customer_analysis,
     )
 
     # Dependent tasks that run after Table 1, 3, 5
