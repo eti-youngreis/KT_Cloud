@@ -3,8 +3,8 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime
 
 # from ETLS import X
-from ETLS import AlbumTotalTimeDownloadsDaily
-from ETLS import RevenuePerCustomerGenreDaily
+from ..ETLS.AlbumTotalTimeDownloadsDaily import incremental_load
+from ..ETLS.RevenuePerCustomerGenreDaily import incremental_load as revenue_incremental_load
 
 # Define your Python functions here
 def run_table_1():
@@ -22,10 +22,10 @@ def run_table_3():
     
 # More functions for other tasks as necessary
 def run_album_totals():
-    AlbumTotalTimeDownloadsDaily.incremental_load()
+    incremental_load()
     
 def run_customer_genre_revenue():
-    RevenuePerCustomerGenreDaily.incremental_load()
+    revenue_incremental_load()
 # Define default arguments for the DAG
 default_args = {
     'owner': 'airflow',

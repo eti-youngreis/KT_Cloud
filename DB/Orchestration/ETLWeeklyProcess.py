@@ -3,8 +3,8 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime
 
 # from ETLS import X
-from ETLS import AlbumTotalTimeDownloadsWeekly
-from ETLS import RevenuePerCustomerGenreWeekly
+from ..ETLS.AlbumTotalTimeDownloadsWeekly import load
+from ..ETLS.RevenuePerCustomerGenreWeekly import load as revenue_load
 
 # Define your Python functions here
 def run_table_1():
@@ -21,10 +21,10 @@ def run_table_3():
 
 # More functions for other tasks as necessary
 def run_album_totals():
-    AlbumTotalTimeDownloadsWeekly.load()
+    load()
     
 def run_customer_genre_revenue():
-    RevenuePerCustomerGenreWeekly.load()
+    revenue_load()
     
 # Define default arguments for the DAG
 default_args = {

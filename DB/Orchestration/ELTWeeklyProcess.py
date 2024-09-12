@@ -2,8 +2,8 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
 # from ELTS import X
-from ELTS import AlbumTotalTimeDownloadsWeeklyELT
-from ELTS import RevenuePerCustomerGenreWeeklyELT
+from ..ELTS.AlbumTotalTimeDownloadsWeeklyELT import load
+from ..ELTS.RevenuePerCustomerGenreWeeklyELT import load as revnue_load
 # Define your Python functions here
 def run_table_1():
     # Code to generate Table 1
@@ -19,11 +19,11 @@ def run_table_3():
 
 # More functions for other tasks as necessary
 def run_album_totals():
-    AlbumTotalTimeDownloadsWeeklyELT.load()
+    load()
     
 def run_customer_genre_revenue():
-    RevenuePerCustomerGenreWeeklyELT.load()
-    
+    revnue_load()
+        
 # Define default arguments for the DAG
 default_args = {
     'owner': 'airflow',
