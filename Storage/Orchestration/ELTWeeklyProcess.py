@@ -67,11 +67,11 @@ with DAG(
     )
 
 
-    task_customer_purchase_frequency_total_spend(
+    task_customer_purchase_frequency_total_spend=PythonOperator(
         task_id='run_customer_purchase_frequency_total_spend',
         python_callable=run_customer_purchase_frequency_total_spend,
     )
-    task_run_top_sell_artists(
+    task_run_top_sell_artists=PythonOperator(
         task_id='run_top_sell_artists',
         python_callable=run_top_sell_artists,
     )
