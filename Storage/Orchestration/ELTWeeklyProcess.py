@@ -4,7 +4,7 @@ from datetime import datetime
 from ..ELTS.CustomerPurchaseFrequencyTotalSpendWeeklyELT import load_elt
 from ..ELTS.topSellingArtistsWeeklyELT import load_and_transform_data
 from ..ELTS.employeeSalePerformanceCustomerInteractionsWeeklyELT import load_employees_sales_customer_interactions_elt
-from ..ELTS.CustomerAverageSpendWeeklyELT import load_average_purchase_value_elt
+from ..ELTS.AveragePurchaseValueWeeklyELT import load_average_purchase_value_elt
 # from ELTS import X
 
 # Define your Python functions here
@@ -75,19 +75,19 @@ with DAG(
     )
 
 
-    task_customer_purchase_frequency_total_spend(
+    task_customer_purchase_frequency_total_spend=PythonOperator(
         task_id='run_customer_purchase_frequency_total_spend',
         python_callable=run_customer_purchase_frequency_total_spend,
     )
-    task_run_top_sell_artists(
+    task_run_top_sell_artists=PythonOperator(
         task_id='run_top_sell_artists',
         python_callable=run_top_sell_artists,
     )
-    task_employees_sales_customer_interactions(
+    task_employees_sales_customer_interactions=PythonOperator(
         task_id='run_employees_sales_customer_interactions',
         python_callable=run_employees_sales_customer_interactions,
     )
-    task_average_purchase_value_elt(
+    task_average_purchase_value_elt=PythonOperator(
         task_id='run_customer_invoices_count_etl',
         python_callable=run_customer_invoices_count,
     )

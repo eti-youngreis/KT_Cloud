@@ -3,6 +3,8 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime
 from ..ETLS.ProductsPurchasedTogetherWeeklyETL import load
 from ..ETLS.topSellingArtistsWeeklyETL import load_top_selling_artists
+from ..ETLS.employeeSalePerformanceCustomerInteractionsWeeklyETL import load_employees_sales_customer_interactions
+from ..ETLS.AveragePurchaseValueWeeklyETL import load_customer_invoices_count_etl
 # from ETLS import X
 
 # Define your Python functions here
@@ -24,6 +26,12 @@ def run_customer_purchase_frequency_total_spend():
 
 def run_top_sell_artists():
     load_top_selling_artists()
+
+def run_employees_sales_customer_interactions():
+    load_employees_sales_customer_interactions()
+
+def run_customer_invoices_count_etl():
+    load_customer_invoices_count_etl()
 
 # More functions for other tasks as necessary
 
@@ -68,13 +76,21 @@ with DAG(
         task_id='run_table_2',
         python_callable=run_table_2,
     )
-    task_customer_purchase_frequency_total_spend(
+    task_customer_purchase_frequency_total_spend=PythonOperator(
         task_id='run_customer_purchase_frequency_total_spend',
         python_callable=run_customer_purchase_frequency_total_spend,
     )
-    task_top_sell_artists(
+    task_top_sell_artists=PythonOperator(
         task_id='run_top_sell_artists',
         python_callable=run_top_sell_artists,
+    )
+    task_employees_sales_customer_interactions=PythonOperator(
+        task_id='employees_sales_customer_interactions',
+        python_callable=run_employees_sales_customer_interactions,
+    )
+    task_top_sell_artists=PythonOperator(
+        task_id='customer_invoices_count_etl',
+        python_callable=run_customer_invoices_count_etl,
     )
     # Define dependencies
     task_1 >> task_2
