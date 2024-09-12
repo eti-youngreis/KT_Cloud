@@ -3,6 +3,7 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime
 from ..ETLS.CustomerPurchaseFrequencyTotalSpendDailyETL import incremental_load
 from ..ETLS.Revenue_Customer_GenreDailyETL import load_incremental_ETL
+from ..ETLS.AlbumPopularityAndRevenueDailyETL import load_album_popularity_and_revenue_incremental_ETL
 
 
 # from ETLS import X
@@ -19,6 +20,8 @@ def run_table_2():
 def run_table_3():
     # Code to generate Table 3
     pass
+def run_album_popularity_and_revenue():
+    load_album_popularity_and_revenue_incremental_ETL()
 
 def run_customer_purchase_frequency_total_spend():
     incremental_load()
@@ -69,6 +72,13 @@ with DAG(
         task_id='run_table_2',
         python_callable=run_table_2,
     )
+
+
+    task_album_popularity_and_revenue= PythonOperator(
+        task_id='run_album_popularity_and_revenue',
+        python_callable=run_album_popularity_and_revenue,
+    )
+
 
     task_run_customer_purchase_frequency_total_spend=PythonOperator(
         task_id='run_customer_purchase_frequency_total_spend',
