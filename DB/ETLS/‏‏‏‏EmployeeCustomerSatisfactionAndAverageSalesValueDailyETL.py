@@ -37,20 +37,20 @@ def incremental_load():
         invoice_lines = spark.read.csv(r"KT_Cloud\DB\ELTS\dbs\InvoiceLine_with_created_at.csv", header=True, inferSchema=True)
 
         # Filter for new data based on the latest timestamp
-        new_employees = employees.filter(employees["updated_at"] > latest_timestamp)
-        new_customers = customers.filter(customers["updated_at"] > latest_timestamp)
-        new_invoices = invoices.filter(invoices["updated_at"] > latest_timestamp)
-        new_invoice_lines = invoice_lines.join(new_invoices, "InvoiceID", "inner")
+        # new_employees = employees.filter(employees["updated_at"] > latest_timestamp)
+        # new_customers = customers.filter(customers["updated_at"] > latest_timestamp)
+        # new_invoices = invoices.filter(invoices["updated_at"] > latest_timestamp)
+        # new_invoice_lines = invoice_lines.join(new_invoices, "InvoiceID", "inner")
 
         # TRANSFORM (Apply joins, groupings, and window functions)
         # --------------------------------------------------------
         
         # Alias the tables
-        new_invoices = new_invoices.alias("invoice")
-        new_customers = new_customers.alias("customer")
-        new_employees = new_employees.alias("employee")
+        invoices = invoices.alias("invoice")
+        customers = customers.alias("customer")
+        employees = employees.alias("employee")
         
-        customer_invoices = new_invoices.join(new_customers, new_invoices["CustomerID"] == new_customers["CustomerID"], "inner") \
+        customer_invoices = invoices.join(customers, invoices["CustomerID"] == customers["CustomerID"], "inner") \
             .select("invoice.InvoiceID", "customer.CustomerID", "customer.SupportRepId")
     
         # Calculate Customer Satisfaction
@@ -62,22 +62,22 @@ def incremental_load():
             .agg(F.countDistinct("customer.CustomerID").alias("CustomerSatisfaction"))
     
         # Calculate Average Sales Value
-        sales_data = new_invoices.join(new_invoice_lines, "InvoiceID", "inner")
+        sales_data = invoices.join(invoice_lines, "InvoiceID", "inner")
     
         avg_sales = sales_data.groupBy("InvoiceID", "invoice.Total") \
             .agg(F.sum("Quantity").alias("QuantitySum")) \
             .withColumn("AverageSalesValue", F.col("invoice.Total") / F.col("QuantitySum"))
     
         # Join all metrics
-        employee_metrics = new_employees.alias("employee") \
-            .join(customer_satisfaction.alias("satisfaction"), new_employees["EmployeeId"] == customer_satisfaction["SupportRepId"], "left") \
+        employee_metrics = employees.alias("employee") \
+            .join(customer_satisfaction.alias("satisfaction"), employees["EmployeeId"] == customer_satisfaction["SupportRepId"], "left") \
             .select("employee.EmployeeId", "employee.LastName", "employee.FirstName", "satisfaction.CustomerSatisfaction")
     
         employee_metrics_with_customers = employee_metrics \
-            .join(new_customers.alias("customer"), employee_metrics["EmployeeId"] == new_customers["customer.SupportRepId"], "left")\
+            .join(customers.alias("customer"), employee_metrics["EmployeeId"] == customers["customer.SupportRepId"], "left")\
             .select("employee.EmployeeId", "employee.LastName", "employee.FirstName", "customer.CustomerId", "satisfaction.CustomerSatisfaction")
     
-        final_data = employee_metrics_with_customers.join(new_invoices.alias("invoice"), employee_metrics_with_customers["customer.CustomerId"] == new_invoices["invoice.CustomerId"], "left") \
+        final_data = employee_metrics_with_customers.join(invoices.alias("invoice"), employee_metrics_with_customers["customer.CustomerId"] == invoices["invoice.CustomerId"], "left") \
             .select("employee.EmployeeId", "employee.LastName", "employee.FirstName", "satisfaction.CustomerSatisfaction", "customer.CustomerId", "invoice.InvoiceID")
     
         final_result = final_data.join(avg_sales.alias("sales"), "InvoiceID", "left")
@@ -88,18 +88,35 @@ def incremental_load():
         current_time = datetime.now()
         user_name = "DailyETL:Yehudit"
 
-        final_data = final_result \
-            .withColumn("created_at", F.lit(current_time)) \
-            .withColumn("updated_at", F.lit(current_time)) \
-            .withColumn("updated_by", F.lit(user_name))
-
-        # LOAD (Append new transformed data to SQLite)
+        # LOAD (Delete and insert new data to SQLite)
         # --------------------------------------------
-        final_data_df = final_data.toPandas()
+        final_data_df = employee_metrics.toPandas()
 
-        # Append new data to the existing table
-        final_data_df.to_sql(name="employee_customer_satisfaction_and_averagesales_value", con=conn, if_exists='append', index=False)
-        
+        # Create a temporary table with the new data
+        final_data_df.to_sql('temp_employee_metrics', conn, if_exists='replace', index=False)
+
+        # Delete existing records that are in the new dataset
+        delete_query = """
+        DELETE FROM employee_customer_satisfaction_and_averagesales_value
+        WHERE EmployeeId IN (SELECT EmployeeId FROM temp_employee_metrics)
+        """
+        cursor.execute(delete_query)
+
+        # Insert all records from the temporary table
+        insert_query = """
+        INSERT INTO employee_customer_satisfaction_and_averagesales_value
+        (EmployeeId, LastName, FirstName, CustomerSatisfaction, AverageSalesValue, created_at, updated_at, updated_by)
+        SELECT temp.EmployeeId, temp.LastName, temp.FirstName, temp.CustomerSatisfaction, temp.AverageSalesValue,
+             COALESCE(main.created_at, ?), ?, ?
+        FROM temp_employee_metrics temp
+        LEFT JOIN employee_customer_satisfaction_and_averagesales_value main
+        ON temp.EmployeeId = main.EmployeeId
+        """
+        cursor.execute(insert_query, (current_time, current_time, user_name))
+
+        # Remove the temporary table
+        cursor.execute("DROP TABLE temp_employee_metrics")
+
         # Commit the changes to the database
         conn.commit()
 

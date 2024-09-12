@@ -59,11 +59,9 @@ def load_album_popularity_and_revenue_incremental_ETL():
 
         # filter data by updated_at
         albums = albums.withColumn("updated_at", to_timestamp(col("updated_at"), "dd/MM/yyyy HH:mm"))
-        # albums = albums.where(albums["updated_at"] > latest_timestamp)
         invoice_lines = invoice_lines.withColumn("updated_at", to_timestamp(col("updated_at"), "dd/MM/yyyy HH:mm"))
-        # invoice_lines = invoice_lines.where(invoice_lines["updated_at"] > latest_timestamp)
         tracks = tracks.withColumn("updated_at", to_timestamp(col("updated_at"), "dd/MM/yyyy HH:mm"))
-        # tracks = tracks.where(tracks["updated_at"] > latest_timestamp)
+
 
 
         # Rename columns to avoid ambiguity
@@ -99,11 +97,7 @@ def load_album_popularity_and_revenue_incremental_ETL():
             F.count("TrackId").alias("TrackCount")
         )
 
-
-
-        # הדפסת מספר השורות
         print(f"Number of rows : {album_revenue.count()}")
-
 
         # Rename columns back to original names if needed
         album_revenue = album_revenue.withColumnRenamed("AlbumId_Albums", "AlbumId")

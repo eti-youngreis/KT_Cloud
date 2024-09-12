@@ -9,7 +9,7 @@ def etl_process():
     spark = SparkSession.builder.appName("CustomerLTVByRegionETL").getOrCreate()
 
     # Open SQLite connection
-    conn = sqlite3.connect("C:\\Users\\User\\Desktop\\p_database.db")
+    conn = sqlite3.connect("C:\\Users\\User\\Desktop\\customer_ltv.db")
 
     try:
         # Drop and Create customer_ltv table
@@ -23,7 +23,7 @@ def etl_process():
                 CustomerLTV REAL,
                 Rank INTEGER,
                 created_at TEXT,
-                updated_at TEXT,
+                UpdatedAt TEXT,
                 updated_by TEXT,
                 PRIMARY KEY (CustomerId, Country)
             )
@@ -49,7 +49,7 @@ def etl_process():
 
         # Add metadata columns
         ranked_df = ranked_df.withColumn("created_at", date_format(current_timestamp(), "yyyy-MM-dd HH:mm:ss")) \
-                             .withColumn("updated_at", date_format(current_timestamp(), "yyyy-MM-dd HH:mm:ss")) \
+                             .withColumn("UpdatedAt", date_format(current_timestamp(), "yyyy-MM-dd HH:mm:ss")) \
                              .withColumn("updated_by", lit("process:user_name"))
 
         # Convert Spark DataFrame to pandas

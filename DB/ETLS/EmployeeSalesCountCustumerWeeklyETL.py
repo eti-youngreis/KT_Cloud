@@ -1,6 +1,8 @@
+from datetime import datetime
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.window import Window
+from pyspark.sql.types import StringType
 import sqlite3
 # import KT_DB  # Assuming KT_DB is the library for SQLite operations
 
@@ -19,15 +21,10 @@ def load_employee_sales_and_customer_etl():
         # EXTRACT (Loading CSVs from S3 or local storage)
         # -----------------------------------------------
         # Load the main table (e.g., customers, tracks, albums)
-        employees_df = spark.read.csv(
-            'C:/Users/Owner/Documents/vast_data/KT_Cloud/database/Employee.csv', header=True, inferSchema=True)
-        # Load other related tables
-        customers_df = spark.read.csv(
-            'C:/Users/Owner/Documents/vast_data/KT_Cloud/database/Customer.csv', header=True, inferSchema=True)
-        invoices_df = spark.read.csv(
-            'C:/Users/Owner/Documents/vast_data/KT_Cloud/database/Invoice.csv', header=True, inferSchema=True)
-        invoiceLines_df = spark.read.csv(
-            'C:/Users/Owner/Documents/vast_data/KT_Cloud/database/InvoiceLine.csv', header=True, inferSchema=True)
+        employees_df = spark.read.csv('C:/Users/Owner/Desktop/ETL/Employee.csv', header=True, inferSchema=True)
+        customers_df = spark.read.csv('C:/Users/Owner/Desktop/ETL/Customer.csv', header=True, inferSchema=True)
+        invoices_df = spark.read.csv('C:/Users/Owner/Desktop/ETL/Invoice.csv', header=True, inferSchema=True)
+        invoiceLines_df = spark.read.csv('C:/Users/Owner/Desktop/ETL/InvoiceLine.csv', header=True, inferSchema=True)
         # TRANSFORM (Apply joins, groupings, and window functions)
         # --------------------------------------------------------
         # Join the main table with related_table_1
@@ -51,9 +48,9 @@ def load_employee_sales_and_customer_etl():
         final_employee_combined_df = employees_sales_df.join(employees_customers_df,
                                                              ["EmployeeId", "EmployeeFirstName",
                                                                  "EmployeeLastName"]
-                                                             ).withColumn("created_at", F.current_date()) \
-            .withColumn("updated_at", F.current_date()) \
-            .withColumn("updated_by", F.lit(f"process:yael_karo_{F.current_date()}")).toPandas()
+                                                             ).withColumn("created_at", F.current_date().cast(StringType())) \
+            .withColumn("updated_at", F.current_date().cast(StringType())) \
+            .withColumn("updated_by", F.lit(f"process:yael_karo_{datetime.now().strftime('%Y-%m-%d')}")).toPandas()
         # Apply window function (e.g., rank customers by spend)
 
         # LOAD (Save transformed data into SQLite using KT_DB)
@@ -62,11 +59,11 @@ def load_employee_sales_and_customer_etl():
 
         # Insert transformed data into a new table in SQLite using KT_DB
         final_employee_combined_df.to_sql(
-            'employee__sales_and_count_count', conn, if_exists='replace', index=False)
+            'employee_sales_and_count', conn, if_exists='replace', index=False)
         # Commit the changes to the database using KT_DB's commit() function
         conn.commit()
-        print("customer_invices_avg", conn.execute(
-            "SELECT * FROM 'customer_invices_avg'").fetchall())
+        print("employee_sales_and_count", conn.execute(
+            "SELECT * FROM 'employee_sales_and_count'").fetchall())
 
     finally:
         # Step 3: Close the SQLite connection and stop Spark session

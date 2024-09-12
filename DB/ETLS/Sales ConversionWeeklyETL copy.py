@@ -14,7 +14,7 @@ def load():
 
     # Step 2: Establish SQLite connection using KT_DB
     # conn = KT_DB.connect('/path_to_sqlite.db')  # Assuming KT_DB has a connect() method
-    conn = sqlite3.connect('/employee.db')
+    conn = sqlite3.connect('employee.db')
     path_to_tables = 'C:\\Users\\USER\\Desktop\\3.9.2024\\Emploee_Tables\\'
     try:
         # EXTRACT (Loading CSVs from S3 or local storage)

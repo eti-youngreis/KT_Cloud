@@ -19,16 +19,16 @@ def incremental_load():
         if cursor.fetchone() is None:
             # Create the table if it doesn't exist
             cursor.execute("""
-                CREATE TABLE customer_purchase_summary (
-                    CustomerId INTEGER,
-                    FirstName TEXT,
-                    LastName TEXT,
-                    TotalSpend REAL,
-                    PurchaseFrequency INTEGER,
-                    created_at TEXT,
-                    updated_at TEXT,
-                    updated_by TEXT
-                )
+            CREATE TABLE customer_purchase_summary (
+                CustomerId INTEGER,
+                FirstName TEXT,
+                LastName TEXT,
+                TotalSpend REAL,
+                PurchaseFrequency INTEGER,
+                created_at TEXT,
+                updated_at TEXT,
+                updated_by TEXT
+            )
             """)
             print("Table 'customer_purchase_summary' created.")
 
@@ -45,8 +45,8 @@ def incremental_load():
         invoices_df = spark.read.csv("D:\\בוטקמפ\\s3\\KT_Cloud\\csv_files\\Invoice.csv", header=True, inferSchema=True)
 
         # Join dataframes
-        customer_invoices_df = customers_df.join(invoices_df, on="CustomerId", how="inner")
-        customer_invoice_lines_df = customer_invoices_df.join(invoice_lines_df, on="InvoiceId", how="inner")
+        customer_invoices_df = customers_df.join(invoices_df, on="CustomerId", how="left")
+        customer_invoice_lines_df = customer_invoices_df.join(invoice_lines_df, on="InvoiceId", how="left")
 
         # Filter based on the latest timestamp
         customer_invoice_lines_df = customer_invoice_lines_df.filter(customer_invoice_lines_df["updated_at"] > latest_timestamp)
@@ -61,28 +61,40 @@ def incremental_load():
         # Adding timestamp columns
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         final_df = aggregated_df.withColumn("created_at", F.lit(current_datetime)) \
-                                .withColumn("updated_at", F.lit(current_datetime)) \
-                                .withColumn("updated_by", F.lit("process:user_name"))
+            .withColumn("updated_at", F.lit(current_datetime)) \
+            .withColumn("updated_by", F.lit("process:user_name"))
 
         # Load data into SQLite
         final_data_df = final_df.toPandas()
         if not final_data_df.empty:
-            # Update existing records
-            for index, row in final_data_df.iterrows():
-                cursor.execute('''
-                    UPDATE customer_purchase_summary
-                    SET TotalSpend = ?, PurchaseFrequency = ?, updated_at = ?, updated_by = ?
-                    WHERE CustomerId = ?
-                ''', (row.TotalSpend, row.PurchaseFrequency, row.updated_at, row.updated_by, row.CustomerId))
+            # Save the created_at for records that are going to be updated
+            customer_ids = final_data_df['CustomerId'].tolist()
+            cursor.execute('''
+                SELECT CustomerId, created_at FROM customer_purchase_summary
+                WHERE CustomerId IN ({})
+            '''.format(','.join(['?'] * len(customer_ids))), customer_ids)
+            created_at_map = {row[0]: row[1] for row in cursor.fetchall()}
 
-            # Insert new records
+            # Assign the original created_at date for customers that already exist
+            for index, row in final_data_df.iterrows():
+                if row['CustomerId'] in created_at_map:
+                    # Update the 'created_at' field in the DataFrame directly
+                    final_data_df.at[index, 'created_at'] = created_at_map[row['CustomerId']]
+                else:
+                    # If it's a new record, use the current datetime
+                    final_data_df.at[index, 'created_at'] = current_datetime
+
+            # Delete existing records that need to be updated
+            cursor.execute('''
+                DELETE FROM customer_purchase_summary
+                WHERE CustomerId IN ({})
+            '''.format(','.join(['?'] * len(customer_ids))), customer_ids)
+
+            # Insert updated records with original created_at and new updated_at
             cursor.executemany('''
                 INSERT INTO customer_purchase_summary (CustomerId, FirstName, LastName, TotalSpend, PurchaseFrequency, created_at, updated_at, updated_by)
-                SELECT ?, ?, ?, ?, ?, ?, ?, ?
-                WHERE NOT EXISTS (
-                    SELECT 1 FROM customer_purchase_summary WHERE CustomerId = ?
-                )
-            ''', [(row.CustomerId, row.FirstName, row.LastName, row.TotalSpend, row.PurchaseFrequency, row.created_at, row.updated_at, row.updated_by, row.CustomerId) for index, row in final_data_df.iterrows()])
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', [(row.CustomerId, row.FirstName, row.LastName, row.TotalSpend, row.PurchaseFrequency, row.created_at, row.updated_at, row.updated_by) for index, row in final_data_df.iterrows()])
 
             # Commit changes
             conn.commit()
@@ -97,6 +109,7 @@ def incremental_load():
     finally:
         conn.close()
         spark.stop()
+
 
 if __name__ == "__main__":
     incremental_load()
