@@ -51,7 +51,7 @@ def load():
                 FROM (select * from invoiceLines where status = 'active') as il
                 left JOIN (select DISTINCT(TrackId), AlbumId from tracks) as tracks on
                 il.TrackId = tracks.TrackId
-                right join (
+                full join (
                     SELECT AlbumId, 
                         SUM(Milliseconds) AS total_album_length
                     FROM tracks
