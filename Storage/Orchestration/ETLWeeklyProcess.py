@@ -3,6 +3,9 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime
 from ..ETLS.ProductsPurchasedTogetherWeeklyETL import load
 from ..ETLS.topSellingArtistsWeeklyETL import load_top_selling_artists
+from ..ETLS.AlbumLength_DownloadsWeeklyETL import load_ETL_album_length_downloads
+from ..ETLS.Revenue_Customer_GenreWeeklyETL import load_ETL_revenue_customer_genre
+
 # from ETLS import X
 
 # Define your Python functions here
@@ -24,6 +27,12 @@ def run_customer_purchase_frequency_total_spend():
 
 def run_top_sell_artists():
     load_top_selling_artists()
+    
+def run_album_length_downloads():
+    load_ETL_album_length_downloads()
+    
+def run_revenue_customer_genre():
+    load_ETL_revenue_customer_genre()
 
 # More functions for other tasks as necessary
 
@@ -68,17 +77,29 @@ with DAG(
         task_id='run_table_2',
         python_callable=run_table_2,
     )
-    task_customer_purchase_frequency_total_spend(
+    task_customer_purchase_frequency_total_spend=PythonOperator(
         task_id='run_customer_purchase_frequency_total_spend',
         python_callable=run_customer_purchase_frequency_total_spend,
     )
-    task_top_sell_artists(
+    task_top_sell_artists=PythonOperator(
         task_id='run_top_sell_artists',
         python_callable=run_top_sell_artists,
     )
+    
+    task_album_length_downloads = PythonOperator(
+        task_id='run_album_length_downloads',
+        python_callable=run_album_length_downloads,
+    )
+    
+    task_revenue_customer_genre = PythonOperator(
+        task_id='run_revenue_customer_genre',
+        python_callable=run_revenue_customer_genre,
+    )
+    
     # Define dependencies
     task_1 >> task_2
     task_3 >> task_4
     task_5 >> task_6
+    task_album_length_downloads >> task_revenue_customer_genre
 
     # You can add more tasks and dependencies following this pattern.

@@ -7,7 +7,7 @@ import os
 
 BASE_URL = "D:\\Users\\גילי\\Documents\\בוטקמפ\\csv files\\"
 
-def load():
+def load_sales_trends():
     conn = sqlite3.connect("employee_genre_sales_elt.db")
     try:
         # EXTRACT (Loading CSVs from S3 or local storage)

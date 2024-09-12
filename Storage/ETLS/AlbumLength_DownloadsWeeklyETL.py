@@ -3,7 +3,7 @@ import sqlite3
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
-def load():
+def load_ETL_album_length_downloads():
     try:
         # Step 1: Initialize Spark session
         spark = SparkSession.builder \
@@ -87,4 +87,4 @@ def load():
     except Exception as e:
         print(f"Error initializing Spark or SQLite: {e}")
 
-load()
+load_ETL_album_length_downloads()
