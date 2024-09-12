@@ -2,7 +2,7 @@ import sqlite3
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
-def loadETL():
+def load_ETL_revenue_customer_genre():
     try:
         # Step 1: Initialize Spark session
         spark = SparkSession.builder \
@@ -105,4 +105,4 @@ def loadETL():
     except Exception as e:
         print(f"Error initializing Spark or SQLite: {e}")
 
-loadETL()
+load_ETL_revenue_customer_genre()

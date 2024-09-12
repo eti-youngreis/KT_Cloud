@@ -2,8 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 import sqlite3
 import pandas as pd
-
-def incremental_load_average_purchase_value_elt():
+def load_average_purchase_value_elt_increment():
     # Step 1: Initialize Spark session
     spark = SparkSession.builder \
         .appName("ELT Template without KT_DB") \
@@ -26,9 +25,8 @@ def incremental_load_average_purchase_value_elt():
         # EXTRACT (Loading CSVs from local storage)
         # -----------------------------------------------
         # Load the main table (e.g., Customers, Invoices, InvoiceLines)
-        customers_df = spark.read.csv("C:/Users/shana/Desktop/ETL/Customer.csv", header=True, inferSchema=True)
-        invoices_df = spark.read.csv('C:/Users/shana/Desktop/ETL/Invoice.csv', header=True, inferSchema=True)
-  
+        customers_df = spark.read.csv('C:/Users/Owner/Desktop/ETL/Customer.csv', header=True, inferSchema=True)
+        invoices_df = spark.read.csv('C:/Users/Owner/Desktop/ETL/Invoice.csv', header=True, inferSchema=True)
         # LOAD (Save the raw data into SQLite without transformation)
         # -----------------------------------------------------------
         # Convert Spark DataFrames to Pandas DataFrames before loading to SQLite
@@ -48,9 +46,6 @@ def incremental_load_average_purchase_value_elt():
         # ----------------------------------------------------
         # Join tables and calculate total purchase and average purchase per customer
         # Apply the transformations using SQLite SQL queries
-        # drop_query="""DROP TABLE IF EXISTS customer_invoice_avg_elt"""
-        # conn.execute(drop_query)
-        # conn.commit()
         create_table_time_query = """
             CREATE TABLE IF NOT EXISTS tableTime AS
             SELECT ci.CustomerId, ci.created_at 
@@ -64,16 +59,6 @@ def incremental_load_average_purchase_value_elt():
                 group by ce.CustomerId
             )
         """
-
-
-        print("SELECT :",conn.execute("""SELECT c.CustomerId,c.created_at,i.InvoiceDate FROM Customers_ELT c
-                JOIN Invoices_ELT i ON c.CustomerId = i.CustomerId
-                where i.InvoiceDate > ? or c.created_at > ?
-                group by c.CustomerId """
-        ,(latest_timestamp,latest_timestamp,)).fetchall())
-        # print("SELECT :",conn.execute("""SELECT InvoiceDate FROM Invoices_ELT 
-        #                 where InvoiceDate > ? """
-        # ,(latest_timestamp,)).fetchall())
         
         conn.execute(create_table_time_query, (latest_timestamp, latest_timestamp))
         conn.commit()
@@ -94,7 +79,7 @@ def incremental_load_average_purchase_value_elt():
                    AVG(i.Total) AS avg_spend,
                    COALESCE(t.created_at, CURRENT_DATE) AS created_at,
                    CURRENT_DATE AS updated_at,
-                   'process:shana_levovitz_' || CURRENT_DATE AS updated_by
+                   'process:yael_karo_' || CURRENT_DATE AS updated_by
             FROM Customers_ELT c
             RIGHT JOIN Invoices_ELT i ON c.CustomerId = i.CustomerId
             LEFT JOIN tableTime t ON c.CustomerId = t.CustomerId
@@ -111,6 +96,5 @@ def incremental_load_average_purchase_value_elt():
         # Step 3: Close the SQLite connection and stop Spark session
         conn.close()  # Close the SQLite connection
         spark.stop()  # Stop the Spark session
-        
 if __name__ == "__main__":
-    incremental_load_average_purchase_value_elt()
+    load_average_purchase_value_elt_increment()

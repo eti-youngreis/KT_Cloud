@@ -1,4 +1,3 @@
-
 from datetime import datetime
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
@@ -31,9 +30,9 @@ def load_customer_invoices_count_etl_increment():
         print("latest_timestamp:", latest_timestamp)
 
         # EXTRACT (Loading CSVs from S3 or local storage)
-        customers_df = spark.read.csv("C:/Users/shana/Desktop/ETL/Customer.csv", header=True, inferSchema=True)
-        invoices_df = spark.read.csv('C:/Users/shana/Desktop/ETL/Invoice.csv', header=True, inferSchema=True)
-  
+        customers_df = spark.read.csv('C:/Users/Owner/Desktop/ETL/Customer.csv', header=True, inferSchema=True)
+        invoices_df = spark.read.csv('C:/Users/Owner/Desktop/ETL/Invoice.csv', header=True, inferSchema=True)
+
         invoices_df = invoices_df.withColumn('InvoiceDate', F.to_date(F.col('InvoiceDate'), 'dd/MM/yyyy'))
         customers_df = customers_df.withColumn('created_at', F.to_date(F.col('created_at'), 'dd/MM/yyyy'))
 
@@ -72,13 +71,13 @@ def load_customer_invoices_count_etl_increment():
             ).withColumn(
                 "updated_at", F.current_date()
             ).withColumn(
-                "updated_by", F.lit(f"process:shana_levovitz_{datetime.now().strftime('%Y-%m-%d')}")
+                "updated_by", F.lit(f"process:yael_karo_{datetime.now().strftime('%Y-%m-%d')}")
             )
 
         else:
             transformed_data = customers_invoices.withColumn("created_at", F.current_date()) \
                 .withColumn("updated_at", F.current_date()) \
-                .withColumn("updated_by", F.lit(f"process:shana_levovitz_{datetime.now().strftime('%Y-%m-%d')}"))
+                .withColumn("updated_by", F.lit(f"process:yael_karo_{datetime.now().strftime('%Y-%m-%d')}"))
 
         transformed_data = transformed_data.withColumn("created_at", F.date_format(F.col("created_at"), "yyyy-MM-dd")) \
             .withColumn("updated_at", F.date_format(F.col("updated_at"), "yyyy-MM-dd"))

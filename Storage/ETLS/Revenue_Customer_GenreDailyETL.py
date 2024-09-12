@@ -1,22 +1,21 @@
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
-from pyspark.sql.window import Window
 import sqlite3
 from datetime import datetime
 import pandas
 
 def load_incremental_ETL():
-    # Step 1: Initialize Spark session
+    # Initialize Spark session
     spark = SparkSession.builder \
         .appName("Revenue per Customer and Genre ETL incremental") \
         .getOrCreate()
 
-    # Step 2: Establish SQLite connection using KT_DB
+    # Establish SQLite connection using KT_DB
     conn = sqlite3.connect('D:\\b\\CustomerRevenueETL.db')
     cursor = conn.cursor()
 
     try:
-        # Step 3: Check if the table exists
+        # Check if the table exists
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='customer_genre_revenue'")
         if cursor.fetchone() is None:
             # Create the table if it doesn't exist
@@ -69,7 +68,7 @@ def load_incremental_ETL():
             (F.col("g.updated_at") > latest_timestamp)
         )
 
-        # Aggregation - Calculate the revenue for each genre with explicit references to the genre name column
+        # Aggregation - Calculate the revenue for each genre
         transformed_data = updated_records_df.groupBy(
             F.col("c.CustomerId"), F.col("c.FirstName"), F.col("c.LastName")
         ).agg(
@@ -79,30 +78,49 @@ def load_incremental_ETL():
             F.sum(F.when(F.col("g.Name") == "Reggae", F.col("il.UnitPrice") * F.col("il.Quantity")).otherwise(0)).alias("ReggaeRevenue"),
             F.sum(F.when(F.col("g.Name") == "Pop", F.col("il.UnitPrice") * F.col("il.Quantity")).otherwise(0)).alias("PopRevenue")
         )
+        
+        print(f"Number of rows to update/add: {transformed_data.count()}")
 
-        # Add metadata columns
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        transformed_data = transformed_data.withColumn("created_at", F.lit(current_time)) \
-                                            .withColumn("updated_at", F.lit(current_time)) \
+
+        # Adding timestamp columns
+        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        transformed_data = transformed_data.withColumn("created_at", F.lit(current_datetime)) \
+                                            .withColumn("updated_at", F.lit(current_datetime)) \
                                             .withColumn("updated_by", F.lit("process:user_name"))
         
-        # Convert to Pandas DataFrame for SQLite insertion
-        print(f"Total transformed records: {transformed_data.count()}")
+        # Convert to Pandas DataFrame
         final_df = transformed_data.toPandas()
-        
+
         if not final_df.empty:
-                
+            # Save the created_at for records that are going to be updated
+            customer_ids = final_df['CustomerId'].tolist()
+            cursor.execute('''
+                SELECT CustomerId, created_at FROM customer_genre_revenue
+                WHERE CustomerId IN ({})
+            '''.format(','.join(['?'] * len(customer_ids))), customer_ids)
+            created_at_map = {row[0]: row[1] for row in cursor.fetchall()}
+
+            # Assign the original created_at date for customers that already exist
+            for index, row in final_df.iterrows():
+                if row['CustomerId'] in created_at_map:
+                    final_df.at[index, 'created_at'] = created_at_map[row['CustomerId']]
+                else:
+                    final_df.at[index, 'created_at'] = current_datetime
+
+            # Create a temporary table
             final_df.to_sql('temp_table', conn, if_exists='replace', index=False)
 
+            # Delete existing records
             delete_query = '''DELETE FROM customer_genre_revenue WHERE CustomerId IN (SELECT CustomerId FROM temp_table)'''
             cursor.execute(delete_query)
 
+            # Insert new records
             insert_query = '''INSERT INTO customer_genre_revenue SELECT * FROM temp_table '''
             cursor.execute(insert_query)
 
             conn.commit()
 
-            # Delete temp_table
+            # Drop temporary table
             cursor.execute('DROP TABLE IF EXISTS temp_table')
             
         # SELECT query to retrieve data
@@ -113,24 +131,19 @@ def load_incremental_ETL():
         for row in rows:
             print(row)
 
-    
     finally:
-        # Step 6: Close the SQLite connection and stop Spark session
+        # Close the SQLite connection and stop Spark session
         conn.close()
         spark.stop()
 
-def update_updated_at_column(file_path):
-    # Step 1: Read the CSV file
-    df = pandas.read_csv(file_path)
 
-    # Step 2: Add created_at column
+def update_updated_at_column(file_path):
+    df = pandas.read_csv(file_path)
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    # df.loc['created_at'] = current_time
     df.loc[:10,'updated_at'] = current_time
 
-    # Step 3: Save the updated CSV file
+    # Save the updated CSV file
     df.to_csv(file_path, index=False)
-
     print(f"Created_at column added to {file_path}")
 
 def main():

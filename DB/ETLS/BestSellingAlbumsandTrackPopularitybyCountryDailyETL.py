@@ -40,11 +40,11 @@ def load():
 
 
         if last_update_time:
-            Invoices = Invoices.filter(F.col("created_at") > last_update_time)
-            InvoiceLines = InvoiceLines.filter(F.col("created_at") > last_update_time)
-            Tracks = Tracks.filter(F.col("created_at") > last_update_time)
-            Albums = Albums.filter(F.col("created_at") > last_update_time)
-            Customers = Customers.filter(F.col("created_at") > last_update_time)
+            Invoices = Invoices.filter(F.col("updated_at") > last_update_time)
+            InvoiceLines = InvoiceLines.filter(F.col("updated_at") > last_update_time)
+            Tracks = Tracks.filter(F.col("updated_at") > last_update_time)
+            Albums = Albums.filter(F.col("updated_at") > last_update_time)
+            Customers = Customers.filter(F.col("updated_at") > last_update_time)
 
         # TRANSFORM (Join tables and group by Album and Country)
         invoice_lines_tracks_df = InvoiceLines.alias("il"

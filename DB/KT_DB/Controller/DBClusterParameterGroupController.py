@@ -14,11 +14,11 @@ class DBClusterParameterGroupController:
     def describe_db_cluste_parameter_group(self, group_name: str) -> Dict:
         return self.service.describe_group(group_name)
     
-    def modify_db_cluste_parameter_group(self, group_name: str, parameters: Optional[Dict[str, str]]=None):
-        updates = {
-            "parameters": parameters
-        }
-        self.service.modify(group_name, updates)
+    def modify_db_cluste_parameter_group(self, group_name: str, parameters: list[Dict[str, any]]):
+        # updates = {
+        #     "parameters": parameters
+        # }
+        self.service.modify(group_name, parameters)
 
-    def describe_db_parameters(self, db_parameter_group_name: str, source: str='user', max_records: int=100, marker: str=None):
+    def describe_db_cluster_parameters(self, db_parameter_group_name: str, source: str='user', max_records: int=100, marker: str=None):
         return self.service.describe_parameters(db_parameter_group_name, source, max_records, marker)

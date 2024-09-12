@@ -1,5 +1,7 @@
 from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
 import sqlite3
+import pandas as pd
 def load_average_purchase_value_elt():
     # Step 1: Initialize Spark session
     spark = SparkSession.builder \
@@ -11,19 +13,23 @@ def load_average_purchase_value_elt():
         # EXTRACT (Loading CSVs from local storage)
         # -----------------------------------------------
         # Load the main table (e.g., Customers, Invoices, InvoiceLines)
-        customers_df = spark.read.csv(
-            'C:/Users/Owner/Documents/vast_data/KT_Cloud/database/Customer.csv', header=True, inferSchema=True)
-                # Load other related tables
-        invoices_df = spark.read.csv(
-            'C:/Users/Owner/Documents/vast_data/KT_Cloud/database/Invoice.csv', header=True, inferSchema=True)
+        customers_df = spark.read.csv('C:/Users/Owner/Desktop/ETL/Customer.csv', header=True, inferSchema=True)
+        invoices_df = spark.read.csv('C:/Users/Owner/Desktop/ETL/Invoice.csv', header=True, inferSchema=True)
         # LOAD (Save the raw data into SQLite without transformation)
         # -----------------------------------------------------------
         # Convert Spark DataFrames to Pandas DataFrames before loading to SQLite
+        # invoices_df = invoices_df.withColumn('InvoiceDate', F.to_date(F.col('InvoiceDate'), 'dd/MM/yyyy'))
+        # customers_df = customers_df.withColumn('created_at', F.to_date(F.col('created_at'), 'dd/MM/yyyy')) 
+
         customers_pd = customers_df.toPandas()
         invoices_pd = invoices_df.toPandas()
+
+        customers_pd['created_at'] = pd.to_datetime(customers_pd['created_at'], format='%d/%m/%Y %H:%M')
+        invoices_pd['InvoiceDate'] = pd.to_datetime(invoices_pd['InvoiceDate'], format='%d/%m/%Y %H:%M')
+
         # Load raw data into SQLite
-        customers_pd.to_sql('Customers', conn, if_exists='replace', index=False)
-        invoices_pd.to_sql('Invoices', conn, if_exists='replace', index=False)
+        customers_pd.to_sql('Customers_ELT', conn, if_exists='replace', index=False)
+        invoices_pd.to_sql('Invoices_ELT', conn, if_exists='replace', index=False)
         # TRANSFORM (Perform transformations with SQL queries)
         # ----------------------------------------------------
         # Join tables and calculate total purchase and average purchase per customer
@@ -34,9 +40,12 @@ def load_average_purchase_value_elt():
         transform_query = """
             CREATE TABLE customer_invoice_avg_elt AS 
             SELECT c.CustomerId,strftime('%m', i.InvoiceDate)  as InvoiceMonth,
-                   AVG(i.Total) AS avg_spend
-            FROM Customers c
-            JOIN Invoices i ON c.CustomerId = i.CustomerId
+                AVG(i.Total) AS avg_spend,
+                CURRENT_DATE AS created_at,
+                CURRENT_DATE AS updated_at,
+                'process:yael_karo_' || CURRENT_DATE AS updated_by
+            FROM Customers_ELT c
+            JOIN Invoices_ELT i ON c.CustomerId = i.CustomerId
             GROUP BY c.CustomerId,InvoiceMonth
         """
         # Execute the transformation query

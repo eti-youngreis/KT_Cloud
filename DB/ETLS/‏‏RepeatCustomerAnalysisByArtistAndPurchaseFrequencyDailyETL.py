@@ -36,31 +36,29 @@ def incremental_load():
             tracks = spark.read.csv(r"KT_Cloud\DB\ELTS\dbs\Track_with_created_at.csv", header=True, inferSchema=True)
             albums = spark.read.csv(r"KT_Cloud\DB\ELTS\dbs\Album_with_created_at.csv", header=True, inferSchema=True)
             artists = spark.read.csv(r"KT_Cloud\DB\ELTS\dbs\Artist_with_created_at.csv", header=True, inferSchema=True)
-            customers = spark.read.csv(r"KT_Cloud\DB\ELTS\dbs\Customer_with_created_at.csv", header=True, inferSchema=True)
 
             # Filter for new data based on the latest timestamp
-            new_invoices = invoices.filter(invoices["updated_at"] > latest_timestamp)
-            new_invoice_lines = invoice_lines.join(new_invoices, "InvoiceID", "inner")
-            new_tracks = tracks.filter(tracks["updated_at"] > latest_timestamp)
-            new_albums = albums.filter(albums["updated_at"] > latest_timestamp)
-            new_artists = artists.filter(artists["updated_at"] > latest_timestamp)
-            new_customers = customers.filter(customers["updated_at"] > latest_timestamp)
+            # new_invoices = invoices.filter(invoices["updated_at"] > latest_timestamp)
+            # new_invoice_lines = invoice_lines.join(new_invoices, "InvoiceID", "inner")
+            # new_tracks = tracks.filter(tracks["updated_at"] > latest_timestamp)
+            # new_albums = albums.filter(albums["updated_at"] > latest_timestamp)
+            # new_artists = artists.filter(artists["updated_at"] > latest_timestamp)
+            # new_customers = customers.filter(customers["updated_at"] > latest_timestamp)
 
             # TRANSFORM (Apply joins, groupings, and window functions)
             # --------------------------------------------------------
             # Alias the tables with more descriptive names
-            new_invoices = new_invoices.alias("invoice")
-            new_invoice_lines = new_invoice_lines.alias("invoice_line")
-            new_tracks = new_tracks.alias("track")
-            new_albums = new_albums.alias("album")
-            new_artists = new_artists.alias("artist")
-            new_customers = new_customers.alias("customer")
+            invoices = invoices.alias("invoice")
+            invoice_lines = invoice_lines.alias("invoice_line")
+            tracks = tracks.alias("track")
+            albums = albums.alias("album")
+            artists = artists.alias("artist")
 
             # Join invoices with invoice_lines, tracks, albums, and artists
-            sales_data = new_invoices.join(new_invoice_lines, "InvoiceID", "inner") \
-                .join(new_tracks, new_invoice_lines["TrackID"] == new_tracks["TrackID"], "inner") \
-                .join(new_albums, new_tracks["AlbumID"] == new_albums["AlbumID"], "inner") \
-                .join(new_artists, new_albums["ArtistID"] == new_artists["ArtistID"], "inner") \
+            sales_data = invoices.join(invoice_lines, "InvoiceID", "inner") \
+                .join(tracks, invoice_lines["TrackID"] == tracks["TrackID"], "inner") \
+                .join(albums, tracks["AlbumID"] == albums["AlbumID"], "inner") \
+                .join(artists, albums["ArtistID"] == artists["ArtistID"], "inner") \
                 .select("invoice.InvoiceID", "invoice.CustomerID", "artist.ArtistID", "artist.Name", "invoice_line.Quantity")
 
             # Define a window specification partitioned by ArtistID and CustomerID
@@ -79,26 +77,43 @@ def incremental_load():
             
             # Select final columns
             final_data = repeat_customer_count.select("ArtistID", "Name", "CustomerID", "PurchaseCount", "RepeatCustomerCount")
-
+            
             # Add metadata columns
             current_time = datetime.now()
             user_name = "DailyETL:Yehudit"
 
-            final_data = final_data \
-                .withColumn("created_at", F.lit(current_time)) \
-                .withColumn("updated_at", F.lit(current_time)) \
-                .withColumn("updated_by", F.lit(user_name))
-
-            # LOAD (Append new transformed data to SQLite)
+            # LOAD (Delete and insert new data to SQLite)
             # --------------------------------------------
             final_data_df = final_data.toPandas()
 
-            # Append new data to the existing table
-            final_data_df.to_sql(name="artist_repeat_customer_analysis", con=conn, if_exists='append', index=False)
-        
+            # Create a temporary table with the new data
+            final_data_df.to_sql('temp_artist_repeat_customer', conn, if_exists='replace', index=False)
+
+            # Delete existing records that are in the new dataset
+            delete_query = """
+            DELETE FROM artist_repeat_customer_analysis
+            WHERE ArtistID IN (SELECT ArtistID FROM temp_artist_repeat_customer)
+            """
+            cursor.execute(delete_query)
+
+            # Insert all records from the temporary table
+            insert_query = """
+            INSERT INTO artist_repeat_customer_analysis
+            (ArtistID, Name, CustomerID, PurchaseCount, RepeatCustomerCount, created_at, updated_at, updated_by)
+            SELECT temp.ArtistID, temp.Name, temp.CustomerID, temp.PurchaseCount, temp.RepeatCustomerCount,
+                 COALESCE(main.created_at, ?), ?, ?
+            FROM temp_artist_repeat_customer temp
+            LEFT JOIN artist_repeat_customer_analysis main
+            ON temp.ArtistID = main.ArtistID AND temp.CustomerID = main.CustomerID
+            """
+            cursor.execute(insert_query, (current_time, current_time, user_name))
+
+            # Remove the temporary table
+            cursor.execute("DROP TABLE temp_artist_repeat_customer")
+
             # Commit the changes to the database
             conn.commit()
-
+            
         finally:
             # Step 4: Close the SQLite connection and stop Spark session
             conn.close()
