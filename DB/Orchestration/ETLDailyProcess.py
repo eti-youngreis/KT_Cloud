@@ -1,6 +1,14 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+from DB.ETLS.TrackPlayCountandRevenueContributionDailyETL import incremental_load as incrementel_load_tk_1
+from DB.ETLS.BestSellingAlbumsandTrackPopularitybyCountryDailyETL import incremental_load as incrementel_load_tk_2
+from DB.ETLS.‏‏‏‏EmployeeCustomerSatisfactionAndAverageSalesValueDailyETL import incremental_load as load_daily_employee_customer_satisfaction_and_averagesales_value
+from DB.ETLS.‏‏RepeatCustomerAnalysisByArtistAndPurchaseFrequencyDailyETL import incremental_load as load_daily_artist_repeat_customer_analysis
+
 # from ETLS import X
 
 # Define your Python functions here
@@ -15,7 +23,18 @@ def run_table_2():
 def run_table_3():
     # Code to generate Table 3
     pass
+def  load_track_play_count():
+    incrementel_load_tk_1()
 
+def  load_best_selling_albums():
+    incrementel_load_tk_2()
+
+def  load_employee_customer_satisfaction_and_averagesales_value():
+    load_daily_employee_customer_satisfaction_and_averagesales_value()
+
+def  load_artist_repeat_customer_analysis():
+    load_daily_artist_repeat_customer_analysis()
+    
 # More functions for other tasks as necessary
 
 # Define default arguments for the DAG
@@ -49,9 +68,24 @@ with DAG(
     )
     
     # Add more independent tasks here
-    task_5 = PythonOperator(
-        task_id='run_table_5',
-        python_callable=run_table_5,
+    track_play_count = PythonOperator(
+        task_id='load_track_play_count',
+        python_callable=load_track_play_count,
+    )
+
+    best_selling_albums = PythonOperator(
+        task_id='load_best_selling_albums',
+        python_callable=load_best_selling_albums,
+    )
+    
+    employee_customer_satisfaction_and_averagesales_value = PythonOperator(
+        task_id='employee_customer_satisfaction_and_averagesales_value',
+        python_callable=load_employee_customer_satisfaction_and_averagesales_value,
+    )
+    
+    artist_repeat_customer_analysis = PythonOperator(
+        task_id='artist_repeat_customer_analysis',
+        python_callable=load_artist_repeat_customer_analysis,
     )
 
     # Dependent tasks that run after Table 1, 3, 5
@@ -61,8 +95,8 @@ with DAG(
     )
 
     # Define dependencies
-    task_1 >> task_2
-    task_3 >> task_4
-    task_5 >> task_6
+    # task_1 >> task_2
+    # task_3 >> task_4
+    # task_5 >> task_6
 
     # You can add more tasks and dependencies following this pattern.

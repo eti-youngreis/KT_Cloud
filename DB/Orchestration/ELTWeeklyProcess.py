@@ -1,21 +1,44 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+from DB.ELTS.TrackPlayCountandRevenueContributionWeeklyELT import load as load_tk_1
+from DB.ELTS.BestSellingAlbumsandTrackPopularitybyCountryWeeklyELT import load as load_tk_2
+from DB.ELTS.GenrePopularityAndAverageSalesWeeklyELT import load_genre_popularity_and_average_sales
+from DB.ELTS.SalesTrendsWeeklyELT import load_sales_trends
+from DB.ELTS.popularityTrackByRegionWeekly import load_popularity_track
+from DB.ELTS.‏‏EmployeeCustomerSatisfactionAndAverageSalesValueWeeklyELT import load as load_weekly_employee_customer_satisfaction_sales
+from DB.ELTS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyWeeklyELT import load as load_weekly_artist_repeat_customer_analysis
+
 # from ELTS import X
 
 # Define your Python functions here
-def run_table_1():
-    # Code to generate Table 1
-    pass
+def run_genre_popularity_and_average_sales():
+    load_genre_popularity_and_average_sales()
 
-def run_table_2():
-    # Code to generate Table 2
-    pass
+def run_sales_trends():
+    load_sales_trends()
 
 def run_table_3():
     # Code to generate Table 3
     pass
+def  load_track_play_count():
+    load_tk_1()
 
+def  load_best_selling_albums():
+    load_tk_2()
+
+def  load_popularity_track_by_region():
+    load_popularity_track()
+
+def load_employee_customer_satisfaction_sales():
+    load_weekly_employee_customer_satisfaction_sales()
+
+def load_artist_repeat_customer_analysis():
+    load_weekly_artist_repeat_customer_analysis()
+    
 # More functions for other tasks as necessary
 
 # Define default arguments for the DAG
@@ -38,20 +61,40 @@ with DAG(
 ) as dag:
 
     # Task 1 (Independent tasks that run first)
-    task_1 = PythonOperator(
-        task_id='run_table_1',
-        python_callable=run_table_1,
+    task_genre_popularity_and_average_sales = PythonOperator(
+        task_id='run_genre_popularity_and_average_sales',
+        python_callable = run_genre_popularity_and_average_sales,
     )
     
-    task_3 = PythonOperator(
-        task_id='run_table_3',
-        python_callable=run_table_3,
+    task_sales_trends = PythonOperator(
+        task_id='run_sales_trends',
+        python_callable = run_sales_trends,
     )
     
     # Add more independent tasks here
-    task_5 = PythonOperator(
-        task_id='run_table_5',
-        python_callable=run_table_5,
+    track_play_count = PythonOperator(
+        task_id='load_track_play_count',
+        python_callable=load_track_play_count,
+    )
+
+    best_selling_albums = PythonOperator(
+        task_id='load_best_selling_albums',
+        python_callable=load_best_selling_albums,
+    )
+
+    popularity_track = PythonOperator(
+        task_id='load_popularity_track',
+        python_callable=load_popularity_track_by_region,
+    )
+    
+    employee_customer_satisfaction_sales = PythonOperator(
+        task_id='employee_customer_satisfaction_sales',
+        python_callable=load_employee_customer_satisfaction_sales,
+    )
+    
+    artist_repeat_customer_analysis = PythonOperator(
+        task_id='artist_repeat_customer_analysis',
+        python_callable=load_artist_repeat_customer_analysis,
     )
 
     # Dependent tasks that run after Table 1, 3, 5
@@ -61,8 +104,8 @@ with DAG(
     )
 
     # Define dependencies
-    task_1 >> task_2
-    task_3 >> task_4
-    task_5 >> task_6
+    # task_1 >> task_2
+    # task_3 >> task_4
+    # task_5 >> task_6
 
     # You can add more tasks and dependencies following this pattern.
