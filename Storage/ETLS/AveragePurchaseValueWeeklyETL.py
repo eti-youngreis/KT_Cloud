@@ -8,7 +8,7 @@ from pyspark.sql.types import StringType
 # import KT_DB  # Assuming KT_DB is the library for SQLite operations
 
 
-def load_customer_invoices_count_etl():
+def load_average_purchase_value_etl():
     # Step 1: Initialize Spark session
     spark = SparkSession.builder \
         .appName("ETL - Average Purchase Value Over Time by Customer Type") \
@@ -66,4 +66,4 @@ def load_customer_invoices_count_etl():
 
 
 if __name__ == "__main__":
-    load_customer_invoices_count_etl()
+    load_average_purchase_value_etl()

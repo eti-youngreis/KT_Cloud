@@ -6,7 +6,7 @@ from pyspark.sql.types import StructType, StructField, StringType
 import sqlite3
 import pandas as pd
 
-def load_customer_invoices_count_etl_increment():
+def incremental_load_average_purchase_value_etl():
     # Step 1: Initialize Spark session
     spark = SparkSession.builder \
         .appName("ETL - Average Purchase Value Over Time by Customer Type") \
@@ -99,4 +99,4 @@ def load_customer_invoices_count_etl_increment():
         spark.stop()
 
 if __name__ == "__main__":
-    load_customer_invoices_count_etl_increment()
+    incremental_load_average_purchase_value_etl()
