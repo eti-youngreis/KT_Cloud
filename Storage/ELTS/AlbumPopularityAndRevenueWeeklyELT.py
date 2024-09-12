@@ -12,29 +12,9 @@ def load_album_popularity_and_revenue_ELT():
     conn = sqlite3.connect('C:/Users/user1/Desktop/0909/AlbumELT.db')
     cursor = conn.cursor()
 
-    # Create raw data tables if they don't exist and insert the data
-    cursor.execute('''CREATE TABLE IF NOT EXISTS Albums (
-                      AlbumId INTEGER PRIMARY KEY,
-                      Title TEXT,
-                      ArtistId INTEGER)''')
+    # Drop table if exists
+    cursor.execute('DROP TABLE IF EXISTS AlbumPopularityAndRevenue')
 
-    cursor.execute('''CREATE TABLE IF NOT EXISTS InvoiceLines (
-                      InvoiceLineId INTEGER PRIMARY KEY,
-                      InvoiceId INTEGER,
-                      TrackId INTEGER,
-                      UnitPrice REAL,
-                      Quantity INTEGER)''')
-
-    cursor.execute('''CREATE TABLE IF NOT EXISTS Tracks (
-                      TrackId INTEGER PRIMARY KEY,
-                      Name TEXT,
-                      AlbumId INTEGER,
-                      MediaTypeId INTEGER,
-                      GenreId INTEGER,
-                      Composer TEXT,
-                      Milliseconds INTEGER,
-                      Bytes INTEGER,
-                      UnitPrice REAL)''')
 
     # Insert data into the raw tables
     albums_df.to_sql('Albums', conn, if_exists='replace', index=False)
@@ -44,7 +24,7 @@ def load_album_popularity_and_revenue_ELT():
     # Step 3: Transform - perform transformations using SQL queries
     # Calculate total revenue and track count per album
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS AlbumPopularityAndRevenue AS
+        CREATE TABLE  AlbumPopularityAndRevenue AS
         SELECT 
             a.AlbumId, 
             a.Title, 
