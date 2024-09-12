@@ -3,6 +3,7 @@ from pyspark.sql.functions import sum as spark_sum, rank, current_timestamp, lit
 from pyspark.sql.window import Window
 import sqlite3
 import pandas as pd
+from datetime import datetime
 
 def etl_process():
     # Initialize Spark session
@@ -85,45 +86,21 @@ def etl_process():
 
         # Find rows to update by checking for matching CustomerId and Country
         updated_rows = pd.merge(result_pandas, existing_data, on=["CustomerId", "Country"], how="inner",
-                                )
+                                suffixes=('', '_existing'))
 
+        # Delete existing rows that need updating
         if not updated_rows.empty:
-            # Insert original created_at of updated rows into temporary table
-            cursor.execute("DROP TABLE IF EXISTS temp_customer_ltv")
-            cursor.execute("""
-                CREATE TABLE temp_customer_ltv (
-                    CustomerId INTEGER,
-                    Country TEXT,
-                    created_at TEXT
-                )
-            """)
+            existing_data = existing_data[~existing_data[['CustomerId', 'Country']].isin(updated_rows[['CustomerId', 'Country']]).all(axis=1)]
 
-            for _, row in updated_rows.iterrows():
-                cursor.execute("""
-                    INSERT INTO temp_customer_ltv (CustomerId, Country, created_at)
-                    VALUES (?, ?, ?)
-                """, (row['CustomerId'], row['Country'], row['created_at']))
-
-            # Delete existing rows that need updating
-            cursor.execute("""
-                DELETE FROM customer_ltv
-                WHERE (CustomerId, Country) IN (
-                    SELECT CustomerId, Country FROM temp_customer_ltv
-                )
-            """)
+        # Merge new and updated rows
+        result_pandas = pd.concat([existing_data, result_pandas])
 
         # Insert new and updated rows with preserved created_at for updated rows
         for _, row in result_pandas.iterrows():
-            created_at_val = cursor.execute("""
-                SELECT created_at FROM temp_customer_ltv
-                WHERE CustomerId = ? AND Country = ?
-            """, (row['CustomerId'], row['Country'])).fetchone()
-
-            created_at = created_at_val[0] if created_at_val else date_format(current_timestamp(),
-                                                                              "yyyy-MM-dd HH:mm:ss")
+            created_at = row['created_at'] if 'created_at' in row and pd.notnull(row['created_at']) else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             cursor.execute("""
-                INSERT INTO customer_ltv (CustomerId, FirstName, LastName, Country, CustomerLTV, Rank, created_at, UpdatedAt, updated_by)
+                INSERT OR REPLACE INTO customer_ltv (CustomerId, FirstName, LastName, Country, CustomerLTV, Rank, created_at, UpdatedAt, updated_by)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 row['CustomerId'], row['FirstName'], row['LastName'], row['Country'],
