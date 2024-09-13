@@ -2,6 +2,9 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
 
+from DB.ETLS.EmployeeCustomerSatisfactionAndAverageSalesWeeklyETL import load as load_weekly_employee_customer_satisfaction_and_averagesales_value
+from DB.ETLS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyWeeklyETL import load as load_weekly_artist_repeat_customer_analysis
+
 # from ETLS import X
 
 
@@ -23,6 +26,13 @@ def  load_track_play_count():
 
 def  load_best_selling_albums():
     load_tk_2()
+    
+def  load_employee_customer_satisfaction_and_averagesales_value():
+    load_weekly_employee_customer_satisfaction_and_averagesales_value()
+    
+def  load_artist_repeat_customer_analysis():
+    load_weekly_artist_repeat_customer_analysis()
+    
 # More functions for other tasks as necessary
 
 # Define default arguments for the DAG
@@ -64,6 +74,16 @@ with DAG(
     best_selling_albums = PythonOperator(
         task_id='load_best_selling_albums',
         python_callable=load_best_selling_albums,
+    )
+    
+    employee_customer_satisfaction_and_averagesales_value = PythonOperator(
+        task_id='employee_customer_satisfaction_and_averagesales_value',
+        python_callable=load_employee_customer_satisfaction_and_averagesales_value,
+    )
+
+    artist_repeat_customer_analysis = PythonOperator(
+        task_id='artist_repeat_customer_analysis',
+        python_callable=load_artist_repeat_customer_analysis,
     )
 
     # Dependent tasks that run after Table 1, 3, 5
