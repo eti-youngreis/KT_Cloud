@@ -1,9 +1,11 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
-from ..ETLS.CustomerPurchaseFrequencyTotalSpendDailyETL import incremental_load
-from ..ETLS.Revenue_Customer_GenreDailyETL import load_incremental_ETL
-from ..ETLS.AlbumPopularityAndRevenueDailyETL import load_album_popularity_and_revenue_incremental_ETL
+from KT_Cloud.Storage.ETLS.CustomerPurchaseFrequencyTotalSpendDailyETL import incremental_load
+from KT_Cloud.Storage.ETLS.Revenue_Customer_GenreDailyETL import load_incremental_ETL
+from KT_Cloud.Storage.ETLS.AlbumPopularityAndRevenueDailyETL import load_album_popularity_and_revenue_incremental_ETL
+from KT_Cloud.Storage.ETLS.CustomerLoyaltyAndInvoiceSizeDailyETL import customer_loyaltyDailyETL
+from KT_Cloud.Storage.ETLS.CustomerLifetimeValuebyRegionDailyETL import customer_ltvDailyETL
 
 
 # from ETLS import X
@@ -13,13 +15,14 @@ def run_table_1():
     # Code to generate Table 1
     pass
 
-def run_table_2():
-    # Code to generate Table 2
-    pass
+def run_customer_loyaltyETL():
+    customer_loyaltyDailyETL()
 
-def run_table_3():
-    # Code to generate Table 3
-    pass
+def run_customer_loyaltyDailyETL():
+    customer_loyaltyDailyETL()
+
+def run_customer_ltvDailyETL():
+    customer_ltvDailyETL()
 def run_album_popularity_and_revenue():
     load_album_popularity_and_revenue_incremental_ETL()
 
@@ -55,24 +58,18 @@ with DAG(
         task_id='run_table_1',
         python_callable=run_table_1,
     )
-    
-    task_3 = PythonOperator(
-        task_id='run_table_3',
-        python_callable=run_table_3,
-    )
+
     
     # Add more independent tasks here
-    task_5 = PythonOperator(
-        task_id='run_table_5',
-        python_callable=run_table_5,
+    customer_ltvDailyETL = PythonOperator(
+        task_id='run_customer_ltvDailyETL',
+        python_callable=run_customer_ltvDailyETL,
     )
 
-    # Dependent tasks that run after Table 1, 3, 5
-    task_2 = PythonOperator(
-        task_id='run_table_2',
-        python_callable=run_table_2,
+    customer_loyaltyDailyETL = PythonOperator(
+        task_id='run_customer_loyaltyDailyETL',
+        python_callable=run_customer_loyaltyDailyETL,
     )
-
 
     task_album_popularity_and_revenue= PythonOperator(
         task_id='run_album_popularity_and_revenue',
@@ -89,10 +86,10 @@ with DAG(
         task_id='run_revenue_customer_genre',
         python_callable=run_revenue_customer_genre,
     )
-    
+
     # Define dependencies
-    task_1 >> task_2
-    task_3 >> task_4
-    task_5 >> task_6
+    # task_1 >> task_2
+    # task_3 >> task_4
+    # task_5 >> task_6
 
     # You can add more tasks and dependencies following this pattern.

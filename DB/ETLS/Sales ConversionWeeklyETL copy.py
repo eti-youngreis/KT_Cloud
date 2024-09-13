@@ -29,46 +29,46 @@ def load():
 
         # TRANSFORM (Apply joins, groupings, and window functions)
         # --------------------------------------------------------
-        # Join the main table with related_table_1
-        joined_employee_customer = employee_table.alias('e') \
-        .join(customer_table.alias('c'), F.col('e.EmployeeId') == F.col('c.SupportRepId'), 'inner') \
-        .join(invoice_table.alias('i'), F.col('i.CustomerId') == F.col('c.CustomerId'))
+       
+        # Current time for 'created_at' and 'updated_at' fields
+        current_time = datetime.now()
 
-        
-        aggregated_data = joined_employee_customer.groupBy('e.EmployeeId', 'e.FirstName', 'e.LastName') \
-            .agg(
-                F.sum(F.when(F.col('i.Total') > 0, 1).otherwise(0)).alias('successful_sales'),
-                F.count('i.InvoiceId').alias('total_invoices')
-            )
+    # Define aliases for the tables
+        employee_alias = employee_table.alias('e')
+        customer_alias = customer_table.alias('c')
+        invoice_alias = invoice_table.alias('i')
 
-        # Calculate the number of invoices per customer for each employee
-        invoice_count_per_customer = joined_employee_customer.groupBy('e.EmployeeId', 'c.CustomerId') \
-            .agg(F.count('i.InvoiceId').alias('invoice_count'))
+        # Join the tables
+        joined_employee_customer = employee_alias \
+            .join(customer_alias, F.col('e.EmployeeId') == F.col('c.SupportRepId'), 'inner') \
+            .join(invoice_alias, F.col('i.CustomerId') == F.col('c.CustomerId'))
 
-        # Calculate the average number of invoices per customer for each employee
-        average_invoice_count = invoice_count_per_customer.groupBy('e.EmployeeId') \
-            .agg(F.avg('invoice_count').alias('average_invoice_count'))
+        # Define the window spec by partitioning over 'EmployeeId'
+        employee_window = Window.partitionBy('e.EmployeeId')
 
-        # Merge aggregated data with average invoice count and calculate conversion rate
-        transformed_data = aggregated_data.join(average_invoice_count, on='EmployeeId') \
-            .withColumn('conversion_rate', F.col('successful_sales') / F.col('total_invoices'))
-
-        # Add metadata columns to the DataFrame
-        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        transformed_data = transformed_data \
+        # Calculate successful_sales and total_invoices using window functions
+        transformed_data = joined_employee_customer \
+            .withColumn('successful_sales', F.sum(F.when(F.col('i.Total') > 0, 1).otherwise(0)).over(employee_window)) \
+            .withColumn('total_invoices', F.count('i.InvoiceId').over(employee_window)) \
+            .withColumn('invoice_count', F.count('i.InvoiceId').over(Window.partitionBy('e.EmployeeId', 'c.CustomerId'))) \
+            .withColumn('average_invoice_count', F.avg('invoice_count').over(employee_window)) \
+            .withColumn('conversion_rate', F.col('successful_sales') / F.col('total_invoices')) \
             .withColumn('created_at', F.lit(current_time)) \
             .withColumn('updated_at', F.lit(current_time)) \
-            .withColumn('updated_by', F.lit('rachel_krashinski'))
+            .withColumn('updated_by', F.lit('Shani_Strauss')) \
+            .dropDuplicates(['e.EmployeeId'])  # Drop duplicates to maintain one row per EmployeeId
 
-        # Select the final columns for output
+        # Select the relevant columns to match the original output format
         final_data_df = transformed_data.select(
-            'EmployeeId',
-            'FirstName',
-            'LastName',
-            'average_invoice_count',
-            'conversion_rate',
-            'created_at',
-            'updated_at',
+            'e.EmployeeId', 
+            'e.FirstName', 
+            'e.LastName', 
+            'successful_sales', 
+            'total_invoices', 
+            'average_invoice_count', 
+            'conversion_rate', 
+            'created_at', 
+            'updated_at', 
             'updated_by'
         )
 

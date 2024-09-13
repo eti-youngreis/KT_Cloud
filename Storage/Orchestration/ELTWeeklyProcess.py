@@ -1,20 +1,21 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
-from ..ELTS.CustomerPurchaseFrequencyTotalSpendWeeklyELT import load_elt
-from ..ELTS.topSellingArtistsWeeklyELT import load_and_transform_data
-from ..ELTS.employeeSalePerformanceCustomerInteractionsWeeklyELT import load_employees_sales_customer_interactions_elt
-from ..ELTS.CustomerAverageSpendWeeklyELT import load_average_purchase_value_elt
-from ..ELTS.AlbumLength_DownloadsWeeklyELT import load_ELT_album_length_downloads
-from ..ELTS.Revenue_Customer_GenreWeeklyELT import load_ELT_revenue_customer_genre
-from ..ELTS.PopularGenresbyCustomerSegmentWeeklyETL import (
-    load_popular_genres_by_city_ETL,
+from KT_Cloud.Storage.ELTS.CustomerPurchaseFrequencyTotalSpendWeeklyELT import load_elt
+from KT_Cloud.Storage.ELTS.topSellingArtistsWeeklyELT import load_and_transform_data
+from KT_Cloud.Storage.ELTS.employeeSalePerformanceCustomerInteractionsWeeklyELT import load_employees_sales_customer_interactions_elt
+from KT_Cloud.Storage.ELTS.AveragePurchaseValueWeeklyELT import load_average_purchase_value_elt
+from KT_Cloud.Storage.ELTS.AlbumLength_DownloadsWeeklyELT import load_ELT_album_length_downloads
+from KT_Cloud.Storage.ELTS.Revenue_Customer_GenreWeeklyELT import load_ELT_revenue_customer_genre
+from KT_Cloud.Storage.ELTS.PopularGenresByCustomerSegmentWeeklyELT import (
+    load_popular_genres_by_city_ELT,
 )
-from ..ELTS.AlbumPopularityAndRevenueWeeklyETL import (
-    load_album_popularity_and_revenue_ETL,
+from KT_Cloud.Storage.ELTS.AlbumPopularityAndRevenueWeeklyELT import (
+    load_album_popularity_and_revenue_ELT,
 )
-from ..ELTS import GenreSalseWeeklyELT
-
+from KT_Cloud.Storage.ELTS import GenreSalseWeeklyELT
+from KT_Cloud.Storage.ELTS.CustomerLifetimeValuebyRegionWeeklyELT import customer_ltvWeeklyELT
+from KT_Cloud.Storage.ELTS.CustomerLoyaltyAndInvoieSizeWeeklyELT import customer_loyaltyWeeklyELT
 # from ELTS import X
 
 
@@ -28,18 +29,18 @@ def run_table_2():
     # Code to generate Table 2
     pass
 
+def run_customer_loyaltyWeeklyELT():
+    customer_loyaltyWeeklyELT()
 
-def run_table_3():
-    # Code to generate Table 3
-    pass
-
+def run_customer_ltvWeeklyELT():
+    customer_ltvWeeklyELT()
 
 def run_popular_genres_by_city():
-    load_popular_genres_by_city_ETL()
+    load_popular_genres_by_city_ELT()
 
 
 def run_album_popularity_and_revenue():
-    load_album_popularity_and_revenue_ETL()
+    load_album_popularity_and_revenue_ELT()
 
 
 # More functions for other tasks as necessary
@@ -86,21 +87,15 @@ with DAG(
     catchup=False,
 ) as dag:
 
-    # Task 1 (Independent tasks that run first)
-    task_1 = PythonOperator(
-        task_id="run_table_1",
-        python_callable=run_table_1,
-    )
-
-    task_3 = PythonOperator(
-        task_id="run_table_3",
-        python_callable=run_table_3,
+    customer_loyaltyWeeklyELT = PythonOperator(
+        task_id="run_customer_loyaltyWeeklyELT",
+        python_callable=run_customer_loyaltyWeeklyELT,
     )
 
     # Add more independent tasks here
-    task_5 = PythonOperator(
-        task_id="run_table_5",
-        python_callable=run_table_5,
+    customer_ltvWeeklyELT = PythonOperator(
+        task_id="run_customer_ltvWeeklyELT",
+        python_callable=run_customer_ltvWeeklyELT,
     )
 
     # Dependent tasks that run after Table 1, 3, 5
@@ -152,8 +147,7 @@ with DAG(
         python_callable=run_genre_salse_weekly,
     )
     # Define dependencies
-    task_1 >> task_2
-    task_3 >> task_4
-    task_5 >> task_6
-
+    # task_1 >> task_2
+    # customer_loyaltyWeeklyELT >> task_4
+    # task_5 >> task_6
     # You can add more tasks and dependencies following this pattern.

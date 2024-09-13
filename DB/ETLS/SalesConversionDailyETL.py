@@ -2,12 +2,21 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 import sqlite3
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
+import random
 
 def get_last_updated_at(conn):
     query = "SELECT MAX(updated_at) FROM employee_data"
     last_updated_at = pd.read_sql(query, conn).iloc[0, 0]
     return last_updated_at if last_updated_at is not pd.NA else '1970-01-01 00:00:00'
+
+# Generate a random date within a month back and a month forward from now
+def generate_random_date():
+    today = datetime.now()
+    start_date = today - timedelta(days=60)
+    end_date = today - timedelta(days=1)
+    random_date = start_date + timedelta(days=random.randint(0, (end_date - start_date).days))
+    return random_date.strftime('%Y-%m-%d')
 
 def incremental_load():
     # Step 1: Initialize Spark session
