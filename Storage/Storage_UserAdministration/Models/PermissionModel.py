@@ -2,23 +2,30 @@ from enum import Enum
 from bidict import bidict
 from itertools import product
 
+
 class Action(Enum):
     """Enumeration of possible actions for permissions."""
-    READ = 'read'
-    WRITE = 'write'
-    DELETE = 'delete'
-    UPDATE = 'update'
-    EXECUTE = 'execute'
+
+    READ = "read"
+    WRITE = "write"
+    DELETE = "delete"
+    UPDATE = "update"
+    EXECUTE = "execute"
+
 
 class Resource(Enum):
     """Enumeration of resources that permissions can apply to."""
-    BUCKET = 'bucket'
-    DATABASE = 'database'
+
+    BUCKET = "bucket"
+    DATABASE = "database"
+
 
 class Effect(Enum):
     """Enumeration of effects that a permission can have."""
+
     DENY = "deny"
     ALLOW = "allow"
+
 
 class Permission:
     """
@@ -29,13 +36,16 @@ class Permission:
         get_id_by_permission(action: Action, resource: Resource, effect: Effect) -> int:
             Returns the ID for the given permission details.
     """
+
     # Create permissions dynamically with combinations of enums
-    _permissions = bidict({
-        idx: (action, resource, effect)
-        for idx, (action, resource, effect) in enumerate(
-            product(Action, Resource, Effect), start=1
-        )
-    })
+    _permissions = bidict(
+        {
+            idx: (action, resource, effect)
+            for idx, (action, resource, effect) in enumerate(
+                product(Action, Resource, Effect), start=1
+            )
+        }
+    )
 
     @classmethod
     def get_permission_by_id(cls, permission_id: int) -> dict[str, str]:
@@ -50,11 +60,13 @@ class Permission:
         return {
             "action": action.value,
             "resource": resource.value,
-            "effect": effect.value
+            "effect": effect.value,
         }
 
     @classmethod
-    def get_id_by_permission(cls, action: Action, resource: Resource, effect: Effect) -> int:
+    def get_id_by_permission(
+        cls, action: Action, resource: Resource, effect: Effect
+    ) -> int:
         """
         Get the ID associated with the given permission details using strings.
         :param action_str: The action of the permission as a string (e.g., 'read').
@@ -69,10 +81,10 @@ class Permission:
             effect = Effect(str(effect.value))
         except ValueError as e:
             raise ValueError(f"Invalid permission details: {e}")
-        
+
         permission = (action, resource, effect)
-        
+
         if permission not in cls._permissions.inv:
             raise ValueError("Permission not found.")
-        
+
         return cls._permissions.inv[permission]
