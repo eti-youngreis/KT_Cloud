@@ -1,19 +1,28 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
-from KT_Cloud.Storage.ETLS.ProductsPurchasedTogetherWeeklyETL import load
-from KT_Cloud.Storage.ETLS.topSellingArtistsWeeklyETL import load_top_selling_artists
-from KT_Cloud.Storage.ETLS.employeeSalePerformanceCustomerInteractionsWeeklyETL import \
-    load_employees_sales_customer_interactions
-from KT_Cloud.Storage.ETLS.AveragePurchaseValueWeeklyETL import load_customer_invoices_count_etl
-from KT_Cloud.Storage.ETLS.AlbumLength_DownloadsWeeklyETL import load_ETL_album_length_downloads
-from KT_Cloud.Storage.ETLS.Revenue_Customer_GenreWeeklyETL import load_ETL_revenue_customer_genre
-from KT_Cloud.Storage.ETLS.AlbumPopularityAndRevenueWeeklyETL import load_album_popularity_and_revenue_ETL
-from KT_Cloud.Storage.ETLS.CustomerLoyaltyAndInvoiceSizeWeeklyETL import customer_loyaltyWeeklyETL
-from KT_Cloud.Storage.ETLS.CustomerLifetimeValuebyRegionWeeklyETL import customer_ltvWeeklyETL
-from KT_Cloud.Storage.ETLS.PopularGenresbyCustomerSegmentWeeklyETL import load_popular_genres_by_city_ETL
+import sys
+import os
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from ETLS.ProductsPurchasedTogetherWeeklyETL import load
+from ETLS.topSellingArtistsWeeklyETL import load_top_selling_artists
+from ETLS.employeeSalePerformanceCustomerInteractionsWeeklyETL import (
+    load_employees_sales_customer_interactions,
+)
+from ETLS.AveragePurchaseValueWeeklyETL import load_customer_invoices_count_etl
+from ETLS.AlbumLength_DownloadsWeeklyETL import load_ETL_album_length_downloads
+from ETLS.Revenue_Customer_GenreWeeklyETL import load_ETL_revenue_customer_genre
+from ETLS.AlbumPopularityAndRevenueWeeklyETL import (
+    load_album_popularity_and_revenue_ETL,
+)
+from ETLS.CustomerLoyaltyAndInvoiceSizeWeeklyETL import customer_loyaltyWeeklyETL
+from ETLS.CustomerLifetimeValuebyRegionWeeklyETL import customer_ltvWeeklyETL
+from ETLS.PopularGenresbyCustomerSegmentWeeklyETL import load_popular_genres_by_city_ETL
+from ELTS import SalesTrendsWeeklyELT
+from ELTS import GenreSalseWeeklyELT
 # from ETLS import X
 
 
@@ -24,8 +33,15 @@ def run_table_1():
     pass
 
 
+def run_sales_trends_weekly():
+    SalesTrendsWeeklyELT.load()
+
+def run_genre_salse_weekly():
+    GenreSalseWeeklyELT.load()
+    
 def run_customer_loyaltyWeeklyETL():
     customer_loyaltyWeeklyETL()
+
 
 
 def run_customer_ltvWeeklyETL():
@@ -69,11 +85,11 @@ default_args = {
 
 # Initialize DAG
 with DAG(
-        'etl_orchestration',
-        default_args=default_args,
-        description='ETL Process Orchestration DAG',
-        schedule_interval=None,  # Set to None for manual runs
-        catchup=False,
+    "etl_orchestration",
+    default_args=default_args,
+    description="ETL Process Orchestration DAG",
+    schedule_interval=None,  # Set to None for manual runs
+    catchup=False,
 ) as dag:
 
     # Task 1 (Independent tasks that run first)
@@ -95,28 +111,28 @@ with DAG(
     )
 
     task_popular_genres_by_city = PythonOperator(
-        task_id='run_popular_genres_by_city',
+        task_id="run_popular_genres_by_city",
         python_callable=run_popular_genres_by_city,
     )
     task_album_popularity_and_revenue = PythonOperator(
-        task_id='run_album_popularity_and_revenue',
+        task_id="run_album_popularity_and_revenue",
         python_callable=run_album_popularity_and_revenue,
     )
 
     task_customer_purchase_frequency_total_spend = PythonOperator(
-        task_id='run_customer_purchase_frequency_total_spend',
+        task_id="run_customer_purchase_frequency_total_spend",
         python_callable=run_customer_purchase_frequency_total_spend,
     )
     task_top_sell_artists = PythonOperator(
-        task_id='run_top_sell_artists',
+        task_id="run_top_sell_artists",
         python_callable=run_top_sell_artists,
     )
     task_employees_sales_customer_interactions = PythonOperator(
-        task_id='employees_sales_customer_interactions',
+        task_id="employees_sales_customer_interactions",
         python_callable=run_employees_sales_customer_interactions,
     )
     task_customer_invoices_count_etl = PythonOperator(
-        task_id='customer_invoices_count_etl',
+        task_id="customer_invoices_count_etl",
         python_callable=run_customer_invoices_count_etl,
     )
 
@@ -145,5 +161,8 @@ with DAG(
     # task_3 >> task_4
     # task_5 >> task_6
     # task_album_length_downloads >> task_revenue_customer_genre
+<<<<<<< HEAD
 
     # You can add more tasks and dependencies following this pattern.
+=======
+>>>>>>> 0cb7c3199cda241794cbde865e70aab79b0cb282
