@@ -16,15 +16,15 @@ class ParameterModel:
 
     def to_dict(self) -> Dict:
         return {
-            'ParameterName': self.parameter_name,
-            'ParameterValue': self.parameter_value,
-            'Description': self.description,
-            'Source': self.source,
-            'ApplyType': self.apply_type,
-            'DataType': self.data_type,
-            'AllowedValues': self.allowed_values,
-            'IsModifiable': self.is_modifiable,
-            'MinimumEngineVersion': self.minimum_engine_version,
-            'ApplyMethod': self.apply_method,
-            'SupportedEngineModes': self.supported_engine_modes
+            'parameter_name': self.parameter_name,
+            'parameter_value': self.parameter_value,
+            'description': self.description,
+            'source': self.source,
+            'apply_type': self.apply_type,
+            'data_type': self.data_type,
+            'allowed_values': self.allowed_values,
+            'is_modifiable': self.is_modifiable,
+            'minimum_engine_version': self.minimum_engine_version,
+            'apply_method': self.apply_method,
+            'supported_engine_modes': self.supported_engine_modes
         }

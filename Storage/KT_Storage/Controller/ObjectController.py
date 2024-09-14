@@ -223,3 +223,7 @@ class ObjectController:
     async def get_object_lock_configuration(self):
         """Retrieve the object lock configuration."""
         pass
+
+
+if __name__ == "__main__":
+    objectController = ObjectController()

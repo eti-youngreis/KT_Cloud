@@ -36,8 +36,8 @@ def incremental_load():
 
         # Filter only new/updated rows based on the last update time
         if last_update_time:
-            # InvoiceLines = InvoiceLines.filter(F.col("updated_at") > F.lit(last_update_time))
-            InvoiceLines = InvoiceLines.filter(F.col("created_at") > F.lit(last_update_time))
+            Tracks = Tracks.filter(F.col("updated_at") > F.lit(last_update_time))
+            InvoiceLines = InvoiceLines.filter(F.col("updated_at") > F.lit(last_update_time))
 
         # TRANSFORM (Apply joins, groupings, and window functions)
         # --------------------------------------------------------
@@ -65,6 +65,10 @@ def incremental_load():
         # LOAD (Save transformed data into SQLite incrementally)
         # ----------------------------------------------------
         final_data_df = final_data_with_metadata.toPandas()
+
+
+
+
 
         # if final_data_df.empty:
         #     print("No new data to process.")
@@ -100,3 +104,5 @@ def incremental_load():
 
 if __name__ == "__main__":
     incremental_load()
+
+

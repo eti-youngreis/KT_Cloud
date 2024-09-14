@@ -3,7 +3,7 @@ import sqlite3  # Assuming you're using sqlite3
 import pandas as pd
 from datetime import datetime
 
-def load():
+def load_genre_popularity_and_average_sales():
     conn = sqlite3.connect('genres_table_ELT.db')
     try:
         # EXTRACT (Loading CSVs from S3 or local storage)
