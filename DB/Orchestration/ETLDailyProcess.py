@@ -8,7 +8,7 @@ from DB.ETLS.TrackPlayCountandRevenueContributionDailyETL import incremental_loa
 from DB.ETLS.BestSellingAlbumsandTrackPopularitybyCountryDailyETL import incremental_load as incrementel_load_tk_2
 from DB.ETLS.‏‏‏‏EmployeeCustomerSatisfactionAndAverageSalesValueDailyETL import incremental_load as load_daily_employee_customer_satisfaction_and_averagesales_value
 from DB.ETLS.‏‏RepeatCustomerAnalysisByArtistAndPurchaseFrequencyDailyETL import incremental_load as load_daily_artist_repeat_customer_analysis
-
+from DB.ETLS.TrackLengthandDownloadFrequencyDailyETL import load_Track_Length_and_Download_Frequency
 # from ETLS import X
 
 # Define your Python functions here
@@ -34,7 +34,10 @@ def  load_employee_customer_satisfaction_and_averagesales_value():
 
 def  load_artist_repeat_customer_analysis():
     load_daily_artist_repeat_customer_analysis()
-    
+
+def load_Track_Length_and_Download_Frequency_etl():
+    load_Track_Length_and_Download_Frequency()    
+
 # More functions for other tasks as necessary
 
 # Define default arguments for the DAG
@@ -86,6 +89,10 @@ with DAG(
     artist_repeat_customer_analysis = PythonOperator(
         task_id='artist_repeat_customer_analysis',
         python_callable=load_artist_repeat_customer_analysis,
+    )
+    track_Length_and_Download_Frequency_task = PythonOperator(
+        task_id='load_Track_Length_and_Download_Frequency_etl',
+        python_callable=load_Track_Length_and_Download_Frequency_etl,
     )
 
     # Dependent tasks that run after Table 1, 3, 5

@@ -4,7 +4,8 @@ from datetime import datetime
 
 from DB.ETLS.EmployeeCustomerSatisfactionAndAverageSalesWeeklyETL import load as load_weekly_employee_customer_satisfaction_and_averagesales_value
 from DB.ETLS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyWeeklyETL import load as load_weekly_artist_repeat_customer_analysis
-
+from DB.ETLS.TrackLengthandDownloadFrequencyWeeklyETL import load_Track_Length_and_Download_Frequency
+from DB.ETLS.TrackPopularityWeeklyETL import load_Track_Popularity
 # from ETLS import X
 
 
@@ -32,6 +33,13 @@ def  load_employee_customer_satisfaction_and_averagesales_value():
     
 def  load_artist_repeat_customer_analysis():
     load_weekly_artist_repeat_customer_analysis()
+
+def load_Track_Popularity_etl():
+    load_Track_Popularity()
+
+
+def load_Track_Length_and_Download_Frequency_etl():
+    load_Track_Length_and_Download_Frequency()    
     
 # More functions for other tasks as necessary
 
@@ -84,6 +92,15 @@ with DAG(
     artist_repeat_customer_analysis = PythonOperator(
         task_id='artist_repeat_customer_analysis',
         python_callable=load_artist_repeat_customer_analysis,
+    )
+
+    track_Popularity_task = PythonOperator(
+        task_id='load_Track_Popularity_etl',
+        python_callable=load_Track_Popularity_etl,
+    )
+    track_Length_and_Download_Frequency_task = PythonOperator(
+        task_id='load_Track_Length_and_Download_Frequency_etl',
+        python_callable=load_Track_Length_and_Download_Frequency_etl,
     )
 
     # Dependent tasks that run after Table 1, 3, 5
