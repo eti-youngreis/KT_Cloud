@@ -161,8 +161,5 @@ with DAG(
     # task_3 >> task_4
     # task_5 >> task_6
     # task_album_length_downloads >> task_revenue_customer_genre
-<<<<<<< HEAD
 
     # You can add more tasks and dependencies following this pattern.
-=======
->>>>>>> 0cb7c3199cda241794cbde865e70aab79b0cb282
