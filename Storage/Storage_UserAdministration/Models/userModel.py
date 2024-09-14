@@ -7,7 +7,6 @@ class User:
         self,
         username: str,
         password: str,
-        user_id =None,
         email=None,
         logged_in=False,
         token = None,
@@ -26,6 +25,20 @@ class User:
         self.policies = policies
         self.quotas =quotas
         self.groups = groups
+
+    def to_dict(self):
+        return {
+            "User_id": self.user_id,
+            "Username":self.username,
+            "Password":self.password,
+            "Email":self.email,
+            "Logged_in":self.logged_in,
+            "Token":self.token,
+            "Role":self.role,
+            "Policies":self.policies,
+            "Policies":self.policies,
+            "Groups":self.groups
+        }
 
     # def verify_password(self, password:str):
     #     # Verify password against the hashed password

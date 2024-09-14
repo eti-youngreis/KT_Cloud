@@ -1,21 +1,31 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
-from KT_Cloud.Storage.ELTS.CustomerPurchaseFrequencyTotalSpendWeeklyELT import load_elt
-from KT_Cloud.Storage.ELTS.topSellingArtistsWeeklyELT import load_and_transform_data
-from KT_Cloud.Storage.ELTS.employeeSalePerformanceCustomerInteractionsWeeklyELT import load_employees_sales_customer_interactions_elt
-from KT_Cloud.Storage.ELTS.AveragePurchaseValueWeeklyELT import load_average_purchase_value_elt
-from KT_Cloud.Storage.ELTS.AlbumLength_DownloadsWeeklyELT import load_ELT_album_length_downloads
-from KT_Cloud.Storage.ELTS.Revenue_Customer_GenreWeeklyELT import load_ELT_revenue_customer_genre
-from KT_Cloud.Storage.ELTS.PopularGenresByCustomerSegmentWeeklyELT import (
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from ELTS.CustomerPurchaseFrequencyTotalSpendWeeklyELT import load_elt
+from ELTS.topSellingArtistsWeeklyELT import load_and_transform_data
+from ELTS.employeeSalePerformanceCustomerInteractionsWeeklyELT import (
+    load_employees_sales_customer_interactions_elt,
+)
+from ELTS.AveragePurchaseValueWeeklyELT import load_average_purchase_value_elt
+from ELTS.AlbumLength_DownloadsWeeklyELT import load_ELT_album_length_downloads
+from ELTS.Revenue_Customer_GenreWeeklyELT import load_ELT_revenue_customer_genre
+from ELTS.PopularGenresByCustomerSegmentWeeklyELT import (
     load_popular_genres_by_city_ELT,
 )
-from KT_Cloud.Storage.ELTS.AlbumPopularityAndRevenueWeeklyELT import (
+from ELTS.AlbumPopularityAndRevenueWeeklyELT import (
     load_album_popularity_and_revenue_ELT,
 )
-from KT_Cloud.Storage.ELTS import GenreSalseWeeklyELT
-from KT_Cloud.Storage.ELTS.CustomerLifetimeValuebyRegionWeeklyELT import customer_ltvWeeklyELT
-from KT_Cloud.Storage.ELTS.CustomerLoyaltyAndInvoieSizeWeeklyELT import customer_loyaltyWeeklyELT
+from ELTS import SalesTrendsWeeklyELT
+from ELTS import GenreSalseWeeklyELT
+from ELTS.CustomerLifetimeValuebyRegionWeeklyELT import customer_ltvWeeklyELT
+from ELTS.CustomerLoyaltyAndInvoieSizeWeeklyELT import customer_loyaltyWeeklyELT
+
 # from ELTS import X
 
 
@@ -25,15 +35,23 @@ def run_genre_salse_weekly():
     GenreSalseWeeklyELT.load()
 
 
+def run_sales_trends_weekly():
+    # Code to generate Table 1
+    SalesTrendsWeeklyELT.load()
+
+
 def run_table_2():
     # Code to generate Table 2
     pass
 
+
 def run_customer_loyaltyWeeklyELT():
     customer_loyaltyWeeklyELT()
 
+
 def run_customer_ltvWeeklyELT():
     customer_ltvWeeklyELT()
+
 
 def run_popular_genres_by_city():
     load_popular_genres_by_city_ELT()
@@ -141,10 +159,14 @@ with DAG(
         python_callable=run_revenue_customer_genre,
     )
 
-
     task_genre_salse_weekly = PythonOperator(
         task_id="run_genre_salse_weekly",
         python_callable=run_genre_salse_weekly,
+    )
+
+    task_sales_trends_weekly = PythonOperator(
+        task_id="run_sales_trends_weekly",
+        python_callable=run_sales_trends_weekly,
     )
     # Define dependencies
     # task_1 >> task_2
