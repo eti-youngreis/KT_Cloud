@@ -37,24 +37,24 @@ def customer_loyaltyWeeklyELT():
                 LastName TEXT,
                 LoyaltyScore INTEGER,
                 AverageInvoiceSize REAL,
-                CreatedAt TEXT,
+                created_at TEXT,
                 UpdatedAt TEXT,
-                UpdatedBy TEXT
+                updated_by TEXT
             )
         """)
 
         # Step 2: Transform - Use SQL for transformations within SQLite
         transformation_query = """
-        INSERT INTO customer_loyalty (CustomerId, FirstName, LastName, LoyaltyScore, AverageInvoiceSize, CreatedAt, UpdatedAt, UpdatedBy)
+        INSERT INTO customer_loyalty (CustomerId, FirstName, LastName, LoyaltyScore, AverageInvoiceSize, created_at, UpdatedAt, updated_by)
         SELECT
             c.CustomerId,
             c.FirstName,
             c.LastName,
             COUNT(i.InvoiceId) AS LoyaltyScore,
             AVG(i.Total) AS AverageInvoiceSize,
-            strftime('%Y-%m-%d %H:%M:%S', 'now') AS CreatedAt,
+            strftime('%Y-%m-%d %H:%M:%S', 'now') AS created_at,
             strftime('%Y-%m-%d %H:%M:%S', 'now') AS UpdatedAt,
-            'process:Efrat_Harush' AS UpdatedBy
+            'process:Efrat_Harush' AS updated_by
         FROM
             customers c
         JOIN
