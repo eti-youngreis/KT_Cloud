@@ -1,7 +1,7 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
-from DB.ELTS import AlbumPopularityDailyELT, PopularGenresDailyELT
+# from DB.ELTS import AlbumPopularityDailyELT, PopularGenresDailyELT
 # from ELTS import X
 
 # Define your Python functions here
@@ -18,10 +18,12 @@ def run_table_3():
     pass
 
 def run_album_popularity_and_revenue():
-    AlbumPopularityDailyELT.album_popularity_incremental_elt()
+    # AlbumPopularityDailyELT.album_popularity_incremental_elt()
+    print("1 hello")
 
 def run_genres_popularity():
-    PopularGenresDailyELT.popular_genres_by_city_incremental_elt()
+    # PopularGenresDailyELT.popular_genres_by_city_incremental_elt()
+    print("2 hello")
     
 
 # More functions for other tasks as necessary

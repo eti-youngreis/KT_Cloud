@@ -55,18 +55,12 @@ def album_popularity_full_elt():
         # EXTRACT (Loading CSVs from local storage)
         # -----------------------------------------------
         # Load the tables CSV as a Pandas DataFrame
-        albums = pd.read_csv("DB\csv_files\Album.csv")
-        tracks = pd.read_csv("DB\csv_files\Track.csv")
-        invoice_lines = pd.read_csv("DB\csv_files\InvoiceLine.csv")
+        albums = pd.read_csv("DB\csvs\Album.csv")
+        tracks = pd.read_csv("DB\csvs\Track.csv")
+        invoice_lines = pd.read_csv("DB\csvs\InvoiceLine.csv")
         
         # LOAD (Save the raw data into SQLite using KT_DB without transformation)
         # -----------------------------------------------------------------------
-        # Convert Spark DataFrames to Pandas DataFrames before loading to SQLite
-        
-        # # set the first column in csv file to primary key
-        # albums.set_index(albums.columns[0], inplace=True)
-        # tracks.set_index(tracks.columns[0], inplace=True)
-        # invoice_lines.set_index(invoice_lines.columns[0], inplace=True)
         
         # Insert the full CSV data into corresponding raw tables in SQLite
         

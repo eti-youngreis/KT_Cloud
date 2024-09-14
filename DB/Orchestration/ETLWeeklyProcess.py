@@ -1,7 +1,7 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
-from ..ETLS import AlbumPopularityWeeklyETL, PopularGenresWeeklyETL
+from DB.ETLS import AlbumPopularityWeeklyETL, PopularGenresWeeklyETL
 # from ETLS import X
 
 # Define your Python functions here

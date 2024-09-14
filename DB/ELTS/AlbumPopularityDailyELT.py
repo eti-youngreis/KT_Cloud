@@ -8,18 +8,25 @@ def album_popularity_incremental_elt():
     cursor = conn.cursor()
 
     try:
-        # Step 2: Get the latest processed timestamp from the target table
-        latest_timestamp_query = "SELECT MAX(updated_at) FROM AlbumPopularityAndRevenue"
-        cursor.execute(latest_timestamp_query)
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='AlbumPopularityAndRevenue'")
+        if cursor.fetchone() is None:
+            cursor.execute('''
+            CREATE TABLE AlbumPopularityAndRevenue (
+                AlbumId INTEGER PRIMARY KEY,
+                Title TEXT,
+                ArtistId INTEGER,
+                TrackCount INTEGER,
+                TotalRevenue REAL,
+                created_at TEXT,
+                updated_at TEXT,
+                updated_by TEXT
+            )
+            ''')
+            print("Table 'AlbumPopularityAndRevenue' created.")
 
-        # Fetch the result of the query
-        latest_timestamp = cursor.fetchone()[0]
-
-
-        # Handle case where no data exists yet (initial load)
-        if latest_timestamp is None:
-            latest_timestamp = '1900-01-01 00:00:00'  # Default for initial load
-        print(latest_timestamp)
+        # Step 4: Get the latest processed timestamp
+        cursor.execute("SELECT MAX(updated_at) FROM AlbumPopularityAndRevenue")
+        latest_timestamp = cursor.fetchone()[0] or '1900-01-01 00:00:00'
        
 
         # Add here latest_timestamp query for each main source of your query
@@ -28,9 +35,9 @@ def album_popularity_incremental_elt():
         # --------------------------------------------------------------
         
         # Load the tables CSV as a Pandas DataFrame
-        albums = pd.read_csv("DB\csv_files\Album.csv")
-        tracks = pd.read_csv("DB\csv_files\Track.csv")
-        invoice_lines = pd.read_csv("DB\csv_files\InvoiceLine.csv")
+        albums = pd.read_csv("DB\csvs\Album.csv")
+        tracks = pd.read_csv("DB\csvs\Track.csv")
+        invoice_lines = pd.read_csv("DB\csvs\InvoiceLine.csv")
         
         
         # Insert the full CSV data into corresponding raw tables in SQLite
@@ -42,25 +49,25 @@ def album_popularity_incremental_elt():
         # TRANSFORM (Perform transformations with SQL queries inside SQLite)
         # ------------------------------------------------------------------
         # Example Transformation: Join tables and calculate total spend, avg spend, etc.
-        stam = "COALESCE(apr.created_at, DATETIME('now')) AS created_at"
+        
 
 
         # Create a temporary table to store the rows to be deleted and inserted
         create_temp_table_query = f"""
         CREATE TEMP TABLE TempDeletedRowsInfo AS
         SELECT al.AlbumId,
-            al.Title,
-            al.ArtistId,
-            SUM(tr.UnitPrice * il.Quantity) AS TotalRevenue,
-            COUNT(tr.TrackId) AS TrackCount,
-            apr.created_at AS created_at,
-            DATETIME('now') AS updated_at,
-            'process:user_name' AS updated_by
+        al.Title,
+        al.ArtistId,
+        SUM(tr.UnitPrice * il.Quantity) AS TotalRevenue,
+        COUNT(tr.TrackId) AS TrackCount,
+        COALESCE(apr.created_at, DATETIME('now')) AS created_at,
+        DATETIME('now') AS updated_at,
+       'process:user_name' AS updated_by
         FROM albums al
         JOIN tracks tr ON al.AlbumId = tr.AlbumId
         JOIN invoice_lines il ON il.TrackId = tr.TrackId
         LEFT JOIN AlbumPopularityAndRevenue apr ON apr.AlbumId = al.AlbumId
-        WHERE al.updated_at > '{latest_timestamp}' or tr.updated_at > '{latest_timestamp}' or il.updated_at > '{latest_timestamp}'
+        WHERE al.updated_at > '{latest_timestamp}' OR tr.updated_at > '{latest_timestamp}' OR il.updated_at > '{latest_timestamp}'
         GROUP BY al.AlbumId;
         """
 
