@@ -2,11 +2,13 @@ import sqlite3
 import pandas as pd
 
 def load_ELT_revenue_customer_genre():
+    # Step 1: Extract
+    # Connect to the SQLite database
+    conn = sqlite3.connect('D:\\b\\revenueCustomerELT.db')
+    cursor = conn.cursor()
     try:
-        # Step 1: Extract
-        # Connect to the SQLite database
-        conn = sqlite3.connect('D:\\b\\revenueCustomerELT.db')
-        cursor = conn.cursor()
+
+
         
         # EXTRACT (Loading CSVs from local storage)
         print("Loading CSV files...")
