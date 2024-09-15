@@ -1,5 +1,5 @@
 import re
-from GeneralValidations import 
+from GeneralValidations import *
 
 
 def is_db_cluster_name_valid(cluster_name):
