@@ -45,10 +45,12 @@ class ObjectManager:
 
         self.object_manager.update_object_in_management_table_by_criteria(table_name, updates, criteria)
 
-    def get_from_memory(self, table_name, object_id):
+    def get_from_memory(self, object_id):
+        table_name = self.object_manager.convert_object_name_to_management_table_name(self.object_name)
         self.object_manager.get_object_from_management_table(table_name,object_id)
 
-    def get_data_from_memory_db(self, table_name):
+    def get_data_from_memory_db(self):
+        table_name = self.object_manager.convert_object_name_to_management_table_name(self.object_name)
         self.object_manager.get_data_from_memory(table_name=table_name)
         
     def convert_object_attributes_to_dictionary(**kwargs):
