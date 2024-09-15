@@ -6,6 +6,3 @@
 ".idea/workspace.xml" 
 *.pyc
 *.db
-DB/csvs/
-abseil-cpp
-*.env
