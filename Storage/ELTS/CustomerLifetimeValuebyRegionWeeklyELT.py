@@ -2,19 +2,18 @@ from pyspark.sql import SparkSession
 import sqlite3
 import pandas as pd
 
-def elt_process():
+def customer_ltvWeeklyELT():
     # Initialize Spark session
     spark = SparkSession.builder.appName("CustomerLTVByRegionELT").getOrCreate()
 
     # Open SQLite connection
-    conn = sqlite3.connect("C:\\Users\\User\\Desktop\\p_database.db")
+    conn = sqlite3.connect("C:\\Users\\User\\Desktop\\customer_ltv.db")
 
     try:
         # Drop and create raw data tables
         conn.execute("DROP TABLE IF EXISTS customers")
         conn.execute("DROP TABLE IF EXISTS invoice_lines")
         conn.execute("DROP TABLE IF EXISTS invoices")
-
         # E - Extraction: Read CSV files
         customers_df = spark.read.csv("C:\\Users\\User\\Desktop\\Customer.csv", header=True, inferSchema=True)
         invoice_lines_df = spark.read.csv("C:\\Users\\User\\Desktop\\InvoiceLine.csv", header=True, inferSchema=True)
@@ -36,7 +35,7 @@ def elt_process():
                 CustomerLTV REAL,
                 Rank INTEGER,
                 created_at TEXT,
-                updated_at TEXT,
+                UpdatedAt TEXT,
                 updated_by TEXT,
                 PRIMARY KEY (CustomerId, Country)
             )
@@ -44,7 +43,7 @@ def elt_process():
 
         # T - Transformation: Perform SQL queries for transformation within SQLite
         transformation_query = """
-        INSERT INTO customer_ltv (CustomerId, FirstName, LastName, Country, CustomerLTV, Rank, created_at, updated_at, updated_by)
+        INSERT INTO customer_ltv (CustomerId, FirstName, LastName, Country, CustomerLTV, Rank, created_at, UpdatedAt, updated_by)
         SELECT
             c.CustomerId,
             c.FirstName,
@@ -53,8 +52,8 @@ def elt_process():
             SUM(i.Total) AS CustomerLTV,
             RANK() OVER (PARTITION BY c.Country ORDER BY SUM(i.Total) DESC) AS Rank,
             strftime('%Y-%m-%d %H:%M:%S', 'now') AS created_at,
-            strftime('%Y-%m-%d %H:%M:%S', 'now') AS updated_at,
-            'process:user_name' AS updated_by
+            strftime('%Y-%m-%d %H:%M:%S', 'now') AS UpdatedAt,
+            'process:Efrat_Harush' AS updated_by
         FROM
             customers c
         JOIN
@@ -79,4 +78,4 @@ def elt_process():
         # Close the SQLite connection
         conn.close()
 
-elt_process()
+customer_ltvWeeklyELT()

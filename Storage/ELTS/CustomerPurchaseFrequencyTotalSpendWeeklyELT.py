@@ -17,8 +17,6 @@ def load_elt():
         invoice_lines_df.to_sql('invoice_lines', conn, if_exists='replace', index=False)
         invoices_df.to_sql('invoices', conn, if_exists='replace', index=False)
 
-        print("הנתונים נטענו לתוך הטבלאות ב-SQLite")
-
         cursor.execute("""
             SELECT c.CustomerId, c.FirstName, c.LastName, 
                    SUM(il.UnitPrice * il.Quantity) AS TotalSpend,
@@ -51,7 +49,6 @@ def load_elt():
             print(row)
 
     finally:
-        # סגירת החיבור למסד הנתונים
         conn.close()
 
 if __name__ == "__main__":

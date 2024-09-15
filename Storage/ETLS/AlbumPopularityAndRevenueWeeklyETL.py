@@ -3,7 +3,8 @@ from pyspark.sql import functions as F
 import sqlite3
 from datetime import datetime
 
-def load_album_popularity_and_revenue():
+
+def load_album_popularity_and_revenue_ETL():
     # Step 1: Initialize Spark session
     spark = SparkSession.builder \
         .appName("Album Popularity and Revenue ETL") \
@@ -60,6 +61,8 @@ def load_album_popularity_and_revenue():
                       updated_at TEXT,
                       updated_by TEXT)''')
 
+    album_revenue = album_revenue.orderBy("AlbumId")
+
     # Insert data
     for row in album_revenue.collect():
         cursor.execute('''INSERT INTO AlbumPopularityAndRevenue 
@@ -75,4 +78,4 @@ def load_album_popularity_and_revenue():
     spark.stop()
 
 if __name__ == "__main__":
-    load_album_popularity_and_revenue()
+    load_album_popularity_and_revenue_ETL()

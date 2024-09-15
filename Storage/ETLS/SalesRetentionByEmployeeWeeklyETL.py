@@ -7,11 +7,11 @@ from datetime import datetime
 def load():
     # Step 1: Initialize Spark session
     spark = SparkSession.builder \
-       .appName("Average Sales per Employee and Customer Retention Rate") \
+       .appName("ETL - Average Sales per Employee and Customer Retention Rate") \
        .getOrCreate()
 
     # Step 2: Establish SQLite connection
-    conn = sqlite3.connect("sales_data.db")
+    conn = sqlite3.connect("./ETL_sales_data.db")
 
     # Define the path to the CSV files
     path = "D:\\בוטקאמפ\\vastProject\\csv\\"

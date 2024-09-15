@@ -1,14 +1,13 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import count, avg, current_timestamp, lit, date_format
 import sqlite3
-import pandas as pd
 
-def load():
+def customer_loyaltyWeeklyETL():
     # Initialize Spark session
     spark = SparkSession.builder.appName("CustomerLoyaltyETL_FullLoad").getOrCreate()
 
     # Open SQLite connection
-    conn = sqlite3.connect("C:\\Users\\User\\Desktop\\database.db")
+    conn = sqlite3.connect("C:\\Users\\User\\Desktop\\customer_loyalty.db")
 
     try:
         # Drop and create customer_loyalty table
@@ -21,7 +20,7 @@ def load():
                 LoyaltyScore INTEGER,
                 AverageInvoiceSize REAL,
                 created_at TEXT,
-                updated_at TEXT,
+                UpdatedAt TEXT,
                 updated_by TEXT
             )
         """)
@@ -54,7 +53,7 @@ def load():
         # Add metadata columns to the DataFrame
         # This includes creation and update timestamps and the user who updated the data
         result_df = result_df.withColumn("created_at", date_format(current_timestamp(), "yyyy-MM-dd HH:mm:ss")) \
-            .withColumn("updated_at", date_format(current_timestamp(), "yyyy-MM-dd HH:mm:ss")) \
+            .withColumn("UpdatedAt", date_format(current_timestamp(), "yyyy-MM-dd HH:mm:ss")) \
             .withColumn("updated_by", lit("process:your_user_name"))
 
         # Convert the Spark DataFrame to a pandas DataFrame for loading into SQLite
@@ -73,4 +72,4 @@ def load():
         # Close the SQLite connection
         conn.close()
 
-load()
+customer_loyaltyWeeklyETL()

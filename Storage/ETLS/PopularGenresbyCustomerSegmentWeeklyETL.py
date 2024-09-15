@@ -4,7 +4,7 @@ from pyspark.sql.window import Window
 import sqlite3
 from datetime import datetime
 
-def load_popular_genres_by_city():
+def load_popular_genres_by_city_ETL():
     # Step 1: Initialize Spark session
     spark = SparkSession.builder \
         .appName("Popular Genres by City ETL") \
@@ -79,4 +79,4 @@ def load_popular_genres_by_city():
     spark.stop()
 
 if __name__ == "__main__":
-    load_popular_genres_by_city()
+    load_popular_genres_by_city_ETL()
