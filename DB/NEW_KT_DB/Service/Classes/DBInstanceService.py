@@ -28,6 +28,7 @@ class DBInstanceService(DBO):
             SQLCommandHelper.create_database(kwargs['db_name'], db_instance._last_node_of_current_version, db_instance.endpoint)
         
         return db_instance
+
     
  
     def create_snapshot(self, db_instance_identifier, db_snapshot_identifier):
@@ -37,6 +38,23 @@ class DBInstanceService(DBO):
         self.dal.update_management_table(db_instance)
 
    
+
+
+    def restore_version(self, db_instance_identifier, db_snapshot_identifier):
+        db_instance = self.dal.get_from_management_table(db_instance_identifier)
+
+        if db_snapshot_identifier not in db_instance._node_subSnapshot_name_to_id:
+            raise DbSnapshotIdentifierNotFoundError(f"Snapshot identifier '{db_snapshot_identifier}' not found.")
+
+        node_id = db_instance._node_subSnapshot_name_to_id[db_snapshot_identifier]
+        snapshot = db_instance._node_subSnapshot_dic.get(node_id)
+
+        if snapshot:
+            db_instance._update_queue_to_current_version(snapshot)
+            db_instance._create_child_to_node(snapshot)
+
+        self.dal.update_management_table(db_instance)
+
 
     def get_endpoint(self, db_instance_identifier):
         db_instance = self.dal.get_from_management_table(db_instance_identifier)

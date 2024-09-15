@@ -20,10 +20,7 @@ class DBInstanceModel:
         self.endpoint = os.path.join(DBInstanceModel.BASE_PATH, self.db_instance_identifier)
         self._current_version_queue = deque([Node_SubSnapshot(parent=None, endpoint=self.endpoint)])
         self._last_node_of_current_version = self._current_version_queue[-1]
-
-
-
-
+        
     def _create_child_to_node(self, node):
         self._last_node_of_current_version = node.create_child(self.endpoint)
         self._current_version_queue.append(self._last_node_of_current_version)
