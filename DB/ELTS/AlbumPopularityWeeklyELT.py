@@ -5,14 +5,15 @@ import sqlite3
 from datetime import datetime
 import sqlite3
 import getpass  # For getting the username for metadata
+import pandas as pd
 
 
 
 
 
-def load():
+def album_popularity_full_elt():
     """
-    ETL process to calculate Album Popularity and Revenue.
+    ELT process to calculate Album Popularity and Revenue.
     The process extracts data from CSV files, transforms the data by calculating total revenue
     and track count for each album, and then loads the transformed data into a SQLite database.
 
@@ -33,7 +34,7 @@ def load():
         .getOrCreate()
 
     # Step 2: Establish SQLite connection using KT_DB
-    conn = sqlite3.connect('DB/ETLS/etl_db.db')  # Assuming KT_DB has a connect() method
+    conn = sqlite3.connect('DB/etl_db.db')  # Assuming KT_DB has a connect() method
 
     try:
         cursor = conn.cursor()
@@ -50,62 +51,22 @@ def load():
             conn.commit()
         else:
             print("AlbumPopularityAndRevenue' does not exist.")
+            
         # EXTRACT (Loading CSVs from local storage)
         # -----------------------------------------------
-        # Load the main table: Albums, Tracks, and InvoiceLines
-        albums = spark.read.csv("DB/ETLS/csv_files/Album.csv", header=True, inferSchema=True)
-        tracks = spark.read.csv("DB/ETLS/csv_files/Track.csv", header=True, inferSchema=True)
-        invoice_lines = spark.read.csv("DB/ETLS/csv_files/InvoiceLine.csv", header=True, inferSchema=True)
+        # Load the tables CSV as a Pandas DataFrame
+        albums = pd.read_csv("DB\csvs\Album.csv")
+        tracks = pd.read_csv("DB\csvs\Track.csv")
+        invoice_lines = pd.read_csv("DB\csvs\InvoiceLine.csv")
         
         # LOAD (Save the raw data into SQLite using KT_DB without transformation)
         # -----------------------------------------------------------------------
-        # Convert Spark DataFrames to Pandas DataFrames before loading to SQLite
         
-        cursor.execute('''CREATE TABLE IF NOT EXISTS albums (
-                      AlbumId INTEGER,
-                      Title TEXT,
-                      ArtistId INTEGER)''')
+        # Insert the full CSV data into corresponding raw tables in SQLite
         
-        cursor.execute('''CREATE TABLE IF NOT EXISTS tracks (
-                      TrackId INTEGER,
-                      Name TEXT,
-                      AlbumId INTEGER,
-                      MediaTypeId INTEGER,
-                      GenreId INTEGER,
-                      Composer TEXT,
-                      Milliseconds INTEGER,
-                      Bytes INTEGER,
-                      UnitPrice DOUBLE)''')
-        
-        cursor.execute('''CREATE TABLE IF NOT EXISTS invoice_lines (
-                      InvoiceLineId INTEGER,
-                      InvoiceId INTEGER,
-                      TrackID INTEGER,
-                      UnitPrice DOUBLE,
-                      Quantity INTEGER)''')
-        
-        
-        # Insert data to 'albums' table
-        for row in albums.collect():
-            cursor.execute('''INSERT INTO albums 
-                              (AlbumId, Title, ArtistId) 
-                              VALUES (?, ?, ?)''',
-                           (row['AlbumId'], row['Title'], row['ArtistId']))
-        
-        # Insert data into 'tracks' table
-        for row in tracks.collect():
-            cursor.execute('''INSERT INTO tracks
-                              (TrackId, Name, AlbumId, MediaTypeId, GenreId, Composer, Milliseconds, Bytes, UnitPrice) 
-                              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                           (row['TrackId'], row['Name'], row['AlbumId'], row['MediaTypeId'], row['GenreId'],
-                            row['Composer'], row['Milliseconds'], row['Bytes'], row['UnitPrice']))
-        
-        # Insert data into 'invoice_lines' table
-        for row in invoice_lines.collect():
-            cursor.execute('''INSERT INTO invoice_lines
-                              (InvoiceLineId, InvoiceId, TrackId, UnitPrice, Quantity) 
-                              VALUES (?, ?, ?, ?, ?)''',
-                           (row['InvoiceLineId'], row['InvoiceId'], row['TrackId'], row['UnitPrice'], row['Quantity']))
+        albums.to_sql('albums', conn, if_exists='replace', index=False)
+        tracks.to_sql('tracks', conn, if_exists='replace', index=False)
+        invoice_lines.to_sql('invoice_lines', conn, if_exists='replace', index=False)
     
 
 
@@ -118,17 +79,17 @@ def load():
         SELECT al.AlbumId,
             al.Title,
             al.ArtistId,
-           SUM(tr.UnitPrice * il.Quantity) AS TotalRevenue,
-           COUNT(tr.TrackId) AS TrackCount,
-           DATETIME('now') AS created_at,
-           DATETIME('now') AS updated_at,
-           'process:user_name' AS updated_by  
+            SUM(tr.UnitPrice * il.Quantity) AS TotalRevenue,
+            COUNT(tr.TrackId) AS TrackCount,
+            DATETIME('now') AS created_at,
+            DATETIME('now') AS updated_at,
+            'process:user_name' AS updated_by  
         FROM albums al
         JOIN tracks tr ON al.AlbumId = tr.AlbumId
         JOIN invoice_lines il ON il.TrackId = tr.TrackId
         GROUP BY al.AlbumId;
+    """
 
-        """
         cursor = conn.cursor()
         cursor.execute(transform_query)
         
@@ -144,4 +105,4 @@ def load():
         spark.stop()
     
 if __name__ == "__main__":
-    load()
+    album_popularity_full_elt()

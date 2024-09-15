@@ -1,276 +1,276 @@
-ArtistId,Name
-1,AC/DC
-2,Accept
-3,Aerosmith
-4,Alanis Morissette
-5,Alice In Chains
-6,Antônio Carlos Jobim
-7,Apocalyptica
-8,Audioslave
-9,BackBeat
-10,Billy Cobham
-11,Black Label Society
-12,Black Sabbath
-13,Body Count
-14,Bruce Dickinson
-15,Buddy Guy
-16,Caetano Veloso
-17,Chico Buarque
-18,Chico Science & Nação Zumbi
-19,Cidade Negra
-20,Cláudio Zoli
-21,Various Artists
-22,Led Zeppelin
-23,Frank Zappa & Captain Beefheart
-24,Marcos Valle
-25,Milton Nascimento & Bebeto
-26,Azymuth
-27,Gilberto Gil
-28,João Gilberto
-29,Bebel Gilberto
-30,Jorge Vercilo
-31,Baby Consuelo
-32,Ney Matogrosso
-33,Luiz Melodia
-34,Nando Reis
-35,Pedro Luís & A Parede
-36,O Rappa
-37,Ed Motta
-38,Banda Black Rio
-39,Fernanda Porto
-40,Os Cariocas
-41,Elis Regina
-42,Milton Nascimento
-43,A Cor Do Som
-44,Kid Abelha
-45,Sandra De Sá
-46,Jorge Ben
-47,Hermeto Pascoal
-48,Barão Vermelho
-49,"Edson, DJ Marky & DJ Patife Featuring Fernanda Porto"
-50,Metallica
-51,Queen
-52,Kiss
-53,Spyro Gyra
-54,Green Day
-55,David Coverdale
-56,Gonzaguinha
-57,Os Mutantes
-58,Deep Purple
-59,Santana
-60,Santana Feat. Dave Matthews
-61,Santana Feat. Everlast
-62,Santana Feat. Rob Thomas
-63,Santana Feat. Lauryn Hill & Cee-Lo
-64,Santana Feat. The Project G&B
-65,Santana Feat. Maná
-66,Santana Feat. Eagle-Eye Cherry
-67,Santana Feat. Eric Clapton
-68,Miles Davis
-69,Gene Krupa
-70,Toquinho & Vinícius
-71,Vinícius De Moraes & Baden Powell
-72,Vinícius De Moraes
-73,Vinícius E Qurteto Em Cy
-74,Vinícius E Odette Lara
-75,"Vinicius, Toquinho & Quarteto Em Cy"
-76,Creedence Clearwater Revival
-77,Cássia Eller
-78,Def Leppard
-79,Dennis Chambers
-80,Djavan
-81,Eric Clapton
-82,Faith No More
-83,Falamansa
-84,Foo Fighters
-85,Frank Sinatra
-86,Funk Como Le Gusta
-87,Godsmack
-88,Guns N' Roses
-89,Incognito
-90,Iron Maiden
-91,James Brown
-92,Jamiroquai
-93,JET
-94,Jimi Hendrix
-95,Joe Satriani
-96,Jota Quest
-97,João Suplicy
-98,Judas Priest
-99,Legião Urbana
-100,Lenny Kravitz
-101,Lulu Santos
-102,Marillion
-103,Marisa Monte
-104,Marvin Gaye
-105,Men At Work
-106,Motörhead
-107,Motörhead & Girlschool
-108,Mônica Marianno
-109,Mötley Crüe
-110,Nirvana
-111,O Terço
-112,Olodum
-113,Os Paralamas Do Sucesso
-114,Ozzy Osbourne
-115,Page & Plant
-116,Passengers
-117,Paul D'Ianno
-118,Pearl Jam
-119,Peter Tosh
-120,Pink Floyd
-121,Planet Hemp
-122,R.E.M. Feat. Kate Pearson
-123,R.E.M. Feat. KRS-One
-124,R.E.M.
-125,Raimundos
-126,Raul Seixas
-127,Red Hot Chili Peppers
-128,Rush
-129,Simply Red
-130,Skank
-131,Smashing Pumpkins
-132,Soundgarden
-133,Stevie Ray Vaughan & Double Trouble
-134,Stone Temple Pilots
-135,System Of A Down
-136,"Terry Bozzio, Tony Levin & Steve Stevens"
-137,The Black Crowes
-138,The Clash
-139,The Cult
-140,The Doors
-141,The Police
-142,The Rolling Stones
-143,The Tea Party
-144,The Who
-145,Tim Maia
-146,Titãs
-147,Battlestar Galactica
-148,Heroes
-149,Lost
-150,U2
-151,UB40
-152,Van Halen
-153,Velvet Revolver
-154,Whitesnake
-155,Zeca Pagodinho
-156,The Office
-157,Dread Zeppelin
-158,Battlestar Galactica (Classic)
-159,Aquaman
-160,Christina Aguilera featuring BigElf
-161,Aerosmith & Sierra Leone's Refugee Allstars
-162,Los Lonely Boys
-163,Corinne Bailey Rae
-164,Dhani Harrison & Jakob Dylan
-165,Jackson Browne
-166,Avril Lavigne
-167,Big & Rich
-168,Youssou N'Dour
-169,Black Eyed Peas
-170,Jack Johnson
-171,Ben Harper
-172,Snow Patrol
-173,Matisyahu
-174,The Postal Service
-175,Jaguares
-176,The Flaming Lips
-177,Jack's Mannequin & Mick Fleetwood
-178,Regina Spektor
-179,Scorpions
-180,House Of Pain
-181,Xis
-182,Nega Gizza
-183,Gustavo & Andres Veiga & Salazar
-184,Rodox
-185,Charlie Brown Jr.
-186,Pedro Luís E A Parede
-187,Los Hermanos
-188,Mundo Livre S/A
-189,Otto
-190,Instituto
-191,Nação Zumbi
-192,DJ Dolores & Orchestra Santa Massa
-193,Seu Jorge
-194,Sabotage E Instituto
-195,Stereo Maracana
-196,Cake
-197,Aisha Duo
-198,Habib Koité and Bamada
-199,Karsh Kale
-200,The Posies
-201,Luciana Souza/Romero Lubambo
-202,Aaron Goldberg
-203,Nicolaus Esterhazy Sinfonia
-204,Temple of the Dog
-205,Chris Cornell
-206,Alberto Turco & Nova Schola Gregoriana
-207,"Richard Marlow & The Choir of Trinity College, Cambridge"
-208,English Concert & Trevor Pinnock
-209,"Anne-Sophie Mutter, Herbert Von Karajan & Wiener Philharmoniker"
-210,"Hilary Hahn, Jeffrey Kahane, Los Angeles Chamber Orchestra & Margaret Batjer"
-211,Wilhelm Kempff
-212,Yo-Yo Ma
-213,Scholars Baroque Ensemble
-214,Academy of St. Martin in the Fields & Sir Neville Marriner
-215,Academy of St. Martin in the Fields Chamber Ensemble & Sir Neville Marriner
-216,"Berliner Philharmoniker, Claudio Abbado & Sabine Meyer"
-217,Royal Philharmonic Orchestra & Sir Thomas Beecham
-218,Orchestre Révolutionnaire et Romantique & John Eliot Gardiner
-219,"Britten Sinfonia, Ivor Bolton & Lesley Garrett"
-220,"Chicago Symphony Chorus, Chicago Symphony Orchestra & Sir Georg Solti"
-221,Sir Georg Solti & Wiener Philharmoniker
-222,"Academy of St. Martin in the Fields, John Birch, Sir Neville Marriner & Sylvia McNair"
-223,London Symphony Orchestra & Sir Charles Mackerras
-224,Barry Wordsworth & BBC Concert Orchestra
-225,"Herbert Von Karajan, Mirella Freni & Wiener Philharmoniker"
-226,Eugene Ormandy
-227,Luciano Pavarotti
-228,Leonard Bernstein & New York Philharmonic
-229,Boston Symphony Orchestra & Seiji Ozawa
-230,Aaron Copland & London Symphony Orchestra
-231,Ton Koopman
-232,Sergei Prokofiev & Yuri Temirkanov
-233,Chicago Symphony Orchestra & Fritz Reiner
-234,Orchestra of The Age of Enlightenment
-235,"Emanuel Ax, Eugene Ormandy & Philadelphia Orchestra"
-236,James Levine
-237,Berliner Philharmoniker & Hans Rosbaud
-238,Maurizio Pollini
-239,"Academy of St. Martin in the Fields, Sir Neville Marriner & William Bennett"
-240,Gustav Mahler
-241,"Felix Schmidt, London Symphony Orchestra & Rafael Frühbeck de Burgos"
-242,Edo de Waart & San Francisco Symphony
-243,Antal Doráti & London Symphony Orchestra
-244,Choir Of Westminster Abbey & Simon Preston
-245,Michael Tilson Thomas & San Francisco Symphony
-246,"Chor der Wiener Staatsoper, Herbert Von Karajan & Wiener Philharmoniker"
-247,The King's Singers
-248,Berliner Philharmoniker & Herbert Von Karajan
-249,"Sir Georg Solti, Sumi Jo & Wiener Philharmoniker"
-250,Christopher O'Riley
-251,Fretwork
-252,Amy Winehouse
-253,Calexico
-254,Otto Klemperer & Philharmonia Orchestra
-255,Yehudi Menuhin
-256,Philharmonia Orchestra & Sir Neville Marriner
-257,"Academy of St. Martin in the Fields, Sir Neville Marriner & Thurston Dart"
-258,Les Arts Florissants & William Christie
-259,The 12 Cellists of The Berlin Philharmonic
-260,Adrian Leaper & Doreen de Feis
-261,"Roger Norrington, London Classical Players"
-262,Charles Dutoit & L'Orchestre Symphonique de Montréal
-263,"Equale Brass Ensemble, John Eliot Gardiner & Munich Monteverdi Orchestra and Choir"
-264,Kent Nagano and Orchestre de l'Opéra de Lyon
-265,Julian Bream
-266,Martin Roscoe
-267,Göteborgs Symfoniker & Neeme Järvi
-268,Itzhak Perlman
-269,Michele Campanella
-270,Gerald Moore
-271,"Mela Tenenbaum, Pro Musica Prague & Richard Kapp"
-272,Emerson String Quartet
-273,"C. Monteverdi, Nigel Rogers - Chiaroscuro; London Baroque; London Cornett & Sackbu"
-274,Nash Ensemble
-275,Philip Glass Ensemble
+ArtistId,Name,created_at,updated_at
+1,AC/DC,2024-09-11 11:16:28,2024-09-11 11:16:28
+2,Accept,2024-09-11 11:16:28,2024-09-11 11:16:28
+3,Aerosmith,2024-09-11 11:16:28,2024-09-11 11:16:28
+4,Alanis Morissette,2024-09-11 11:16:28,2024-09-11 11:16:28
+5,Alice In Chains,2024-09-11 11:16:28,2024-09-11 11:16:28
+6,Antônio Carlos Jobim,2024-09-11 11:16:28,2024-09-11 11:16:28
+7,Apocalyptica,2024-09-11 11:16:28,2024-09-11 11:16:28
+8,Audioslave,2024-09-11 11:16:28,2024-09-11 11:16:28
+9,BackBeat,2024-09-11 11:16:28,2024-09-11 11:16:28
+10,Billy Cobham,2024-09-11 11:16:28,2024-09-11 11:16:28
+11,Black Label Society,2024-09-11 11:16:28,2024-09-11 11:16:28
+12,Black Sabbath,2024-09-11 11:16:28,2024-09-11 11:16:28
+13,Body Count,2024-09-11 11:16:28,2024-09-11 11:16:28
+14,Bruce Dickinson,2024-09-11 11:16:28,2024-09-11 11:16:28
+15,Buddy Guy,2024-09-11 11:16:28,2024-09-11 11:16:28
+16,Caetano Veloso,2024-09-11 11:16:28,2024-09-11 11:16:28
+17,Chico Buarque,2024-09-11 11:16:28,2024-09-11 11:16:28
+18,Chico Science & Nação Zumbi,2024-09-11 11:16:28,2024-09-11 11:16:28
+19,Cidade Negra,2024-09-11 11:16:28,2024-09-11 11:16:28
+20,Cláudio Zoli,2024-09-11 11:16:28,2024-09-11 11:16:28
+21,Various Artists,2024-09-11 11:16:28,2024-09-11 11:16:28
+22,Led Zeppelin,2024-09-11 11:16:28,2024-09-11 11:16:28
+23,Frank Zappa & Captain Beefheart,2024-09-11 11:16:28,2024-09-11 11:16:28
+24,Marcos Valle,2024-09-11 11:16:28,2024-09-11 11:16:28
+25,Milton Nascimento & Bebeto,2024-09-11 11:16:28,2024-09-11 11:16:28
+26,Azymuth,2024-09-11 11:16:28,2024-09-11 11:16:28
+27,Gilberto Gil,2024-09-11 11:16:28,2024-09-11 11:16:28
+28,João Gilberto,2024-09-11 11:16:28,2024-09-11 11:16:28
+29,Bebel Gilberto,2024-09-11 11:16:28,2024-09-11 11:16:28
+30,Jorge Vercilo,2024-09-11 11:16:28,2024-09-11 11:16:28
+31,Baby Consuelo,2024-09-11 11:16:28,2024-09-11 11:16:28
+32,Ney Matogrosso,2024-09-11 11:16:28,2024-09-11 11:16:28
+33,Luiz Melodia,2024-09-11 11:16:28,2024-09-11 11:16:28
+34,Nando Reis,2024-09-11 11:16:28,2024-09-11 11:16:28
+35,Pedro Luís & A Parede,2024-09-11 11:16:28,2024-09-11 11:16:28
+36,O Rappa,2024-09-11 11:16:28,2024-09-11 11:16:28
+37,Ed Motta,2024-09-11 11:16:28,2024-09-11 11:16:28
+38,Banda Black Rio,2024-09-11 11:16:28,2024-09-11 11:16:28
+39,Fernanda Porto,2024-09-11 11:16:28,2024-09-11 11:16:28
+40,Os Cariocas,2024-09-11 11:16:28,2024-09-11 11:16:28
+41,Elis Regina,2024-09-11 11:16:28,2024-09-11 11:16:28
+42,Milton Nascimento,2024-09-11 11:16:28,2024-09-11 11:16:28
+43,A Cor Do Som,2024-09-11 11:16:28,2024-09-11 11:16:28
+44,Kid Abelha,2024-09-11 11:16:28,2024-09-11 11:16:28
+45,Sandra De Sá,2024-09-11 11:16:28,2024-09-11 11:16:28
+46,Jorge Ben,2024-09-11 11:16:28,2024-09-11 11:16:28
+47,Hermeto Pascoal,2024-09-11 11:16:28,2024-09-11 11:16:28
+48,Barão Vermelho,2024-09-11 11:16:28,2024-09-11 11:16:28
+49,"Edson, DJ Marky & DJ Patife Featuring Fernanda Porto",2024-09-11 11:16:28,2024-09-11 11:16:28
+50,Metallica,2024-09-11 11:16:28,2024-09-11 11:16:28
+51,Queen,2024-09-11 11:16:28,2024-09-11 11:16:28
+52,Kiss,2024-09-11 11:16:28,2024-09-11 11:16:28
+53,Spyro Gyra,2024-09-11 11:16:28,2024-09-11 11:16:28
+54,Green Day,2024-09-11 11:16:28,2024-09-11 11:16:28
+55,David Coverdale,2024-09-11 11:16:28,2024-09-11 11:16:28
+56,Gonzaguinha,2024-09-11 11:16:28,2024-09-11 11:16:28
+57,Os Mutantes,2024-09-11 11:16:28,2024-09-11 11:16:28
+58,Deep Purple,2024-09-11 11:16:28,2024-09-11 11:16:28
+59,Santana,2024-09-11 11:16:28,2024-09-11 11:16:28
+60,Santana Feat. Dave Matthews,2024-09-11 11:16:28,2024-09-11 11:16:28
+61,Santana Feat. Everlast,2024-09-11 11:16:28,2024-09-11 11:16:28
+62,Santana Feat. Rob Thomas,2024-09-11 11:16:28,2024-09-11 11:16:28
+63,Santana Feat. Lauryn Hill & Cee-Lo,2024-09-11 11:16:28,2024-09-11 11:16:28
+64,Santana Feat. The Project G&B,2024-09-11 11:16:28,2024-09-11 11:16:28
+65,Santana Feat. Maná,2024-09-11 11:16:28,2024-09-11 11:16:28
+66,Santana Feat. Eagle-Eye Cherry,2024-09-11 11:16:28,2024-09-11 11:16:28
+67,Santana Feat. Eric Clapton,2024-09-11 11:16:28,2024-09-11 11:16:28
+68,Miles Davis,2024-09-11 11:16:28,2024-09-11 11:16:28
+69,Gene Krupa,2024-09-11 11:16:28,2024-09-11 11:16:28
+70,Toquinho & Vinícius,2024-09-11 11:16:28,2024-09-11 11:16:28
+71,Vinícius De Moraes & Baden Powell,2024-09-11 11:16:28,2024-09-11 11:16:28
+72,Vinícius De Moraes,2024-09-11 11:16:28,2024-09-11 11:16:28
+73,Vinícius E Qurteto Em Cy,2024-09-11 11:16:28,2024-09-11 11:16:28
+74,Vinícius E Odette Lara,2024-09-11 11:16:28,2024-09-11 11:16:28
+75,"Vinicius, Toquinho & Quarteto Em Cy",2024-09-11 11:16:28,2024-09-11 11:16:28
+76,Creedence Clearwater Revival,2024-09-11 11:16:28,2024-09-11 11:16:28
+77,Cássia Eller,2024-09-11 11:16:28,2024-09-11 11:16:28
+78,Def Leppard,2024-09-11 11:16:28,2024-09-11 11:16:28
+79,Dennis Chambers,2024-09-11 11:16:28,2024-09-11 11:16:28
+80,Djavan,2024-09-11 11:16:28,2024-09-11 11:16:28
+81,Eric Clapton,2024-09-11 11:16:28,2024-09-11 11:16:28
+82,Faith No More,2024-09-11 11:16:28,2024-09-11 11:16:28
+83,Falamansa,2024-09-11 11:16:28,2024-09-11 11:16:28
+84,Foo Fighters,2024-09-11 11:16:28,2024-09-11 11:16:28
+85,Frank Sinatra,2024-09-11 11:16:28,2024-09-11 11:16:28
+86,Funk Como Le Gusta,2024-09-11 11:16:28,2024-09-11 11:16:28
+87,Godsmack,2024-09-11 11:16:28,2024-09-11 11:16:28
+88,Guns N' Roses,2024-09-11 11:16:28,2024-09-11 11:16:28
+89,Incognito,2024-09-11 11:16:28,2024-09-11 11:16:28
+90,Iron Maiden,2024-09-11 11:16:28,2024-09-11 11:16:28
+91,James Brown,2024-09-11 11:16:28,2024-09-11 11:16:28
+92,Jamiroquai,2024-09-11 11:16:28,2024-09-11 11:16:28
+93,JET,2024-09-11 11:16:28,2024-09-11 11:16:28
+94,Jimi Hendrix,2024-09-11 11:16:28,2024-09-11 11:16:28
+95,Joe Satriani,2024-09-11 11:16:28,2024-09-11 11:16:28
+96,Jota Quest,2024-09-11 11:16:28,2024-09-11 11:16:28
+97,João Suplicy,2024-09-11 11:16:28,2024-09-11 11:16:28
+98,Judas Priest,2024-09-11 11:16:28,2024-09-11 11:16:28
+99,Legião Urbana,2024-09-11 11:16:28,2024-09-11 11:16:28
+100,Lenny Kravitz,2024-09-11 11:16:28,2024-09-11 11:16:28
+101,Lulu Santos,2024-09-11 11:16:28,2024-09-11 11:16:28
+102,Marillion,2024-09-11 11:16:28,2024-09-11 11:16:28
+103,Marisa Monte,2024-09-11 11:16:28,2024-09-11 11:16:28
+104,Marvin Gaye,2024-09-11 11:16:28,2024-09-11 11:16:28
+105,Men At Work,2024-09-11 11:16:28,2024-09-11 11:16:28
+106,Motörhead,2024-09-11 11:16:28,2024-09-11 11:16:28
+107,Motörhead & Girlschool,2024-09-11 11:16:28,2024-09-11 11:16:28
+108,Mônica Marianno,2024-09-11 11:16:28,2024-09-11 11:16:28
+109,Mötley Crüe,2024-09-11 11:16:28,2024-09-11 11:16:28
+110,Nirvana,2024-09-11 11:16:28,2024-09-11 11:16:28
+111,O Terço,2024-09-11 11:16:28,2024-09-11 11:16:28
+112,Olodum,2024-09-11 11:16:28,2024-09-11 11:16:28
+113,Os Paralamas Do Sucesso,2024-09-11 11:16:28,2024-09-11 11:16:28
+114,Ozzy Osbourne,2024-09-11 11:16:28,2024-09-11 11:16:28
+115,Page & Plant,2024-09-11 11:16:28,2024-09-11 11:16:28
+116,Passengers,2024-09-11 11:16:28,2024-09-11 11:16:28
+117,Paul D'Ianno,2024-09-11 11:16:28,2024-09-11 11:16:28
+118,Pearl Jam,2024-09-11 11:16:28,2024-09-11 11:16:28
+119,Peter Tosh,2024-09-11 11:16:28,2024-09-11 11:16:28
+120,Pink Floyd,2024-09-11 11:16:28,2024-09-11 11:16:28
+121,Planet Hemp,2024-09-11 11:16:28,2024-09-11 11:16:28
+122,R.E.M. Feat. Kate Pearson,2024-09-11 11:16:28,2024-09-11 11:16:28
+123,R.E.M. Feat. KRS-One,2024-09-11 11:16:28,2024-09-11 11:16:28
+124,R.E.M.,2024-09-11 11:16:28,2024-09-11 11:16:28
+125,Raimundos,2024-09-11 11:16:28,2024-09-11 11:16:28
+126,Raul Seixas,2024-09-11 11:16:28,2024-09-11 11:16:28
+127,Red Hot Chili Peppers,2024-09-11 11:16:28,2024-09-11 11:16:28
+128,Rush,2024-09-11 11:16:28,2024-09-11 11:16:28
+129,Simply Red,2024-09-11 11:16:28,2024-09-11 11:16:28
+130,Skank,2024-09-11 11:16:28,2024-09-11 11:16:28
+131,Smashing Pumpkins,2024-09-11 11:16:28,2024-09-11 11:16:28
+132,Soundgarden,2024-09-11 11:16:28,2024-09-11 11:16:28
+133,Stevie Ray Vaughan & Double Trouble,2024-09-11 11:16:28,2024-09-11 11:16:28
+134,Stone Temple Pilots,2024-09-11 11:16:28,2024-09-11 11:16:28
+135,System Of A Down,2024-09-11 11:16:28,2024-09-11 11:16:28
+136,"Terry Bozzio, Tony Levin & Steve Stevens",2024-09-11 11:16:28,2024-09-11 11:16:28
+137,The Black Crowes,2024-09-11 11:16:28,2024-09-11 11:16:28
+138,The Clash,2024-09-11 11:16:28,2024-09-11 11:16:28
+139,The Cult,2024-09-11 11:16:28,2024-09-11 11:16:28
+140,The Doors,2024-09-11 11:16:28,2024-09-11 11:16:28
+141,The Police,2024-09-11 11:16:28,2024-09-11 11:16:28
+142,The Rolling Stones,2024-09-11 11:16:28,2024-09-11 11:16:28
+143,The Tea Party,2024-09-11 11:16:28,2024-09-11 11:16:28
+144,The Who,2024-09-11 11:16:28,2024-09-11 11:16:28
+145,Tim Maia,2024-09-11 11:16:28,2024-09-11 11:16:28
+146,Titãs,2024-09-11 11:16:28,2024-09-11 11:16:28
+147,Battlestar Galactica,2024-09-11 11:16:28,2024-09-11 11:16:28
+148,Heroes,2024-09-11 11:16:28,2024-09-11 11:16:28
+149,Lost,2024-09-11 11:16:28,2024-09-11 11:16:28
+150,U2,2024-09-11 11:16:28,2024-09-11 11:16:28
+151,UB40,2024-09-11 11:16:28,2024-09-11 11:16:28
+152,Van Halen,2024-09-11 11:16:28,2024-09-11 11:16:28
+153,Velvet Revolver,2024-09-11 11:16:28,2024-09-11 11:16:28
+154,Whitesnake,2024-09-11 11:16:28,2024-09-11 11:16:28
+155,Zeca Pagodinho,2024-09-11 11:16:28,2024-09-11 11:16:28
+156,The Office,2024-09-11 11:16:28,2024-09-11 11:16:28
+157,Dread Zeppelin,2024-09-11 11:16:28,2024-09-11 11:16:28
+158,Battlestar Galactica (Classic),2024-09-11 11:16:28,2024-09-11 11:16:28
+159,Aquaman,2024-09-11 11:16:28,2024-09-11 11:16:28
+160,Christina Aguilera featuring BigElf,2024-09-11 11:16:28,2024-09-11 11:16:28
+161,Aerosmith & Sierra Leone's Refugee Allstars,2024-09-11 11:16:28,2024-09-11 11:16:28
+162,Los Lonely Boys,2024-09-11 11:16:28,2024-09-11 11:16:28
+163,Corinne Bailey Rae,2024-09-11 11:16:28,2024-09-11 11:16:28
+164,Dhani Harrison & Jakob Dylan,2024-09-11 11:16:28,2024-09-11 11:16:28
+165,Jackson Browne,2024-09-11 11:16:28,2024-09-11 11:16:28
+166,Avril Lavigne,2024-09-11 11:16:28,2024-09-11 11:16:28
+167,Big & Rich,2024-09-11 11:16:28,2024-09-11 11:16:28
+168,Youssou N'Dour,2024-09-11 11:16:28,2024-09-11 11:16:28
+169,Black Eyed Peas,2024-09-11 11:16:28,2024-09-11 11:16:28
+170,Jack Johnson,2024-09-11 11:16:28,2024-09-11 11:16:28
+171,Ben Harper,2024-09-11 11:16:28,2024-09-11 11:16:28
+172,Snow Patrol,2024-09-11 11:16:28,2024-09-11 11:16:28
+173,Matisyahu,2024-09-11 11:16:28,2024-09-11 11:16:28
+174,The Postal Service,2024-09-11 11:16:28,2024-09-11 11:16:28
+175,Jaguares,2024-09-11 11:16:28,2024-09-11 11:16:28
+176,The Flaming Lips,2024-09-11 11:16:28,2024-09-11 11:16:28
+177,Jack's Mannequin & Mick Fleetwood,2024-09-11 11:16:28,2024-09-11 11:16:28
+178,Regina Spektor,2024-09-11 11:16:28,2024-09-11 11:16:28
+179,Scorpions,2024-09-11 11:16:28,2024-09-11 11:16:28
+180,House Of Pain,2024-09-11 11:16:28,2024-09-11 11:16:28
+181,Xis,2024-09-11 11:16:28,2024-09-11 11:16:28
+182,Nega Gizza,2024-09-11 11:16:28,2024-09-11 11:16:28
+183,Gustavo & Andres Veiga & Salazar,2024-09-11 11:16:28,2024-09-11 11:16:28
+184,Rodox,2024-09-11 11:16:28,2024-09-11 11:16:28
+185,Charlie Brown Jr.,2024-09-11 11:16:28,2024-09-11 11:16:28
+186,Pedro Luís E A Parede,2024-09-11 11:16:28,2024-09-11 11:16:28
+187,Los Hermanos,2024-09-11 11:16:28,2024-09-11 11:16:28
+188,Mundo Livre S/A,2024-09-11 11:16:28,2024-09-11 11:16:28
+189,Otto,2024-09-11 11:16:28,2024-09-11 11:16:28
+190,Instituto,2024-09-11 11:16:28,2024-09-11 11:16:28
+191,Nação Zumbi,2024-09-11 11:16:28,2024-09-11 11:16:28
+192,DJ Dolores & Orchestra Santa Massa,2024-09-11 11:16:28,2024-09-11 11:16:28
+193,Seu Jorge,2024-09-11 11:16:28,2024-09-11 11:16:28
+194,Sabotage E Instituto,2024-09-11 11:16:28,2024-09-11 11:16:28
+195,Stereo Maracana,2024-09-11 11:16:28,2024-09-11 11:16:28
+196,Cake,2024-09-11 11:16:28,2024-09-11 11:16:28
+197,Aisha Duo,2024-09-11 11:16:28,2024-09-11 11:16:28
+198,Habib Koité and Bamada,2024-09-11 11:16:28,2024-09-11 11:16:28
+199,Karsh Kale,2024-09-11 11:16:28,2024-09-11 11:16:28
+200,The Posies,2024-09-11 11:16:28,2024-09-11 11:16:28
+201,Luciana Souza/Romero Lubambo,2024-09-11 11:16:28,2024-09-11 11:16:28
+202,Aaron Goldberg,2024-09-11 11:16:28,2024-09-11 11:16:28
+203,Nicolaus Esterhazy Sinfonia,2024-09-11 11:16:28,2024-09-11 11:16:28
+204,Temple of the Dog,2024-09-11 11:16:28,2024-09-11 11:16:28
+205,Chris Cornell,2024-09-11 11:16:28,2024-09-11 11:16:28
+206,Alberto Turco & Nova Schola Gregoriana,2024-09-11 11:16:28,2024-09-11 11:16:28
+207,"Richard Marlow & The Choir of Trinity College, Cambridge",2024-09-11 11:16:28,2024-09-11 11:16:28
+208,English Concert & Trevor Pinnock,2024-09-11 11:16:28,2024-09-11 11:16:28
+209,"Anne-Sophie Mutter, Herbert Von Karajan & Wiener Philharmoniker",2024-09-11 11:16:28,2024-09-11 11:16:28
+210,"Hilary Hahn, Jeffrey Kahane, Los Angeles Chamber Orchestra & Margaret Batjer",2024-09-11 11:16:28,2024-09-11 11:16:28
+211,Wilhelm Kempff,2024-09-11 11:16:28,2024-09-11 11:16:28
+212,Yo-Yo Ma,2024-09-11 11:16:28,2024-09-11 11:16:28
+213,Scholars Baroque Ensemble,2024-09-11 11:16:28,2024-09-11 11:16:28
+214,Academy of St. Martin in the Fields & Sir Neville Marriner,2024-09-11 11:16:28,2024-09-11 11:16:28
+215,Academy of St. Martin in the Fields Chamber Ensemble & Sir Neville Marriner,2024-09-11 11:16:28,2024-09-11 11:16:28
+216,"Berliner Philharmoniker, Claudio Abbado & Sabine Meyer",2024-09-11 11:16:28,2024-09-11 11:16:28
+217,Royal Philharmonic Orchestra & Sir Thomas Beecham,2024-09-11 11:16:28,2024-09-11 11:16:28
+218,Orchestre Révolutionnaire et Romantique & John Eliot Gardiner,2024-09-11 11:16:28,2024-09-11 11:16:28
+219,"Britten Sinfonia, Ivor Bolton & Lesley Garrett",2024-09-11 11:16:28,2024-09-11 11:16:28
+220,"Chicago Symphony Chorus, Chicago Symphony Orchestra & Sir Georg Solti",2024-09-11 11:16:28,2024-09-11 11:16:28
+221,Sir Georg Solti & Wiener Philharmoniker,2024-09-11 11:16:28,2024-09-11 11:16:28
+222,"Academy of St. Martin in the Fields, John Birch, Sir Neville Marriner & Sylvia McNair",2024-09-11 11:16:28,2024-09-11 11:16:28
+223,London Symphony Orchestra & Sir Charles Mackerras,2024-09-11 11:16:28,2024-09-11 11:16:28
+224,Barry Wordsworth & BBC Concert Orchestra,2024-09-11 11:16:28,2024-09-11 11:16:28
+225,"Herbert Von Karajan, Mirella Freni & Wiener Philharmoniker",2024-09-11 11:16:28,2024-09-11 11:16:28
+226,Eugene Ormandy,2024-09-11 11:16:28,2024-09-11 11:16:28
+227,Luciano Pavarotti,2024-09-11 11:16:28,2024-09-11 11:16:28
+228,Leonard Bernstein & New York Philharmonic,2024-09-11 11:16:28,2024-09-11 11:16:28
+229,Boston Symphony Orchestra & Seiji Ozawa,2024-09-11 11:16:28,2024-09-11 11:16:28
+230,Aaron Copland & London Symphony Orchestra,2024-09-11 11:16:28,2024-09-11 11:16:28
+231,Ton Koopman,2024-09-11 11:16:28,2024-09-11 11:16:28
+232,Sergei Prokofiev & Yuri Temirkanov,2024-09-11 11:16:28,2024-09-11 11:16:28
+233,Chicago Symphony Orchestra & Fritz Reiner,2024-09-11 11:16:28,2024-09-11 11:16:28
+234,Orchestra of The Age of Enlightenment,2024-09-11 11:16:28,2024-09-11 11:16:28
+235,"Emanuel Ax, Eugene Ormandy & Philadelphia Orchestra",2024-09-11 11:16:28,2024-09-11 11:16:28
+236,James Levine,2024-09-11 11:16:28,2024-09-11 11:16:28
+237,Berliner Philharmoniker & Hans Rosbaud,2024-09-11 11:16:28,2024-09-11 11:16:28
+238,Maurizio Pollini,2024-09-11 11:16:28,2024-09-11 11:16:28
+239,"Academy of St. Martin in the Fields, Sir Neville Marriner & William Bennett",2024-09-11 11:16:28,2024-09-11 11:16:28
+240,Gustav Mahler,2024-09-11 11:16:28,2024-09-11 11:16:28
+241,"Felix Schmidt, London Symphony Orchestra & Rafael Frühbeck de Burgos",2024-09-11 11:16:28,2024-09-11 11:16:28
+242,Edo de Waart & San Francisco Symphony,2024-09-11 11:16:28,2024-09-11 11:16:28
+243,Antal Doráti & London Symphony Orchestra,2024-09-11 11:16:28,2024-09-11 11:16:28
+244,Choir Of Westminster Abbey & Simon Preston,2024-09-11 11:16:28,2024-09-11 11:16:28
+245,Michael Tilson Thomas & San Francisco Symphony,2024-09-11 11:16:28,2024-09-11 11:16:28
+246,"Chor der Wiener Staatsoper, Herbert Von Karajan & Wiener Philharmoniker",2024-09-11 11:16:28,2024-09-11 11:16:28
+247,The King's Singers,2024-09-11 11:16:28,2024-09-11 11:16:28
+248,Berliner Philharmoniker & Herbert Von Karajan,2024-09-11 11:16:28,2024-09-11 11:16:28
+249,"Sir Georg Solti, Sumi Jo & Wiener Philharmoniker",2024-09-11 11:16:28,2024-09-11 11:16:28
+250,Christopher O'Riley,2024-09-11 11:16:28,2024-09-11 11:16:28
+251,Fretwork,2024-09-11 11:16:28,2024-09-11 11:16:28
+252,Amy Winehouse,2024-09-11 11:16:28,2024-09-11 11:16:28
+253,Calexico,2024-09-11 11:16:28,2024-09-11 11:16:28
+254,Otto Klemperer & Philharmonia Orchestra,2024-09-11 11:16:28,2024-09-11 11:16:28
+255,Yehudi Menuhin,2024-09-11 11:16:28,2024-09-11 11:16:28
+256,Philharmonia Orchestra & Sir Neville Marriner,2024-09-11 11:16:28,2024-09-11 11:16:28
+257,"Academy of St. Martin in the Fields, Sir Neville Marriner & Thurston Dart",2024-09-11 11:16:28,2024-09-11 11:16:28
+258,Les Arts Florissants & William Christie,2024-09-11 11:16:28,2024-09-11 11:16:28
+259,The 12 Cellists of The Berlin Philharmonic,2024-09-11 11:16:28,2024-09-11 11:16:28
+260,Adrian Leaper & Doreen de Feis,2024-09-11 11:16:28,2024-09-11 11:16:28
+261,"Roger Norrington, London Classical Players",2024-09-11 11:16:28,2024-09-11 11:16:28
+262,Charles Dutoit & L'Orchestre Symphonique de Montréal,2024-09-11 11:16:28,2024-09-11 11:16:28
+263,"Equale Brass Ensemble, John Eliot Gardiner & Munich Monteverdi Orchestra and Choir",2024-09-11 11:16:28,2024-09-11 11:16:28
+264,Kent Nagano and Orchestre de l'Opéra de Lyon,2024-09-11 11:16:28,2024-09-11 11:16:28
+265,Julian Bream,2024-09-11 11:16:28,2024-09-11 11:16:28
+266,Martin Roscoe,2024-09-11 11:16:28,2024-09-11 11:16:28
+267,Göteborgs Symfoniker & Neeme Järvi,2024-09-11 11:16:28,2024-09-11 11:16:28
+268,Itzhak Perlman,2024-09-11 11:16:28,2024-09-11 11:16:28
+269,Michele Campanella,2024-09-11 11:16:28,2024-09-11 11:16:28
+270,Gerald Moore,2024-09-11 11:16:28,2024-09-11 11:16:28
+271,"Mela Tenenbaum, Pro Musica Prague & Richard Kapp",2024-09-11 11:16:28,2024-09-11 11:16:28
+272,Emerson String Quartet,2024-09-11 11:16:28,2024-09-11 11:16:28
+273,"C. Monteverdi, Nigel Rogers - Chiaroscuro; London Baroque; London Cornett & Sackbu",2024-09-11 11:16:28,2024-09-11 11:16:28
+274,Nash Ensemble,2024-09-11 11:16:28,2024-09-11 11:16:28
+275,Philip Glass Ensemble,2024-09-11 11:16:28,2024-09-11 11:16:28
