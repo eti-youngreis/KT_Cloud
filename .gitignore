@@ -8,3 +8,4 @@
 *.db
 DB/csvs/
 abseil-cpp
+*.env
