@@ -150,3 +150,7 @@ class ObjectManager:
             dict[key] = value
     
         return dict
+        
+    def get_all_data_from_table(self, table_name):
+            get_all_data_query = f"""SELECT * FROM {table_name} """
+            return self.execute_query_with_multiple_results(get_all_data_query)
