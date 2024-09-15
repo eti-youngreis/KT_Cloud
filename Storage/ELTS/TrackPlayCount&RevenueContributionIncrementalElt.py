@@ -4,7 +4,7 @@ import pandas as pd
 import sqlite3
 
 
-def incremental_elt():
+def track_play_count_and_revenue_contribution_incremental_elt():
     spark = SparkSession.builder \
         .appName("ETL Template with KT_DB") \
         .getOrCreate()
@@ -67,4 +67,4 @@ def incremental_elt():
 
 
 if __name__ == "__main__":
-    incremental_elt()
+    track_play_count_and_revenue_contribution_incremental_elt()
