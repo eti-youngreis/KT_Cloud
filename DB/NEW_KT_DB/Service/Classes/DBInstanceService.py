@@ -15,13 +15,10 @@ class DBInstanceService(DBO):
     def create(self, **kwargs):
         # Perform validations
         Validation.validate_db_instance_params(kwargs)
-
         # Create DBInstance model
         db_instance = DBInstanceModel(**kwargs)
-
         # Save to management table
-        self.dal.save_to_management_table(db_instance)
-
+        self.dal.createInMemoryDBInstance(db_instance)
         # Create physical database if db_name is provided
         if 'db_name' in kwargs:
             SQLCommandHelper.create_database(
@@ -29,8 +26,31 @@ class DBInstanceService(DBO):
 
         return db_instance
 
+
+    def delete(self, db_instance_identifier):
+        '''Delete an existing DBInstance.'''
+        # Delete from memory using DBInstanceManager.deleteInMemoryDBInstance() function
+        self.dal.deleteInMemoryDBInstance(db_instance_identifier)
+
+    def describe(self, db_instance_identifier):
+        '''Describe the details of DBInstance.'''
+        return self.dal.describeDBInstance(db_instance_identifier)
+
+    def modify(self, db_instance):
+        '''Modify an existing DBInstance.'''
+        self.dal.modifyDBInstance(db_instance)
+
+    def get(self, db_instance_identifier):
+        '''Get DBInstance object.'''
+        # Return real-time object using DBInstanceManager.getDBInstance() function
+        return self.dal.getDBInstance(db_instance_identifier)
+
+        # להחיות את האובייקט מהטבלה בזמן הריצה
+
+
+
     def create_snapshot(self, db_instance_identifier, db_snapshot_identifier):
-        db_instance = self.dal.get_from_management_table(
+        db_instance = self.dal.getDBInstance(
             db_instance_identifier)
         db_instance._node_subSnapshot_name_to_id[
             db_snapshot_identifier] = db_instance._last_node_of_current_version.id_snepshot
@@ -43,6 +63,39 @@ class DBInstanceService(DBO):
         db_instance._node_subSnapshot_name_to_id.pop(
             db_snapshot_identifier, None)
         self.dal.update_management_table(db_instance)
+
+    def restore_version(self, db_instance_identifier, db_snapshot_identifier):
+        db_instance = self.dal.get_from_management_table(
+            db_instance_identifier)
+
+        if db_snapshot_identifier not in db_instance._node_subSnapshot_name_to_id:
+            raise DbSnapshotIdentifierNotFoundError(
+                f"Snapshot identifier '{db_snapshot_identifier}' not found.")
+
+        node_id = db_instance._node_subSnapshot_name_to_id[db_snapshot_identifier]
+        snapshot = db_instance._node_subSnapshot_dic.get(node_id)
+
+        if snapshot:
+            self._update_queue_to_current_version(snapshot, db_instance)
+            self._create_child_to_node(db_instance)
+
+        self.dal.update_management_table(db_instance)
+
+        return db_instance
+
+
+    def stop(self, db_instance_identifier):
+        db_instance = self.dal.get_from_management_table(
+            db_instance_identifier)
+        db_instance.status = 'stopped'
+        self.dal.update_management_table(db_instance)
+
+    def start(self, db_instance_identifier):
+        db_instance = self.dal.get_from_management_table(
+            db_instance_identifier)
+        db_instance.status = 'available'
+        self.dal.update_management_table(db_instance)
+
 
     def __get_node_height(self, current_node):
         height = 0
@@ -79,37 +132,6 @@ class DBInstanceService(DBO):
         db_instance._current_version_queue.append(
             db_instance._last_node_of_current_version)
         db_instance._node_subSnapshot_dic[db_instance._last_node_of_current_version.id_snepshot] = db_instance._last_node_of_current_version
-
-    def restore_version(self, db_instance_identifier, db_snapshot_identifier):
-        db_instance = self.dal.get_from_management_table(
-            db_instance_identifier)
-
-        if db_snapshot_identifier not in db_instance._node_subSnapshot_name_to_id:
-            raise DbSnapshotIdentifierNotFoundError(
-                f"Snapshot identifier '{db_snapshot_identifier}' not found.")
-
-        node_id = db_instance._node_subSnapshot_name_to_id[db_snapshot_identifier]
-        snapshot = db_instance._node_subSnapshot_dic.get(node_id)
-
-        if snapshot:
-            self._update_queue_to_current_version(snapshot, db_instance)
-            self._create_child_to_node(db_instance)
-
-        self.dal.update_management_table(db_instance)
-
-        return db_instance
-
-    def stop(self, db_instance_identifier):
-        db_instance = self.dal.get_from_management_table(
-            db_instance_identifier)
-        db_instance.status = 'stopped'
-        self.dal.update_management_table(db_instance)
-
-    def start(self, db_instance_identifier):
-        db_instance = self.dal.get_from_management_table(
-            db_instance_identifier)
-        db_instance.status = 'available'
-        self.dal.update_management_table(db_instance)
 
 
 class SQLCommandHelper:

@@ -21,7 +21,11 @@ class DBInstanceModel:
         self._current_version_queue = deque([Node_SubSnapshot(parent=None, endpoint=self.endpoint)])
         self._last_node_of_current_version = self._current_version_queue[-1]
         
-
+        # _current_version_queue, _last_node_of_current_version , parent -
+        #לשמור רק id 
+        #ובעת ההחיאה להביא את המצביעים מהמילון...
+        #החייאה: הפעולה בסרוויס-
+        #get
 
     def to_dict(self):
         return {
@@ -49,7 +53,7 @@ class Node_SubSnapshot:
         
         self.deleted_records_db_path = self._create_deleted_records_db_path(endpoint)
         self.snapshot_name = None
-        self.children = []
+        # self.children = []
 
     def _create_deleted_records_db_path(self, endpoint):
         deleted_records_db_path = os.path.join(endpoint, str(self.id_snepshot))
@@ -71,10 +75,10 @@ class Node_SubSnapshot:
             dbs_paths_new_dic[db] = new_path
         return dbs_paths_new_dic
 
-    def _add_child(self, child):
-        self.children.append(child)
+    # def _add_child(self, child):
+    #     self.children.append(child)
 
     def create_child(self, endpoint):
         child = Node_SubSnapshot(parent=self, endpoint=endpoint)
-        self._add_child(child)
+        # self._add_child(child)
         return child
