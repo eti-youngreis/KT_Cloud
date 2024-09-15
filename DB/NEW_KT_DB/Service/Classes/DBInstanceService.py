@@ -8,7 +8,6 @@ import sqlite3
 import re
 from typing import Deque, List, Tuple
 
-
 class DBInstanceService(DBO):
     def __init__(self, dal: DBInstanceManager):
         self.dal = dal
