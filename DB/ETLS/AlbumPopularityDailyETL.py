@@ -66,7 +66,6 @@ def album_popularity_incremental_etl():
         albums = spark.read.csv("DB\csvs\Album.csv", header=True, inferSchema=True)
         tracks = spark.read.csv("DB\csvs\Track.csv", header=True, inferSchema=True)
         invoice_lines = spark.read.csv("DB\csvs\InvoiceLine.csv", header=True, inferSchema=True)
-        tracks = tracks.withColumn("updated_at_timestamp", F.to_timestamp("updated_at"))
 
         # TRANSFORM (Apply joins, groupings, and window functions)
         # --------------------------------------------------------
@@ -81,7 +80,7 @@ def album_popularity_incremental_etl():
                 "inner"
             ).drop(
                 invoice_lines["TrackId"]).drop(
-                    invoice_lines["UnitPrice"]).withColumn("max_updated_at", F.greatest(albums.updated_at ,tracks.updated_at_timestamp, invoice_lines.updated_at)).drop(
+                    invoice_lines["UnitPrice"]).withColumn("max_updated_at", F.greatest(albums.updated_at ,tracks.updated_at, invoice_lines.updated_at)).drop(
                         albums["updated_at"]).drop(
                             tracks["updated_at"]).drop(
                                 invoice_lines["updated_at"]).filter(
