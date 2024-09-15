@@ -28,16 +28,15 @@ class DBInstanceService(DBO):
             SQLCommandHelper.create_database(kwargs['db_name'], db_instance._last_node_of_current_version, db_instance.endpoint)
         
         return db_instance
-
+    
+ 
     def create_snapshot(self, db_instance_identifier, db_snapshot_identifier):
         db_instance = self.dal.get_from_management_table(db_instance_identifier)
-        db_instance.create_snapshot(db_snapshot_identifier)
+        db_instance._node_subSnapshot_name_to_id[db_snapshot_identifier] = db_instance._last_node_of_current_version.id_snepshot
+        db_instance._create_child_to_node(db_instance._last_node_of_current_version)
         self.dal.update_management_table(db_instance)
 
-    def restore_version(self, db_instance_identifier, db_snapshot_identifier):
-        db_instance = self.dal.get_from_management_table(db_instance_identifier)
-        db_instance.restore_version(db_snapshot_identifier)
-        self.dal.update_management_table(db_instance)
+   
 
     def get_endpoint(self, db_instance_identifier):
         db_instance = self.dal.get_from_management_table(db_instance_identifier)
