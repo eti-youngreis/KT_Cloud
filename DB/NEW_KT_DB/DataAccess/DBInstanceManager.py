@@ -8,6 +8,7 @@ class DBInstanceManager:
         self.table_name = 'db_instance_management'
         self.create_table()
 
+    
     def create_table(self):
         table_structure = '''
             db_instance_identifier TEXT PRIMARY KEY,
