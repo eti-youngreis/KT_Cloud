@@ -57,9 +57,11 @@ class DBManager:
 
 
     # Riki7649255  based on rachel-8511, ShaniStrassProg 
-    def insert_data_into_table(self, table_name, data, params = ()):
-        insert_statement = f'''INSERT INTO {table_name} VALUES {data}'''
-        self.execute_query_without_results(insert_statement, params)
+    def insert_data_into_table(self, table_name, columns, data):
+        column_names = ', '.join(columns)
+        placeholders = ', '.join(['?' for _ in range(len(columns))])
+        insert_query = f"INSERT INTO {table_name} ({column_names}) VALUES ({placeholders})"
+        self.execute_query_without_results(insert_query, data)
 
 
     # Riki7649255 based on rachel-8511, Shani
