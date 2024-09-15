@@ -55,6 +55,7 @@ class DBManager:
 
     # Riki7649255  based on rachel-8511, ShaniStrassProg 
     def insert_data_into_table(self, table_name, columns, data):
+        print(f'inserting data into {table_name} with columns {columns} and data {data}')
         column_names = ', '.join(columns)
         placeholders = ', '.join(['?' for _ in range(len(columns))])
         insert_query = f"INSERT INTO {table_name} ({column_names}) VALUES ({placeholders})"
