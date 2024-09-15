@@ -1,104 +1,180 @@
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+from datetime import datetime
 import sqlite3
 import pandas as pd
-from datetime import datetime
 
-def get_last_updated_at(conn):
+def transform_data(employee_table: DataFrame, customer_table: DataFrame, invoice_table: DataFrame, conn) -> DataFrame:
+    current_time = datetime.now()
+    last_updated_at = get_last_updated_at(conn)
+
+    # Alias tables
+    employee_alias = employee_table.alias('e')
+    customer_alias = customer_table.alias('c')
+    invoice_alias = invoice_table.alias('i')
+
+    # Filter updated customers and invoices
+    customer_new = customer_alias.filter((F.col('c.updated_at') > last_updated_at) & (F.col('c.status') == 'active'))
+    invoice_new = invoice_alias.filter((F.col('i.updated_at') > last_updated_at) & (F.col('i.status') == 'active'))
+
+    # Find customers related to updated invoices
+    customers_related_to_updated_invoices = invoice_new \
+        .join(customer_alias, F.col('i.CustomerId') == F.col('c.CustomerId'), 'inner') \
+        .select(F.col('c.CustomerId').alias('related_customer_id'), F.col('c.SupportRepId'))
+
+    # Find employees related to updated customers
+    employees_related_to_updated_customers = employee_alias \
+        .join(customer_new, F.col('c.SupportRepId') == F.col('e.EmployeeId'), 'inner') \
+        .select(F.col('e.EmployeeId').alias('related_employee_id'))
+
+    # Find employees related to customers who have updated invoices
+    employees_related_to_updated_invoices = employee_alias \
+        .join(customers_related_to_updated_invoices, F.col('e.EmployeeId') == F.col('c.SupportRepId'), 'inner') \
+        .select(F.col('e.EmployeeId').alias('related_employee_id'))
+
+    # Combine all employees who need updates
+    employees_to_update = employees_related_to_updated_customers \
+        .union(employees_related_to_updated_invoices) \
+        .distinct()
+
+    # Define the window specification for aggregation
+    employee_window = Window.partitionBy('related_employee_id')
+
+    # Joining employees with customers and invoices
+    joined_data = employees_to_update.alias('etu') \
+        .join(employee_alias.alias('e2'), F.col('etu.related_employee_id') == F.col('e2.EmployeeId'), 'inner') \
+        .join(customer_alias.alias('c2'), F.col('e2.EmployeeId') == F.col('c2.SupportRepId'), 'inner') \
+        .join(invoice_alias.alias('i2'), F.col('c2.CustomerId') == F.col('i2.CustomerId'), 'inner')
+
+    # Calculate metrics
+    transformed_data = joined_data \
+        .withColumn('successful_sales', F.sum(F.when(F.col('i2.Total') > 0, 1).otherwise(0)).over(employee_window)) \
+        .withColumn('total_invoices', F.count('i2.InvoiceId').over(employee_window)) \
+        .withColumn('conversion_rate', F.col('successful_sales') / F.col('total_invoices')) \
+        .withColumn('created_at', F.lit(current_time)) \
+        .withColumn('updated_at', F.lit(current_time)) \
+        .withColumn('updated_by', F.lit('Shani_Strauss'))
+
+    return transformed_data
+
+def initialize_spark_session(app_name: str) -> SparkSession:
+    return SparkSession.builder.appName(app_name).getOrCreate()
+
+def connect_to_sqlite(db_path: str) -> sqlite3.Connection:
+    return sqlite3.connect(db_path)
+
+def load_data(spark: SparkSession, path_to_tables: str) -> tuple:
+    employee_table = spark.read.csv(f'{path_to_tables}/Employee.csv', header=True, inferSchema=True)
+    invoice_table = spark.read.csv(f'{path_to_tables}/Invoice.csv', header=True, inferSchema=True)
+    customer_table = spark.read.csv(f'{path_to_tables}/Customer.csv', header=True, inferSchema=True)
+    return employee_table, invoice_table, customer_table
+
+def add_columns(df: DataFrame, status_value: str = 'active') -> DataFrame:
+    return df \
+        .withColumn('updated_at', F.current_timestamp()) \
+        .withColumn('status', F.lit(status_value))
+
+def load_data_with_columns(spark: SparkSession, path_to_tables: str) -> tuple:
+    employee_table = spark.read.csv(f'{path_to_tables}/Employee.csv', header=True, inferSchema=True)
+    invoice_table = spark.read.csv(f'{path_to_tables}/Invoice.csv', header=True, inferSchema=True)
+    customer_table = spark.read.csv(f'{path_to_tables}/Customer.csv', header=True, inferSchema=True)
+
+    customer_table = add_columns(customer_table)
+    invoice_table = add_columns(invoice_table)
+
+    return employee_table, invoice_table, customer_table
+
+def get_last_updated_at(conn: sqlite3.Connection) -> datetime:
     query = "SELECT MAX(updated_at) FROM employee_data"
     last_updated_at = pd.read_sql(query, conn).iloc[0, 0]
-    return last_updated_at if last_updated_at is not pd.NA else '1970-01-01 00:00:00'
+    return last_updated_at if last_updated_at is not pd.NA else datetime(1970, 1, 1)
 
-def incremental_load():
-    # Step 1: Initialize Spark session
-    spark = SparkSession.builder \
-        .appName('ETL Template with Incremental Load') \
-        .getOrCreate()
 
-    # Step 2: Establish SQLite connection
-    conn = sqlite3.connect('employee.db')
-    path_to_tables = 'C:\\Users\\USER\\Desktop\\3.9.2024\\Emploee_Tables\\'
+def update_employee_data(transformed_data: DataFrame, db_path: str, table_name: str):
+    conn = connect_to_sqlite(db_path)
     
     try:
-        # Get the last `updated_at` value
-        last_updated_at = get_last_updated_at(conn)
+        # Convert PySpark DataFrame to Pandas DataFrame
+        transformed_data_pd = transformed_data.toPandas()
 
-        # EXTRACT (Loading CSVs from S3 or local storage)
-        # -----------------------------------------------
-        employee_table = spark.read.csv(f'{path_to_tables}\\Employee.csv', header=True, inferSchema=True)
-        invoice_table = spark.read.csv(f'{path_to_tables}\\Invoice.csv', header=True, inferSchema=True)
-        customer_table = spark.read.csv(f'{path_to_tables}\\Customer.csv', header=True, inferSchema=True)
+        # Load existing data from SQLite into a pandas DataFrame
+        query = f"SELECT * FROM {table_name}"
+        existing_data = pd.read_sql(query, conn)
 
-        # Add `updated_at` column with the current timestamp
-        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        employee_table = employee_table.withColumn('updated_at', F.lit(current_time))
-        invoice_table = invoice_table.withColumn('updated_at', F.lit(current_time))
-        customer_table = customer_table.withColumn('updated_at', F.lit(current_time))
+        # Check if 'created_at' exists in the existing data
+        if 'created_at' not in existing_data.columns:
+            # Create 'created_at' column in the existing data if it doesn't exist
+            existing_data['created_at'] = pd.NaT  # Assign None or NaT to 'created_at'
+            
+        # Join new and existing data on EmployeeId
+        updated_data = pd.merge(transformed_data_pd, existing_data[['EmployeeId', 'created_at']], 
+                                on='EmployeeId', how='left')
+        
 
-        # FILTER new/updated data based on `updated_at`
-        employee_table = employee_table.filter(F.col('updated_at') > last_updated_at)
-        invoice_table = invoice_table.filter(F.col('updated_at') > last_updated_at)
-        customer_table = customer_table.filter(F.col('updated_at') > last_updated_at)
+        # Fill in created_at for new rows where it doesn't exist
+#         updated_data['created_at'] = updated_data['created_at'].fillna(pd.Timestamp.now())
 
-        # TRANSFORM (Apply joins, groupings, and window functions)
-        # --------------------------------------------------------
-        joined_employee_customer = employee_table.alias('e') \
-            .join(customer_table.alias('c'), F.col('e.EmployeeId') == F.col('c.SupportRepId'), 'inner') \
-            .join(invoice_table.alias('i'), F.col('i.CustomerId') == F.col('c.CustomerId'))
-
-        aggregated_data = joined_employee_customer.groupBy('e.EmployeeId', 'e.FirstName', 'e.LastName') \
-            .agg(
-                F.sum(F.when(F.col('i.Total') > 0, 1).otherwise(0)).alias('successful_sales'),
-                F.count('i.InvoiceId').alias('total_invoices')
-            )
-
-        invoice_count_per_customer = joined_employee_customer.groupBy('e.EmployeeId', 'c.CustomerId') \
-            .agg(F.count('i.InvoiceId').alias('invoice_count'))
-
-        average_invoice_count = invoice_count_per_customer.groupBy('e.EmployeeId') \
-            .agg(F.avg('invoice_count').alias('average_invoice_count'))
-
-        transformed_data = aggregated_data.join(average_invoice_count, on='EmployeeId') \
-            .withColumn('conversion_rate', F.col('successful_sales') / F.col('total_invoices')) \
-            .withColumn('created_at', F.lit(current_time)) \
-            .withColumn('updated_at', F.lit(current_time)) \
-            .withColumn('updated_by', F.lit('Shani_Strauss'))
-
-        final_data_df = transformed_data.select(
-            'EmployeeId',
-            'FirstName',
-            'LastName',
-            'average_invoice_count',
-            'conversion_rate',
-            'created_at',
-            'updated_at',
-            'updated_by'
-        )
-
-        # Convert Spark DataFrame to Pandas DataFrame for SQLite operations
-        final_data_df = final_data_df.toPandas()
-
-        # Load existing data from SQLite
-        existing_data = pd.read_sql('SELECT * FROM employee_data', conn)
-
-        # Merge new data with existing data
-        updated_data = existing_data.set_index('EmployeeId').combine_first(final_data_df.set_index('EmployeeId')).reset_index()
-
-        # Update `updated_at` only for existing records
-        updated_data['updated_at'] = updated_data.apply(
-            lambda row: final_data_df.loc[final_data_df['EmployeeId'] == row['EmployeeId'], 'updated_at'].values[0] if row['EmployeeId'] in final_data_df['EmployeeId'].values else row['updated_at'],
-            axis=1
-        )
-
-        # Save the updated data back to SQLite
-        updated_data.to_sql('employee_data', conn, if_exists='replace', index=False)
+        # Collect employee IDs to update
+        employee_ids_to_update = transformed_data_pd['EmployeeId'].tolist()
+        
+        # Delete old records in the table for these EmployeeIds
+        query = f"DELETE FROM {table_name} WHERE EmployeeId IN ({','.join(map(str, employee_ids_to_update))})"
+        conn.execute(query)
         conn.commit()
 
+        # Insert updated data back into SQLite
+        updated_data.to_sql(table_name, conn, if_exists='append', index=False)
     finally:
-        # Step 3: Clean up resources
         conn.close()
-        spark.stop()
 
-# Call the function to execute the ETL process
+
+
+def load_to_sqlite(df: DataFrame, conn: sqlite3.Connection, table_name: str):
+    df.toPandas().to_sql(table_name, conn, if_exists='append', index=False)
+    conn.commit()
+
+def create_employee_data_table(db_path: str):
+    conn = connect_to_sqlite(db_path)
+    try:
+        query = """
+    CREATE TABLE IF NOT EXISTS employee_data (
+        EmployeeId INTEGER PRIMARY KEY,
+        successful_sales INTEGER,
+        total_invoices INTEGER,
+        conversion_rate REAL,
+        created_at TIMESTAMP,
+        updated_at TIMESTAMP,
+        updated_by TEXT
+);
+
+        """
+        conn.execute(query)
+        conn.commit()
+    finally:
+        conn.close()
+
+def cleanup(spark: SparkSession, conn: sqlite3.Connection):
+    if conn is not None:
+        conn.close()
+    spark.stop()
+
+def incremental_load():
+    spark = initialize_spark_session('ETL Template with KT_DB')
+    db_path = 'C:/Users/USER/Desktop/3.9.2024/Emploee_Tables/employee.db'
+    path_to_tables = 'C:/Users/USER/Desktop/3.9.2024/Emploee_Tables/'
+
+    try:
+        # Create the table if it doesn't exist
+        create_employee_data_table(db_path)
+        
+        employee_table, invoice_table, customer_table = load_data_with_columns(spark, path_to_tables)
+        final_data_df = transform_data(employee_table, customer_table, invoice_table, connect_to_sqlite(db_path))
+        update_employee_data(final_data_df, db_path, 'employee_data')
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        cleanup(spark, None)
+
 if __name__ == "__main__":
     incremental_load()
