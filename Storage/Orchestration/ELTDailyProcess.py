@@ -19,6 +19,7 @@ from ELTS.CustomerLifetimeValuebyRegionDailyELT import (
 from ELTS.CustomerLoyaltyAndInvoieSizeDailyELT import (
     customer_loyaltyDailyELT,
 )
+from ELTS.EmployeeCustomerSatisfactionDailyELT import load as incrementel_load_employee_customer_satisfaction_sales
 
 # import DB.ELTS.TrackPlayCountandRevenueContributionDailyELT
 # from ELTS import X
@@ -44,6 +45,9 @@ def load_track_play_count():
 
 def load_best_selling_albums():
     incrementel_load_tk_2()
+    
+def load_employee_customer_satisfaction_sales():
+    incrementel_load_employee_customer_satisfaction_sales()
 
 
 # More functions for other tasks as necessary
@@ -90,6 +94,10 @@ with DAG(
     best_selling_albums = PythonOperator(
         task_id="load_best_selling_albums",
         python_callable=load_best_selling_albums,
+    )
+    employee_customer_satisfaction_sales = PythonOperator(
+        task_id="load_employee_customer_satisfaction_sales",
+        python_callable=load_employee_customer_satisfaction_sales,
     )
 
     # Define dependencies

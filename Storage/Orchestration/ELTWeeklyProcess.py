@@ -25,6 +25,8 @@ from ELTS import SalesTrendsWeeklyELT
 from ELTS import GenreSalseWeeklyELT
 from ELTS.CustomerLifetimeValuebyRegionWeeklyELT import customer_ltvWeeklyELT
 from ELTS.CustomerLoyaltyAndInvoieSizeWeeklyELT import customer_loyaltyWeeklyELT
+from ELTS.EmployeeCustomerSatisfactionWeeklyELT  import load as load_employee_customer_satisfaction_sales
+from ELTS.RepeatCustomerAnalysisWeeklyELT import load as load_repeat_customer_analysis
 
 # from ELTS import X
 
@@ -40,11 +42,12 @@ def run_sales_trends_weekly():
     SalesTrendsWeeklyELT.load()
 
 
-def run_table_2():
-    # Code to generate Table 2
-    pass
+def run_employee_customer_satisfaction_sales_weekly():
+    load_employee_customer_satisfaction_sales()
 
-
+def run_repeat_customer_analysis_weekly():
+    load_repeat_customer_analysis()
+    
 def run_customer_loyaltyWeeklyELT():
     customer_loyaltyWeeklyELT()
 
@@ -116,6 +119,16 @@ with DAG(
         python_callable=run_customer_ltvWeeklyELT,
     )
 
+    task_employee_customer_satisfaction_sales = PythonOperator(
+        task_id="run_employee_customer_satisfaction_sales",
+        python_callable=run_employee_customer_satisfaction_sales_weekly,
+    )
+    
+    task_repeat_customer_analysis = PythonOperator(
+        task_id="run_repeat_customer_analysis",
+        python_callable=run_repeat_customer_analysis_weekly,
+    )
+    
     # Dependent tasks that run after Table 1, 3, 5
     task_2 = PythonOperator(
         task_id="run_table_2",
