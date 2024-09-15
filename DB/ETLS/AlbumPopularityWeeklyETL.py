@@ -10,7 +10,7 @@ import getpass  # For getting the username for metadata
 
 
 
-def load():
+def album_popularity_full_etl():
     """
     ETL process to calculate Album Popularity and Revenue.
     The process extracts data from CSV files, transforms the data by calculating total revenue
@@ -33,7 +33,7 @@ def load():
         .getOrCreate()
 
     # Step 2: Establish SQLite connection using KT_DB
-    conn = sqlite3.connect('DB/ETLS/etl_db.db')  # Assuming KT_DB has a connect() method
+    conn = sqlite3.connect('DB/etl_db.db')  # Assuming KT_DB has a connect() method
 
     try:
         cursor = conn.cursor()
@@ -129,4 +129,4 @@ def load():
         spark.stop()
     
 if __name__ == "__main__":
-    load()
+    album_popularity_full_etl()

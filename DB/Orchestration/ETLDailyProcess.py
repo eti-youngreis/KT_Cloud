@@ -6,9 +6,10 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from DB.ETLS.TrackPlayCountandRevenueContributionDailyETL import incremental_load as incrementel_load_tk_1
 from DB.ETLS.BestSellingAlbumsandTrackPopularitybyCountryDailyETL import incremental_load as incrementel_load_tk_2
-from DB.ETLS.‏‏‏‏EmployeeCustomerSatisfactionAndAverageSalesValueDailyETL import incremental_load as load_daily_employee_customer_satisfaction_and_averagesales_value
-from DB.ETLS.‏‏RepeatCustomerAnalysisByArtistAndPurchaseFrequencyDailyETL import incremental_load as load_daily_artist_repeat_customer_analysis
+from DB.ETLS.EmployeeCustomerSatisfactionAndAverageSalesValueDailyETL import incremental_load as load_daily_employee_customer_satisfaction_and_averagesales_value
+from DB.ETLS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyDailyETL import incremental_load as load_daily_artist_repeat_customer_analysis
 
+from DB.ETLS import AlbumPopularityDailyETL, PopularGenresDailyETL
 # from ETLS import X
 
 # Define your Python functions here
@@ -35,6 +36,12 @@ def  load_employee_customer_satisfaction_and_averagesales_value():
 def  load_artist_repeat_customer_analysis():
     load_daily_artist_repeat_customer_analysis()
     
+def run_album_popularity_and_revenue():
+    AlbumPopularityDailyETL.album_popularity_incremental_etl()
+
+def run_genres_popularity():
+    PopularGenresDailyETL.popular_genres_by_city_incremental_etl()
+
 # More functions for other tasks as necessary
 
 # Define default arguments for the DAG
@@ -86,6 +93,16 @@ with DAG(
     artist_repeat_customer_analysis = PythonOperator(
         task_id='artist_repeat_customer_analysis',
         python_callable=load_artist_repeat_customer_analysis,
+    )
+    
+    task_album_popularity_and_revenue = PythonOperator(
+        task_id = 'run_album_popularity_and_revenue',
+        python_callable = run_album_popularity_and_revenue
+    )
+    
+    task_genres_popularity = PythonOperator(
+        task_id = 'run_genres_popularity',
+        python_callable = run_genres_popularity
     )
 
     # Dependent tasks that run after Table 1, 3, 5

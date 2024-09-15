@@ -1,19 +1,19 @@
-PlaylistId,Name
-1,Music
-2,Movies
-3,TV Shows
-4,Audiobooks
-5,90’s Music
-6,Audiobooks
-7,Movies
-8,Music
-9,Music Videos
-10,TV Shows
-11,Brazilian Music
-12,Classical
-13,Classical 101 - Deep Cuts
-14,Classical 101 - Next Steps
-15,Classical 101 - The Basics
-16,Grunge
-17,Heavy Metal Classic
-18,On-The-Go 1
+PlaylistId,Name,created_at,updated_at
+1,Music,2024-09-11 11:16:28,2024-09-11 11:16:28
+2,Movies,2024-09-11 11:16:28,2024-09-11 11:16:28
+3,TV Shows,2024-09-11 11:16:28,2024-09-11 11:16:28
+4,Audiobooks,2024-09-11 11:16:28,2024-09-11 11:16:28
+5,90’s Music,2024-09-11 11:16:28,2024-09-11 11:16:28
+6,Audiobooks,2024-09-11 11:16:28,2024-09-11 11:16:28
+7,Movies,2024-09-11 11:16:28,2024-09-11 11:16:28
+8,Music,2024-09-11 11:16:28,2024-09-11 11:16:28
+9,Music Videos,2024-09-11 11:16:28,2024-09-11 11:16:28
+10,TV Shows,2024-09-11 11:16:28,2024-09-11 11:16:28
+11,Brazilian Music,2024-09-11 11:16:28,2024-09-11 11:16:28
+12,Classical,2024-09-11 11:16:28,2024-09-11 11:16:28
+13,Classical 101 - Deep Cuts,2024-09-11 11:16:28,2024-09-11 11:16:28
+14,Classical 101 - Next Steps,2024-09-11 11:16:28,2024-09-11 11:16:28
+15,Classical 101 - The Basics,2024-09-11 11:16:28,2024-09-11 11:16:28
+16,Grunge,2024-09-11 11:16:28,2024-09-11 11:16:28
+17,Heavy Metal Classic,2024-09-11 11:16:28,2024-09-11 11:16:28
+18,On-The-Go 1,2024-09-11 11:16:28,2024-09-11 11:16:28

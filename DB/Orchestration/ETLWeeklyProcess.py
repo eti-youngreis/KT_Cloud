@@ -5,6 +5,7 @@ from datetime import datetime
 from DB.ETLS.EmployeeCustomerSatisfactionAndAverageSalesWeeklyETL import load as load_weekly_employee_customer_satisfaction_and_averagesales_value
 from DB.ETLS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyWeeklyETL import load as load_weekly_artist_repeat_customer_analysis
 
+from DB.ETLS import AlbumPopularityWeeklyETL, PopularGenresWeeklyETL
 # from ETLS import X
 
 
@@ -33,6 +34,22 @@ def  load_employee_customer_satisfaction_and_averagesales_value():
 def  load_artist_repeat_customer_analysis():
     load_weekly_artist_repeat_customer_analysis()
     
+
+def run_table_4():
+    pass
+
+def run_table_5():
+    pass
+
+def run_table_6():
+    pass
+
+def run_album_popularity_and_revenue():
+    AlbumPopularityWeeklyETL.album_popularity_full_etl()
+
+def run_genres_popularity():
+    PopularGenresWeeklyETL.popular_genres_by_city_full_etl()
+
 # More functions for other tasks as necessary
 
 # Define default arguments for the DAG
@@ -50,7 +67,7 @@ with DAG(
     "etl_orchestration",
     default_args=default_args,
     description="ETL Process Orchestration DAG",
-    schedule_interval=None,  # Set to None for manual runs
+    schedule_interval='@weekly',  # Set to None for manual runs
     catchup=False,
 ) as dag:
 
@@ -63,6 +80,10 @@ with DAG(
     task_3 = PythonOperator(
         task_id="run_table_3",
         python_callable=run_table_3,
+    )
+    task_4 = PythonOperator(
+        task_id='run_table_4',
+        python_callable=run_table_4,
     )
 
     # Add more independent tasks here
@@ -84,6 +105,21 @@ with DAG(
     artist_repeat_customer_analysis = PythonOperator(
         task_id='artist_repeat_customer_analysis',
         python_callable=load_artist_repeat_customer_analysis,
+    )
+    task_6 = PythonOperator(
+        task_id='run_table_6',
+        python_callable=run_table_6,
+    )
+    
+    
+    task_album_popularity_and_revenue = PythonOperator(
+        task_id = 'run_album_popularity_and_revenue',
+        python_callable = run_album_popularity_and_revenue
+    )
+    
+    task_genres_popularity = PythonOperator(
+        task_id = 'run_genres_popularity',
+        python_callable = run_genres_popularity
     )
 
     # Dependent tasks that run after Table 1, 3, 5
