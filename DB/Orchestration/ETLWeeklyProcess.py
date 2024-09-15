@@ -4,7 +4,7 @@ from datetime import datetime
 
 from DB.ETLS.EmployeeCustomerSatisfactionAndAverageSalesWeeklyETL import load as load_weekly_employee_customer_satisfaction_and_averagesales_value
 from DB.ETLS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyWeeklyETL import load as load_weekly_artist_repeat_customer_analysis
-
+from DB.ETLS.CustomersInvoicesAvgWeeklyETL import load_customer_invoices_count_etl
 # from ETLS import X
 
 
@@ -32,6 +32,9 @@ def  load_employee_customer_satisfaction_and_averagesales_value():
     
 def  load_artist_repeat_customer_analysis():
     load_weekly_artist_repeat_customer_analysis()
+
+def load_customer_invoices_avg_of_month():
+    load_customer_invoices_count_etl()
     
 # More functions for other tasks as necessary
 
@@ -84,6 +87,11 @@ with DAG(
     artist_repeat_customer_analysis = PythonOperator(
         task_id='artist_repeat_customer_analysis',
         python_callable=load_artist_repeat_customer_analysis,
+    )
+
+    customer_invoices_avg_of_month = PythonOperator(
+        task_id='customer_invoices_avg_of_month',
+        python_callable=load_customer_invoices_avg_of_month,
     )
 
     # Dependent tasks that run after Table 1, 3, 5
