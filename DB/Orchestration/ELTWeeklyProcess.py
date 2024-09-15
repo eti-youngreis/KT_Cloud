@@ -11,13 +11,15 @@ from DB.ELTS.SalesTrendsWeeklyELT import load_sales_trends
 from DB.ELTS.popularityTrackByRegionWeekly import load_popularity_track
 from DB.ELTS.EmployeeCustomerSatisfactionAndAverageSalesValueWeeklyELT import load as load_weekly_employee_customer_satisfaction_sales
 from DB.ELTS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyWeeklyELT import load as load_weekly_artist_repeat_customer_analysis
-from DB.ELTS.CustomersInvoicesAvgWeeklyELT import load_average_purchase_value_elt
-
-from DB.ELTS import AlbumPopularityWeeklyELT, PopularGenresWeeklyELT
+from DB.ELTS.TrackLengthandDownloadFrequencyWeeklyELT import load_Track_Length_and_Download_Frequency
+from DB.ELTS.TrackPopularityWeeklyELT import load_Track_Popularity
 # from ELTS import X
+=======
+from DB.ELTS.CustomersInvoicesAvgWeeklyELT import load_average_purchase_value_elt
+from DB.ELTS import AlbumPopularityWeeklyELT, PopularGenresWeeklyELT
 from ..ELTS.AlbumTotalTimeDownloadsWeeklyELT import load
 from ..ELTS.RevenuePerCustomerGenreWeeklyELT import load as revnue_load
-# Define your Python functions here
+
 def run_genre_popularity_and_average_sales():
     load_genre_popularity_and_average_sales()
 
@@ -41,6 +43,14 @@ def load_employee_customer_satisfaction_sales():
 
 def load_artist_repeat_customer_analysis():
     load_weekly_artist_repeat_customer_analysis()
+
+def load_Track_Popularity_elt():
+    load_Track_Popularity()
+
+
+def load_Track_Length_and_Download_Frequency_elt():
+    load_Track_Length_and_Download_Frequency()      
+
 
 def load_customers_Invoices_average_of_month():
     load_average_purchase_value_elt()
@@ -133,6 +143,14 @@ with DAG(
     artist_repeat_customer_analysis = PythonOperator(
         task_id='artist_repeat_customer_analysis',
         python_callable=load_artist_repeat_customer_analysis,
+    )
+    track_Popularity_task = PythonOperator(
+        task_id='load_Track_Popularity_elt',
+        python_callable=load_Track_Popularity_elt,
+    )
+    track_Length_and_Download_Frequency_task = PythonOperator(
+        task_id='load_Track_Length_and_Download_Frequency_elt',
+        python_callable=load_Track_Length_and_Download_Frequency_elt,
     )
 
     customers_Invoices_average_of_month = PythonOperator(
