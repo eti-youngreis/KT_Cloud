@@ -21,47 +21,7 @@ class DBInstanceModel:
         self._current_version_queue = deque([Node_SubSnapshot(parent=None, endpoint=self.endpoint)])
         self._last_node_of_current_version = self._current_version_queue[-1]
         
-    def _create_child_to_node(self, node):
-        self._last_node_of_current_version = node.create_child(self.endpoint)
-        self._current_version_queue.append(self._last_node_of_current_version)
-        self._node_subSnapshot_dic[self._last_node_of_current_version.id_snepshot] = self._last_node_of_current_version
 
-    def __get_node_height(self, current_node):
-        height = 0
-        while current_node:
-            height += 1
-            current_node = current_node.parent
-        return height
-
-    def _update_queue_to_current_version(self, snapshot_to_restore):
-        height = self.__get_node_height(snapshot_to_restore)
-        non_shared_nodes_deque = deque()
-        queue_len = len(self._current_version_queue)
-
-        while height > queue_len:
-            non_shared_nodes_deque.appendleft(snapshot_to_restore)
-            snapshot_to_restore = snapshot_to_restore.parent
-            height -= 1
-
-        while height < queue_len:
-            self._current_version_queue.popleft()
-            queue_len -= 1
-
-        while snapshot_to_restore != self._current_version_queue[-1]:
-            non_shared_nodes_deque.appendleft(snapshot_to_restore)
-            snapshot_to_restore = snapshot_to_restore.parent
-            self._current_version_queue.popleft()
-
-        self._current_version_queue.extend(non_shared_nodes_deque)
-
-    def get_endpoint(self):
-        return self.endpoint
-
-    def stop(self):
-        self.status = 'stopped'
-
-    def start(self):
-        self.status = 'available'
 
     def to_dict(self):
         return {
