@@ -15,7 +15,8 @@ from DB.ELTS.CustomersInvoicesAvgWeeklyELT import load_average_purchase_value_el
 
 from DB.ELTS import AlbumPopularityWeeklyELT, PopularGenresWeeklyELT
 # from ELTS import X
-
+from ..ELTS.AlbumTotalTimeDownloadsWeeklyELT import load
+from ..ELTS.RevenuePerCustomerGenreWeeklyELT import load as revnue_load
 # Define your Python functions here
 def run_genre_popularity_and_average_sales():
     load_genre_popularity_and_average_sales()
@@ -50,7 +51,12 @@ def run_genres_popularity():
     PopularGenresWeeklyELT.popular_genres_by_city_full_elt()
 
 # More functions for other tasks as necessary
-
+def run_album_totals():
+    load()
+    
+def run_customer_genre_revenue():
+    revnue_load()
+        
 # Define default arguments for the DAG
 default_args = {
     'owner': 'airflow',
@@ -103,6 +109,17 @@ with DAG(
         python_callable=load_best_selling_albums,
     )
 
+    task_album_totals = PythonOperator(
+        task_id = 'task_album_totals_weekly_elt',
+        python_callable=run_album_totals
+    )
+    
+    task_revenue_customer_genre = PythonOperator(
+        task_id = 'task_revenue_customer_genre_weekly_elt',
+        python_callable=run_customer_genre_revenue
+    )
+    
+
     popularity_track = PythonOperator(
         task_id='load_popularity_track',
         python_callable=load_popularity_track_by_region,
@@ -122,6 +139,7 @@ with DAG(
         task_id='customers_Invoices_average_of_month',
         python_callable=load_customers_Invoices_average_of_month,
     )
+
 
     # Dependent tasks that run after Table 1, 3, 5
     task_2 = PythonOperator(

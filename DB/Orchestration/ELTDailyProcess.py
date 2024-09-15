@@ -1,4 +1,4 @@
-from airflow import DAG
+from airflow.models.dag import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
 import sys
@@ -11,7 +11,8 @@ from DB.ELTS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyDailyELT import l
 from DB.ELTS.CustomersInvoicesAvgDailyELT import load_average_purchase_value_elt_increment
 # import DB.ELTS.TrackPlayCountandRevenueContributionDailyELT
 # from ELTS import X
-
+from ..ETLS.AlbumTotalTimeDownloadsDaily import incremental_load
+from ..ELTS.RevenuePerCustomerGenreDailyELT import incremental_load as incremental_load_revenue
 # Define your Python functions here
 def run_table_1():
     # Code to generate Table 1
@@ -50,7 +51,12 @@ def run_genres_popularity():
     
 
 # More functions for other tasks as necessary
-
+def run_album_totals():
+    incremental_load()
+    
+def run_customer_genre_revenue():
+    incremental_load_revenue()
+    
 # Define default arguments for the DAG
 default_args = {
     'owner': 'airflow',
@@ -85,6 +91,16 @@ with DAG(
     track_play_count = PythonOperator(
         task_id='load_track_play_count',
         python_callable=load_track_play_count,
+    )
+    
+    task_album_totals = PythonOperator(
+        task_id = 'task_album_totals_daily_elt',
+        python_callable=run_album_totals
+    )
+    
+    task_revenue_customer_genre = PythonOperator(
+        task_id = 'task_revenue_customer_genre_daily_elt',
+        python_callable=run_customer_genre_revenue
     )
 
     best_selling_albums = PythonOperator(

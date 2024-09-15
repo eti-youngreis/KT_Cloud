@@ -2,11 +2,22 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
 
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
+from Storage.ETLS import GenreSalesWeeklyETL
+
+
 from DB.ETLS.EmployeeCustomerSatisfactionAndAverageSalesWeeklyETL import load as load_weekly_employee_customer_satisfaction_and_averagesales_value
 from DB.ETLS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyWeeklyETL import load as load_weekly_artist_repeat_customer_analysis
 from DB.ETLS.CustomersInvoicesAvgWeeklyETL import load_customer_invoices_count_etl
 from DB.ETLS import AlbumPopularityWeeklyETL, PopularGenresWeeklyETL
 # from ETLS import X
+from ..ETLS.AlbumTotalTimeDownloadsWeekly import load
+from ..ETLS.RevenuePerCustomerGenreWeekly import load as revenue_load
 
 
 
@@ -54,7 +65,12 @@ def run_genres_popularity():
     PopularGenresWeeklyETL.popular_genres_by_city_full_etl()
 
 # More functions for other tasks as necessary
-
+def run_album_totals():
+    load()
+    
+def run_customer_genre_revenue():
+    revenue_load()
+    
 # Define default arguments for the DAG
 default_args = {
     "owner": "airflow",
@@ -99,7 +115,16 @@ with DAG(
         task_id='load_best_selling_albums',
         python_callable=load_best_selling_albums,
     )
+
+    task_album_totals = PythonOperator(
+        task_id = 'task_album_totals_weekly',
+        python_callable=run_album_totals
+    )
     
+    task_revenue_customer_genre = PythonOperator(
+        task_id = 'task_revenue_customer_genre_weekly',
+        python_callable=run_customer_genre_revenue
+
     employee_customer_satisfaction_and_averagesales_value = PythonOperator(
         task_id='employee_customer_satisfaction_and_averagesales_value',
         python_callable=load_employee_customer_satisfaction_and_averagesales_value,
@@ -135,7 +160,7 @@ with DAG(
         task_id="run_table_2",
         python_callable=run_table_2,
     )
-
+    
     # Define dependencies
     # task_1 >> task_2
     # task_3 >> task_4
