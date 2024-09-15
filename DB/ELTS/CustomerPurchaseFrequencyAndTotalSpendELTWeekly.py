@@ -11,8 +11,8 @@ def load():
 
     try:
         # Reading the customer and invoice CSV files, with headers and automatic schema inference
-        customer_df = spark.read.csv(r"C:\\Users\\user1\\Desktop\\בוטקמפ\הפרוקיט\\elt\\csv files\\Customer.csv", header=True, inferSchema=True)
-        invoice_df = spark.read.csv(r"C:\\Users\\user1\\Desktop\\בוטקמפ\הפרוקיט\\elt\\csv files\\Invoice.csv", header=True, inferSchema=True)
+        customer_df = spark.read.csv(r"Customer.csv", header=True, inferSchema=True)
+        invoice_df = spark.read.csv(r"Invoice.csv", header=True, inferSchema=True)
 
         # Converting the Spark DataFrame to a Pandas DataFrame for integration with SQLite
         customer = customer_df.toPandas()
