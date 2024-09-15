@@ -13,6 +13,7 @@ from DB.ELTS.EmployeeCustomerSatisfactionAndAverageSalesValueWeeklyELT import lo
 from DB.ELTS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyWeeklyELT import load as load_weekly_artist_repeat_customer_analysis
 from DB.ELTS.CustomersInvoicesAvgWeeklyELT import load_average_purchase_value_elt
 
+from DB.ELTS import AlbumPopularityWeeklyELT, PopularGenresWeeklyELT
 # from ELTS import X
 
 # Define your Python functions here
@@ -42,6 +43,12 @@ def load_artist_repeat_customer_analysis():
 
 def load_customers_Invoices_average_of_month():
     load_average_purchase_value_elt()
+def run_album_popularity_and_revenue():
+    AlbumPopularityWeeklyELT.album_popularity_full_elt()
+
+def run_genres_popularity():
+    PopularGenresWeeklyELT.popular_genres_by_city_full_elt()
+
 # More functions for other tasks as necessary
 
 # Define default arguments for the DAG
@@ -73,6 +80,17 @@ with DAG(
         task_id='run_sales_trends',
         python_callable = run_sales_trends,
     )
+    
+    task_album_popularity_and_revenue = PythonOperator(
+        task_id = 'run_album_popularity_and_revenue',
+        python_callable = run_album_popularity_and_revenue
+    )
+    
+    task_genres_popularity = PythonOperator(
+        task_id = 'run_genres_popularity',
+        python_callable = run_genres_popularity
+    )
+
     
     # Add more independent tasks here
     track_play_count = PythonOperator(

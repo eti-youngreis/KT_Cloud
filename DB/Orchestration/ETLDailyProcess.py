@@ -10,6 +10,7 @@ from DB.ETLS.EmployeeCustomerSatisfactionAndAverageSalesValueDailyETL import inc
 from DB.ETLS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyDailyETL import incremental_load as load_daily_artist_repeat_customer_analysis
 from DB.ETLS.CustomersInvoicesAvgDailyETL import load_customer_invoices_count_etl_increment
 
+from DB.ETLS import AlbumPopularityDailyETL, PopularGenresDailyETL
 # from ETLS import X
 
 # Define your Python functions here
@@ -39,6 +40,11 @@ def  load_artist_repeat_customer_analysis():
 def load_customer_invoices_avg_of_month():
     load_customer_invoices_count_etl_increment()
     
+def run_album_popularity_and_revenue():
+    AlbumPopularityDailyETL.album_popularity_incremental_etl()
+
+def run_genres_popularity():
+    PopularGenresDailyETL.popular_genres_by_city_incremental_etl()
 
 # More functions for other tasks as necessary
 
@@ -91,6 +97,16 @@ with DAG(
     artist_repeat_customer_analysis = PythonOperator(
         task_id='artist_repeat_customer_analysis',
         python_callable=load_artist_repeat_customer_analysis,
+    )
+    
+    task_album_popularity_and_revenue = PythonOperator(
+        task_id = 'run_album_popularity_and_revenue',
+        python_callable = run_album_popularity_and_revenue
+    )
+    
+    task_genres_popularity = PythonOperator(
+        task_id = 'run_genres_popularity',
+        python_callable = run_genres_popularity
     )
 
     customer_invoices_avg_of_month = PythonOperator(

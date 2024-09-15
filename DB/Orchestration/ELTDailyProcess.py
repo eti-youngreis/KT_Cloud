@@ -40,12 +40,21 @@ def  load_employee_customer_satisfaction_sales():
 def  load_artist_repeat_customer_analysis():
     incrementel_load_artist_repeat_customer_analysis()
     
+def run_album_popularity_and_revenue():
+    # AlbumPopularityDailyELT.album_popularity_incremental_elt()
+    print("1 hello")
+
+def run_genres_popularity():
+    # PopularGenresDailyELT.popular_genres_by_city_incremental_elt()
+    print("2 hello")
+    
+
 # More functions for other tasks as necessary
 
 # Define default arguments for the DAG
 default_args = {
     'owner': 'airflow',
-    'start_date': datetime(2024, 9, 1),
+    'start_date': datetime(2024, 9, 11),
     'depends_on_past': False,
     'email_on_failure': False,
     'email_on_retry': False,
@@ -102,6 +111,16 @@ with DAG(
     task_2 = PythonOperator(
         task_id='run_table_2',
         python_callable=run_table_2,
+    )
+    
+    task_album_popularity_and_revenue = PythonOperator(
+        task_id = 'run_album_popularity_and_revenue',
+        python_callable = run_album_popularity_and_revenue
+    )
+    
+    task_genres_popularity = PythonOperator(
+        task_id = 'run_genres_popularity',
+        python_callable = run_genres_popularity
     )
 
     # Define dependencies
