@@ -1,14 +1,24 @@
 import json
 import os
 from userModel import User
+from PermissionModel import Permission
 class Group:
     def __init__(self, group_name:str, file_path:str='groups.json'):
         self.name:str = group_name
-        self.users:User = [] 
+        self.users:list[User] = [] 
         self.roles = []  
-        self.permissions = []  
+        self.permissions:list[Permission] = []  
         self.file_path = file_path
         self.load_group()
+
+
+    def to_dict(self):
+        return {
+            "Name":self.name,
+            "Users":[user.to_dict() for user in self.users],
+            "Roles":[role.to_dict() for role in self.roles],
+            "Permissions":[premission.to_dict() for premission in self.permissions], 
+        }
 
     def load_data(self):
         if os.path.exists(self.file_path):

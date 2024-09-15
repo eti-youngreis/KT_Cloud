@@ -9,12 +9,17 @@ from DB.ELTS.BestSellingAlbumsandTrackPopularitybyCountryWeeklyELT import load a
 from DB.ELTS.GenrePopularityAndAverageSalesWeeklyELT import load_genre_popularity_and_average_sales
 from DB.ELTS.SalesTrendsWeeklyELT import load_sales_trends
 from DB.ELTS.popularityTrackByRegionWeekly import load_popularity_track
-from DB.ELTS.‏‏EmployeeCustomerSatisfactionAndAverageSalesValueWeeklyELT import load as load_weekly_employee_customer_satisfaction_sales
+from DB.ELTS.EmployeeCustomerSatisfactionAndAverageSalesValueWeeklyELT import load as load_weekly_employee_customer_satisfaction_sales
 from DB.ELTS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyWeeklyELT import load as load_weekly_artist_repeat_customer_analysis
-
+from DB.ELTS.TrackLengthandDownloadFrequencyWeeklyELT import load_Track_Length_and_Download_Frequency
+from DB.ELTS.TrackPopularityWeeklyELT import load_Track_Popularity
 # from ELTS import X
+=======
+from DB.ELTS.CustomersInvoicesAvgWeeklyELT import load_average_purchase_value_elt
+from DB.ELTS import AlbumPopularityWeeklyELT, PopularGenresWeeklyELT
+from ..ELTS.AlbumTotalTimeDownloadsWeeklyELT import load
+from ..ELTS.RevenuePerCustomerGenreWeeklyELT import load as revnue_load
 
-# Define your Python functions here
 def run_genre_popularity_and_average_sales():
     load_genre_popularity_and_average_sales()
 
@@ -38,9 +43,30 @@ def load_employee_customer_satisfaction_sales():
 
 def load_artist_repeat_customer_analysis():
     load_weekly_artist_repeat_customer_analysis()
-    
-# More functions for other tasks as necessary
 
+def load_Track_Popularity_elt():
+    load_Track_Popularity()
+
+
+def load_Track_Length_and_Download_Frequency_elt():
+    load_Track_Length_and_Download_Frequency()      
+
+
+def load_customers_Invoices_average_of_month():
+    load_average_purchase_value_elt()
+def run_album_popularity_and_revenue():
+    AlbumPopularityWeeklyELT.album_popularity_full_elt()
+
+def run_genres_popularity():
+    PopularGenresWeeklyELT.popular_genres_by_city_full_elt()
+
+# More functions for other tasks as necessary
+def run_album_totals():
+    load()
+    
+def run_customer_genre_revenue():
+    revnue_load()
+        
 # Define default arguments for the DAG
 default_args = {
     'owner': 'airflow',
@@ -71,6 +97,17 @@ with DAG(
         python_callable = run_sales_trends,
     )
     
+    task_album_popularity_and_revenue = PythonOperator(
+        task_id = 'run_album_popularity_and_revenue',
+        python_callable = run_album_popularity_and_revenue
+    )
+    
+    task_genres_popularity = PythonOperator(
+        task_id = 'run_genres_popularity',
+        python_callable = run_genres_popularity
+    )
+
+    
     # Add more independent tasks here
     track_play_count = PythonOperator(
         task_id='load_track_play_count',
@@ -81,6 +118,17 @@ with DAG(
         task_id='load_best_selling_albums',
         python_callable=load_best_selling_albums,
     )
+
+    task_album_totals = PythonOperator(
+        task_id = 'task_album_totals_weekly_elt',
+        python_callable=run_album_totals
+    )
+    
+    task_revenue_customer_genre = PythonOperator(
+        task_id = 'task_revenue_customer_genre_weekly_elt',
+        python_callable=run_customer_genre_revenue
+    )
+    
 
     popularity_track = PythonOperator(
         task_id='load_popularity_track',
@@ -96,6 +144,20 @@ with DAG(
         task_id='artist_repeat_customer_analysis',
         python_callable=load_artist_repeat_customer_analysis,
     )
+    track_Popularity_task = PythonOperator(
+        task_id='load_Track_Popularity_elt',
+        python_callable=load_Track_Popularity_elt,
+    )
+    track_Length_and_Download_Frequency_task = PythonOperator(
+        task_id='load_Track_Length_and_Download_Frequency_elt',
+        python_callable=load_Track_Length_and_Download_Frequency_elt,
+    )
+
+    customers_Invoices_average_of_month = PythonOperator(
+        task_id='customers_Invoices_average_of_month',
+        python_callable=load_customers_Invoices_average_of_month,
+    )
+
 
     # Dependent tasks that run after Table 1, 3, 5
     task_2 = PythonOperator(

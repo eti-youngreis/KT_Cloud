@@ -8,23 +8,23 @@ import sqlite3
 def load():
     # Step 1: Initialize Spark session
     spark = SparkSession.builder \
-        .appName("ETL Template with KT_DB") \
+        .appName("Repeat customer analysis Weekly ETL") \
         .getOrCreate()
 
     # Step 2: Establish SQLite connection using KT_DB
     # conn = KT_DB.connect('/path_to_sqlite.db')
-    conn = sqlite3.connect('KT_Cloud/Storage/ETLS/etl_db.db')
+    conn = sqlite3.connect('KT_Cloud/Storage/ETLS/db/repeat_customer_analysis.db')
     try:
         # EXTRACT (Loading CSVs from S3 or local storage)
         # -----------------------------------------------
 
         # Load other related tables
-        customers = spark.read.csv("KT_Cloud/Storage/ETLS/csv files/Customer.csv", header=True, inferSchema=True)
-        invoices = spark.read.csv("KT_Cloud/Storage/ETLS/csv files/Invoice.csv", header=True, inferSchema=True)
-        invoice_line = spark.read.csv("KT_Cloud/Storage/ETLS/csv files/InvoiceLine.csv", header=True, inferSchema=True)
-        tracks = spark.read.csv("KT_Cloud\Storage\ETLS\csv files\Track.csv", header=True, inferSchema=True)
-        artists = spark.read.csv("KT_Cloud\Storage\ETLS\csv files\Artist.csv", header=True, inferSchema=True)
-        albums = spark.read.csv("KT_Cloud\Storage\ETLS\csv files\Album.csv", header=True, inferSchema=True)
+        customers = spark.read.csv("D:/boto3 project/csv files/Customer.csv", header=True, inferSchema=True)
+        invoices = spark.read.csv("D:/boto3 project/csv files/Invoice.csv", header=True, inferSchema=True)
+        invoice_line = spark.read.csv("D:/boto3 project/csv files/InvoiceLine.csv", header=True, inferSchema=True)
+        tracks = spark.read.csv("D:/boto3 project/csv files/Track.csv", header=True, inferSchema=True)
+        artists = spark.read.csv("D:/boto3 project/csv files/Artist.csv", header=True, inferSchema=True)
+        albums = spark.read.csv("D:/boto3 project/csv files/Album.csv", header=True, inferSchema=True)
         
         # Rename ambiguous columns
         artists = artists.withColumnRenamed("Name", "ArtistName")  # Rename Name to ArtistName
@@ -50,7 +50,9 @@ def load():
         window_spec = Window.partitionBy("ArtistId").orderBy(F.desc("PurchaseCount"))
         customer_purchase_count = customer_purchase_count.withColumn("Rank", F.rank().over(window_spec))
     
-        customer_purchase_count.show(200)
+        customer_purchase_count = customer_purchase_count.withColumn("created_at", F.current_timestamp())\
+                            .withColumn("updated_at", F.current_timestamp())\
+                            .withColumn("updated_by", F.lit("Efrat"))
                     
         # Convert to pandas dataframe and write to SQLite
         customer_purchase_count.toPandas().to_sql('repeat_customer_analysis', conn, if_exists='replace', index=False)

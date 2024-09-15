@@ -5,7 +5,7 @@ import sqlite3
 import pandas as pd
 from datetime import datetime
 
-def etl_process():
+def customer_ltvDailyETL():
     # Initialize Spark session
     spark = SparkSession.builder.appName("CustomerLTVByRegionETL").getOrCreate()
 
@@ -116,4 +116,4 @@ def etl_process():
         # Close the SQLite connection
         conn.close()
 
-etl_process()
+customer_ltvDailyETL()

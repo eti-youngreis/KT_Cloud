@@ -3,7 +3,7 @@ import sqlite3
 import pandas as pd
 
 
-def incremental_elt_process():
+def customer_loyaltyDailyELT():
     # Initialize Spark session
     spark = SparkSession.builder.appName("CustomerLoyaltyELT_IncrementalLoad").getOrCreate()
 
@@ -50,28 +50,28 @@ def incremental_elt_process():
                     LastName TEXT,
                     LoyaltyScore INTEGER,
                     AverageInvoiceSize REAL,
-                    CreatedAt TEXT,
+                    created_at TEXT,
                     UpdatedAt TEXT,
-                    UpdatedBy TEXT
+                    updated_by TEXT
                 )
             """)
 
         # Create a temporary table to store the creation date of existing rows
         conn.execute("""
             CREATE TEMPORARY TABLE temp_loyalty_creation_dates AS
-            SELECT CustomerId, CreatedAt FROM customer_loyalty;
+            SELECT CustomerId, created_at FROM customer_loyalty;
         """)
 
         # Step 4: Transform - Insert or update customer loyalty data
         transformation_query = """
-            INSERT OR REPLACE INTO customer_loyalty (CustomerId, FirstName, LastName, LoyaltyScore, AverageInvoiceSize, CreatedAt, UpdatedAt, UpdatedBy)
+            INSERT OR REPLACE INTO customer_loyalty (CustomerId, FirstName, LastName, LoyaltyScore, AverageInvoiceSize, created_at, UpdatedAt, updated_by)
             SELECT
                 c.CustomerId,
                 c.FirstName,
                 c.LastName,
                 COUNT(i.InvoiceId) AS LoyaltyScore,
                 AVG(i.Total) AS AverageInvoiceSize,
-                COALESCE(tlcd.CreatedAt, strftime('%Y-%m-%d %H:%M:%S', 'now')) AS CreatedAt,
+                COALESCE(tlcd.created_at, strftime('%Y-%m-%d %H:%M:%S', 'now')) AS created_at,
                 strftime('%Y-%m-%d %H:%M:%S', 'now') AS UpdatedAt,
                 'process:Efrat_Harush' AS UpdatedBy
             FROM 
@@ -101,4 +101,4 @@ def incremental_elt_process():
         conn.close()
 
 
-incremental_elt_process()
+customer_loyaltyDailyELT()

@@ -4,7 +4,7 @@ from pyspark.sql.window import Window
 import sqlite3
 import pandas as pd
 
-def etl_process():
+def customer_ltvWeeklyETL():
     # Initialize Spark session
     spark = SparkSession.builder.appName("CustomerLTVByRegionETL").getOrCreate()
 
@@ -67,4 +67,4 @@ def etl_process():
         # Close the SQLite connection
         conn.close()
 
-etl_process()
+customer_ltvWeeklyETL()
