@@ -10,18 +10,18 @@ def load():
         .getOrCreate()
 
     # Step 2: Establish SQLite connection using KT_DB
-    conn = sqlite3.connect('KT_Cloud/Storage/ETLS/etl_db.db')
+    conn = sqlite3.connect('KT_Cloud/Storage/ETLS/etl_db1.db')
 
     try:
         cursor = conn.cursor()
         # EXTRACT (Loading CSVs from S3 or local storage)
         # -----------------------------------------------
-        customers = spark.read.csv("KT_Cloud/Storage/ETLS/csv files/Customer.csv", header=True, inferSchema=True)
-        invoices = spark.read.csv("KT_Cloud/Storage/ETLS/csv files/Invoice.csv", header=True, inferSchema=True)
-        invoice_lines = spark.read.csv("KT_Cloud/Storage/ETLS/csv files/InvoiceLine.csv", header=True, inferSchema=True)
-        tracks = spark.read.csv("KT_Cloud\Storage\ETLS\csv files\Track.csv", header=True, inferSchema=True)
-        artists = spark.read.csv("KT_Cloud\Storage\ETLS\csv files\Artist.csv", header=True, inferSchema=True)
-        albums = spark.read.csv("KT_Cloud\Storage\ETLS\csv files\Album.csv", header=True, inferSchema=True)
+        customers = spark.read.csv("D:/boto3 project/csv files/Customer_with_created_at.csv", header=True, inferSchema=True)
+        invoices = spark.read.csv("D:/boto3 project/csv files/Invoice_with_created_at.csv", header=True, inferSchema=True)
+        invoice_lines = spark.read.csv("D:/boto3 project/csv files/InvoiceLine_with_created_at.csv", header=True, inferSchema=True)
+        tracks = spark.read.csv("D:/boto3 project/csv files/Track_with_created_at.csv", header=True, inferSchema=True)
+        artists = spark.read.csv("D:/boto3 project/csv files/Artist_with_created_at.csv", header=True, inferSchema=True)
+        albums = spark.read.csv("D:/boto3 project/csv files/Album_with_created_at.csv", header=True, inferSchema=True)
         # Load other related tables
 
         # LOAD (Save the raw data into SQLite using KT_DB without transformation)
@@ -39,43 +39,55 @@ def load():
         # TRANSFORM (Perform transformations with SQL queries using KT_DB functions)
         # -------------------------------------------------------------------------
         # Example Transformation 1: Join tables and calculate total spend and average
-        query_sales_data = """
-            SELECT inv.CustomerId, inv.InvoiceId, il.Quantity, tr.TrackId, art.Name
+        # query_sales_data = """
+        #     SELECT inv.CustomerId, inv.InvoiceId, il.Quantity, tr.TrackId, art.Name
+        #     FROM invoices inv
+        #     JOIN invoice_lines il ON inv.InvoiceId = il.InvoiceId
+        #     JOIN tracks tr ON il.TrackId = tr.TrackId
+        #     JOIN albums al ON tr.AlbumId = al.AlbumId
+        #     JOIN artists art ON al.ArtistId = art.ArtistId;
+        #     """
+
+        # sales = cursor.execute(query_sales_data).fetchall()
+        # cursor.execute('''CREATE TABLE IF NOT EXISTS sales_data (
+        #             InvoiceID INTEGER,
+        #             CustomerID INTEGER,
+        #             ArtistID INTEGER,
+        #             Name TEXT,
+        #             Quantity INTEGER)'''
+        # )
+        
+        # # Insert data to 'sales_data' table
+        # conn.executemany("""
+        #     INSERT INTO sales_data (InvoiceID, CustomerID, ArtistID, Name, Quantity)
+        #     VALUES (?, ?, ?, ?, ?)
+        #     """, sales)
+        # # Execute the transformation query using KT_DB's execute() method
+
+        # repeat_customer_query = """
+        #         CREATE VIEW IF NOT EXISTS repeat_customer_analysis AS
+        #         SELECT ArtistID, Name, CustomerID, PurchaseCount,
+        #         COUNT(CustomerID) OVER (PARTITION BY ArtistID) AS RepeatCustomerCount
+        #         FROM (
+        #             SELECT ArtistID, CustomerID, Name, COUNT(InvoiceID) AS PurchaseCount
+        #             FROM sales_data
+        #             GROUP BY ArtistID, CustomerID
+        #             HAVING COUNT(InvoiceID) > 1
+        #         ) AS customer_artist_purchases;
+        #         """
+        
+        cursor.execute("""CREATE VIEW IF NOT EXISTS repeat_customer_analysis AS
+            SELECT art.ArtistId, art.Name, inv.CustomerId, COUNT(inv.InvoiceId) AS PurchaseCount,
+                COUNT(inv.CustomerId) OVER (PARTITION BY art.ArtistId) AS RepeatCustomerCount
             FROM invoices inv
             JOIN invoice_lines il ON inv.InvoiceId = il.InvoiceId
             JOIN tracks tr ON il.TrackId = tr.TrackId
             JOIN albums al ON tr.AlbumId = al.AlbumId
-            JOIN artists art ON al.ArtistId = art.ArtistId;
-            """
-
-        sales = cursor.execute(query_sales_data).fetchall()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS sales_data (
-                    InvoiceID INTEGER,
-                    CustomerID INTEGER,
-                    ArtistID INTEGER,
-                    Name TEXT,
-                    Quantity INTEGER)'''
-        )
-        
-        # Insert data to 'sales_data' table
-        conn.executemany("""
-            INSERT INTO sales_data (InvoiceID, CustomerID, ArtistID, Name, Quantity)
-            VALUES (?, ?, ?, ?, ?)
-            """, sales)
-        # Execute the transformation query using KT_DB's execute() method
-
-        repeat_customer_query = """
-                CREATE VIEW IF NOT EXISTS repeat_customer_analysis AS
-                SELECT ArtistID, Name, CustomerID, PurchaseCount,
-                COUNT(CustomerID) OVER (PARTITION BY ArtistID) AS RepeatCustomerCount
-                FROM (
-                    SELECT ArtistID, CustomerID, Name, COUNT(InvoiceID) AS PurchaseCount
-                    FROM sales_data
-                    GROUP BY ArtistID, CustomerID
-                    HAVING COUNT(InvoiceID) > 1
-                ) AS customer_artist_purchases;
-                """
-        cursor.execute(repeat_customer_query)
+            JOIN artists art ON al.ArtistId = art.ArtistId
+            GROUP BY art.ArtistId, art.Name, inv.CustomerId
+            HAVING COUNT(inv.InvoiceId) > 1;
+            
+            """)
         
         time = datetime.now()
         user_name = "Efrat"

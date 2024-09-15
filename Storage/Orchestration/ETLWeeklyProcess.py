@@ -1,16 +1,15 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
-# from ETLS import X
+from KT_Cloud.Storage.ETLS import EmployeeCustomerSatisfactionWeeklyETL
 
 # Define your Python functions here
 def run_table_1():
     # Code to generate Table 1
     pass
 
-def run_table_2():
-    # Code to generate Table 2
-    pass
+def run_employee_customer_satisfaction():
+    EmployeeCustomerSatisfactionWeeklyETL.load()
 
 def run_table_3():
     # Code to generate Table 3
@@ -43,26 +42,27 @@ with DAG(
         python_callable=run_table_1,
     )
     
-    task_3 = PythonOperator(
-        task_id='run_table_3',
-        python_callable=run_table_3,
+    employee_customer_satisfaction = PythonOperator(
+        task_id='run_employee_customer_satisfaction',
+        python_callable=run_employee_customer_satisfaction,
     )
     
     # Add more independent tasks here
-    task_5 = PythonOperator(
-        task_id='run_table_5',
-        python_callable=run_table_5,
-    )
+    # task_5 = PythonOperator(
+    #     task_id='run_table_5',
+    #     python_callable=run_table_5,
+    # )
 
-    # Dependent tasks that run after Table 1, 3, 5
-    task_2 = PythonOperator(
-        task_id='run_table_2',
-        python_callable=run_table_2,
-    )
+    # # Dependent tasks that run after Table 1, 3, 5
+    # task_2 = PythonOperator(
+    #     task_id='run_table_2',
+    #     python_callable=run_table_2,
+    # )
 
-    # Define dependencies
-    task_1 >> task_2
-    task_3 >> task_4
-    task_5 >> task_6
+    # # Define dependencies
+    # task_1 >> task_2
+    # task_3 >> task_4
+    # task_5 >> task_6
+    task_1 >> employee_customer_satisfaction
 
     # You can add more tasks and dependencies following this pattern.

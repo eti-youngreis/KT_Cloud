@@ -62,7 +62,6 @@ def load():
         # window_spec = Window.orderBy(F.desc("RepeatCustomerCount"))
         # final_df = final_df.withColumn("rank", F.rank().over(window_spec))
 
-        final_df.show()
         # # Add Metadata
         final_df = final_df.withColumn("created_at", F.current_timestamp())\
                         .withColumn("updated_at", F.current_timestamp())\
