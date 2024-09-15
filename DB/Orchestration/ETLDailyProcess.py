@@ -8,6 +8,12 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')
 from DB.ETLS.TrackPlayCountandRevenueContributionDailyETL import incremental_load as incrementel_load_tk_1
 from DB.ETLS.BestSellingAlbumsandTrackPopularitybyCountryDailyETL import incremental_load as incrementel_load_tk_2
 
+from DB.ETLS.EmployeeCustomerSatisfactionAndAverageSalesValueDailyETL import incremental_load as load_daily_employee_customer_satisfaction_and_averagesales_value
+from DB.ETLS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyDailyETL import incremental_load as load_daily_artist_repeat_customer_analysis
+from DB.ETLS.CustomersInvoicesAvgDailyETL import load_customer_invoices_count_etl_increment
+
+from DB.ETLS import AlbumPopularityDailyETL, PopularGenresDailyETL
+
 # from ETLS import X
 from ..ETLS.AlbumTotalTimeDownloadsDaily import incremental_load
 from ..ETLS.RevenuePerCustomerGenreDaily import incremental_load as revenue_incremental_load
@@ -30,6 +36,24 @@ def  load_track_play_count():
 
 def  load_best_selling_albums():
     incrementel_load_tk_2()
+
+
+def  load_employee_customer_satisfaction_and_averagesales_value():
+    load_daily_employee_customer_satisfaction_and_averagesales_value()
+
+def  load_artist_repeat_customer_analysis():
+    load_daily_artist_repeat_customer_analysis()
+
+def load_customer_invoices_avg_of_month():
+    load_customer_invoices_count_etl_increment()
+    
+def run_album_popularity_and_revenue():
+    AlbumPopularityDailyETL.album_popularity_incremental_etl()
+
+def run_genres_popularity():
+    PopularGenresDailyETL.popular_genres_by_city_incremental_etl()
+
+# More functions for other tasks as necessary
 
 # More functions for other tasks as necessary
 def run_album_totals():
@@ -77,7 +101,7 @@ with DAG(
         task_id='load_best_selling_albums',
         python_callable=load_best_selling_albums,
     )
-    
+
     task_album_totals = PythonOperator(
         task_id = 'task_album_totals_daily',
         python_callable=run_album_totals
@@ -86,6 +110,31 @@ with DAG(
     task_revenue_customer_genre = PythonOperator(
         task_id = 'task_revenue_customer_genre_daily',
         python_callable=run_customer_genre_revenue
+
+    employee_customer_satisfaction_and_averagesales_value = PythonOperator(
+        task_id='employee_customer_satisfaction_and_averagesales_value',
+        python_callable=load_employee_customer_satisfaction_and_averagesales_value,
+    )
+    
+    artist_repeat_customer_analysis = PythonOperator(
+        task_id='artist_repeat_customer_analysis',
+        python_callable=load_artist_repeat_customer_analysis,
+    )
+    
+    task_album_popularity_and_revenue = PythonOperator(
+        task_id = 'run_album_popularity_and_revenue',
+        python_callable = run_album_popularity_and_revenue
+    )
+    
+    task_genres_popularity = PythonOperator(
+        task_id = 'run_genres_popularity',
+        python_callable = run_genres_popularity
+    )
+
+    customer_invoices_avg_of_month = PythonOperator(
+        task_id='customer_invoices_avg_of_month',
+        python_callable=load_customer_invoices_avg_of_month,
+
     )
 
     # Dependent tasks that run after Table 1, 3, 5

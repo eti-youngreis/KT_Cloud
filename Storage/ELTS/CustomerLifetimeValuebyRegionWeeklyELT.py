@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 import sqlite3
 import pandas as pd
 
-def elt_process():
+def customer_ltvWeeklyELT():
     # Initialize Spark session
     spark = SparkSession.builder.appName("CustomerLTVByRegionELT").getOrCreate()
 
@@ -78,4 +78,4 @@ def elt_process():
         # Close the SQLite connection
         conn.close()
 
-elt_process()
+customer_ltvWeeklyELT()

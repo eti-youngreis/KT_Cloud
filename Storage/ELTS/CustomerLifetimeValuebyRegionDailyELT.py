@@ -2,7 +2,7 @@ import sqlite3
 import pandas as pd
 from pyspark.sql import SparkSession
 
-def elt_process():
+def customer_ltvDailyELT():
     # Initialize Spark session
     spark = SparkSession.builder.appName("CustomerLoyaltyELT_IncrementalLoad").getOrCreate()
     # Open SQLite connection
@@ -125,4 +125,4 @@ def elt_process():
         # Close the SQLite connection
         conn.close()
 
-elt_process()
+customer_ltvDailyELT()

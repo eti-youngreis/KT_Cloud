@@ -2,12 +2,13 @@ import sqlite3
 import pandas as pd
 
 def load_ELT_album_length_downloads():
+    # Establish SQLite connection
+    conn = sqlite3.connect('C:\\Users\\User\\Desktop\\AlbumELT.db')
     try:
         # Step 1: Extract and Load
         print("Loading CSV files into SQLite...")
         
-        # Establish SQLite connection
-        conn = sqlite3.connect('D:\\b\\AlbumELT.db')
+
         
         # Load CSV files into SQLite tables
         pd.read_csv("D:\\csvFiles\\Album.csv").to_sql('albums', conn, if_exists='replace', index=False)

@@ -8,22 +8,22 @@ import sqlite3
 def load():
     # Step 1: Initialize Spark session
     spark = SparkSession.builder \
-        .appName("ETL Template with KT_DB") \
+        .appName("Employee Customer Satisfaction and Sales Daily ETL") \
         .getOrCreate()
 
     # Step 2: Establish SQLite connection using KT_DB
     # conn = KT_DB.connect('/path_to_sqlite.db')
-    conn = sqlite3.connect('KT_Cloud/Storage/ETLS/etl_db.db')
+    conn = sqlite3.connect('KT_Cloud/Storage/ETLS/db/employee_customer_satisfaction.db')
     try:
         # EXTRACT (Loading CSVs from S3 or local storage)
         # -----------------------------------------------
         # Load the main table (e.g., customers, tracks, albums)
-        employees = spark.read.csv("KT_Cloud/Storage/ETLS/csv files/Employee.csv", header=True, inferSchema=True)
-
+        employees = spark.read.csv("D:/boto3 project/csv files/Employee.csv", header=True, inferSchema=True)
+        
         # Load other related tables
-        customers = spark.read.csv("KT_Cloud/Storage/ETLS/csv files/Customer.csv", header=True, inferSchema=True)
-        invoices = spark.read.csv("KT_Cloud/Storage/ETLS/csv files/Invoice.csv", header=True, inferSchema=True)
-        invoice_line = spark.read.csv("KT_Cloud/Storage/ETLS/csv files/InvoiceLine.csv", header=True, inferSchema=True)
+        customers = spark.read.csv("D:/boto3 project/csv files/Customer.csv", header=True, inferSchema=True)
+        invoices = spark.read.csv("D:/boto3 project/csv files/Invoice.csv", header=True, inferSchema=True)
+        invoice_line = spark.read.csv("D:/boto3 project/csv files/InvoiceLine.csv", header=True, inferSchema=True)
 
         employees = employees.withColumnRenamed("FirstName", "EmployeeFirstName")\
                         .withColumnRenamed("LastName", "EmployeeLastName")
@@ -37,7 +37,7 @@ def load():
 
         customer_satisfaction_df = repeat_customers.groupBy("SupportRepId") \
             .agg(F.countDistinct("CustomerID").alias("CustomerSatisfaction"))
-        customer_satisfaction_df.show()
+
         
         # Join Invoices with InvoiceLines to calculate Average Sales Value
         sales_data = invoices.join(invoice_line, "InvoiceID", "inner")
@@ -45,8 +45,6 @@ def load():
         avg_sales = sales_data.groupBy("InvoiceID", "Total") \
             .agg(F.sum("Quantity").alias("QuantitySum")) \
             .withColumn("AverageSalesValue", F.col("Total") / F.col("QuantitySum"))
-
-        avg_sales.show()
         
         employees_data = employees.join(customer_satisfaction_df, employees["EmployeeId"] == customer_satisfaction_df["SupportRepId"], "left")\
             .select("EmployeeId", "EmployeeLastName", "EmployeeFirstName", "CustomerSatisfaction")
@@ -54,8 +52,7 @@ def load():
         employees_customer_satisfaction = employees_data\
             .join(customers, employees_data["EmployeeId"] == customers["SupportRepId"], "left")\
                 .select("EmployeeId", "EmployeeLastName", "EmployeeFirstName", "CustomerId", "CustomerSatisfaction")
-        employees_customer_satisfaction.show()
-    
+
         final_df = employees_customer_satisfaction.join(invoices.alias("inv"), employees_customer_satisfaction["CustomerId"] == invoices["CustomerId"], "left") \
             .select("EmployeeId", "EmployeeLastName", "EmployeeFirstName", "CustomerSatisfaction", "inv.CustomerId", "InvoiceID")\
                 .join(avg_sales, "InvoiceID", "left")
@@ -65,7 +62,6 @@ def load():
         # window_spec = Window.orderBy(F.desc("RepeatCustomerCount"))
         # final_df = final_df.withColumn("rank", F.rank().over(window_spec))
 
-        final_df.show()
         # # Add Metadata
         final_df = final_df.withColumn("created_at", F.current_timestamp())\
                         .withColumn("updated_at", F.current_timestamp())\

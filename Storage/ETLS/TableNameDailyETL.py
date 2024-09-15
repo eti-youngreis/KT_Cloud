@@ -1,4 +1,4 @@
-from pyspark.sql import SparkSession
+הfrom pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.window import Window
 import KT_DB  # Assuming KT_DB is the library for SQLite operations
