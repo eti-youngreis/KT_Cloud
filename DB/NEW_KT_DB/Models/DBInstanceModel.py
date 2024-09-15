@@ -21,21 +21,6 @@ class DBInstanceModel:
         self._current_version_queue = deque([Node_SubSnapshot(parent=None, endpoint=self.endpoint)])
         self._last_node_of_current_version = self._current_version_queue[-1]
 
-    def create_snapshot(self, db_snapshot_identifier):
-        self._node_subSnapshot_name_to_id[db_snapshot_identifier] = self._last_node_of_current_version.id_snepshot
-        self._create_child_to_node(self._last_node_of_current_version)
-
-    def restore_version(self, db_snapshot_identifier):
-        if db_snapshot_identifier not in self._node_subSnapshot_name_to_id:
-            raise DbSnapshotIdentifierNotFoundError(f"Snapshot identifier '{db_snapshot_identifier}' not found.")
-
-        node_id = self._node_subSnapshot_name_to_id[db_snapshot_identifier]
-        snapshot = self._node_subSnapshot_dic.get(node_id)
-
-        if snapshot:
-            self._update_queue_to_current_version(snapshot)
-            self._create_child_to_node(snapshot)
-
     def _create_child_to_node(self, node):
         self._last_node_of_current_version = node.create_child(self.endpoint)
         self._current_version_queue.append(self._last_node_of_current_version)
