@@ -110,3 +110,14 @@ class ObjectManager:
             dict[key] = value
     
         return dict
+
+    def is_exists(self, object):
+        table_name = convert_object_name_to_management_table_name(object.object_name)
+        try:
+            query=f'select * from {table_name} where {object.pk_column} = {object.pk_value}'
+            result=self.db_manager.execute_query_with_single_result(query)
+            if result is None:
+                return False
+            return True 
+        except sqlite3.OperationalError as e:
+            return False 
