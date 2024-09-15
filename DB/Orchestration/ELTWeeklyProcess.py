@@ -9,9 +9,9 @@ from DB.ELTS.BestSellingAlbumsandTrackPopularitybyCountryWeeklyELT import load a
 from DB.ELTS.GenrePopularityAndAverageSalesWeeklyELT import load_genre_popularity_and_average_sales
 from DB.ELTS.SalesTrendsWeeklyELT import load_sales_trends
 from DB.ELTS.popularityTrackByRegionWeekly import load_popularity_track
-from DB.ELTS.‏‏EmployeeCustomerSatisfactionAndAverageSalesValueWeeklyELT import load as load_weekly_employee_customer_satisfaction_sales
+from DB.ELTS.EmployeeCustomerSatisfactionAndAverageSalesValueWeeklyELT import load as load_weekly_employee_customer_satisfaction_sales
 from DB.ELTS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyWeeklyELT import load as load_weekly_artist_repeat_customer_analysis
-
+from DB.ELTS.CustomerLoyaltyAndInvoiceSizeWeeklyELT import load as load_customer_loyalty
 # from ELTS import X
 
 # Define your Python functions here
@@ -39,6 +39,8 @@ def load_employee_customer_satisfaction_sales():
 def load_artist_repeat_customer_analysis():
     load_weekly_artist_repeat_customer_analysis()
     
+def load_customer_loyalty():
+    load_customer_loyalty()
 # More functions for other tasks as necessary
 
 # Define default arguments for the DAG
@@ -96,7 +98,10 @@ with DAG(
         task_id='artist_repeat_customer_analysis',
         python_callable=load_artist_repeat_customer_analysis,
     )
-
+    customer_loyalty = PythonOperator(
+            task_id='customer_loyalty_and_invoice_size',
+            python_callable=load_customer_loyalty,
+    )
     # Dependent tasks that run after Table 1, 3, 5
     task_2 = PythonOperator(
         task_id='run_table_2',

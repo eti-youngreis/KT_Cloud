@@ -4,7 +4,7 @@ from datetime import datetime
 
 from DB.ETLS.EmployeeCustomerSatisfactionAndAverageSalesWeeklyETL import load as load_weekly_employee_customer_satisfaction_and_averagesales_value
 from DB.ETLS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyWeeklyETL import load as load_weekly_artist_repeat_customer_analysis
-
+from DB.ETLS.CustomerLoyaltyAndInvoiceSizeWeeklyETL import load as load_customer_loyalty
 # from ETLS import X
 
 
@@ -26,6 +26,9 @@ def  load_track_play_count():
 
 def  load_best_selling_albums():
     load_tk_2()
+
+def load_customer_loyalty():
+    load_customer_loyalty()
     
 def  load_employee_customer_satisfaction_and_averagesales_value():
     load_weekly_employee_customer_satisfaction_and_averagesales_value()
@@ -85,7 +88,12 @@ with DAG(
         task_id='artist_repeat_customer_analysis',
         python_callable=load_artist_repeat_customer_analysis,
     )
-
+    
+    customer_loyalty = PythonOperator(
+            task_id='customer_loyalty_and_invoice_size',
+            python_callable=load_customer_loyalty,
+    )
+    
     # Dependent tasks that run after Table 1, 3, 5
     task_2 = PythonOperator(
         task_id="run_table_2",

@@ -6,8 +6,9 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from DB.ELTS.TrackPlayCountandRevenueContributionDailyELT import incremental_load as incrementel_load_tk_1
 from DB.ELTS.BestSellingAlbumsandTrackPopularitybyCountryDailyELT import incremental_load as incrementel_load_tk_2
-from DB.ELTS.‏‏‏‏EmployeeCustomerSatisfactionAndAverageSalesValueDailyELT import load as incrementel_load_employee_customer_satisfaction_sales
-from DB.ELTS.‏‏‏‏‏‏RepeatCustomerAnalysisByArtistAndPurchaseFrequencyDailyELT import load as incrementel_load_artist_repeat_customer_analysis
+from DB.ELTS.EmployeeCustomerSatisfactionAndAverageSalesValueDailyELT import load as incrementel_load_employee_customer_satisfaction_sales
+from DB.ELTS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyDailyELT import load as incrementel_load_artist_repeat_customer_analysis
+from DB.ELTS.CustomerLoyaltyAndInvoiceSizeDailyELT import load as incremental_customers_loyalty_load
 # import DB.ELTS.TrackPlayCountandRevenueContributionDailyELT
 # from ELTS import X
 
@@ -35,6 +36,9 @@ def  load_employee_customer_satisfaction_sales():
 
 def  load_artist_repeat_customer_analysis():
     incrementel_load_artist_repeat_customer_analysis()
+
+def load_customer_loyalty_and_invoive_size():
+    incremental_customers_loyalty_load()
     
 # More functions for other tasks as necessary
 
@@ -87,6 +91,11 @@ with DAG(
     artist_repeat_customer_analysis = PythonOperator(
         task_id='artist_repeat_customer_analysis',
         python_callable=load_artist_repeat_customer_analysis,
+    )
+
+    customer_loyality = PythonOperator(
+        task_id = 'customer_loyalty_and_invoicee_size',
+        python_callable = load_customer_loyalty_and_invoive_size,
     )
 
     # Dependent tasks that run after Table 1, 3, 5
