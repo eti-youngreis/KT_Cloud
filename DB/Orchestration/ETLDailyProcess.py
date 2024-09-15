@@ -8,6 +8,7 @@ from DB.ETLS.TrackPlayCountandRevenueContributionDailyETL import incremental_loa
 from DB.ETLS.BestSellingAlbumsandTrackPopularitybyCountryDailyETL import incremental_load as incrementel_load_tk_2
 from DB.ETLS.EmployeeCustomerSatisfactionAndAverageSalesValueDailyETL import incremental_load as load_daily_employee_customer_satisfaction_and_averagesales_value
 from DB.ETLS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyDailyETL import incremental_load as load_daily_artist_repeat_customer_analysis
+from DB.ETLS.CustomersInvoicesAvgDailyETL import load_customer_invoices_count_etl_increment
 
 from DB.ETLS import AlbumPopularityDailyETL, PopularGenresDailyETL
 # from ETLS import X
@@ -35,6 +36,9 @@ def  load_employee_customer_satisfaction_and_averagesales_value():
 
 def  load_artist_repeat_customer_analysis():
     load_daily_artist_repeat_customer_analysis()
+
+def load_customer_invoices_avg_of_month():
+    load_customer_invoices_count_etl_increment()
     
 def run_album_popularity_and_revenue():
     AlbumPopularityDailyETL.album_popularity_incremental_etl()
@@ -103,6 +107,11 @@ with DAG(
     task_genres_popularity = PythonOperator(
         task_id = 'run_genres_popularity',
         python_callable = run_genres_popularity
+    )
+
+    customer_invoices_avg_of_month = PythonOperator(
+        task_id='customer_invoices_avg_of_month',
+        python_callable=load_customer_invoices_avg_of_month,
     )
 
     # Dependent tasks that run after Table 1, 3, 5
