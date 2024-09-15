@@ -30,9 +30,9 @@ class ObjectManager:
 
 
     # rachel-8511, Riki7649255
-    def get_object_from_management_table(self, object_id: int) -> Dict[str, Any]:
+    def get_object_from_management_table(self, columns = ["*"], object_id: int) -> Dict[str, Any]:
         '''Retrieve an object from the database.'''
-        result = self.db_manager.select_and_return_records_from_table(self.table_name, ['type_object', 'metadata'], f'object_id = {object_id}')
+        result = self.db_manager.select_and_return_records_from_table(self.table_name, columns, criteria= f'object_id = {object_id}')
         if result:
             return result[object_id]
         else:

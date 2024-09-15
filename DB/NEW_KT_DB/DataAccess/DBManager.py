@@ -113,7 +113,8 @@ class DBManager:
             raise Exception(f'Error selecting from {table_name}: {e}')
     
     def is_exists_in_table(self, table_name:str, criteria:str):
-        return self.select_and_return_records_from_table(table_name, criteria=criteria) is not None
+        """check if rows exists in table"""
+        return self.select_and_return_records_from_table(table_name, criteria=criteria) != {}
         
 
     # rachel-8511, ShaniStrassProg, Riki7649255
