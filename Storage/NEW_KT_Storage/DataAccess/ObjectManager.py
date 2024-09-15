@@ -5,6 +5,7 @@ from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 from StorageManager import StorageManager
 
 class ObjectManager:
+
     def __init__(self, db_file: str,type, storage_path=None):
         """Initialize ObjectManager with the database connection."""
         self.object_manager = ObjectManager(db_file)
@@ -39,6 +40,7 @@ class ObjectManager:
         
         # if criteria not sent- use PK for deletion
         if criteria == 'default':
+          
             criteria = f'{object.pk_column} = {object.pk_value}'
 
         table_name = self.object_manager.convert_object_name_to_management_table_name(self.object_name)
@@ -47,6 +49,7 @@ class ObjectManager:
 
     def get_from_memory(self, table_name, object_id):
         self.object_manager.get_object_from_management_table(table_name,object_id)
+
 
     def get_data_from_memory_db(self, table_name):
         self.object_manager.get_data_from_memory(table_name=table_name)
