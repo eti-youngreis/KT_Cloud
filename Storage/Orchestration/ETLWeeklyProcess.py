@@ -23,6 +23,8 @@ from ETLS.CustomerLifetimeValuebyRegionWeeklyETL import customer_ltvWeeklyETL
 from ETLS.PopularGenresbyCustomerSegmentWeeklyETL import load_popular_genres_by_city_ETL
 from ELTS import SalesTrendsWeeklyELT
 from ELTS import GenreSalseWeeklyELT
+from ETLS.EmployeeCustomerSatisfactionWeeklyETL import load as load_employee_customer_satisfaction_sales
+from ETLS.RepeatCustomerAnalysisWeeklyETL import load as load_repeat_customer_analysis
 # from ETLS import X
 
 
@@ -70,6 +72,12 @@ def run_employees_sales_customer_interactions():
 
 def run_customer_invoices_count_etl():
     load_customer_invoices_count_etl()
+    
+def run_employee_customer_satisfaction_sales_weekly():
+    load_employee_customer_satisfaction_sales()
+
+def run_repeat_customer_analysis_weekly():
+    load_repeat_customer_analysis()
 
 # More functions for other tasks as necessary
 
@@ -154,6 +162,16 @@ with DAG(
     task_sales_trends_weekly = PythonOperator(
         task_id="run_sales_trends_weekly",
         python_callable=run_sales_trends_weekly,
+    )
+    
+    task_employee_customer_satisfaction_sales = PythonOperator(
+        task_id="run_employee_customer_satisfaction_sales",
+        python_callable=run_employee_customer_satisfaction_sales_weekly,
+    )
+    
+    task_repeat_customer_analysis = PythonOperator(
+        task_id="run_repeat_customer_analysis",
+        python_callable=run_repeat_customer_analysis_weekly,
     )
 
     # Define dependencies
