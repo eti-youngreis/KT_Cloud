@@ -1,11 +1,11 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
-# from ELTS import X
+from Storage.ELTS.CustomerAverageSpendWeeklyELT import load_customers_average_spend_lifetime_value_elt
 
 # Define your Python functions here
-def run_table_1():
-    # Code to generate Table 1
+def run_CustomerAverageSpendWeeklyELT():
+    load_customers_average_spend_lifetime_value_elt()
     pass
 
 def run_table_2():
@@ -39,8 +39,8 @@ with DAG(
 
     # Task 1 (Independent tasks that run first)
     task_1 = PythonOperator(
-        task_id='run_table_1',
-        python_callable=run_table_1,
+        task_id='run_CustomerAverageSpendWeeklyELT',
+        python_callable=run_CustomerAverageSpendWeeklyELT,
     )
     
     task_3 = PythonOperator(

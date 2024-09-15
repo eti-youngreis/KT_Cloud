@@ -1,16 +1,14 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
-# from ETLS import X
-
+from Storage.ETLS.CustomerAverageSpendWeeklyETL import load
+from Storage.ETLS.SalesRetentionByEmployeeWeeklyETL import load
 # Define your Python functions here
-def run_table_1():
-    # Code to generate Table 1
-    pass
+def run_CustomerAverageSpendWeeklyETL():
+    load()
 
-def run_table_2():
-    # Code to generate Table 2
-    pass
+def run_SalesRetentionByEmployeeWeeklyETL():
+    load()
 
 def run_table_3():
     # Code to generate Table 3
@@ -38,14 +36,14 @@ with DAG(
 ) as dag:
 
     # Task 1 (Independent tasks that run first)
-    task_1 = PythonOperator(
-        task_id='run_table_1',
-        python_callable=run_table_1,
+    CustomerAverageSpendWeeklyETL = PythonOperator(
+        task_id='run_CustomerAverageSpendWeeklyETL',
+        python_callable=run_CustomerAverageSpendWeeklyETL,
     )
     
-    task_3 = PythonOperator(
-        task_id='run_table_3',
-        python_callable=run_table_3,
+    SalesRetentionByEmployeeWeeklyETL = PythonOperator(
+        task_id='run_SalesRetentionByEmployeeWeeklyETL',
+        python_callable=run_SalesRetentionByEmployeeWeeklyETL,
     )
     
     # Add more independent tasks here
