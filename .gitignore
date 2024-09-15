@@ -5,3 +5,4 @@
 *.db
 ".idea/workspace.xml" 
 *.pyc
+*.db
