@@ -13,9 +13,11 @@ from Storage.ETLS import GenreSalesWeeklyETL
 
 from DB.ETLS.EmployeeCustomerSatisfactionAndAverageSalesWeeklyETL import load as load_weekly_employee_customer_satisfaction_and_averagesales_value
 from DB.ETLS.RepeatCustomerAnalysisByArtistAndPurchaseFrequencyWeeklyETL import load as load_weekly_artist_repeat_customer_analysis
+
+from DB.ETLS.TrackLengthandDownloadFrequencyWeeklyETL import load_Track_Length_and_Download_Frequency
+from DB.ETLS.TrackPopularityWeeklyETL import load_Track_Popularity
 from DB.ETLS.CustomersInvoicesAvgWeeklyETL import load_customer_invoices_count_etl
 from DB.ETLS import AlbumPopularityWeeklyETL, PopularGenresWeeklyETL
-# from ETLS import X
 from ..ETLS.AlbumTotalTimeDownloadsWeekly import load
 from ..ETLS.RevenuePerCustomerGenreWeekly import load as revenue_load
 
@@ -45,8 +47,16 @@ def  load_employee_customer_satisfaction_and_averagesales_value():
 def  load_artist_repeat_customer_analysis():
     load_weekly_artist_repeat_customer_analysis()
 
+def load_Track_Popularity_etl():
+    load_Track_Popularity()
+
+
+def load_Track_Length_and_Download_Frequency_etl():
+    load_Track_Length_and_Download_Frequency()    
+
 def load_customer_invoices_avg_of_month():
     load_customer_invoices_count_etl()
+
     
 
 def run_table_4():
@@ -153,6 +163,15 @@ with DAG(
     customer_invoices_avg_of_month = PythonOperator(
         task_id='customer_invoices_avg_of_month',
         python_callable=load_customer_invoices_avg_of_month,
+    )
+
+    track_Popularity_task = PythonOperator(
+        task_id='load_Track_Popularity_etl',
+        python_callable=load_Track_Popularity_etl,
+    )
+    track_Length_and_Download_Frequency_task = PythonOperator(
+        task_id='load_Track_Length_and_Download_Frequency_etl',
+        python_callable=load_Track_Length_and_Download_Frequency_etl,
     )
 
     # Dependent tasks that run after Table 1, 3, 5

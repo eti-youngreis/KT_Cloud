@@ -10,6 +10,7 @@ os.environ["SPARK_HOME"] = r"C:\spark-3.5.2-bin-hadoop3\spark-3.5.2-bin-hadoop3"
 os.environ["PYSPARK_PYTHON"] = r"C:\Users\רוט\AppData\Local\Programs\Python\Python312\python.exe"
 os.environ["PATH"] += f";{os.environ['JAVA_HOME']}\\bin"
 
+
 def load_Track_Length_and_Download_Frequency():
     # Step 1: Initialize Spark session
     spark = SparkSession.builder.appName(
@@ -38,19 +39,19 @@ def load_Track_Length_and_Download_Frequency():
         # Join tracks and albums DataFrames, then calculate average track length
         tracks_albums_df = tracks_df.join(albums_df, tracks_df.AlbumId == albums_df.AlbumId) \
             .drop(albums_df.AlbumId)  # Drop duplicate AlbumId column
-        
+
         tracks_albums_df = tracks_albums_df \
             .withColumn("AverageTrackLength", F.avg("Milliseconds").over(window_album))
 
         # Join tracks and invoice lines DataFrames, then calculate download frequency
         track_downloads_df = tracks_df.join(invoice_lines_df, "TrackId") \
             .drop(invoice_lines_df.TrackId)
-        
+
         window_track = Window.partitionBy("TrackId")
 
         # Calculate Download Quantity using Window
         track_downloads_df = track_downloads_df \
-        .withColumn("DownloadFrequency", F.sum("Quantity").over(window_track)) \
+            .withColumn("DownloadFrequency", F.sum("Quantity").over(window_track)) \
 
         # track_downloads_df = track_downloads_df \
         #     .withColumn("DownloadFrequency", F.count("InvoiceLineId").over(window_track))
@@ -59,13 +60,15 @@ def load_Track_Length_and_Download_Frequency():
         print("track_downloads_df.columns:")
         print(track_downloads_df.columns)
         # שמירה על עמודות ספציפיות בלבד
-        tracks_albums_df = tracks_albums_df.select("AlbumId","AverageTrackLength")
-        track_downloads_df = track_downloads_df.select("TrackId", "DownloadFrequency")
+        tracks_albums_df = tracks_albums_df.select(
+            "AlbumId", "AverageTrackLength")
+        track_downloads_df = track_downloads_df.select(
+            "TrackId", "DownloadFrequency")
         # Combine final data and add metadata columns
         final_data = tracks_df \
             .join(tracks_albums_df, "AlbumId", "left") \
             .join(track_downloads_df, "TrackId", "left")
-        print("final_data.columns:")    
+        print("final_data.columns:")
         print(final_data.columns)
         # Select only relevant columns
         final_data = final_data.select(
@@ -129,4 +132,4 @@ def load_Track_Length_and_Download_Frequency():
 
 
 # Execute the function
-load_Track_Length_and_Download_Frequency()
+# load_Track_Length_and_Download_Frequency()
