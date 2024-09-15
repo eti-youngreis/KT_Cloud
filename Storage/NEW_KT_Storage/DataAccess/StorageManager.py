@@ -3,7 +3,7 @@ import shutil
 
 
 class StorageManager:
-    def __init__(self, base_directory: str):
+    def __init__(self, base_directory: str="KT_Cloud\\server"):        
         """
         Initialize StorageManager with a base directory for operations.
         :param base_directory: Base directory to manage files and directories within.
