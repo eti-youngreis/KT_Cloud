@@ -19,11 +19,13 @@ class DBInstance:
         self.status = 'available'
         self.created_time = datetime.now()
         self.endpoint = os.path.join(DBInstance.BASE_PATH, self.db_instance_identifier)
+        if not os.path.exists(DBInstance.BASE_PATH):
+            os.mkdir(DBInstance.BASE_PATH)
         if not os.path.exists(self.endpoint):
             os.mkdir(self.endpoint)
         self.databases = kwargs.get('databases', {})
         self.pk_column = kwargs.get('pk_column', 'db_instance_id')
-        self.pk_value = kwargs.get('pk_value', None)
+        self.pk_value = kwargs.get('pk_value', self.db_instance_identifier)
     
     def to_dict(self):
         """Retrieve the metadata of the DB instance as a dictionary."""

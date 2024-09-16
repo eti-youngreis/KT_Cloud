@@ -3,7 +3,7 @@ from typing import Optional, Dict
 from Service.Classes.DBInstanceService import DBInstanceService
 
 
-class DBinstanceController:
+class DBInstanceController:
     def __init__(self, service: DBInstanceService):
         self.service = service
 
