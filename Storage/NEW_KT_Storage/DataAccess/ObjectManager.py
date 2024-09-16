@@ -46,9 +46,6 @@ class ObjectManager:
         return self.object_manager.get_object_from_management_table(table_name, object_id)
 
 
-    # def get_data_from_memory_db(self):
-    #     table_name = self.object_manager.convert_object_name_to_management_table_name(self.object_name)
-    #     return list(self.object_manager.get_all_data_from_table(table_name=table_name))
     def get_data_from_memory_db(self):
         table_name = self.object_manager.convert_object_name_to_management_table_name(self.object_name)
         data_tuple = self.object_manager.get_all_data_from_table(table_name=table_name)
@@ -67,5 +64,5 @@ class ObjectManager:
 
     def get_all_from_memory(self,criteria):
         table_name = self.object_manager.convert_object_name_to_management_table_name(self.object_name)
-        self.object_manager.get_objects_from_management_table_by_criteria(table_name, columns=["*"], criteria=criteria)
+        return self.object_manager.get_objects_from_management_table_by_criteria(table_name, columns=["*"], criteria=criteria)
 
