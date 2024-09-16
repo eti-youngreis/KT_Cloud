@@ -40,7 +40,7 @@ class DBClusterService(DBO):
         # סגירת חיבור למסד הנתונים
         conn.close()
         #""""""""""""""
-        snapshot_db_path = f"../snapshot/{db_snapshot.db_name}_{current_timestamp}.db"
+        snapshot_db_path = f"../snapshot/{db_name}_{current_timestamp}.db"
 
         self.db_snapshot = DBSnapshotModel(db_name, creation_date = current_timestamp, owner_alias = owner_alias,
                                       description = description, progress = progress, url_snapshot = snapshot_db_path)
