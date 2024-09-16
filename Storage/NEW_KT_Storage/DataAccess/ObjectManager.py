@@ -65,7 +65,7 @@ class ObjectManager:
 
         return dict
 
-    # def get_all_from_memory(self,criteria):
-    #     table_name = self.object_manager.convert_object_name_to_management_table_name(self.object_name)
-    #     self.object_manager.get_objects_from_management_table_by_criteria(table_name,columns=["*"],criteria=criteria)
+    def get_all_from_memory(self,criteria):
+        table_name = self.object_manager.convert_object_name_to_management_table_name(self.object_name)
+        self.object_manager.get_objects_from_management_table_by_criteria(table_name, columns=["*"], criteria=criteria)
 
