@@ -34,7 +34,7 @@ class ObjectManager:
             # list
             if isinstance(attr, list):
                 # list of objects
-                if attr[0].__class__.__module__ != 'builtins':
+                if not isinstance(attr[0], (int, float, str, bool)):
                     ids = []
                     for sub_obj in attr:
                         self._insert_object_to_management_table(sub_obj)
@@ -45,7 +45,7 @@ class ObjectManager:
                     values.append(str(attr))
                     
             # if single attribute is an object
-            elif attr.__class__.__module__ != 'builtins':
+            elif not isinstance(attr, (int, float, str, bool)):
                 self._insert_object_to_management_table(table_name, attr)
                 values.append(getattr(attr, attr.pk_column))
             # single primitive attribute
