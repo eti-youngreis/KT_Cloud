@@ -1,7 +1,10 @@
 from typing import Dict, Any
 import json
 import sqlite3
-from DBManager import DBManager
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from DataAccess.DBManager import DBManager
 
 class ObjectManager:
     def __init__(self, db_file: str):
@@ -12,7 +15,7 @@ class ObjectManager:
     # for internal use only:
 
     # Riki7649255 based on rachel-8511
-    def create_management_table(self, table_name, table_structure='object_id INTEGER PRIMARY KEY AUTOINCREMENT,type_object TEXT NOT NULL,metadata TEXT NOT NULL')
+    def create_management_table(self, table_name, table_structure):
         self.db_manager.create_table(table_name, table_structure)
 
     
@@ -42,13 +45,13 @@ class ObjectManager:
         self.db_manager.delete_data_from_table(table_name, criteria)
 
 
-    # rachel-8511, ShaniStrassProg is it needed?
+    # # rachel-8511, ShaniStrassProg is it needed?
     # def get_all_objects(self) -> Dict[int, Dict[str, Any]]:
     #     '''Retrieve all objects from the database.'''
     #     return self.db_manager.select(self.table_name, ['object_id', 'type_object', 'metadata'])
 
 
-    # rachel-8511 is it needed?
+    # # rachel-8511 is it needed?
     # def describe_table(self) -> Dict[str, str]:
     #     '''Describe the schema of the table.'''
     #     return self.db_manager.describe(self.table_name)
@@ -58,9 +61,11 @@ class ObjectManager:
         return f'mng_{object_name}s'
 
 
-    def is_management_table_exist(table_name):
-        # check if table exists using single result query
-        return db_manager.execute_query_with_single_result(f'desc table {table_name}')
+    
+    def is_management_table_exist(self, table_name):
+        query = f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}'"
+        result = self.db_manager.execute_query_with_single_result(query)
+        return result is not None
 
 
     # for outer use:

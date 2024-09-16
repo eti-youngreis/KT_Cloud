@@ -8,25 +8,22 @@ class DBManager:
         '''Initialize the database connection and create tables if they do not exist.'''
         self.connection = sqlite3.connect(db_file)
 
-
     # rachel-8511, ShaniStrassProg
     def close(self):
-    '''Close the database connection.'''
-    self.connection.close()
-
+        '''Close the database connection.'''
+        self.connection.close()
 
     # saraNoigershel
     def execute_query_with_multiple_results(self, query: str) -> Optional[List[Tuple]]:
-    '''Execute a given query and return the results.'''
-    try:
-        c = self.connection.cursor()
-        c.execute(query)
-        results = c.fetchall()
-        # self.connection.commit() ???
-        return results if results else None
-    except OperationalError as e:
-        raise Exception(f'Error executing query {query}: {e}')
-
+        '''Execute a given query and return the results.'''
+        try:
+            c = self.connection.cursor()
+            c.execute(query)
+            results = c.fetchall()
+            # self.connection.commit() ???
+            return results if results else None
+        except OperationalError as e:
+            raise Exception(f'Error executing query {query}: {e}')
 
     # ShaniStrassProg 
     def execute_query_with_single_result(self, query: str) -> Optional[Tuple]:
@@ -40,7 +37,6 @@ class DBManager:
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
 
-
     # Riki7649255
     def execute_query_without_results(self, query: str):
         '''Execute a given query without waiting for any result.'''
@@ -50,49 +46,54 @@ class DBManager:
             self.connection.commit()
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
-    
 
     # Yael, Riki7649255
     def create_table(self, table_name, table_structure):
         '''create a table in a given db by given table_structure'''
         create_statement = f'''CREATE TABLE IF NOT EXISTS {table_name} ({table_structure})'''
-        execute_query_without_results(create_statement)
-
+        self.execute_query_without_results(create_statement)
 
     # Riki7649255  based on rachel-8511, ShaniStrassProg 
     def insert_data_into_table(self, table_name, data):
         insert_statement = f'''INSERT INTO {table_name} VALUES {data}'''
-        execute_query_without_results(insert_statement)
+        self.execute_query_without_results(insert_statement)
 
+    # # Riki7649255 based on rachel-8511, Shani
+    # def update_records_in_table(self, table_name: str, updates: Dict[str, Any], criteria: str) -> None:
+    #     '''Update records in the specified table based on criteria.'''
+        
+    #     # add documentation here
+    #     set_clause = ', '.join([f'{k} = ?' for k in updates.keys()])
+    #     values = list(updates.values())
+        
+    #     update_statement = f'''
+    #         UPDATE {table_name}
+    #         SET {set_clause}
+    #         WHERE {criteria}
+    #     '''
+        
+    #     self.execute_query_without_results(update_statement)
 
-    # Riki7649255 based on rachel-8511, Shani
     def update_records_in_table(self, table_name: str, updates: Dict[str, Any], criteria: str) -> None:
-    '''Update records in the specified table based on criteria.'''
-    
-    # add documentation here
-    set_clause = ', '.join([f'{k} = ?' for k in updates.keys()])
-    values = list(updates.values())
-    
-    update_statement = f'''
-        UPDATE {table_name}
-        SET {set_clause}
-        WHERE {criteria}
-    '''
-    
-    execute_query_without_results(update_statement)
-
+        '''Update records in the specified table based on criteria.'''
+        set_clause = '(' + ', '.join([f'{k}' for k in updates.keys()]) + ') = (' + ', '.join([f'"{v}"' for v in updates.values()]) + ')'
+        update_statement = f'''
+            UPDATE {table_name}
+            SET {set_clause}
+            WHERE {criteria}
+        '''
+        self.execute_query_without_results(update_statement)
 
     # Riki7649255 based on rachel-8511
     def delete_data_from_table(self, table_name: str, criteria: str) -> None:
-    '''Delete a record from the specified table based on criteria.'''
-    
-    delete_statement = f'''
-        DELETE FROM {table_name}
-        WHERE {criteria}
-    ''')
-    
-    execute_query_without_results(delete_statement)
-
+        '''Delete a record from the specified table based on criteria.'''
+        
+        delete_statement = f'''
+            DELETE FROM {table_name}
+            WHERE {criteria}
+        '''
+        
+        self.execute_query_without_results(delete_statement)
 
     # rachel-8511, Riki7649255
     def select_and_return_records_from_table(self, table_name: str, columns: List[str] = ['*'], criteria: str = '') -> Dict[int, Dict[str, Any]]:
@@ -109,23 +110,21 @@ class DBManager:
         if criteria:
             query += f' WHERE {criteria}'
         try:
-            results = execute_query_with_multiple_results(query)
+            results = self.execute_query_with_multiple_results(query)
             return {result[0]: dict(zip(columns, result[1:])) for result in results}
         except OperationalError as e:
             raise Exception(f'Error selecting from {table_name}: {e}')
-        
 
     # rachel-8511, ShaniStrassProg, Riki7649255
     def describe_table(self, table_name: str) -> Dict[str, str]:
         '''Describe table structure.'''
         try:
             desc_statement = f'PRAGMA table_info({table_name})'
-            columns = execute_query_with_multiple_results(desc_statement)
+            columns = self.execute_query_with_multiple_results(desc_statement)
             return {col[1]: col[2] for col in columns}
         except OperationalError as e:
             raise Exception(f'Error describing table {table_name}: {e}')
-    
-    
+
     # ShaniStrassProg
     # should be in ObjectManager and send the query to one of the execute_query functions
     # def is_json_column_contains_key_and_value(self, table_name: str, key: str, value: str) -> bool:
@@ -144,7 +143,6 @@ class DBManager:
     #         print(f'Error: {e}')
     #         return False
 
-
     # Yael, ShaniStrassProg
     # should be in ObjectManager and send the query to one of the execute_query functions
     # def is_identifier_exist(self, table_name: str, value: str) -> bool:
@@ -158,7 +156,6 @@ class DBManager:
     #         return c.fetchone()[0] > 0
     #     except sqlite3.OperationalError as e:
     #         print(f'Error: {e}')
-    
 
     # sara-lea
     # should be in ObjectManager and send the query to one of the execute_query functions
