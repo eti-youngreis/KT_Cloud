@@ -83,7 +83,7 @@ class ObjectManager:
     #     return self.db_manager.describe(self.table_name)
 
 
-    def _convert_object_name_to_management_table_name(object_name):
+    def _convert_object_name_to_management_table_name(self, object_name):
         return f'mng_{object_name}s'
 
 
