@@ -32,6 +32,9 @@ class ObjectManager:
         values = tuple([str(getattr(object, column)) for column in columns])
         self.db_manager.insert_data_into_table(table_name, columns, values)
 
+    def _insert_dict_to_management_table(self, table_name, data):
+        self.db_manager.insert_data_into_table(table_name, data.keys(), data.values())
+        
     # Malki1844
     def _get_all_data_from_table(self, table_name):
         self.db_manager.get_all_data_from_table(table_name)
