@@ -64,42 +64,49 @@ class ObjectManager:
 
 
     # for outer use:
-    def save_in_memory(self, object):
+    def save_in_memory(self, object_name:str, metadata:Dict[str:Any], object_id:Optional[str] = None):
        
         # insert object info into management table mng_{object_name}s
         # for exmple: object db_instance will be saved in table mng_db_instances
-        table_name = convert_object_name_to_management_table_name(self.object_name)
+        table_name = self.convert_object_name_to_management_table_name(object_name)
 
-        if not is_management_table_exist(table_name):
-            create_management_table(table_name)
+        if not self.is_management_table_exist(table_name):
+            self.create_management_table(table_name)
+        
+        if object_id:
+            self.insert_object_to_management_table_with_str_id(table_name, object_id, metadata)
         
         insert_object_to_management_table(table_name, object)
 
     
-    def delete_from_memory(self,criteria='default'):
+    def delete_from_memory(self,object_name, criteria='default', object_id:Optional[str] =  None):
         
         # if criteria not sent- use PK for deletion
         if criteria == 'default':
             criteria = f'{self.pk_column} = {self.pk_value}'
         
-        table_name = convert_object_name_to_management_table_name(self.object_name)
+        table_name = self.convert_object_name_to_management_table_name(object_name)
         
         delete_data_from_table(table_name, criteria)
 
 
-    def update_in_memory(self, updates, criteria='default'):
+    def update_in_memory(self, object_name, updates, criteria='default', object_id:Optional[str] =  None):
         
         # if criteria not sent- use PK for deletion
         if criteria == 'default':
             criteria = f'{self.pk_column} = {self.pk_value}'
 
-        table_name = convert_object_name_to_management_table_name(self.object_name)
+        table_name = self.convert_object_name_to_management_table_name(object_name)
 
         update_object_in_management_table_by_criteria(table_name, updates, criteria)
 
-
-    def get_from_memory(self):
-        get_object_from_management_table(self.object_id)
+    
+    def get_from_memory(self, object_name, columns = ["*"], object_id = None, criteria = None):
+        """get records from memory by criteria or id"""
+        table_name = self.convert_object_name_to_management_table_name(object_name)
+        if object_id:
+            criteria = f'object_id = {object_id}'
+        self.get_objects_from_management_table_by_criteria(table_name, columns, criteria)
 
 
     def convert_object_attributes_to_dictionary(**kwargs):
