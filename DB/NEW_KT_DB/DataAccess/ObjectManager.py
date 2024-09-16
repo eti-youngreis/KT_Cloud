@@ -1,7 +1,7 @@
 from typing import Dict, Any
 import json
 import sqlite3
-from DBManager import DBManager
+from .DBManager import DBManager
 
 class ObjectManager:
     def __init__(self, db_file: str):
@@ -12,7 +12,7 @@ class ObjectManager:
     # for internal use only:
 
     # Riki7649255 based on rachel-8511
-    def create_management_table(self, table_name, table_structure='object_id INTEGER PRIMARY KEY AUTOINCREMENT,type_object TEXT NOT NULL,metadata TEXT NOT NULL')
+    def create_management_table(self, table_name, table_structure='object_id INTEGER PRIMARY KEY AUTOINCREMENT,type_object TEXT NOT NULL,metadata TEXT NOT NULL'):
         self.db_manager.create_table(table_name, table_structure)
 
     
@@ -27,11 +27,11 @@ class ObjectManager:
 
 
     # rachel-8511, Riki7649255
-    def get_object_from_management_table(self, object_id: int) -> Dict[str, Any]:
+    def get_object_from_management_table(self, pk_col, table_name, object_id: int) -> Dict[str, Any]:
         '''Retrieve an object from the database.'''
-        result = self.db_manager.select_and_return_records_from_table(self.table_name, ['type_object', 'metadata'], f'object_id = {object_id}')
+        result = self.db_manager.select_and_return_records_from_table(table_name=table_name, criteria=f'{pk_col} = \'{object_id}\'')
         if result:
-            return result[object_id]
+            return result
         else:
             raise FileNotFoundError(f'Object with ID {object_id} not found.')
 
@@ -68,7 +68,7 @@ class ObjectManager:
        
         # insert object info into management table mng_{object_name}s
         # for exmple: object db_instance will be saved in table mng_db_instances
-        table_name = convert_object_name_to_management_table_name(self.object_name)
+        table_name = ObjectManager.convert_object_name_to_management_table_name(self.object_name)
 
         if not is_management_table_exist(table_name):
             create_management_table(table_name)
@@ -82,7 +82,7 @@ class ObjectManager:
         if criteria == 'default':
             criteria = f'{self.pk_column} = {self.pk_value}'
         
-        table_name = convert_object_name_to_management_table_name(self.object_name)
+        table_name = ObjectManager.convert_object_name_to_management_table_name(self.object_name)
         
         delete_data_from_table(table_name, criteria)
 
@@ -93,7 +93,7 @@ class ObjectManager:
         if criteria == 'default':
             criteria = f'{self.pk_column} = {self.pk_value}'
 
-        table_name = convert_object_name_to_management_table_name(self.object_name)
+        table_name = ObjectManager.convert_object_name_to_management_table_name(self.object_name)
 
         update_object_in_management_table_by_criteria(table_name, updates, criteria)
 

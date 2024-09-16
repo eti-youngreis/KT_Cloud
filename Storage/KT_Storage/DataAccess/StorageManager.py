@@ -3,9 +3,9 @@ from typing import Dict, Any
 import os
 import aiofiles
 import shutil
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad
-import base6import
+from Cryptodome.Cipher import AES
+from Cryptodome.Util.Padding import pad
+# import base6import
 
 
 URL_SERVER = 's3/KT_cloud/Storage/server'
@@ -48,7 +48,7 @@ class StorageManager:
       file_path = os.path.join(self.server_path, bucket, versioned_file_name)
       
       if not os.path.exists(file_path):
-         return {'error': 'File not found'}
+         raise FileNotFoundError(f"File '{key}' with version '{version_id}' not found in bucket '{bucket}'.")
       
       if os.path.isdir(file_path):
          # If the object is a directory, return its metadata and list of contents
@@ -76,7 +76,7 @@ class StorageManager:
    def delete_by_name(self, bucket_name, version_id,  key) -> None:
       """Delete a specified file or directory by name in a bucket and version."""
       file_name, file_extension = os.path.splitext(key)
-      file_name_path = f"{file_name}{file_extension}"
+      file_name_path = f"{file_name}.v{version_id}{file_extension}"
       file_path = os.path.join(self.server_path, bucket_name, file_name_path)
       
       if os.path.exists(file_path):
