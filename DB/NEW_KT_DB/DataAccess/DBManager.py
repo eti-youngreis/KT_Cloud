@@ -8,21 +8,19 @@ class DBManager:
         '''Initialize the database connection and create tables if they do not exist.'''
         self.connection = sqlite3.connect(db_file)
 
-
-    # saraNoigershel
     def execute_query_with_multiple_results(self, query: str, params:Tuple = ()) -> Optional[List[Tuple]]:
         '''Execute a given query and return the results.'''
         try:
             c = self.connection.cursor()
             c.execute(query, params)
             results = c.fetchall()
-            self.connection.commit()
+            self.connection.commit() 
+
             return results if results else None
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
 
 
-    # ShaniStrassProg
     def execute_query_with_single_result(self, query: str, params:Tuple = ()) -> Optional[Tuple]:
         '''Execute a given query and return a single result.'''
         try:
@@ -31,12 +29,10 @@ class DBManager:
             result = c.fetchone()
             self.connection.commit()
             return result if result else None
-
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
 
 
-    # Riki7649255
     def execute_query_without_results(self, query: str, params:Tuple = ()):
         '''Execute a given query without waiting for any result.'''
         try:
@@ -47,19 +43,18 @@ class DBManager:
             raise Exception(f'Error executing query {query}: {e}')
 
 
-    # Yael, Riki7649255
+    
     def create_table(self, table_name, table_structure):
         '''create a table in a given db by given table_structure'''
         create_statement = f'''CREATE TABLE IF NOT EXISTS {table_name} ({table_structure})'''
         self.execute_query_without_results(create_statement)
 
-    # Riki7649255  based on rachel-8511, ShaniStrassProg
+
     def insert_data_into_table(self, table_name, data):
         insert_statement = f'''INSERT INTO {table_name} VALUES {data}'''
         self.execute_query_without_results(insert_statement)
 
 
-    # Riki7649255 based on rachel-8511, Shani
     def update_records_in_table(self, table_name: str, updates: Dict[str, Any], criteria: Optional[str]) -> None:
         '''Update records in the specified table based on criteria.'''
 
@@ -77,7 +72,6 @@ class DBManager:
         self.execute_query_without_results(update_statement, values)
 
 
-    # Riki7649255 based on rachel-8511
     def delete_data_from_table(self, table_name: str, criteria: str) -> None:
         '''Delete a record from the specified table based on criteria.'''
 
@@ -87,8 +81,7 @@ class DBManager:
         '''
 
         self.execute_query_without_results(delete_statement)
-
-    # Tem-M
+    
     def get_column_names_of_table(self, table_name):
         '''Get the columns from the specified table.'''
         try:
@@ -107,7 +100,7 @@ class DBManager:
             print(f"Error occurred while fetching data from table {table_name}: {e}")
             return []
 
-    # rachel-8511, Riki7649255
+    
     def select_and_return_records_from_table(self, table_name: str, columns: List[str] = ['*'], criteria: Optional[str] = None) -> Dict[int, Dict[str, Any]]:
         '''Select records from the specified table based on criteria.
         Args:
@@ -127,7 +120,6 @@ class DBManager:
             query += f' WHERE {criteria};'
         try:
             results = self.execute_query_with_multiple_results(query)
-            print(results)
             return {result[0]: dict(zip(cols if columns != ['*'] else cols[1:], result[1:])) for result in results}
         except OperationalError as e:
             raise Exception(f'Error selecting from {table_name}: {e}')
@@ -139,7 +131,6 @@ class DBManager:
         return self.select_and_return_records_from_table(table_name, criteria=criteria) != {}
 
 
-    # rachel-8511, ShaniStrassProg, Riki7649255
     def describe_table(self, table_name: str) -> Dict[str, str]:
         '''Describe table structure.'''
         try:
@@ -149,7 +140,6 @@ class DBManager:
         except OperationalError as e:
             raise Exception(f'Error describing table {table_name}: {e}')
 
-    # rachel-8511, ShaniStrassProg
     def close(self):
         '''Close the database connection.'''
         self.connection.close()
