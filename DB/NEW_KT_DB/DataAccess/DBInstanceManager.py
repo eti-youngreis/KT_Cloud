@@ -7,15 +7,7 @@ class DBInstanceManager:
     def __init__(self, db_file: str):
         self.object_manager = ObjectManager(db_file)
         self.table_name = 'db_instance'
-        self.create_table()
-
-    def create_table(self):
-        table_structure = '''
-            db_instance_identifier TEXT PRIMARY KEY,
-            metadata TEXT NOT NULL
-        '''
-        self.object_manager.create_management_table(
-            self.table_name, table_structure)
+      
 
     def createInMemoryDBInstance(self, db_instance):
         metadata = json.dumps(db_instance.to_dict())

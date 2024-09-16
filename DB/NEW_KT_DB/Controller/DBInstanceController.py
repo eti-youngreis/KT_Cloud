@@ -13,13 +13,13 @@ class DBInstanceController:
     def describe_db_instance(self, db_instance_identifier):
         return self.service.describe(db_instance_identifier)
 
-    def modify_db_instance(self, db_instance):
-        return self.service.modify(db_instance)
+    def modify_db_instance(self, db_instance_identifier):
+        return self.service.modify(db_instance_identifier)
 
     def get_db_instance(self, db_instance_identifier):
         return self.service.get(db_instance_identifier)
 
-        
+
     def stop_db_instance(self, db_instance_identifier):
         return self.service.stop(db_instance_identifier)
 

@@ -8,6 +8,7 @@ import sqlite3
 import re
 from typing import Deque, List, Tuple
 
+
 class DBInstanceService(DBO):
     def __init__(self, dal: DBInstanceManager):
         self.dal = dal
@@ -26,7 +27,6 @@ class DBInstanceService(DBO):
 
         return db_instance
 
-
     def delete(self, db_instance_identifier):
         '''Delete an existing DBInstance.'''
         # Delete from memory using DBInstanceManager.deleteInMemoryDBInstance() function
@@ -36,37 +36,74 @@ class DBInstanceService(DBO):
         '''Describe the details of DBInstance.'''
         return self.dal.describeDBInstance(db_instance_identifier)
 
-    def modify(self, db_instance):
+    def modify(self, db_instance_identifier):
         '''Modify an existing DBInstance.'''
+        db_instance = self.get(db_instance_identifier)
         self.dal.modifyDBInstance(db_instance)
 
+
     def get(self, db_instance_identifier):
-        '''Get DBInstance object.'''
-        # Return real-time object using DBInstanceManager.getDBInstance() function
-        return self.dal.getDBInstance(db_instance_identifier)
+        db_instance_data = self.dal.getDBInstance(db_instance_identifier)
 
-        # להחיות את האובייקט מהטבלה בזמן הריצה
+        nodes = {id: None for id in db_instance_data['node_subSnapshot_dic']}
 
+        def revive_node(node_id):
+            if nodes[node_id] is not None:
+                return nodes[node_id]
 
+            node_data = db_instance_data['node_subSnapshot_dic'][node_id]
+            parent_id = node_data['parent_id']
+
+            if parent_id is not None and parent_id in nodes:
+                parent = revive_node(parent_id)
+            else:
+                parent = None
+
+            node = Node_SubSnapshot(
+                parent=parent,
+                endpoint=db_instance_data['endpoint'],
+                id_snapshot=node_data['id_snapshot'],
+                dbs_paths_dic=node_data['dbs_paths_dic'],
+                deleted_records_db_path=node_data['deleted_records_db_path']
+            )
+
+            nodes[node_id] = node
+            return node
+ 
+        for node_id in nodes:
+            revive_node(node_id)
+
+        db_instance = DBInstanceModel(
+            db_instance_identifier=db_instance_data['db_instance_identifier'],
+            allocated_storage=db_instance_data['allocated_storage'],
+            master_username=db_instance_data['master_username'],
+            master_user_password=db_instance_data['master_user_password'],
+            port=db_instance_data['port'],
+            status=db_instance_data['status'],
+            created_time=datetime.fromisoformat(db_instance_data['created_time']),
+            endpoint=db_instance_data['endpoint'],
+            _node_subSnapshot_dic=nodes,
+            _node_subSnapshot_name_to_id=db_instance_data['node_subSnapshot_name_to_id'],
+            _current_version_ids_queue=deque(
+                db_instance_data['current_version_ids_queue'])
+        )
+
+        return db_instance
 
     def create_snapshot(self, db_instance_identifier, db_snapshot_identifier):
-        db_instance = self.dal.getDBInstance(
-            db_instance_identifier)
-        db_instance._node_subSnapshot_name_to_id[
-            db_snapshot_identifier] = db_instance._last_node_of_current_version.id_snepshot
+        db_instance = self.get(db_instance_identifier)
+        db_instance._node_subSnapshot_name_to_id[db_snapshot_identifier] = db_instance._last_node_of_current_version.id_snapshot
         self._create_child_to_node(db_instance)
-        self.dal.update_management_table(db_instance)
+        self.dal.modifyDBInstance(db_instance)
 
     def delete_snapshot(self, db_instance_identifier, db_snapshot_identifier):
-        db_instance = self.dal.get_from_management_table(
-            db_instance_identifier)
+        db_instance = self.get(db_instance_identifier)
         db_instance._node_subSnapshot_name_to_id.pop(
             db_snapshot_identifier, None)
-        self.dal.update_management_table(db_instance)
+        self.dal.modifyDBInstance(db_instance)
 
     def restore_version(self, db_instance_identifier, db_snapshot_identifier):
-        db_instance = self.dal.get_from_management_table(
-            db_instance_identifier)
+        db_instance = self.get(db_instance_identifier)
 
         if db_snapshot_identifier not in db_instance._node_subSnapshot_name_to_id:
             raise DbSnapshotIdentifierNotFoundError(
@@ -79,59 +116,58 @@ class DBInstanceService(DBO):
             self._update_queue_to_current_version(snapshot, db_instance)
             self._create_child_to_node(db_instance)
 
-        self.dal.update_management_table(db_instance)
+        self.dal.modifyDBInstance(db_instance)
 
         return db_instance
 
-
     def stop(self, db_instance_identifier):
-        db_instance = self.dal.get_from_management_table(
-            db_instance_identifier)
+        db_instance = self.get(db_instance_identifier)
         db_instance.status = 'stopped'
-        self.dal.update_management_table(db_instance)
+        self.dal.modifyDBInstance(db_instance)
 
     def start(self, db_instance_identifier):
-        db_instance = self.dal.get_from_management_table(
-            db_instance_identifier)
+        db_instance = self.get(db_instance_identifier)
         db_instance.status = 'available'
-        self.dal.update_management_table(db_instance)
+        self.dal.modifyDBInstance(db_instance)
 
-
-    def __get_node_height(self, current_node):
+    def __get_node_height(self, current_node, node_subSnapshot_dic):
         height = 0
         while current_node:
             height += 1
-            current_node = current_node.parent
+            current_node = node_subSnapshot_dic.get(current_node.parent_id)
         return height
 
     def _update_queue_to_current_version(self, snapshot_to_restore, db_instance):
-        height = self.__get_node_height(snapshot_to_restore)
+        height = self.__get_node_height(
+            snapshot_to_restore, db_instance._node_subSnapshot_dic)
         non_shared_nodes_deque = deque()
-        queue_len = len(db_instance._current_version_queue)
+        queue_len = len(db_instance._current_version_ids_queue)
 
         while height > queue_len:
-            non_shared_nodes_deque.appendleft(snapshot_to_restore)
-            snapshot_to_restore = snapshot_to_restore.parent
+            non_shared_nodes_deque.appendleft(snapshot_to_restore.id_snapshot)
+            snapshot_to_restore = db_instance._node_subSnapshot_dic.get(
+                snapshot_to_restore.parent_id)
             height -= 1
 
         while height < queue_len:
-            db_instance._current_version_queue.popleft()
+            db_instance._current_version_ids_queue.popleft()
             queue_len -= 1
 
-        while snapshot_to_restore != db_instance._current_version_queue[-1]:
-            non_shared_nodes_deque.appendleft(snapshot_to_restore)
-            snapshot_to_restore = snapshot_to_restore.parent
-            db_instance._current_version_queue.popleft()
+        while snapshot_to_restore.id_snapshot != db_instance._current_version_ids_queue[-1]:
+            non_shared_nodes_deque.appendleft(snapshot_to_restore.id_snapshot)
+            snapshot_to_restore = db_instance._node_subSnapshot_dic.get(
+                snapshot_to_restore.parent_id)
+            db_instance._current_version_ids_queue.popleft()
 
-        db_instance._current_version_queue.extend(non_shared_nodes_deque)
+        db_instance._current_version_ids_queue.extend(non_shared_nodes_deque)
 
     def _create_child_to_node(self, db_instance):
         node = db_instance._last_node_of_current_version
         db_instance._last_node_of_current_version = node.create_child(
             db_instance.endpoint)
-        db_instance._current_version_queue.append(
-            db_instance._last_node_of_current_version)
-        db_instance._node_subSnapshot_dic[db_instance._last_node_of_current_version.id_snepshot] = db_instance._last_node_of_current_version
+        db_instance._current_version_ids_queue.append(
+            db_instance._last_node_of_current_version.id_snapshot)
+        db_instance._node_subSnapshot_dic[db_instance._last_node_of_current_version.id_snapshot] = db_instance._last_node_of_current_version
 
 
 class SQLCommandHelper:
@@ -530,7 +566,7 @@ class SQLCommandHelper:
         Parameters:
             queue (Deque['Node_SubSnapshot']): A deque containing nodes with database paths.
             delete_query (str): The original SQL DELETE query to be modified and executed.
-            current_id_snepshot (int): The current snapshot ID to mark the deleted records. 
+            current_id_snapshot (int): The current snapshot ID to mark the deleted records. 
 
         Raises:
             InvalidQueryError: If the query execution fails or the query is not constructed properly.
@@ -576,12 +612,12 @@ class SQLCommandHelper:
                                 insert_deleted_query = f"""
                                 INSERT INTO deleted_records_in_version (_record_id, snapshot_id, table_name)
                                 VALUES ({record_id[0]}, {
-                                    current_node.id_snepshot}, '{table_name}');
+                                    current_node.id_snapshot}, '{table_name}');
                                 """
                                 SQLCommandHelper._run_query(
                                     current_node.deleted_records_db_path, insert_deleted_query)
                             print(f"Records from {table_name} marked as deleted in DB: {
-                                  db_name} at snapshot: {current_node.id_snepshot}")
+                                  db_name} at snapshot: {current_node.id_snapshot}")
                             return
                         else:
                             print(f"Table {table_name} not found in DB: {
@@ -611,7 +647,7 @@ class SQLCommandHelper:
         conn = None  # Initialize the connection variable
         db_filename = f"{db_name}.db"
         db_path = os.path.join(
-            endpoint, str(last_node_of_current_version.id_snepshot))
+            endpoint, str(last_node_of_current_version.id_snapshot))
         os.makedirs(db_path, exist_ok=True)
         db_path = os.path.join(db_path, db_filename)
         print(db_path)
