@@ -4,6 +4,7 @@ class DBInstanceController:
     def __init__(self, service: DBInstanceService):
         self.service = service
 
+
     def create_db_instance(self, **kwargs):
         return self.service.create(**kwargs)
 
@@ -13,9 +14,9 @@ class DBInstanceController:
     def describe_db_instance(self, db_instance_identifier):
         return self.service.describe(db_instance_identifier)
 
-    def modify_db_instance(self, db_instance_identifier):
-        return self.service.modify(db_instance_identifier)
-
+    def modify_db_instance(self, db_instance_identifier, **kwargs):
+        return self.service.modify(db_instance_identifier, **kwargs)
+    
     def get_db_instance(self, db_instance_identifier):
         return self.service.get(db_instance_identifier)
 

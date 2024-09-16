@@ -36,10 +36,27 @@ class DBInstanceService(DBO):
         '''Describe the details of DBInstance.'''
         return self.dal.describeDBInstance(db_instance_identifier)
 
-    def modify(self, db_instance_identifier):
-        '''Modify an existing DBInstance.'''
+   
+    def modify(self, db_instance_identifier, **kwargs):
+        """Modify an existing DBInstance."""
         db_instance = self.get(db_instance_identifier)
+
+        modifiable_attributes = [
+            'allocated_storage',
+            'master_user_password',
+            'port',
+            'status'
+        ]
+
+        for attr, value in kwargs.items():
+            if attr in modifiable_attributes:
+                setattr(db_instance, attr, value)
+            else:
+                print(f"Warning: Attribute '{attr}' cannot be modified or does not exist.")
+
         self.dal.modifyDBInstance(db_instance)
+
+        return db_instance    
 
 
     def get(self, db_instance_identifier):
