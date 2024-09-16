@@ -46,8 +46,8 @@ class ObjectManager:
         self.object_manager.update_object_in_management_table_by_criteria(table_name, updates, criteria)
 
 
-    def get_from_memory(self):
-        self.object_manager.get_object_from_management_table(self.object_id)
+    def get_from_memory(self,object):
+        self.object_manager.get_object_from_management_table(object.id)
 
 
     def convert_object_attributes_to_dictionary(**kwargs):
