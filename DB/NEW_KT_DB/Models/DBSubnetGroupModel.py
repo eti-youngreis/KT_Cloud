@@ -1,4 +1,5 @@
 from typing import List, Dict, Any
+import ast
 import json
 import sys
 import os
@@ -27,7 +28,9 @@ class DBSubnetGroup:
             self.vpc_id = kwargs['vpc_id']
             self.subnets = kwargs.get('subnets', None)
             if not self.subnets:
-                self.subnets = dict()
+                self.subnets = []
+            if type(self.subnets) is not list:
+                self.subnets = ast.literal_eval(self.subnets)
             self.db_subnet_group_arn = kwargs.get('db_subnet_group_arn', None)
             
         except KeyError as e:

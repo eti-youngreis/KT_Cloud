@@ -1,3 +1,4 @@
+from sqlite3 import IntegrityError
 from typing import List, Dict, Any
 
 import sys
@@ -19,6 +20,7 @@ class DBSubnetGroupService:
         self.storage_manager = StorageManager()
         self.storage_manager.create_bucket(self.bucket)
         self.version_manager = VersionManager()
+        self.subnet_groups = dict()
     
     def create_db_subnet_group(self, **kwargs):
         # object
@@ -28,19 +30,29 @@ class DBSubnetGroupService:
         if not is_length_in_range(kwargs['db_subnet_group_name'], 1, 255):
             raise ValueError("invalid length for subnet group db_subnet_group_name: " + len(kwargs['db_subnet_group_name']))
         
+        if kwargs['db_subnet_group_name'] in self.subnet_groups:
+            raise ValueError(f"db_subnet_group_name {kwargs['db_subnet_group_name']} already exists")
+        
         if kwargs.get('description') and not is_length_in_range('description', 1, 255):
             raise ValueError("invalid length for subnet group description: " + len(kwargs['description']))
         
         subnet_group = DBSubnetGroup(**kwargs)
+        # save in management table
+        # in try except block in case the server was shut down and re-run and local collection doesn't include all subnetGroups
+        try:
+            self.manager.create(subnet_group)
+        except IntegrityError as e:
+            raise ValueError(f"db_subnet_group_name {kwargs['db_subnet_group_name']} already exists")
+        
         # physical object
         # version = 0 assume created for the first time
         self.storage_manager.create(self.bucket, subnet_group.db_subnet_group_name, subnet_group.to_bytes(), '0')
-        # save in memory
-        self.manager.create(subnet_group)
+        # save in local collection (hash table) for quick access
+        self.subnet_groups[kwargs['db_subnet_group_name']] = subnet_group
 
     def get_db_subnet_group(self, db_subnet_group_name: str) -> DBSubnetGroup:
         data = self.manager.get(db_subnet_group_name)
-        return DBSubnetGroup(**data)
+        return data
 
     def modify_db_subnet_group(self, db_subnet_group_name: str, updates: Dict[str, Any]) -> DBSubnetGroup:
         if not db_subnet_group_name:
@@ -63,9 +75,15 @@ class DBSubnetGroupService:
     def delete_db_subnet_group(self, db_subnet_group_name: str) -> None:
         if not db_subnet_group_name:
             raise ValueError('Missing required argument db_subnet_group_name')
-        
+
+        # delete from management table
         self.manager.delete(db_subnet_group_name)
-        self.storage_manager.delete_by_db_subnet_group_name(bucket_db_subnet_group_name=self.bucket, version_id=self.version_manager.get(self.bucket, db_subnet_group_name).version_id, key=db_subnet_group_name)
+        # for now version id is 0
+        # delete physical object from storage
+        self.storage_manager.delete_by_name(bucket_name=self.bucket, version_id='0', key=db_subnet_group_name)
+        # delete from local collection (hash table)
+        if db_subnet_group_name in self.subnet_groups:
+            del self.subnet_groups[db_subnet_group_name]
 
     def describe_db_subnet_group(self, db_subnet_group_name: str) -> Dict:
         if not db_subnet_group_name:
