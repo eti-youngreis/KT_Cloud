@@ -21,7 +21,7 @@ class ObjectManager:
 
     # Riki7649255 based on saraNoigershel
     def insert_object_to_management_table(self, table_name, object_metadata):
-        self.db_manager.insert_data_into_table(table_name, ['metadata'], (object_metadata))
+        self.db_manager.insert_data_into_table(table_name, (object_metadata))
 
     # def insert_object_to_management_table_with_str_id(self, table_name, id, metadata):
     #     self.db_manager.insert_data_into_table(table_name, ['object_id','metadata'],(id, metadata))
@@ -42,15 +42,15 @@ class ObjectManager:
     # rachel-8511, Riki7649255
     def get_object_from_management_table(self, table_name, object_id: int, columns = ["*"]) -> Dict[str, Any]:
         '''Retrieve an object from the database.'''
-        result = self.db_manager.select_and_return_records_from_table(table_name, columns, criteria= f'object_id = {object_id}')
+        result = self.db_manager.select_and_return_records_from_table(table_name, columns, criteria= f"object_id = '{object_id}'")
         if result:
-            return result[object_id]
+            return result
         else:
             raise FileNotFoundError(f'Object with ID {object_id} not found.')
 
-    def get_objects_from_management_table_by_criteria(self, object_id: int, columns = ["*"], criteria:Optional[str] = None) -> Dict:
+    def get_objects_from_management_table_by_criteria(self, table_name, columns = ["*"], criteria:Optional[str] = None) -> Dict:
         '''Retrieve an object from the database.'''
-        result = self.db_manager.select_and_return_records_from_table(self.table_name, columns, criteria)
+        result = self.db_manager.select_and_return_records_from_table(table_name, columns, criteria)
         if result:
             return result
         else:
@@ -64,7 +64,7 @@ class ObjectManager:
 
     def delete_object_from_management_table_by_id(self, table_name, object_id) -> None:
         '''Delete an object from the database.'''
-        self.db_manager.delete_data_from_table(table_name, criteria= f'object_id = {object_id}')
+        self.db_manager.delete_data_from_table(table_name, criteria= f"object_id = '{object_id}'")
 
 
     # rachel-8511, ShaniStrassProg is it needed?
@@ -125,7 +125,7 @@ class ObjectManager:
         if criteria == 'default':
             if not object_id:
                 raise ValueError('must be or criteria or object id')
-            criteria = f'object_id = {object_id}'
+            criteria = f"object_id = '{object_id}'"
 
         table_name = self.convert_object_name_to_management_table_name(object_name)
 
@@ -152,7 +152,7 @@ class ObjectManager:
         self.get_objects_from_management_table_by_criteria(table_name, columns, criteria)
 
 
-    def convert_object_attributes_to_dictionary(**kwargs):
+    def convert_object_attributes_to_dictionary(self, **kwargs):
 
         dict = {}
 
@@ -162,4 +162,4 @@ class ObjectManager:
         return dict
 
     def get_all_data_from_table(self, table_name):
-        self.db_manager.get_all_data_from_table(table_name)
+       return self.db_manager.get_all_data_from_table(table_name)
