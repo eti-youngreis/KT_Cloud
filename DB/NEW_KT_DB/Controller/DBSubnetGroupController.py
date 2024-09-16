@@ -19,6 +19,11 @@ class DBSubnetGroupController:
     def get_db_subnet_group(self, name):
         return self.service.get_db_subnet_group(name)
     
-    def describe_db_subnet_group(self, name):
-        return self.service.describe_db_subnet_group(name)
+    def list_all_subnets(self):
+        return self.service.list_all_subnets()
     
+    def create_subnet(self, subnet_id: str):
+        self.service.create_subnet(subnet_id)
+        
+    def delete_subnet(self, subnet_id: str):
+        self.service.delete_subnet(subnet_id)

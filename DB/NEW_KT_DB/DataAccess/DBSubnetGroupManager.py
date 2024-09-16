@@ -1,38 +1,122 @@
-from typing import Dict, Any, List
 
 import sys
 import os
+
+import sqlalchemy
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 
-from Models.DBSubnetGroupModel import DBSubnetGroup
+
+from typing import Any, List, Dict
+from sqlalchemy.orm import Session
+from Models.DBSubnetGroupModel import DBSubnetGroup, Subnet
 
 class DBSubnetGroupManager:
-    def __init__(self, object_manager):
-        self.object_manager = object_manager
-        self.object_manager._create_management_table(DBSubnetGroup.table_name, DBSubnetGroup.table_structure)
+    def __init__(self, session: Session):
+        self.session = session
 
-    def create(self, subnet_group: DBSubnetGroup):
-        self.object_manager.save_in_memory(DBSubnetGroup.table_name, subnet_group)
+    def get_all(self) -> List[DBSubnetGroup]:
+        """Retrieve all DBSubnetGroup records."""
+        try:
+            return self.session.query(DBSubnetGroup).all()
+        except sqlalchemy.exc.PendingRollbackError:
+            self.session.rollback()
 
-    def get(self, name: str):
-        data = self.object_manager.get_from_memory_by_id(DBSubnetGroup.pk_column, DBSubnetGroup.table_name, name)
-        if data:
-            data_mapping = {'db_subnet_group_name':name}
-            for key, value in data[name].items():
-                data_mapping[key] = value 
-            return DBSubnetGroup(**data_mapping)
-        else:
-            raise ValueError(f"subnet group with name '{name}' not found")
+    def get_by_name(self, db_subnet_group_name: str) -> DBSubnetGroup:
+        """Retrieve a DBSubnetGroup by its name."""
+        try:
+            return self.session.query(DBSubnetGroup).filter_by(db_subnet_group_name=db_subnet_group_name).first()
+        except sqlalchemy.exc.PendingRollbackError:
+            print(f'rollback in get, couldn\'t get {db_subnet_group_name}')
+            self.session.rollback()
 
+    def create(self, db_subnet_group: DBSubnetGroup):
+        """Insert a new DBSubnetGroup into the database."""
+        try:
+            self.session.add(db_subnet_group)
+            self.session.commit()
+        except sqlalchemy.exc.PendingRollbackError:
+            print(f'rollback in create - didn\'t create {db_subnet_group}')
+            self.session.rollback()
+
+    def delete(self, db_subnet_group_name: str):
+        """Delete a DBSubnetGroup by its name."""
+        try:
+            db_subnet_group = self.get_by_name(db_subnet_group_name)
+            if db_subnet_group:
+                self.session.delete(db_subnet_group)
+                self.session.commit()
+        except sqlalchemy.exc.PendingRollbackError:
+            self.session.rollback()
+            
+    def modify(self, db_subnet_group: DBSubnetGroup):
+        """Modify a DBSubnetGroup by its name."""
+        try:
+            db_subnet_group = self.get_by_name(db_subnet_group.db_subnet_group_name)
+            if db_subnet_group:
+                db_subnet_group.db_subnet_group_description = db_subnet_group.db_subnet_group_description
+                db_subnet_group.vpc_id = db_subnet_group.vpc_id
+                db_subnet_group.subnets = db_subnet_group.subnets
+                self.session.commit()
+        except sqlalchemy.exc.PendingRollbackError:
+            self.session.rollback()
+            
+    def modify_by_id(self, db_subnet_group_name: str, updates: Dict[str, Any]):
+        """Modify a DBSubnetGroup by its name."""
+        try:
+            db_subnet_group = self.get_by_name(db_subnet_group_name)
+            if db_subnet_group:
+                for key, value in updates.items():
+                    setattr(db_subnet_group, key, value)
+                self.session.commit()
+        except sqlalchemy.exc.PendingRollbackError:
+            self.session.rollback()
+
+class SubnetManager:
+    def __init__(self, session: Session):
+        self.session = session
+
+    def get_all(self) -> List[Subnet]:
+        """Retrieve all Subnet records."""
+        try:
+            return self.session.query(Subnet).all()
+        except sqlalchemy.exc.PendingRollbackError:
+            self.session.rollback()
+
+    def get_by_id(self, id: str) -> Subnet:
+        """Retrieve a Subnet by its ID."""
+        try:
+            return self.session.query(Subnet).filter_by(subnet_id = id).first()
+        except sqlalchemy.exc.PendingRollbackError:
+            self.session.rollback()
+            
+    def create(self, subnet: Subnet):
+        """Insert a new Subnet into the database."""
+        try:
+            self.session.add(subnet)
+            self.session.commit()
+        except sqlalchemy.exc.PendingRollbackError:
+            self.session.rollback()
     
-    def delete(self, name: str):
-        self.object_manager.delete_from_memory_by_id(DBSubnetGroup.pk_column, name, DBSubnetGroup.table_name)
+    def delete(self, subnet_id: str):
+        """Delete a Subnet by its ID."""
+        try:
+            subnet = self.get_by_id(subnet_id)
+            if subnet:
+                self.session.delete(subnet)
+                self.session.commit()
+        except sqlalchemy.exc.PendingRollbackError:
+            self.session.rollback()
 
-    def describe(self, name: str): 
-        return self.get(name).to_dict()
-    
-    def modify(self, subnet_group: DBSubnetGroup):
-        updates = subnet_group.to_dict()
-        del updates['db_subnet_group_name']
-        self.object_manager.update_in_memory_by_id(DBSubnetGroup.pk_column, DBSubnetGroup.table_name, updates, subnet_group.db_subnet_group_name)
+
+    def modify(self, subnet: Subnet):
+        try:
+            db_subnet = self.get_by_id(subnet.subnet_id)
+            if db_subnet:
+                db_subnet.status = subnet.status
+                self.session.commit()
+        except sqlalchemy.exc.PendingRollbackError:
+            self.session.rollback()
+       

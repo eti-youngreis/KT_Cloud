@@ -1,91 +1,74 @@
-from sqlite3 import IntegrityError
-from typing import List, Dict, Any
+# service/db_subnet_group_service.py
 
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
+
+from typing import Any, Dict, List
+from DataAccess.DBSubnetGroupManager import DBSubnetGroupManager, SubnetManager
+from Models.DBSubnetGroupModel import DBSubnetGroup, Subnet
+from sqlalchemy.orm import Session
 
 
-from Models.DBSubnetGroupModel import DBSubnetGroup
-from DataAccess.DBSubnetGroupManager import DBSubnetGroupManager
-from Storage.KT_Storage.DataAccess.StorageManager import StorageManager
-from Storage.KT_Storage.DataAccess.VersionManager import VersionManager
-from Validation.GeneralValidations import *
 class DBSubnetGroupService:
-    def __init__(self, db_subnet_group_manager: DBSubnetGroupManager):
-        self.manager = db_subnet_group_manager
-        self.bucket = 'db_subnet_groups'
-        self.storage_manager = StorageManager()
-        self.storage_manager.create_bucket(self.bucket)
-        self.version_manager = VersionManager()
-        self.subnet_groups = dict()
-    
-    def create_db_subnet_group(self, **kwargs):
-        # object
-        if not kwargs.get('db_subnet_group_name'):
-            raise ValueError('Missing required argument db_subnet_group_name')
-        
-        if not is_length_in_range(kwargs['db_subnet_group_name'], 1, 255):
-            raise ValueError("invalid length for subnet group db_subnet_group_name: " + len(kwargs['db_subnet_group_name']))
-        
-        if kwargs['db_subnet_group_name'] in self.subnet_groups:
-            raise ValueError(f"db_subnet_group_name {kwargs['db_subnet_group_name']} already exists")
-        
-        if kwargs.get('description') and not is_length_in_range('description', 1, 255):
-            raise ValueError("invalid length for subnet group description: " + len(kwargs['description']))
-        
-        subnet_group = DBSubnetGroup(**kwargs)
-        # save in management table
-        # in try except block in case the server was shut down and re-run and local collection doesn't include all subnetGroups
-        try:
-            self.manager.create(subnet_group)
-        except IntegrityError as e:
-            raise ValueError(f"db_subnet_group_name {kwargs['db_subnet_group_name']} already exists")
-        
-        # physical object
-        # version = 0 assume created for the first time
-        self.storage_manager.create(self.bucket, subnet_group.db_subnet_group_name, subnet_group.to_bytes(), '0')
-        # save in local collection (hash table) for quick access
-        self.subnet_groups[kwargs['db_subnet_group_name']] = subnet_group
+    def __init__(self, session: Session): 
+        self.db_subnet_group_repo = DBSubnetGroupManager(session)
+        self.subnet_repo = SubnetManager(session)
+
+    def create_db_subnet_group(self, db_subnet_group_name: str, db_subnet_group_description: str, vpc_id: str, subnet_ids: List[str], db_subnet_group_arn: str):
+        """Create a new DBSubnetGroup with associated subnets."""
+        subnets = [self.subnet_repo.get_by_id(subnet_id) for subnet_id in subnet_ids]
+        if None in subnets:
+            raise ValueError("One or more subnets not found.")
+
+        db_subnet_group = DBSubnetGroup(
+            db_subnet_group_name=db_subnet_group_name,
+            db_subnet_group_description=db_subnet_group_description,
+            vpc_id=vpc_id,
+            subnets=subnets,
+            db_subnet_group_arn = db_subnet_group_arn,
+            status = 'pending'
+        )
+        self.db_subnet_group_repo.create(db_subnet_group)
 
     def get_db_subnet_group(self, db_subnet_group_name: str) -> DBSubnetGroup:
-        data = self.manager.get(db_subnet_group_name)
-        return data
+        """Get DBSubnetGroup by name."""
+        return self.db_subnet_group_repo.get_by_name(db_subnet_group_name)
 
-    def modify_db_subnet_group(self, db_subnet_group_name: str, updates: Dict[str, Any]) -> DBSubnetGroup:
-        if not db_subnet_group_name:
-            raise ValueError('Missing required argument db_subnet_group_name')
+    def delete_db_subnet_group(self, db_subnet_group_name: str):
+        """Delete a DBSubnetGroup."""
+        self.db_subnet_group_repo.delete(db_subnet_group_name)
 
-        if updates.get('description') and not is_length_in_range(updates['description'], 1, 255):
-            raise ValueError("invalid length for subnet group description: " + len(updates['description']))
-        
-        subnet_group = self.get_db_subnet_group(db_subnet_group_name)
-        
+    def modify_db_subnet_group(self, db_subnet_group_name: str, updates:Dict[str, Any]):
         for key, value in updates.items():
-            setattr(subnet_group, key, value)
-            
-        self.manager.modify(subnet_group)
-        # version = str(int(self.version_manager.get(self.bucket, subnet_group.db_subnet_group_name).version_id)+1)
-        # for now we override the basic version, when the latest version id can be retrieved, we will make a new version as old_version_id + 1
-        self.storage_manager.create(self.bucket, db_subnet_group_name, subnet_group.to_bytes(), '0')
+            if key == 'subnets':
+                # Manage subnet associations
+                new_subnets = [self.subnet_repo.get_by_id(subnet_id) for subnet_id in value]
+                if None in new_subnets:
+                    raise ValueError("One or more subnets not found.")
+                updates['subnets'] = new_subnets
 
-    def delete_db_subnet_group(self, db_subnet_group_name: str) -> None:
-        if not db_subnet_group_name:
-            raise ValueError('Missing required argument db_subnet_group_name')
-
-        # delete from management table
-        self.manager.delete(db_subnet_group_name)
-        # for now version id is 0
-        # delete physical object from storage
-        self.storage_manager.delete_by_name(bucket_name=self.bucket, version_id='0', key=db_subnet_group_name)
-        # delete from local collection (hash table)
-        if db_subnet_group_name in self.subnet_groups:
-            del self.subnet_groups[db_subnet_group_name]
-
-    def describe_db_subnet_group(self, db_subnet_group_name: str) -> Dict:
-        if not db_subnet_group_name:
-            raise ValueError('Missing required argument db_subnet_group_name')
+        self.db_subnet_group_repo.modify_by_id(db_subnet_group_name, updates)
         
-        return self.manager.describe(db_subnet_group_name)
+    def list_db_subnet_groups(self) -> List[DBSubnetGroup]:
+        """List all DBSubnetGroups."""
+        return self.db_subnet_group_repo.get_all()
+
+    def list_all_subnets(self) -> List[Subnet]:
+        return self.subnet_repo.get_all()
+    
+    def create_subnet(self, subnet_id: str):
+        """Create a new subnet."""
+        subnet = Subnet(subnet_id=subnet_id, status='pending')
+        self.subnet_repo.create(subnet)
+        
+    def delete_subnet(self, subnet_id: str):
+        """Delete a subnet."""
+        self.subnet_repo.delete(subnet_id)
+        
+
+        
+    
+    
