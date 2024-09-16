@@ -23,6 +23,7 @@ class DBSubnetGroup:
     
     def __init__(self, **kwargs):
         try:
+            print(kwargs)
             self.db_subnet_group_name = kwargs['db_subnet_group_name']
             self.db_subnet_group_description = kwargs['db_subnet_group_description']
             self.vpc_id = kwargs['vpc_id']

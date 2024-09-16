@@ -57,8 +57,7 @@ class DBSubnetGroupService:
     def modify_db_subnet_group(self, db_subnet_group_name: str, updates: Dict[str, Any]) -> DBSubnetGroup:
         if not db_subnet_group_name:
             raise ValueError('Missing required argument db_subnet_group_name')
-        
-        
+
         if updates.get('description') and not is_length_in_range(updates['description'], 1, 255):
             raise ValueError("invalid length for subnet group description: " + len(updates['description']))
         
