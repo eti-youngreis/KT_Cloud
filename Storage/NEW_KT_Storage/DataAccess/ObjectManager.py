@@ -7,7 +7,6 @@ class ObjectManager:
     def __init__(self, db_file: str,type, storage_path="D:\\s3_project\\server"):
         """Initialize ObjectManager with the database connection."""
         self.object_manager = ObjectManagerDB(db_file)
-        self.storage_manager = StorageManager(storage_path)
         self.object_name = type
 
     # for outer use:
