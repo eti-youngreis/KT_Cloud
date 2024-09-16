@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 import os
 from DataAccess.ObjectManager import ObjectManager
+from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 class DBInstance:
     BASE_PATH = "db_instances"
@@ -19,10 +20,8 @@ class DBInstance:
         self.status = 'available'
         self.created_time = datetime.now()
         self.endpoint = os.path.join(DBInstance.BASE_PATH, self.db_instance_identifier)
-        if not os.path.exists(DBInstance.BASE_PATH):
-            os.mkdir(DBInstance.BASE_PATH)
-        if not os.path.exists(self.endpoint):
-            os.mkdir(self.endpoint)
+        storageManager=StorageManager(DBInstance.BASE_PATH)
+        storageManager.create_directory(self.endpoint)
         self.databases = kwargs.get('databases', {})
         self.pk_column = kwargs.get('pk_column', 'db_instance_id')
         self.pk_value = kwargs.get('pk_value', self.db_instance_identifier)
@@ -43,3 +42,10 @@ class DBInstance:
             pk_value=self.pk_value
 
         )
+
+    def to_sql(self):
+        # Convert the model instance to a dictionary
+        data_dict = self.to_dict()
+        values = '(' + ", ".join(f'\'{json.dumps(v)}\'' if isinstance(v, dict) or isinstance(v, list) else f'\'{v}\'' if isinstance(v, str) else f'\'{str(v)}\''
+                           for v in data_dict.values()) + ')'
+        return values
