@@ -92,11 +92,11 @@ class ObjectManager:
 
 
     # for outer use:
-    def save_in_memory(self, type_object:str, metadata:Dict[str:Any], object_id:Optional[str] = None):
+    def save_in_memory(self, object_name:str, metadata:Dict[str:Any], object_id:Optional[str] = None):
        
         # insert object info into management table mng_{object_name}s
         # for exmple: object db_instance will be saved in table mng_db_instances
-        table_name = self.convert_object_name_to_management_table_name(type_object)
+        table_name = self.convert_object_name_to_management_table_name(object_name)
 
         if not self.is_management_table_exist(table_name):
             self.create_management_table(table_name)
@@ -108,7 +108,7 @@ class ObjectManager:
             self.insert_object_to_management_table(table_name, metadata)
 
     
-    def delete_from_memory(self,criteria='default', object_id:Optional[str] =  None):
+    def delete_from_memory(self,object_name, criteria='default', object_id:Optional[str] =  None):
         
         # if criteria not sent- use PK for deletion
         if criteria == 'default':
@@ -116,12 +116,12 @@ class ObjectManager:
                 raise ValueError('must be or criteria or object id')
             criteria = f'object_id = {object_id}'
         
-        table_name = self.convert_object_name_to_management_table_name(self.object_name)
+        table_name = self.convert_object_name_to_management_table_name(object_name)
         
         self.delete_object_from_management_table(table_name, criteria)
 
 
-    def update_in_memory(self, type_object, updates, criteria='default', object_id:Optional[str] =  None):
+    def update_in_memory(self, object_name, updates, criteria='default', object_id:Optional[str] =  None):
         
         # if criteria not sent- use PK for deletion
         if criteria == 'default':
@@ -129,14 +129,14 @@ class ObjectManager:
                 raise ValueError('must be or criteria or object id')
             criteria = f'object_id = {object_id}'
 
-        table_name = self.convert_object_name_to_management_table_name(type_object)
+        table_name = self.convert_object_name_to_management_table_name(object_name)
 
         self.update_object_in_management_table_by_criteria(table_name, updates, criteria)
 
     
-    def get_from_memory(self, type_object, columns = ["*"], object_id = None, criteria = None):
+    def get_from_memory(self, object_name, columns = ["*"], object_id = None, criteria = None):
         """get records from memory by criteria or id"""
-        table_name = self.convert_object_name_to_management_table_name(type_object)
+        table_name = self.convert_object_name_to_management_table_name(object_name)
         if object_id:
             criteria = f'object_id = {object_id}'
         self.get_objects_from_management_table_by_criteria(table_name, columns, criteria)
