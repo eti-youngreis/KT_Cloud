@@ -9,12 +9,6 @@ class DBManager:
         self.connection = sqlite3.connect(db_file)
 
 
-    # rachel-8511, ShaniStrassProg
-    def close(self):
-    '''Close the database connection.'''
-    self.connection.close()
-
-
     # saraNoigershel
     def execute_query_with_multiple_results(self, query: str, params:Tuple = ()) -> Optional[List[Tuple]]:
         '''Execute a given query and return the results.'''
