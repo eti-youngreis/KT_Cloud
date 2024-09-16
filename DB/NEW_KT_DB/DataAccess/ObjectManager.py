@@ -29,7 +29,29 @@ class ObjectManager:
             the table should be created within the __init__ function of the manager you created (i.e. DBInstanceManager)
         """
         columns = self.db_manager.get_columns_from_table(table_name)
-        values = tuple([str(getattr(object, column)) for column in columns])
+        values = []
+        for attr in [getattr(object, column) for column in columns]:
+            # list
+            if isinstance(attr, list):
+                # list of objects
+                if attr[0].__class__.__module__ != 'builtins':
+                    ids = []
+                    for sub_obj in attr:
+                        self._insert_object_to_management_table(sub_obj)
+                        ids.append(getattr(sub_obj, sub_obj.pk_column))
+                    values.append(str(ids))
+                # list of primitive types
+                else:
+                    values.append(str(attr))
+                    
+            # if single attribute is an object
+            elif attr.__class__.__module__ != 'builtins':
+                self._insert_object_to_management_table(table_name, attr)
+                values.append(getattr(attr, attr.pk_column))
+            # single primitive attribute
+            else:
+                values.append(str(attr))
+        values = tuple(values)
         self.db_manager.insert_data_into_table(table_name, columns, values)
 
     # Malki1844
