@@ -32,6 +32,7 @@ class InvalidDBProxyEndpointStateFault(Exception):
 class DBProxyendpointService(DBO):
     def __init__(self, dal: DBProxyEndpointManager):
         self.dal = dal
+        self.path = "DB\NEW_KT_DB\server\db_proxy_endpoints"
    
     
 
