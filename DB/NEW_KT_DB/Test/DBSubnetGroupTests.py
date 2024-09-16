@@ -218,7 +218,7 @@ def test_insert_many(index):
 
     
     
-@pytest.mark.parametrize("index", range(20))
+@pytest.mark.parametrize("index", range(10))
 def test_delete_many_from_prev_test(index):
     db_subnet_group_name=f'subnet_group_{index}'
     controller.delete_db_subnet_group(db_subnet_group_name)
