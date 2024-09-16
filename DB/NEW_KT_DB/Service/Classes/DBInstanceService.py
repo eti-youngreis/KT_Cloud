@@ -62,6 +62,13 @@ class DBInstanceService(DBO):
     def get(self, db_instance_identifier):
         db_instance_data = self.dal.getDBInstance(db_instance_identifier)
 
+        db_instance_data['allocated_storage'] = int(db_instance_data['allocated_storage'])
+        db_instance_data['port'] = int(db_instance_data['port'])
+        db_instance_data['created_time'] = datetime.fromisoformat(db_instance_data['created_time'])
+
+        db_instance_data['node_subSnapshot_dic'] = {uuid.UUID(k): v for k, v in db_instance_data['node_subSnapshot_dic'].items()}
+        db_instance_data['_current_version_ids_queue'] = deque(uuid.UUID(id_str) for id_str in db_instance_data['current_version_ids_queue'])
+
         nodes = {id: None for id in db_instance_data['node_subSnapshot_dic']}
 
         def revive_node(node_id):
@@ -109,6 +116,7 @@ class DBInstanceService(DBO):
 
     def create_snapshot(self, db_instance_identifier, db_snapshot_identifier):
         db_instance = self.get(db_instance_identifier)
+        setattr(db_instance,'created_time', datetime.now())
         db_instance._node_subSnapshot_name_to_id[db_snapshot_identifier] = db_instance._last_node_of_current_version.id_snapshot
         self._create_child_to_node(db_instance)
         self.dal.modifyDBInstance(db_instance)
