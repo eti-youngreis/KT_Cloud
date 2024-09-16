@@ -21,15 +21,27 @@ manager = DBSubnetGroupManager(object_manager=object_manager)
 service = DBSubnetGroupService(manager)
 controller = DBSubnetGroupController(service)
 storage_manager = StorageManager()
-    
-def test_create():
-    
-    # remove existing subnet group from previous tests
-    conn = sqlite3.connect('../object_management_db.db')
-    conn.execute("delete from db_subnet_groups where db_subnet_group_name = 'subnet_group_1'")
+
+@pytest.fixture
+def clear_table():
+    # Connect to the SQLite database
+    conn = conn = sqlite3.connect('../object_management_db.db')
+    cursor = conn.cursor()
+
+    # Clear the table if it exists
+    table_name = "db_subnet_groups"
+    cursor.execute(f"DELETE FROM {table_name};")
+
+    # Commit changes and close the connection
     conn.commit()
     conn.close()
+
+    # Yield to allow tests to run
+    yield
+        
+def test_create(clear_table):
     
+    # remove existing subnet group from previous tests
     controller.create_db_subnet_group(
         db_subnet_group_name='subnet_group_1',
         subnets=[
