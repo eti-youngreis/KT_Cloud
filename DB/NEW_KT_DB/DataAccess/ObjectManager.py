@@ -22,15 +22,39 @@ class ObjectManager:
 
     
     # Riki7649255 based on saraNoigershel, Tem-M
-    def _insert_object_to_management_table(self, table_name, object):
+    def _insert_object_to_management_table(self, table_name, obj):
         """
-            inserts an object to the management table you specified, the object should be sent as is! not converted to a tuple or dictionary!
-            if the table does not exist, the function will abort and raise an error
-            the table should be created within the __init__ function of the manager you created (i.e. DBInstanceManager)
+        Inserts an object into the specified management table, recursively handling nested objects
+        and collections of objects.
         """
         columns = self.db_manager.get_columns_from_table(table_name)
-        values = tuple([str(getattr(object, column)) for column in columns])
+
+        # Recursively handle attributes of the object
+        values = tuple(self._extract_value(getattr(obj, column)) for column in columns)
+
         self.db_manager.insert_data_into_table(table_name, columns, values)
+        
+    # Tem-M
+    def _extract_value(self, value):
+        """
+        Recursively extract values from nested objects or collections of objects.
+        """
+        # If the value is a nested object (not a primitive), recursively extract its attributes
+        if hasattr(value, "__dict__"):
+            # This is a custom object, extract its attributes as a dict
+            return str(self._extract_value(getattr(value, value.pk_column)))
+
+        # Handle collections: lists, sets, tuples
+        elif isinstance(value, (list, set, tuple)):
+            return str([self._extract_value(v) for v in value])
+
+        # Handle dictionaries
+        elif isinstance(value, dict):
+            return str({k: self._extract_value(v) for k, v in value.items()})
+
+        # If it's a primitive value, just return it as is
+        else:
+            return str(value)  # Convert to string if needed
 
     def _insert_dict_to_management_table(self, table_name, data):
         self.db_manager.insert_data_into_table(table_name, data.keys(), data.values())

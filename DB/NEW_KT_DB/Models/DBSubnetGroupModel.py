@@ -32,6 +32,8 @@ class DBSubnetGroup:
                 self.subnets = []
             if type(self.subnets) is not list:
                 self.subnets = ast.literal_eval(self.subnets)
+            if len(self.subnets) > 0 and type(self.subnets[0]) is not dict:
+                self.subnets = [ast.literal_eval(subnet) for subnet in self.subnets]
             self.db_subnet_group_arn = kwargs.get('db_subnet_group_arn', None)
             
         except KeyError as e:
