@@ -22,26 +22,26 @@ class ObjectManager:
     def insert_object_to_management_table(self, table_name, object_metadata):
         self.db_manager.insert_data_into_table(table_name, ['metadata'], (object_metadata))
 
-    def insert_object_to_management_table_with_str_id(self, table_name, id, metadata):
+    def insert_object_to_management_table_with_str_id(self, table_name, id, metadata, pk_column: str):
         self.db_manager.insert_data_into_table(
-            table_name, ['object_id', 'metadata'], (id, metadata))
+            table_name, [pk_column, 'metadata'], (id, metadata))
 
     # Riki7649255 based on rachel-8511
 
     def update_object_in_management_table_by_criteria(self, table_name, updates, criteria):
         self.db_manager.update_records_in_table(table_name, updates, criteria)
 
-    def update_object_in_management_table_by_id(self, table_name, object_id, updates):
-        self.db_manager.update_records_in_table(table_name, updates, f'object_id = {object_id}')
+    def update_object_in_management_table_by_id(self, table_name, object_id, updates, pk_column: str):
+        self.db_manager.update_records_in_table(table_name, updates, f'{pk_column} = {object_id}')
 
 
 
     # rachel-8511, Riki7649255
 
-    def get_object_from_management_table(self, table_name, object_id: int, columns=["*"]) -> Dict[str, Any]:
+    def get_object_from_management_table(self, table_name, object_id: int, pk_column: str, columns=["*"]) -> Dict[str, Any]:
         '''Retrieve an object from the database.'''
         result = self.db_manager.select_and_return_records_from_table(
-            table_name, columns, criteria=f'object_id = {object_id}')
+            table_name, columns, criteria=f'{pk_column} = {object_id}')
         if result:
             return result[object_id]
         else:
@@ -63,9 +63,9 @@ class ObjectManager:
         '''Delete an object from the database.'''
         self.db_manager.delete_data_from_table(table_name, criteria)
 
-    def delete_object_from_management_table_by_id(self, table_name, object_id) -> None:
+    def delete_object_from_management_table_by_id(self, table_name, object_id, pk_column: str) -> None:
         '''Delete an object from the database.'''
-        self.db_manager.delete_data_from_table(table_name, criteria= f'object_id = {object_id}')
+        self.db_manager.delete_data_from_table(table_name, criteria= f'{pk_column} = {object_id}')
 
 
     # rachel-8511, ShaniStrassProg is it needed?
@@ -105,36 +105,36 @@ class ObjectManager:
             self.insert_object_to_management_table(table_name, metadata)
 
     
-    def delete_from_memory(self,object_name:str, criteria='default', object_id:Optional[str] =  None):
+    def delete_from_memory(self,object_name:str, pk_column: str, criteria='default', object_id:Optional[str] =  None):
 
         # if criteria not sent- use PK for deletion
         if criteria == 'default':
             if not object_id:
                 raise ValueError('must be or criteria or object id')
-            criteria = f'object_id = {object_id}'
+            criteria = f'{pk_column} = {object_id}'
 
         table_name = self.convert_object_name_to_management_table_name(object_name)
 
         self.delete_object_from_management_table(table_name, criteria)
 
 
-    def update_in_memory(self, object_name, updates, criteria='default', object_id:Optional[str] =  None):
+    def update_in_memory(self, object_name, updates, pk_column: str, criteria='default', object_id:Optional[str] =  None):
 
         # if criteria not sent- use PK for deletion
         if criteria == 'default':
             if not object_id:
                 raise ValueError('must be or criteria or object id')
-            criteria = f'object_id = {object_id}'
+            criteria = f'{pk_column} = {object_id}'
 
         table_name = self.convert_object_name_to_management_table_name(object_name)
         self.update_object_in_management_table_by_criteria(table_name, updates, criteria)
 
     
-    def get_from_memory(self, object_name, columns = ["*"], object_id = None, criteria = None):
+    def get_from_memory(self, object_name, pk_column: str, columns = ["*"], object_id = None, criteria = None):
         """get records from memory by criteria or id"""
         table_name = self.convert_object_name_to_management_table_name(object_name)
         if object_id:
-            criteria = f'object_id = {object_id}'
+            criteria = f'{pk_column} = {object_id}'
         return self.get_objects_from_management_table_by_criteria(table_name, columns, criteria)
 
     def convert_object_attributes_to_dictionary(**kwargs):
