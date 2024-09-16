@@ -21,11 +21,11 @@ class ObjectManager:
         self.object_manager.insert_object_to_management_table(table_name, object)
 
 
-    def delete_from_memory(self,object,object_id, criteria='default'):
+    def delete_from_memory(self,pk_column, pk_value, object_id, criteria='default'):
 
         # if criteria not sent- use PK for deletion
         if criteria == 'default':
-            criteria = f"{object.pk_column} = '{object.pk_value}'"
+            criteria = f"{pk_column} = '{pk_value}'"
 
         self.object_manager.delete_from_memory(self.object_name, criteria,object_id=object_id)
 

@@ -89,7 +89,7 @@ class DBManager:
         self.execute_query_without_results(delete_statement)
 
     # Tem-M
-    def get_columns_from_table(self, table_name):
+    def get_column_names_of_table(self, table_name):
         '''Get the columns from the specified table.'''
         try:
             get_columns_query = f"""PRAGMA table_info({table_name});"""
@@ -119,7 +119,7 @@ class DBManager:
         '''
         cols = columns
         if cols == ['*']:
-            cols = self.get_columns_from_table(table_name)
+            cols = self.get_column_names_of_table(table_name)
 
         columns_clause = ', '.join(cols)
         query = f'SELECT {columns_clause} FROM {table_name}'
@@ -134,7 +134,7 @@ class DBManager:
         except TypeError as e:
             raise Exception(f'Error selecting from {table_name}: {e}')
 
-    def is_exists_in_table(self, table_name:str, criteria:str):
+    def is_object_exist(self, table_name:str, criteria:str):
         """check if rows exists in table"""
         return self.select_and_return_records_from_table(table_name, criteria=criteria) != {}
 
