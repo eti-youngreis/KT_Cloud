@@ -8,11 +8,11 @@ class DBClusterManager:
         '''Initialize ObjectManager with the database connection.'''
         self.object_manager = ObjectManager(db_file)
         self.table_name ='cluster_managment'
-        self.create_table()
+        # self.create_table()
 
 
-    def createInMemoryDBCluster(self):
-        self.object_manager.save_in_memory()
+    def createInMemoryDBCluster(self, cluster_to_save):
+        self.object_manager.save_in_memory(cluster_to_save)
 
 
     def deleteInMemoryDBCluster(self):
@@ -25,4 +25,3 @@ class DBClusterManager:
 
     def modifyDBCluster(self):
         self.object_manager.update_in_memory()
-    

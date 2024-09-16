@@ -12,7 +12,7 @@ class ObjectManager:
     # for internal use only:
 
     # Riki7649255 based on rachel-8511
-    def create_management_table(self, table_name, table_structure='object_id INTEGER PRIMARY KEY AUTOINCREMENT,type_object TEXT NOT NULL,metadata TEXT NOT NULL')
+    def create_management_table(self, table_name, table_structure='object_id INTEGER PRIMARY KEY AUTOINCREMENT,type_object TEXT NOT NULL,metadata TEXT NOT NULL'):
         self.db_manager.create_table(table_name, table_structure)
 
     
@@ -60,21 +60,28 @@ class ObjectManager:
 
     def is_management_table_exist(table_name):
         # check if table exists using single result query
-        return db_manager.execute_query_with_single_result(f'desc table {table_name}')
+        return self.db_manager.execute_query_with_single_result(f'desc table {table_name}')
 
 
     # for outer use:
-    def save_in_memory(self, object):
+    # def save_in_memory(self, object):
        
+    #     # insert object info into management table mng_{object_name}s
+    #     # for exmple: object db_instance will be saved in table mng_db_instances
+    #     table_name = self.convert_object_name_to_management_table_name(self.object_name)
+
+    #     if not self.is_management_table_exist(table_name):
+    #         self.create_management_table(table_name)
+        
+    #     self.insert_object_to_management_table(table_name, object)
+
+    def save_in_memory(self, object):
         # insert object info into management table mng_{object_name}s
         # for exmple: object db_instance will be saved in table mng_db_instances
-        table_name = convert_object_name_to_management_table_name(self.object_name)
-
-        if not is_management_table_exist(table_name):
-            create_management_table(table_name)
-        
-        insert_object_to_management_table(table_name, object)
-
+        table_name = str(object.__class__.__name__)
+        if not self.is_management_table_exist(table_name):
+            self.create_management_table(table_name)
+        self.insert_object_to_management_table(table_name, object)
     
     def delete_from_memory(self,criteria='default'):
         
@@ -82,9 +89,9 @@ class ObjectManager:
         if criteria == 'default':
             criteria = f'{self.pk_column} = {self.pk_value}'
         
-        table_name = convert_object_name_to_management_table_name(self.object_name)
+        table_name = self.convert_object_name_to_management_table_name(self.object_name)
         
-        delete_data_from_table(table_name, criteria)
+        self.delete_data_from_table(table_name, criteria)
 
 
     def update_in_memory(self, updates, criteria='default'):
@@ -93,13 +100,13 @@ class ObjectManager:
         if criteria == 'default':
             criteria = f'{self.pk_column} = {self.pk_value}'
 
-        table_name = convert_object_name_to_management_table_name(self.object_name)
+        table_name = self.convert_object_name_to_management_table_name(self.object_name)
 
-        update_object_in_management_table_by_criteria(table_name, updates, criteria)
+        self.update_object_in_management_table_by_criteria(table_name, updates, criteria)
 
 
     def get_from_memory(self):
-        get_object_from_management_table(self.object_id)
+        self.get_object_from_management_table(self.object_id)
 
 
     def convert_object_attributes_to_dictionary(**kwargs):
