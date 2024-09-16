@@ -1,10 +1,16 @@
-from DataAccess import StorageManager
+# from DataAccess import StorageManager
 from typing import Dict, Any
 import json
 import aiofiles
 import os
 
-from Models.VesionModel import Version
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
+
+from ..Models.VesionModel import Version
 from .StorageManager import StorageManager
 class VersionManager:
     def __init__(self, metadata_file="s3 project/KT_Cloud/Storage/server/metadata.json"):

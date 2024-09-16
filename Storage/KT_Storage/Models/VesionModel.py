@@ -1,7 +1,7 @@
 from datetime import datetime
 import hashlib
-from AclModel import Acl
-from Tag import Tag
+from .AclModel import Acl
+from .Tag import Tag
 
 
 # domain/versioning.py
