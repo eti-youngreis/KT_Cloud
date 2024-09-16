@@ -11,21 +11,21 @@ class DBManager:
 
     # rachel-8511, ShaniStrassProg
     def close(self):
-    '''Close the database connection.'''
-    self.connection.close()
+        '''Close the database connection.'''
+        self.connection.close()
 
 
     # saraNoigershel
     def execute_query_with_multiple_results(self, query: str) -> Optional[List[Tuple]]:
-    '''Execute a given query and return the results.'''
-    try:
-        c = self.connection.cursor()
-        c.execute(query)
-        results = c.fetchall()
-        # self.connection.commit() ???
-        return results if results else None
-    except OperationalError as e:
-        raise Exception(f'Error executing query {query}: {e}')
+        '''Execute a given query and return the results.'''
+        try:
+            c = self.connection.cursor()
+            c.execute(query)
+            results = c.fetchall()
+            # self.connection.commit() ???
+            return results if results else None
+        except OperationalError as e:
+            raise Exception(f'Error executing query {query}: {e}')
 
 
     # ShaniStrassProg 
@@ -67,31 +67,30 @@ class DBManager:
 
     # Riki7649255 based on rachel-8511, Shani
     def update_records_in_table(self, table_name: str, updates: Dict[str, Any], criteria: str) -> None:
-    '''Update records in the specified table based on criteria.'''
-    
-    # add documentation here
-    set_clause = ', '.join([f'{k} = ?' for k in updates.keys()])
-    values = list(updates.values())
-    
-    update_statement = f'''
-        UPDATE {table_name}
-        SET {set_clause}
-        WHERE {criteria}
-    '''
-    
-    execute_query_without_results(update_statement)
+        '''Update records in the specified table based on criteria.'''
+
+        # add documentation here
+        set_clause = ', '.join([f'{k} = ?' for k in updates.keys()])
+        values = list(updates.values())
+
+        update_statement = f'''
+            UPDATE {table_name}
+            SET {set_clause}
+            WHERE {criteria}
+        '''
+
+        execute_query_without_results(update_statement)
 
 
     # Riki7649255 based on rachel-8511
     def delete_data_from_table(self, table_name: str, criteria: str) -> None:
-    '''Delete a record from the specified table based on criteria.'''
-    
-    delete_statement = f'''
-        DELETE FROM {table_name}
-        WHERE {criteria}
-    ''')
-    
-    execute_query_without_results(delete_statement)
+        '''Delete a record from the specified table based on criteria.'''
+
+        delete_statement = f'''
+            DELETE FROM {table_name}
+            WHERE {criteria}'''
+
+        execute_query_without_results(delete_statement)
 
 
     # rachel-8511, Riki7649255

@@ -12,7 +12,7 @@ class ObjectManager:
     # for internal use only:
 
     # Riki7649255 based on rachel-8511
-    def create_management_table(self, table_name, table_structure='object_id INTEGER PRIMARY KEY AUTOINCREMENT,type_object TEXT NOT NULL,metadata TEXT NOT NULL')
+    def create_management_table(self, table_name, table_structure='object_id INTEGER PRIMARY KEY AUTOINCREMENT,type_object TEXT NOT NULL,metadata TEXT NOT NULL'):
         self.db_manager.create_table(table_name, table_structure)
 
     
