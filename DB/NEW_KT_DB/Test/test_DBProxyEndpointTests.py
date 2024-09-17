@@ -51,11 +51,9 @@ def setup_db_proxy_endpoint(endpoint_controller: DBProxyEndpointController):
     
 
 
-def _test_exists_in_db(endpoint_manager:DBProxyEndpointManager, endpoint_name, exists_flag:bool = True):
-    if exists_flag:
-        assert endpoint_manager.is_exists(endpoint_name)
-    else:
-        assert not endpoint_manager.is_exists(endpoint_name)
+def _test_exists_in_db(endpoint_manager:DBProxyEndpointManager, endpoint_name):
+    assert endpoint_manager.is_exists(endpoint_name)
+   
 
 def _test_file_content_is_correct(storage_manager:StorageManager,file_path, db_proxy_name, endpoint_name, target_role):
     pass
@@ -131,10 +129,10 @@ def test_delete_db_proxy_endpoint(setup_db_proxy_endpoint, endpoint_controller:D
     
     # Check if phisical file not exists
     endpoint_file_name = endpoint_service._convert_endpoint_name_to_endpoint_file_name(endpoint_name)
-    test_file_exists(endpoint_file_name, False)
+    assert not test_file_exists(endpoint_file_name)
     
     # Check if data not in table
-    _test_exists_in_db(endpoint_name, False)
+    assert not _test_exists_in_db(endpoint_name)
     
 
 def test_delete_non_exist_db_proxy_endpoint(endpoint_controller:DBProxyEndpointController):
@@ -166,12 +164,12 @@ def test_modify_name_to_db_proxy_endpoint(setup_db_proxy_endpoint,endpoint_servi
     # Check if phisical file is up-to-date
     old_endpoint_file_name = endpoint_service._convert_endpoint_name_to_endpoint_file_name(endpoint_name)
     new_endpoint_file_name = endpoint_service._convert_endpoint_name_to_endpoint_file_name(new_name)
-    test_file_exists(old_endpoint_file_name, False)
-    test_file_exists(new_endpoint_file_name, True)
+    assert not test_file_exists(old_endpoint_file_name)
+    test_file_exists(new_endpoint_file_name)
     
     # Check if data in table in updated
     _test_exists_in_db(new_name)
-    _test_exists_in_db(endpoint_name, False)
+    assert not _test_exists_in_db(endpoint_name)
     
     
 

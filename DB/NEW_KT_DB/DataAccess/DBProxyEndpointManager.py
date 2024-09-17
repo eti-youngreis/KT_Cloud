@@ -1,19 +1,29 @@
 from typing import Dict, Any, Optional, List
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 from DB.NEW_KT_DB.Models.DBProxyEndpointModel import DBProxyEndpoint
-
+import json
 class DBProxyEndpointManager:
     
-    def __init__(self, object_manager):
-        self.object_manager:ObjectManager = object_manager
-        self.object_manager._create_management_table(DBProxyEndpoint.object_name, DBProxyEndpoint.table_structure)
+    def _to_sql(data_dict):
+        # Convert the model instance to a dictionary
+        values = '(' + ", ".join(f'\'{json.dumps(v)}\'' if isinstance(v, dict) or isinstance(v, list) else f'\'{v}\'' if isinstance(v, str) else f'\'{str(v)}\''
+                           for v in data_dict.values()) + ')'
+        return values
 
-    def create(self, db_proxy_endpoint: DBProxyEndpoint):
+    
+    def __init__(self, object_manager:ObjectManager):
+        self.object_manager:ObjectManager = object_manager
+        self.object_manager.create_management_table(DBProxyEndpoint.object_name, DBProxyEndpoint.table_structure)
+    
+    
+    def create(self, db_proxy_endpoint_description):
         """insert object to table"""
-        self.object_manager.save_in_memory(DBProxyEndpoint.object_name, db_proxy_endpoint)
+        values = DBProxyEndpointManager._to_sql(db_proxy_endpoint_description)
+        self.object_manager.save_in_memory(DBProxyEndpoint.object_name, values)
 
     def get(self, name: str):
         """convert data to object"""
+        # self.object_manager.get_from_memory(DBProxyEndpoint.object_name, criteria='')
         data = self.object_manager.get_from_memory_by_id(DBProxyEndpoint.pk_column, DBProxyEndpoint.object_name, name)
         if data:
             data_mapping = {'DBProxyEndpointName':name}
