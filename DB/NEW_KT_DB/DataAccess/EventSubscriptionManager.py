@@ -9,19 +9,19 @@ class EventSubscriptionManager:
         '''Initialize ObjectManager with the database connection.'''
         self.object_manager = ObjectManager(db_file)
         self.object_manager.create_management_table(
-            EventSubscription.table_name, EventSubscription.table_schema)
+            EventSubscription.get_object_name(), EventSubscription.table_schema)
 
     def createInMemoryEventSubscription(self, event_subscription: EventSubscription):
-        self.object_manager.save_in_memory(self.table_name, event_subscription.to_dict(
-        ), object_id=event_subscription.subscription_name)
+        self.object_manager.save_in_memory(event_subscription.get_object_name(), event_subscription.to_sql(
+        ))
 
     def deleteInMemoryEventSubscription(self, subscription_name: str):
-        self.object_manager.delete_from_memory(
-            object_name=self.table_name, object_id=subscription_name)
+        self.object_manager.delete_from_memory_by_pk(
+            EventSubscription.get_object_name(), EventSubscription.pk_column, subscription_name)
 
     def describeEventSubscription(self, subscription_name: str, columns=['*']) -> EventSubscription:
         event_subscription_dict = self.object_manager.get_from_memory(
-            object_name=self.table_name, columns=columns, object_id=subscription_name)
+            EventSubscription.get_object_name(), columns, f'"{EventSubscription.pk_column} = "{subscription_name}"')
         event_subscription = EventSubscription(**event_subscription_dict)
         # for key, value in updates.items():
         #     setattr(current_subscription, key, value)

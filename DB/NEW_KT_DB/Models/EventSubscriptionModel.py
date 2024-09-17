@@ -31,15 +31,13 @@ class EventCategory(Enum):
 
 class EventSubscription:
 
-    table_name = 'event_subscriptions'
     pk_column = 'subscription_name'
-    table_schema  = {
-        'subscription_name': 'TEXT PRIMARY KEY',
-        'source_type': 'TEXT',
-        'source_ids': 'TEXT',
-        'event_categories': 'TEXT',
-        'sns_topic_arn': 'TEXT'
-    }
+    table_schema = """
+        subscription_name TEXT PRIMARY KEY,
+        source_type TEXT,
+        source_ids TEXT,
+        event_categories TEXT,
+        sns_topic_arn TEXT"""
 
     def __init__(
         self,
@@ -65,11 +63,22 @@ class EventSubscription:
         '''Retrieve the data of the event subscription as a dictionary.'''
 
         return ObjectManager.convert_object_attributes_to_dictionary(
-            subscription_name = self.subscription_name,
-            source_type = self.source_type.value,
-            sources = {source_type: list(sources) for source_type, sources in self.sources.items()},
-            event_categories = [event_category.value for event_category in self.event_categories],
-            sns_topic_arn = self.sns_topic_arn,
-            pk_column = self.pk_column,
-            pk_value = self.pk_value
+            subscription_name=self.subscription_name,
+            source_type=self.source_type.value,
+            sources={source_type: list(sources)
+                     for source_type, sources in self.sources.items()},
+            event_categories=[
+                event_category.value for event_category in self.event_categories],
+            sns_topic_arn=self.sns_topic_arn,
+            pk_column=self.pk_column,
+            pk_value=self.pk_value
         )
+
+    def to_sql(self) -> str:
+        data = self.to_dict()
+        values = ', '.join(f"'{value}'" for value in data.values())
+        return values
+
+    @staticmethod
+    def get_object_name() -> str:
+        return __class__.__name__.removesuffix('Model')
