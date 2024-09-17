@@ -12,9 +12,10 @@ class ObjectManager:
     def create_management_table(self, object_name, table_structure='default', pk_column_data_type='INTEGER'):
 
         table_name = self._convert_object_name_to_management_table_name(object_name)
+        pk_constraint = ' AUTOINCREMENT' if pk_column_data_type == 'INTEGER' else ''
 
         if table_structure == 'default':
-            table_structure = f'object_id {pk_column_data_type} PRIMARY KEY AUTOINCREMENT,type_object TEXT NOT NULL,metadata TEXT NOT NULL'
+            table_structure = f'object_id {pk_column_data_type} PRIMARY KEY {pk_constraint},type_object TEXT NOT NULL,metadata TEXT NOT NULL'
         self.db_manager.create_table(table_name, table_structure)
 
 
@@ -44,7 +45,7 @@ class ObjectManager:
         # for exmple: object db_instance will be saved in table mng_db_instances
         table_name = self._convert_object_name_to_management_table_name(object_name)
 
-        if not self._is_management_table_exist(table_name):
+        if not self._is_management_table_exist(object_name):
             self.create_management_table(object_name)
         
         if columns is None:
@@ -88,7 +89,7 @@ class ObjectManager:
         if columns is None and criteria is None:
             return self.db_manager.get_data_from_table(table_name)
         elif columns is None:
-            return self.object_manager.get_from_memory(object_name, criteria=criteria)
+            return self.db_manager.get_data_from_table(table_name, criteria=criteria)
         elif criteria is None:
             return self.db_manager.get_data_from_table(table_name, columns)
         else:
