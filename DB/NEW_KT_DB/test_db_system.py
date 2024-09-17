@@ -14,7 +14,7 @@ from DB.NEW_KT_DB.Controller.DBInstanceController import DBInstanceController
 
 
 def main():
-    # יצירת מופעים של המחלקות הנדרשות
+    # Creating instances of required classes
     db_file = os.path.join('DB', 'NEW_KT_DB', 'test_database.db')
     db_manager = DBManager(db_file)
     object_manager = ObjectManager(db_file)
@@ -23,8 +23,8 @@ def main():
     db_instance_controller = DBInstanceController(db_instance_service)
     db_snapshot_controller = DBSnapshotController(db_instance_service)
 
-    # בדיקת פונקציונליות DBInstanceController
-    print("בדיקת DBInstanceController:")
+    # Testing DBInstanceController functionality
+    print("Testing DBInstanceController:")
     instance_id = "test-instance-1"
     db_instance = db_instance_controller.create_db_instance(
         db_instance_identifier=instance_id,
@@ -33,62 +33,62 @@ def main():
         master_user_password="password123",
         db_name="testdb"
     )
-    print(f"מופע DB נוצר: {instance_id}")
+    print(f"DB instance created: {instance_id}")
 
     description = db_instance_controller.describe_db_instance(instance_id)
-    print(f"תיאור מופע DB: {description}")
+    print(f"DB instance description: {description}")
 
     db_instance_controller.modify_db_instance(instance_id, allocated_storage=30)
-    print(f"מופע DB שונה: {instance_id}")
+    print(f"DB instance modified: {instance_id}")
 
     db_instance_controller.stop_db_instance(instance_id)
-    print(f"מופע DB הופסק: {instance_id}")
+    print(f"DB instance stopped: {instance_id}")
 
     db_instance_controller.start_db_instance(instance_id)
-    print(f"מופע DB הופעל: {instance_id}")
+    print(f"DB instance started: {instance_id}")
 
-    # בדיקת פונקציונליות DBSnapshotController
-    print("\nבדיקת DBSnapshotController:")
+    # Testing DBSnapshotController functionality
+    print("\nTesting DBSnapshotController:")
     snapshot_id = "test-snapshot-1"
     db_snapshot_controller.create_snapshot(instance_id, snapshot_id)
-    print(f"צילום מצב נוצר: {snapshot_id}")
+    print(f"Snapshot created: {snapshot_id}")
 
     snapshots = db_snapshot_controller.list_snapshots(instance_id)
-    print(f"רשימת צילומי מצב: {snapshots}")
+    print(f"List of snapshots: {snapshots}")
 
     snapshot_description = db_snapshot_controller.describe_snapshot(instance_id, snapshot_id)
-    print(f"תיאור צילום מצב: {snapshot_description}")
+    print(f"Snapshot description: {snapshot_description}")
 
-    db_snapshot_controller.modify_snapshot(instance_id, snapshot_id, description="צילום מצב לבדיקה")
-    print(f"צילום מצב שונה: {snapshot_id}")
+    db_snapshot_controller.modify_snapshot(instance_id, snapshot_id, description="Test snapshot")
+    print(f"Snapshot modified: {snapshot_id}")
 
     db_snapshot_controller.restore_snapshot(instance_id, snapshot_id)
-    print(f"שחזור מצילום מצב: {snapshot_id}")
+    print(f"Restored from snapshot: {snapshot_id}")
 
     db_snapshot_controller.delete_snapshot(instance_id, snapshot_id)
-    print(f"צילום מצב נמחק: {snapshot_id}")
+    print(f"Snapshot deleted: {snapshot_id}")
 
-    # בדיקת ביצוע שאילתות
-    print("\nבדיקת ביצוע שאילתות:")
+    # Testing query execution
+    print("\nTesting query execution:")
     create_table_query = "CREATE TABLE test_table (id INTEGER PRIMARY KEY, name TEXT)"
     db_instance_controller.service.execute_query(instance_id, create_table_query, "testdb")
-    print("טבלה נוצרה")
+    print("Table created")
 
     insert_query = "INSERT INTO test_table (name) VALUES ('Test Name')"
     db_instance_controller.service.execute_query(instance_id, insert_query, "testdb")
-    print("נתונים הוכנסו")
+    print("Data inserted")
 
     select_query = "SELECT * FROM test_table"
     result = db_instance_controller.service.execute_query(instance_id, select_query, "testdb")
-    print(f"תוצאת שאילתת SELECT: {result}")
+    print(f"SELECT query result: {result}")
 
-    # ניקוי
+    # Cleanup
     db_instance_controller.delete_db_instance(instance_id)
-    print(f"מופע DB נמחק: {instance_id}")
+    print(f"DB instance deleted: {instance_id}")
 
     if os.path.exists(db_file):
         os.remove(db_file)
-        print(f"קובץ מסד הנתונים {db_file} נמחק")
+        print(f"Database file {db_file} deleted")
 
 if __name__ == "__main__":
     main()
