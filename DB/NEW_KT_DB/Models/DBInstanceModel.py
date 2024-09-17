@@ -49,7 +49,7 @@ class DBInstanceModel:
 
             node_subSnapshot_dic={str(k): v.to_dict() for k, v in self._node_subSnapshot_dic.items()},
             node_subSnapshot_name_to_id=self._node_subSnapshot_name_to_id,
-            current_version_ids_queue=[str(id_snapshot) for id_snapshot in self._current_version_ids_queue]
+            current_version_ids_queue=[str(id_snapshot) for id_snapshot in self._current_version_ids_queue],
 
             pk_column = self.pk_column,
             pk_value = self.pk_value

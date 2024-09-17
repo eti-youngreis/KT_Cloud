@@ -8,7 +8,6 @@ class DBInstanceManager:
     
     def __init__(self, db_file: str):
         self.object_manager = ObjectManager(db_file)
-        # self.object_name = self.__class__.__name__.replace('Manager', '').lower()
         self._create_db_instance_managment_table()
 
     def _create_db_instance_managment_table(self):
