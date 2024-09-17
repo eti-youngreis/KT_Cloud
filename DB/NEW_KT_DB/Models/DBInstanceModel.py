@@ -51,8 +51,6 @@ class DBInstanceModel:
         )
 
 
-
-
 class Node_SubSnapshot:
 
     def __init__(self, parent=None, endpoint=None, **kwargs):
@@ -73,7 +71,7 @@ class Node_SubSnapshot:
             parent_id=str(self.parent_id) if self.parent_id else None,
             dbs_paths_dic=self.dbs_paths_dic,
             deleted_records_db_path=self.deleted_records_db_path,
-            snapshot_type=self.snapshot_type
+            snapshot_type=self.snapshot_type,
             created_time=self.created_time.isoformat()
         )    
 
