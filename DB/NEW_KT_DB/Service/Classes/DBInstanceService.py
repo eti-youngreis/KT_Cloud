@@ -161,22 +161,26 @@ class DBInstanceService(DBO):
     
     def modify_snapshot(self, db_instance_identifier, db_snapshot_identifier, **kwargs):
         db_instance = self.get(db_instance_identifier)
-    
+
         if db_snapshot_identifier not in db_instance._node_subSnapshot_name_to_id:
             raise DbSnapshotIdentifierNotFoundError(f"Snapshot identifier '{db_snapshot_identifier}' not found.")
-    
+
         node_id = db_instance._node_subSnapshot_name_to_id[db_snapshot_identifier]
         snapshot = db_instance._node_subSnapshot_dic.get(node_id)
-    
+
         if snapshot:
+            modifiable_attributes = ['description', 'tags']  # Add other modifiable attributes as needed
             for key, value in kwargs.items():
-                if hasattr(snapshot, key):
-                    setattr(snapshot, key, value)
+                if key in modifiable_attributes:
+                    if hasattr(snapshot, key):
+                        setattr(snapshot, key, value)
+                    else:
+                        print(f"Warning: Attribute '{key}' does not exist for the snapshot.")
                 else:
-                    print(f"Warning: Attribute '{key}' does not exist for the snapshot.")
-    
+                    print(f"Warning: Attribute '{key}' cannot be modified for snapshots.")
+
         self.dal.modifyDBInstance(db_instance)
-    
+
         return snapshot
     
     def stop(self, db_instance_identifier):
