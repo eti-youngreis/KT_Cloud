@@ -7,7 +7,7 @@ class ObjectManager:
     def __init__(self, db_file: str,type, storage_path="D:\\s3_project\\server"):
         """Initialize ObjectManager with the database connection."""
         self.object_manager = ObjectManagerDB(db_file)
-        self.object_name = type
+
 
     # for outer use:
     def save_in_memory(self, object_name, object_info, columns=None):
@@ -34,6 +34,8 @@ class ObjectManager:
 
         if columns is None and criteria is None:
             return self.object_manager.get_from_memory(object_name)
+        elif columns is None:
+            return self.object_manager.get_from_memory(object_name, criteria=criteria)
         elif criteria is None:
             return self.object_manager.get_from_memory(object_name, columns)
         else:
