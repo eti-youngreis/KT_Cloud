@@ -23,4 +23,4 @@ class SNSTopicController:
 
     def get_sns_topic(self, topic_name: str) -> SNSTopicModel:
         '''Get an existing SNS topic.'''
-        return self.sns_service.get_sns_topic(topic_name)
+        return self.sns_service.get(topic_name)
