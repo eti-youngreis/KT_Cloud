@@ -1,7 +1,11 @@
 from typing import Dict, Any, Optional
 import json
 import sqlite3
-from DBManager import DBManager
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from DataAccess.DBManager import DBManager
  
 class ObjectManager:
     def __init__(self, db_file: str):
@@ -27,7 +31,7 @@ class ObjectManager:
             self.db_manager.insert_data_into_table(table_name, object_info, columns_to_populate)
 
 
-    def _update_object_in_management_table_by_criteria(self, table_name, updates, criteria):
+    def _update_object_in_management_table_by_criteria(self, table_name, updates, criteria=None):
         self.db_manager.update_records_in_table(table_name, updates, criteria)
 
 
