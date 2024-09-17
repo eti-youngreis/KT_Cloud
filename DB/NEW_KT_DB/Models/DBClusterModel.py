@@ -1,7 +1,12 @@
 from datetime import datetime
 from typing import Dict
-from DataAccess import ObjectManager
+import sys
 import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from DataAccess import ObjectManager
+import json
 class Cluster:
 
     def __init__(self, **kwargs): 
@@ -39,7 +44,8 @@ class Cluster:
     def to_dict(self) -> Dict:
         '''Retrieve the data of the DB cluster as a dictionary.'''
 
-        return ObjectManager.convert_object_attributes_to_dictionary(
+        return ObjectManager.ObjectManager.convert_object_attributes_to_dictionary(
+            self,
             db_cluster_identifier=self.db_cluster_identifier,
             engine=self.engine,
             allocated_storage=self.allocated_storage,
@@ -59,7 +65,7 @@ class Cluster:
             storage_encrypted=self.storage_encrypted,
             storage_type=self.storage_type,
             tags=self.tags,
-            created_at=self.created_at,
+            # created_at=self.created_at,
             status=self.status,
             primary_writer_instance=self.primary_writer_instance,
             reader_instances=self.reader_instances,
@@ -103,3 +109,43 @@ class Cluster:
     #         pk_column=self.pk_column,
     #         pk_value=self.pk_value
     #     )
+    def cluster_to_dict(cluster):
+        # Create a dictionary with the key as the cluster identifier
+        cluster_dict = {
+            cluster.db_cluster_identifier: {
+                "engine": cluster.engine,
+                "allocated_storage": cluster.allocated_storage,
+                "copy_tags_to_snapshot": cluster.copy_tags_to_snapshot,
+                "db_cluster_instance_class": cluster.db_cluster_instance_class,
+                "database_name": cluster.database_name,
+                "db_cluster_parameter_group_name": cluster.db_cluster_parameter_group_name,
+                "db_subnet_group_name": cluster.db_subnet_group_name,
+                "deletion_protection": cluster.deletion_protection,
+                "engine_version": cluster.engine_version,
+                "master_username": cluster.master_username,
+                "master_user_password": cluster.master_user_password,
+                "manage_master_user_password": cluster.manage_master_user_password,
+                "option_group_name": cluster.option_group_name,
+                "port": cluster.port,
+                "replication_source_identifier": cluster.replication_source_identifier,
+                "storage_encrypted": cluster.storage_encrypted,
+                "storage_type": cluster.storage_type,
+                "tags": cluster.tags,
+                # "created_at": str(cluster.created_at),  # Uncomment if needed
+                "status": cluster.status,
+                "primary_writer_instance": cluster.primary_writer_instance,
+                "reader_instances": cluster.reader_instances,
+                "cluster_endpoint": cluster.cluster_endpoint,
+                "instances_endpoints": cluster.instances_endpoints,
+                "pk_column": cluster.pk_column,
+                "pk_value": cluster.pk_value
+            }
+        }
+        return cluster_dict
+
+    def to_sql(self):
+        # Convert the model instance to a dictionary
+        data_dict = self.to_dict()
+        values = '(' + ", ".join(f'\'{json.dumps(v)}\'' if isinstance(v, dict) or isinstance(v, list) else f'\'{v}\'' if isinstance(v, str) else f'\'{str(v)}\''
+                           for v in data_dict.values()) + ')'
+        return values

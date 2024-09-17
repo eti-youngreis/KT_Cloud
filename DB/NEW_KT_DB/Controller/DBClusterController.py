@@ -1,5 +1,12 @@
 # from Service.Classes import DBClusterService
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from KT_Cloud.Storage.NEW_KT_Storage.DataAccess import StorageManager
 from Service.Classes.DBClusterService import DBClusterService
+from DataAccess import DBClusterManager
 class DBClusterController:
     def __init__(self, service: DBClusterService):
         self.service = service
@@ -18,10 +25,18 @@ class DBClusterController:
 
 
 if __name__=='__main__':
-    clusterController = DBClusterController()
+
+    desktop_path = os.path.join(os.path.expanduser('~'), 'Desktop')
+    cluster_directory = os.path.join(desktop_path, f'Clusters/clusters.db')
+    base = os.path.join(desktop_path, f'Clusters')
+    storage_manager = StorageManager.StorageManager(base)
+    clusterManager = DBClusterManager.DBClusterManager(cluster_directory)
+    clusterService = DBClusterService(clusterManager,storage_manager, cluster_directory)
+    clusterController = DBClusterController(clusterService)
     cluster_data = {
-    'db_cluster_identifier': 'my-cluster-1',
-    'engine': 'aurora-mysql',
+    'db_cluster_identifier': 'my-cluster-3',
+    'engine': 'mysql',
+    'allocated_storage':5,
     'db_subnet_group_name': 'my-subnet-group'
     }
 

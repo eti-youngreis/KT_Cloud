@@ -1,5 +1,10 @@
 import re
-import GeneralValidations
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from Validation import GeneralValidations
 
 # def is_db_cluster_name_valid(cluster_name):
 #     return is_length_in_range(cluster_name, 5, 20)

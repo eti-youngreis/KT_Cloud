@@ -2,12 +2,14 @@ from typing import Dict, Any
 import json
 import sqlite3
 from DataAccess import ObjectManager
+from typing import Optional
 
 class DBClusterManager:
     def __init__(self, db_file: str):
         '''Initialize ObjectManager with the database connection.'''
-        self.object_manager = ObjectManager(db_file)
-        self.table_name ='cluster_managment'
+        self.object_manager = ObjectManager.ObjectManager(db_file)
+        self.object_name ='clusters'
+        self.pk_column = 'ClusterID'
         # self.create_table()
 
 
@@ -15,13 +17,30 @@ class DBClusterManager:
         self.object_manager.save_in_memory(cluster_to_save)
 
 
-    def deleteInMemoryDBCluster(self):
-        self.object_manager.delete_from_memory()
+    def deleteInMemoryDBCluster(self,cluster_identifier):
+        self.object_manager.delete_from_memory(cluster_identifier)
 
 
-    def describeDBCluster(self):
-        self.object_manager.get_from_memory()
+    def describeDBCluster(self, cluster_id):
+        self.object_manager.get_from_memory(self.object_name, object_id = cluster_id)
 
+    def modifyDBCluster(self, cluster_id, updates):
+        self.object_manager.update_in_memory(self.object_name, updates, object_id = cluster_id)
 
-    def modifyDBCluster(self):
-        self.object_manager.update_in_memory()
+    def select(self, name:Optional[str] = None, columns = ["*"]):
+        data = self.object_manager.get_from_memory(self.object_name, columns = columns, object_id = name)
+        if data:
+            data_to_return = [{col:data[col] for col in columns}]
+            data_to_return[self.pk_column] = name
+            return data_to_return
+            
+        else:
+            raise ValueError(f"db cluster with name '{name}' not found")
+
+    def is_exists(self, name):
+        """check if object exists in table"""
+        try:
+            self.select(name)
+            return True
+        except:
+            return False
