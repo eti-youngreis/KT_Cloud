@@ -16,7 +16,7 @@ class DBClusterService(DBO):
     
     # validations here
 
-    def create(self, db_name: str, description: str = None, progress: str = None):
+    def create(self, db_name: str, description: str, progress: str):
         '''Create a new DBSnapshot.'''
         # Create a timestamp with the current date and time
         current_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -68,8 +68,8 @@ class DBClusterService(DBO):
         return self.dal.describeDBCluster()
         
 
-    def modify(self, owner_alias: str = None, status: str = None, description: str = None,
-               progress: str = None):
+    def modify(self, owner_alias: str, status: str, description: str,
+               progress: str):
         '''Modify an existing DBCluster.'''
         # update object in code
         # modify physical object

@@ -7,7 +7,6 @@ class DBSnapshotManager:
     def __init__(self, db_file: str):
         '''Initialize ObjectManager with the database connection.'''
         self.object_manager = ObjectManager(db_file)
-        self.table_name ='snapshot_managment'
         self.create_table()
 
 
