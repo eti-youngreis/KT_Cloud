@@ -52,7 +52,6 @@ def test_create_valid_db_instance(db_instance_controller):
         "master_user_password": "password"
     }
     response = db_instance_controller.create_db_instance(**attributes)
-    print('response:',response)
     assert response['DBInstance']['db_instance_identifier'] == "db123"
     assert response['DBInstance']['master_username'] == "admin"
     with pytest.raises(AlreadyExistsError):
@@ -66,12 +65,12 @@ def test_delete_db_instance(db_instance_controller):
     }
     
     db_instance_controller.create_db_instance(**attributes)
+    print('db_instance_controller.describe_db_instance("db123"):',db_instance_controller.describe_db_instance("db123"))
     
     db_instance_controller.delete_db_instance({
         "db_instance_identifier": "db123",
         "skip_final_snapshot": True
     })
-    
     with pytest.raises(DBInstanceNotFoundError):
         db_instance_controller.describe_db_instance("db123")
 
@@ -120,7 +119,7 @@ def test_modify_db_instance(db_instance_controller):
     
     response = db_instance_controller.modify_db_instance(**updates)
     
-    assert response['DBInstance']['allocated_storage'] == 50
+    assert response['DBInstance'].allocated_storage == 50
 
 def test_describe_db_instance_not_found(db_instance_controller):
     with pytest.raises(DBInstanceNotFoundError):

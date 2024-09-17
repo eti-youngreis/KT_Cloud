@@ -119,6 +119,7 @@ class DBManager:
 
     def delete_data_from_table(self, table_name: str, criteria: str) -> None:
         '''Delete a record from the specified table based on criteria.'''
+
         delete_statement = f'''
             DELETE FROM {table_name}
             WHERE {criteria}
@@ -132,7 +133,6 @@ class DBManager:
         try:
             get_columns_query = f"""PRAGMA table_info({table_name});"""
             cols = self.execute_query_with_multiple_results(get_columns_query)
-            print(cols)
             return [col[1] for col in cols]
         except EmptyResultsetError as e:
             print(f"table {table_name} not found: {e}")
