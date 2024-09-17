@@ -9,7 +9,7 @@ class EventSubscriptionManager:
         '''Initialize ObjectManager with the database connection.'''
         self.object_manager = ObjectManager(db_file)
         self.object_manager.create_management_table(
-            EventSubscription.get_object_name(), EventSubscription.table_schema)
+            EventSubscription.get_object_name(), EventSubscription.table_schema, 'TEXT')
 
     def createInMemoryEventSubscription(self, event_subscription: EventSubscription) -> None:
         self.object_manager.save_in_memory(event_subscription.get_object_name(), event_subscription.to_sql(
@@ -20,8 +20,8 @@ class EventSubscriptionManager:
             EventSubscription.get_object_name(), EventSubscription.pk_column, subscription_name)
 
     def describeEventSubscription(self, subscription_name: str, columns: Optional[List[str]] = None, criteria: Optional[str] = None) -> EventSubscription:
-        event_subscription_dict = self.object_manager.get_all_objects_from_memory(
-            EventSubscription.get_object_name())
+        event_subscription_dict = self.object_manager.get_from_memory(
+            EventSubscription.get_object_name(), columns, criteria)
         event_subscription = EventSubscription(
             **json.loads(event_subscription_dict))
         return event_subscription
