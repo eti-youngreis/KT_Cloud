@@ -18,15 +18,7 @@ class DBSnapshotController:
         return list(db_instance._node_subSnapshot_name_to_id.keys())
 
     def describe_snapshot(self, db_instance_identifier: str, db_snapshot_identifier: str):
-        db_instance = self.db_instance_service.get(db_instance_identifier)
-        snapshot_id = db_instance._node_subSnapshot_name_to_id.get(db_snapshot_identifier)
-        if snapshot_id:
-            snapshot = db_instance._node_subSnapshot_dic.get(snapshot_id)
-            return {
-                "SnapshotIdentifier": db_snapshot_identifier,
-                "DBInstanceIdentifier": db_instance_identifier,
-                "SnapshotCreationTime": snapshot.created_time 
-                "SnapshotType": snapshot.snapshot_type, 
-                
-            }
-        return None
+        return self.db_instance_service.describe_snapshot(db_instance_identifier, db_snapshot_identifier)
+
+    def modify_snapshot(self, db_instance_identifier: str, db_snapshot_identifier: str, **kwargs):
+        return self.db_instance_service.modify_snapshot(db_instance_identifier, db_snapshot_identifier, **kwargs)

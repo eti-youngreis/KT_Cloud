@@ -9,6 +9,7 @@ import sqlite3
 import re
 from typing import Deque, List, Tuple
 from DB.NEW_KT_DB.Models.DBInstanceModel import Node_SubSnapshot
+import uuid
 
 class DBInstanceService(DBO):
     def __init__(self, dal: DBInstanceManager):
@@ -36,7 +37,6 @@ class DBInstanceService(DBO):
     def describe(self, db_instance_identifier):
         '''Describe the details of DBInstance.'''
         return self.dal.describeDBInstance(db_instance_identifier)
-
    
     def modify(self, db_instance_identifier, **kwargs):
         """Modify an existing DBInstance."""
@@ -58,7 +58,6 @@ class DBInstanceService(DBO):
         self.dal.modifyDBInstance(db_instance)
 
         return db_instance    
-
 
     def get(self, db_instance_identifier):
         db_instance_data = self.dal.getDBInstance(db_instance_identifier)
@@ -146,6 +145,39 @@ class DBInstanceService(DBO):
 
         return db_instance
 
+    def describe_snapshot(self, db_instance_identifier, db_snapshot_identifier):
+        db_instance = self.get(db_instance_identifier)
+        snapshot_id = db_instance._node_subSnapshot_name_to_id.get(db_snapshot_identifier)
+        if snapshot_id:
+            snapshot = db_instance._node_subSnapshot_dic.get(snapshot_id)
+            return {
+                "SnapshotIdentifier": db_snapshot_identifier,
+                "DBInstanceIdentifier": db_instance_identifier,
+                "SnapshotCreationTime": snapshot.created_time,
+                "SnapshotType": snapshot.snapshot_type, 
+            }
+        return None
+    
+    def modify_snapshot(self, db_instance_identifier, db_snapshot_identifier, **kwargs):
+        db_instance = self.get(db_instance_identifier)
+    
+        if db_snapshot_identifier not in db_instance._node_subSnapshot_name_to_id:
+            raise DbSnapshotIdentifierNotFoundError(f"Snapshot identifier '{db_snapshot_identifier}' not found.")
+    
+        node_id = db_instance._node_subSnapshot_name_to_id[db_snapshot_identifier]
+        snapshot = db_instance._node_subSnapshot_dic.get(node_id)
+    
+        if snapshot:
+            for key, value in kwargs.items():
+                if hasattr(snapshot, key):
+                    setattr(snapshot, key, value)
+                else:
+                    print(f"Warning: Attribute '{key}' does not exist for the snapshot.")
+    
+        self.dal.modifyDBInstance(db_instance)
+    
+        return snapshot
+    
     def stop(self, db_instance_identifier):
         db_instance = self.get(db_instance_identifier)
         db_instance.status = 'stopped'
@@ -739,4 +771,8 @@ class DatabaseCloneError(Exception):
 
 class DatabaseCloneError(Exception):
     """Custom exception for database cloning errors."""
+    pass
+
+class DatabaseNotFoundError(Exception):
+    """Raised when a database is not found."""
     pass

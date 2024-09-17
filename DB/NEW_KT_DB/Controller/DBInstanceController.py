@@ -4,7 +4,6 @@ class DBInstanceController:
     def __init__(self, service: DBInstanceService):
         self.service = service
 
-
     def create_db_instance(self, **kwargs):
         return self.service.create(**kwargs)
 
@@ -26,7 +25,6 @@ class DBInstanceController:
 
     def start_db_instance(self, db_instance_identifier):
         return self.service.start(db_instance_identifier)    
-
 
 
     def create_snapshot(self, db_instance_identifier, db_snapshot_identifier):
