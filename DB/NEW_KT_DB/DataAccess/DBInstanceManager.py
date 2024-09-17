@@ -45,3 +45,10 @@ class DBInstanceManager:
         criteria = f"db_instance_identifier = '{db_instance_identifier}'"
         result = self.object_manager.get_from_memory(self.object_name, ["*"], criteria)
         return result
+
+    def is_db_instance_exists(self, db_instance_identifier):
+        try:
+            self.object_manager.get_from_memory(self.object_name, db_instance_identifier)
+            return True
+        except ValueError:
+            return False
