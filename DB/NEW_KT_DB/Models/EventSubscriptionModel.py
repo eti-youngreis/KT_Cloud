@@ -31,6 +31,16 @@ class EventCategory(Enum):
 
 class EventSubscription:
 
+    table_name = 'event_subscriptions'
+    pk_column = 'subscription_name'
+    table_schema  = {
+        'subscription_name': 'TEXT PRIMARY KEY',
+        'source_type': 'TEXT',
+        'source_ids': 'TEXT',
+        'event_categories': 'TEXT',
+        'sns_topic_arn': 'TEXT'
+    }
+
     def __init__(
         self,
         subscription_name: str,
@@ -49,7 +59,6 @@ class EventSubscription:
         self.event_categories = event_categories
         self.sns_topic_arn = sns_topic_arn
 
-        self.pk_column = 'subscription_name'
         self.pk_value = self.subscription_name
 
     def to_dict(self) -> Dict:
