@@ -126,7 +126,13 @@ class DBManager:
     
     def is_exists_in_table(self, table_name:str, criteria:str):
         """check if rows exists in table"""
-        return self.select_and_return_records_from_table(table_name, criteria=criteria) != {}
+        try:
+            in_memory_object = self.get_data_from_table(table_name, criteria=criteria)
+            if in_memory_object:
+                return True
+        except Exception as e:
+            print(Exception(f"Error checking if object {criteria} exists in {table_name}: {e}"))
+            return False
 
 
     def describe_table(self, table_name: str) -> Dict[str, str]:
