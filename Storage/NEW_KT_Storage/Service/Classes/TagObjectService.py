@@ -2,6 +2,7 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..",'..')))
 
 from DataAccess.TagObjectManager import TagObjectManager
 from Models.TagObjectModel import TagObject
@@ -26,3 +27,7 @@ class TagObjectService:
 
     def describe(self, tag: TagObject):
         return self.tag_dal.describeTagObject(tag)
+
+if __name__ == '__main__':
+    tagObjectService = TagObjectService()
+    tagObjectService.create("a","a")

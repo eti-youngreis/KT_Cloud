@@ -1,15 +1,15 @@
 from typing import Dict
-from DataAccess import ObjectManager
 import uuid
+from DataAccess import ObjectManager
 
 
 class TagObject:
-    def __init__(self, key: str, value: str, pk_value):
-        self.id = str(uuid.uuid1())
+    def __init__(self, key: str, value: str):
+        self.tag_id = str(uuid.uuid1())
         self.key = key
         self.value = value
-        self.pk_column = "id"
-        self.pk_value = self.id
+        self.pk_column = "TagId"
+        self.pk_value = self.tag_id
 
     def to_dict(self) -> Dict:
         """Retrieve the data of the DB cluster as a dictionary."""
