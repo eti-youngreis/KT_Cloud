@@ -10,58 +10,42 @@ class ObjectManager:
         self.object_name = type
 
     # for outer use:
-    def save_in_memory(self, object):
+    def save_in_memory(self, object_name, object_info, columns=None):
 
-        # insert object info into management table mng_{object_name}s
-        # for exmple: object db_instance will be saved in table mng_db_instances
-        table_name = self.object_manager.convert_object_name_to_management_table_name(self.object_name)
-        if not self.object_manager.is_management_table_exist(table_name):
-            self.object_manager.create_management_table(table_name)
-
-        self.object_manager.insert_object_to_management_table(table_name, object)
+        self.object_manager.save_in_memory(object_name, object_info, columns)
 
 
-    def delete_from_memory(self,pk_column, pk_value, object_id, criteria='default'):
+    def delete_from_memory_by_criteria(self, object_name:str, criteria:str):
 
-        # if criteria not sent- use PK for deletion
-        if criteria == 'default':
-            criteria = f"{pk_column} = '{pk_value}'"
-
-        self.object_manager.delete_from_memory(self.object_name, criteria,object_id=object_id)
+        self.object_manager.delete_from_memory_by_criteria(object_name, criteria)
 
 
-    def update_in_memory(self,object, updates, criteria='default'):
+    def delete_from_memory_by_pk(self, object_name:str, pk_column:str, pk_value:str):
 
-        # if criteria not sent- use PK for deletion
-        if criteria == 'default':
-            criteria = f'{object.pk_column} = {object.pk_value}'
-
-        table_name = self.object_manager.convert_object_name_to_management_table_name(self.object_name)
-
-        self.object_manager.update_object_in_management_table_by_criteria(table_name, updates, criteria)
-
-    def get_from_memory(self, object_id):
-        table_name = self.object_manager.convert_object_name_to_management_table_name(self.object_name)
-        return self.object_manager.get_object_from_management_table(table_name, object_id)
+        self.object_manager.delete_from_memory_by_pk(object_name, pk_column, pk_value)
 
 
-    def get_data_from_memory_db(self):
-        table_name = self.object_manager.convert_object_name_to_management_table_name(self.object_name)
-        data_tuple = self.object_manager.get_all_data_from_table(table_name=table_name)
-        data_list = [list(row) for row in data_tuple]
-        return data_list
+    def update_in_memory(self, object_name, updates, criteria):
+
+        self.object_manager.update_in_memory(object_name, updates, criteria)
+
+
+    def get_from_memory(self, object_name, columns=None, criteria=None):
+
+        if columns is None and criteria is None:
+            return self.object_manager.get_from_memory(object_name)
+        elif criteria is None:
+            return self.object_manager.get_from_memory(object_name, columns)
+        else:
+            return self.object_manager.get_from_memory(object_name, columns, criteria)
 
 
     def convert_object_attributes_to_dictionary(self, **kwargs):
 
-        dict = {}
+        return self.object_manager.convert_object_attributes_to_dictionary(**kwargs)
 
-        for key, value in kwargs.items():
-            dict[key] = value
 
-        return dict
+    def get_all_objects_from_memory(self, object_name):
 
-    def get_all_from_memory(self,criteria):
-        table_name = self.object_manager.convert_object_name_to_management_table_name(self.object_name)
-        return self.object_manager.get_objects_from_management_table_by_criteria(table_name, columns=["*"], criteria=criteria)
+        return self.object_manager.get_all_objects_from_memory(object_name)
 
