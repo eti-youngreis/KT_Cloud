@@ -73,6 +73,7 @@ class DBManager:
             c = self.connection.cursor()
             c.execute(query)
             results = c.fetchall()
+            print(results)
             return {result[0]: dict(zip(columns, result[1:])) for result in results}
         except OperationalError as e:
             raise Exception(f'Error selecting from {table_name}: {e}')

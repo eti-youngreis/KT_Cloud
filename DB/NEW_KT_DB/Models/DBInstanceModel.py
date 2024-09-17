@@ -1,12 +1,16 @@
 import json
 from datetime import datetime
 import os
+import sys
 from DataAccess.ObjectManager import ObjectManager
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../')))
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 class DBInstance:
     BASE_PATH = "db_instances"
-
+    table_name='db_instance'  
+    pk_column ='db_instance_id'    
+    table_structure = f'{pk_column} TEXT PRIMARY KEY ,metadata TEXT NOT NULL'
     def __init__(self, **kwargs):
         """
         Initialize a new DBInstance with the given parameters.
@@ -19,11 +23,10 @@ class DBInstance:
         self.port = kwargs.get('port', 3306)
         self.status = 'available'
         self.created_time = datetime.now()
-        self.endpoint = os.path.join(DBInstance.BASE_PATH, self.db_instance_identifier)
+        self.endpoint = self.db_instance_identifier
         storageManager=StorageManager(DBInstance.BASE_PATH)
         storageManager.create_directory(self.endpoint)
         self.databases = kwargs.get('databases', {})
-        self.pk_column = kwargs.get('pk_column', 'db_instance_id')
         self.pk_value = kwargs.get('pk_value', self.db_instance_identifier)
     
     def to_dict(self):
@@ -35,17 +38,16 @@ class DBInstance:
             master_user_password=self.master_user_password,
             port=self.port,
             status=self.status,
-            created_time=self.created_time,
+            created_time=str(self.created_time),
             endpoint=self.endpoint,
             databases=self.databases,
-            pk_column=self.pk_column,
             pk_value=self.pk_value
 
         )
 
     def to_sql(self):
         # Convert the model instance to a dictionary
-        data_dict = self.to_dict()
-        values = '(' + ", ".join(f'\'{json.dumps(v)}\'' if isinstance(v, dict) or isinstance(v, list) else f'\'{v}\'' if isinstance(v, str) else f'\'{str(v)}\''
-                           for v in data_dict.values()) + ')'
+        # values = '(' + ", ".join(f'\'{json.dumps(v)}\'' if isinstance(v, dict) or isinstance(v, list) else f'\'{v}\'' if isinstance(v, str) else f'\'{str(v)}\''
+        #                    for v in data_dict.values()) + ')'
+        values='(\''+self.db_instance_identifier+'\',\''+json.dumps(self.to_dict())+'\')'
         return values

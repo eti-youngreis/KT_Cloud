@@ -2,22 +2,27 @@ import os
 import sys
 import pytest
 import sqlite3
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
-from NEW_KT_DB.Service.Classes.DBInstanceService import DBInstanceManager,DBInstanceService,AlreadyExistsError,ParamValidationError,DBInstanceNotFoundError
-from NEW_KT_DB.Controller.DBInstanceController import DBInstanceController
-
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
+from Service.Classes.DBInstanceService import DBInstanceManager,DBInstanceService,AlreadyExistsError,ParamValidationError,DBInstanceNotFoundError
+from Exception.exception import MissingRequireParamError
+from Controller.DBInstanceController import DBInstanceController
+from DataAccess.ObjectManager import ObjectManager
 
 @pytest.fixture
-def db_instance_manager():
-    return DBInstanceManager(':memory:')
+def object_manager():
+    return ObjectManager(':memory:')
+
+@pytest.fixture
+def db_instance_manager(object_manager):
+    return DBInstanceManager(object_manager)
 
 @pytest.fixture
 def db_instance_service(db_instance_manager):
     return DBInstanceService(db_instance_manager)
 
 @pytest.fixture
-def snapshot_service(db_instance_manager):
-    return SnapShotService(db_instance_manager)
+def snapshot_service(object_manager):
+    return SnapShotService(SnapShotManager(object_manager))
 
 @pytest.fixture
 def db_instance_controller(db_instance_service):
@@ -34,7 +39,7 @@ def test_create_invalid_identifier(db_instance_controller):
 
 def test_create_missing_required_param(db_instance_controller):
     # Test for missing required parameter
-    with pytest.raises(ParamValidationError):
+    with pytest.raises(MissingRequireParamError):
         db_instance_controller.create_db_instance(
             master_username="admin", 
             master_user_password="password"
@@ -47,7 +52,7 @@ def test_create_valid_db_instance(db_instance_controller):
         "master_user_password": "password"
     }
     response = db_instance_controller.create_db_instance(**attributes)
-    
+    print('response:',response)
     assert response['DBInstance']['db_instance_identifier'] == "db123"
     assert response['DBInstance']['master_username'] == "admin"
     with pytest.raises(AlreadyExistsError):
@@ -68,7 +73,7 @@ def test_delete_db_instance(db_instance_controller):
     })
     
     with pytest.raises(DBInstanceNotFoundError):
-        db_instance_controller.describe("db123")
+        db_instance_controller.describe_db_instance("db123")
 
 def test_delete_with_snapshot_invalide_params_db_instance(db_instance_controller,snapshot_service):
     attributes = {
@@ -97,7 +102,7 @@ def test_delete_with_snapshot_invalide_params_db_instance(db_instance_controller
         "final_db_snapshot_identifier":"final_db_snapshot_identifier_db123"
     })
 
-    snapshot_service.descride("final_db_snapshot_identifier_db123")   
+    snapshot_service.describe_db_instance("final_db_snapshot_identifier_db123")   
 
 def test_modify_db_instance(db_instance_controller):
     attributes = {
@@ -106,17 +111,17 @@ def test_modify_db_instance(db_instance_controller):
         "master_user_password": "password"
     }
     
-    db_instance_controller.create(**attributes)
+    db_instance_controller.create_db_instance(**attributes)
     
     updates = {
         "db_instance_identifier": "db123",
         "allocated_storage": 50
     }
     
-    response = db_instance_controller.modify(**updates)
+    response = db_instance_controller.modify_db_instance(**updates)
     
     assert response['DBInstance']['allocated_storage'] == 50
 
 def test_describe_db_instance_not_found(db_instance_controller):
     with pytest.raises(DBInstanceNotFoundError):
-        db_instance_controller.describe("non_existent_instance")
+        db_instance_controller.describe_db_instance("non_existent_instance")
