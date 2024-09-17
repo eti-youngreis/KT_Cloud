@@ -29,14 +29,15 @@ from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 class DBClusterService:
     def __init__(self, dal: DBClusterManager, storage_manager: StorageManager, directory:str):
-        self.dal = dal,
-        self.directory = directory,
+        self.dal = dal
+        self.directory = directory
         self.storage_manager = storage_manager
         if not self.storage_manager.is_directory_exist(directory):
             self.storage_manager.create_directory(directory)
     
     def get_file_path(self, cluster_name: str):
-        return os.path.join(self.directory, cluster_name + '.json')
+        # return os.path.join(self.directory, cluster_name + '.json')
+        return str(self.directory)+str(cluster_name)+'.json'
 
     def is_cluster_exist(self, cluster_identifier: str):
         cluster_path = self.get_file_path(cluster_identifier)
@@ -60,8 +61,8 @@ class DBClusterService:
             raise ValueError("Missing required parameters")
 
         # Perform validations
-        if self.dal.is_exists(kwargs.get('db_cluster_identifier')):
-            raise ValueError(f"Cluster {kwargs.get('db_cluster_identifier')} already exists")
+        # if self.dal.is_exists(kwargs.get('db_cluster_identifier')):
+        #     raise ValueError(f"Cluster {kwargs.get('db_cluster_identifier')} already exists")
         
         if not validate_db_cluster_identifier(kwargs.get('db_cluster_identifier')):
             raise ValueError(f"Invalid DBClusterIdentifier: {kwargs.get('db_cluster_identifier')}")
@@ -141,20 +142,20 @@ class DBClusterService:
             file_path=file_path, content=json_object)
         
         # cluster_to_sql = cluster.to_sql()
-        ccc = cluster.cluster_to_dict()
-        bbb = json.dumps(ccc)
+        ccc = cluster.to_dict()
+        # bbb = json.dumps(ccc)
         # Store the cluster information in the database
-        self.dal.createInMemoryDBCluster(bbb)
+        self.dal.createInMemoryDBCluster(ccc)
 
-        return {"DBCluster": cluster_dict}
+        return {"DBCluster": ccc}
 
 
 
     def delete(self, cluster_identifier:str):
         '''Delete an existing DBCluster.'''
         
-        if not self.is_cluster_exist(cluster_identifier):
-            raise ValueError("Cluster does not exist!!")
+        # if not self.is_cluster_exist(cluster_identifier):
+        #     raise ValueError("Cluster does not exist!!")
           
         file_path = self.get_file_path(cluster_identifier+"_configurations")
         self.storage_manager.delete_file(file_path=file_path)
@@ -167,8 +168,8 @@ class DBClusterService:
 
     def describe(self, cluster_id):
         '''Describe the details of DBCluster.'''
-        if not self.is_cluster_exist(cluster_id):
-            raise ValueError("Cluster does not exist!!")
+        # if not self.is_cluster_exist(cluster_id):
+        #     raise ValueError("Cluster does not exist!!")
         
         return self.dal.describeDBCluster(cluster_id)
 
@@ -178,8 +179,8 @@ class DBClusterService:
         # update object in code
         # modify physical object
         # update object in memory using DBClusterManager.modifyInMemoryDBCluster() function- send criteria using self attributes
-        if not self.is_cluster_exist(cluster_id):
-            raise ValueError("Cluster does not exist!!")
+        # if not self.is_cluster_exist(cluster_id):
+        #     raise ValueError("Cluster does not exist!!")
         
         if 'db_cluster_identifier' in kwargs and not validate_db_cluster_identifier(kwargs.get('db_cluster_identifier')):
             raise ValueError(f"Invalid DBClusterIdentifier: {kwargs.get('db_cluster_identifier')}")

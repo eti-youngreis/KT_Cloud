@@ -321,12 +321,17 @@
 from typing import Dict, Any, Optional
 import json
 import sqlite3
-from DBManager import DBManager
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from DataAccess import DBManager
  
 class ObjectManager:
     def __init__(self, db_file: str):
         '''Initialize ObjectManager with the database connection.'''
-        self.db_manager = DBManager(db_file)
+        self.db_manager = DBManager.DBManager(db_file)
 
 
     def create_management_table(self, object_name, table_structure='default', pk_column_data_type='INTEGER'):
@@ -364,7 +369,7 @@ class ObjectManager:
         # for exmple: object db_instance will be saved in table mng_db_instances
         table_name = self._convert_object_name_to_management_table_name(object_name)
 
-        if not self._is_management_table_exist(table_name):
+        if not self._is_management_table_exist(object_name):
             self.create_management_table(object_name)
         
         if columns is None:

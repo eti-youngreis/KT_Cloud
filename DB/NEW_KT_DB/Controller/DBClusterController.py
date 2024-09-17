@@ -29,9 +29,9 @@ if __name__=='__main__':
     desktop_path = os.path.join(os.path.expanduser('~'), 'Desktop')
     cluster_directory = os.path.join(desktop_path, f'Clusters/clusters.db')
     base = os.path.join(desktop_path, f'Clusters')
-    storage_manager = StorageManager.StorageManager(base)
-    clusterManager = DBClusterManager.DBClusterManager(cluster_directory)
-    clusterService = DBClusterService(clusterManager,storage_manager, cluster_directory)
+    storage_manager = StorageManager.StorageManager('Clusters')
+    clusterManager = DBClusterManager.DBClusterManager('Clusters/clusters.db')
+    clusterService = DBClusterService(clusterManager,storage_manager, 'Clusters')
     clusterController = DBClusterController(clusterService)
     cluster_data = {
     'db_cluster_identifier': 'my-cluster-3',

@@ -14,21 +14,20 @@ class DBClusterManager:
 
 
     def createInMemoryDBCluster(self, cluster_to_save):
-        self.object_manager.save_in_memory(cluster_to_save)
+        self.object_manager.save_in_memory(self.object_name, cluster_to_save)
 
 
     def deleteInMemoryDBCluster(self,cluster_identifier):
-        self.object_manager.delete_from_memory(cluster_identifier)
-
+        self.object_manager.delete_from_memory_by_pk(self.object_name, self.pk_column, cluster_identifier)
 
     def describeDBCluster(self, cluster_id):
-        self.object_manager.get_from_memory(self.object_name, object_id = cluster_id)
+        self.object_manager.get_from_memory(self.object_name, criteria=f" {self.pk_column} = {cluster_id}")
 
     def modifyDBCluster(self, cluster_id, updates):
-        self.object_manager.update_in_memory(self.object_name, updates, object_id = cluster_id)
+        self.object_manager.update_in_memory(self.object_name, updates, criteria=f" {self.pk_column} = {cluster_id}")
 
     def select(self, name:Optional[str] = None, columns = ["*"]):
-        data = self.object_manager.get_from_memory(self.object_name, columns = columns, object_id = name)
+        data = self.object_manager.get_from_memory(self.object_name,criteria=f" {self.pk_column} = {name}")
         if data:
             data_to_return = [{col:data[col] for col in columns}]
             data_to_return[self.pk_column] = name
