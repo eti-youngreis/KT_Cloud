@@ -33,7 +33,7 @@ class InvalidDBProxyEndpointStateFault(Exception):
 
 
 class DBProxyEndpointService(DBO):
-    def __init__(self, dal: DBProxyEndpointManager, storage:StorageManager, db_proxy_service):
+    def __init__(self, dal: DBProxyEndpointManager, storage:StorageManager):
         self.dal:DBProxyEndpointManager = dal
         self.storage:StorageManager = storage
    
@@ -74,7 +74,7 @@ class DBProxyEndpointService(DBO):
             raise DBProxyEndpointAlreadyExistsFault(f'db proxy endpoint {DBProxyEndpointName} already exists')
         
         # create object
-        db_proxy_endpoint:DBProxyEndpoint = DBProxyEndpoint(DBProxyName, DBProxyEndpointName, TargetRole, Tags, IsDefault)
+        db_proxy_endpoint:DBProxyEndpoint = DBProxyEndpoint(self.dal.object_manager, DBProxyName, DBProxyEndpointName, TargetRole, Tags, IsDefault)
     
         # create physical object as described in task
         file_name = self._convert_endpoint_name_to_endpoint_file_name(DBProxyEndpointName)
@@ -82,7 +82,7 @@ class DBProxyEndpointService(DBO):
         self.storage.create_file(file_name, content)
         
         # save in memory 
-        self.dal.create(db_proxy_endpoint)
+        self.dal.create(db_proxy_endpoint.to_dict())
         return self.describe(DBProxyEndpointName=DBProxyEndpointName)
 
 

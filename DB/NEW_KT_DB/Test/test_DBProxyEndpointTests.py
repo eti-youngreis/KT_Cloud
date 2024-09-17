@@ -13,7 +13,7 @@ from DB.NEW_KT_DB.Test.GeneralTests import test_file_exists
 
 @pytest.fixture
 def storage_manager() -> StorageManager:
-    storage_manager:StorageManager = StorageManager(':memory:')
+    storage_manager:StorageManager = StorageManager('DBProxyEndpoints')
     return storage_manager
 
 @pytest.fixture

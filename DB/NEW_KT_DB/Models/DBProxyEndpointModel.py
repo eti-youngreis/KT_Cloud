@@ -18,7 +18,7 @@ class DBProxyEndpoint:
     IsDefault BOOLEAN NOT NULL,
     FOREIGN KEY (DBProxyName) REFERENCES {foreign_table_name}(DBProxyName)"""
 
-    def __init__(self, DBProxyName:str, DBProxyEndpointName:str, TargetRole:Optional[str] = None, Tags:Optional[List[Dict[str, str]]] = None, IsDefault:bool = False): 
+    def __init__(self, object_manager:ObjectManager, DBProxyName:str, DBProxyEndpointName:str, TargetRole:Optional[str] = None, Tags:Optional[List[Dict[str, str]]] = None, IsDefault:bool = False): 
         self.DBProxyName=DBProxyName
         self.DBProxyEndpointName=DBProxyEndpointName
         self.TargetRole=TargetRole
@@ -27,6 +27,7 @@ class DBProxyEndpoint:
         self.CreatedDate = datetime.now()
         self.Endpoint = ''
         self.IsDefault = IsDefault
+        self.object_manager = object_manager
 
        
 
@@ -34,7 +35,7 @@ class DBProxyEndpoint:
     def to_dict(self) -> Dict:
         '''Retrieve the data of the DB cluster as a dictionary.'''
 
-        return ObjectManager.convert_object_attributes_to_dictionary(
+        return self.object_manager.convert_object_attributes_to_dictionary(
             DBProxyName = self.DBProxyName,
             DBProxyEndpointName = self.DBProxyEndpointName,
             Status = self.Status,
@@ -46,9 +47,4 @@ class DBProxyEndpoint:
             
         )
     
-    def to_sql(self):
-        # Convert the model instance to a dictionary
-        data_dict = self.to_dict()
-        values = '(' + ", ".join(f'\'{json.dumps(v)}\'' if isinstance(v, dict) or isinstance(v, list) else f'\'{v}\'' if isinstance(v, str) else f'\'{str(v)}\''
-                           for v in data_dict.values()) + ')'
-        return values
+    
