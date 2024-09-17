@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from DB.NEW_KT_DB.DataAccess.DBInstanceManager import DBInstanceManager
 from DB.NEW_KT_DB.Models.DBInstanceModel import DBInstanceModel, Node_SubSnapshot
 from DB.NEW_KT_DB.Service.Abc.DBO import DBO
@@ -9,6 +9,7 @@ import sqlite3
 import re
 from typing import List, Tuple
 import uuid
+import json
 
 class DBInstanceService(DBO):
     def __init__(self, dal: DBInstanceManager):
@@ -59,76 +60,13 @@ class DBInstanceService(DBO):
 
         return db_instance    
 
-    # def get(self, db_instance_identifier):
-    #     db_instance_data = self.dal.getDBInstance(db_instance_identifier)
-
-    #     if not db_instance_data or len(db_instance_data) == 0:
-    #         raise ValueError(f"DB Instance with identifier {db_instance_identifier} not found.")
-
-    #     instance_json = db_instance_data[0][2]
-    #     instance_dict = json.loads(instance_json)
-
-    #     db_instance_data['allocated_storage'] = int(db_instance_data['allocated_storage'])
-    #     db_instance_data['port'] = int(db_instance_data['port'])
-    #     db_instance_data['created_time'] = datetime.fromisoformat(db_instance_data['created_time'])
-
-    #     db_instance_data['node_subSnapshot_dic'] = {uuid.UUID(k): v for k, v in db_instance_data['node_subSnapshot_dic'].items()}
-    #     db_instance_data['_current_version_ids_queue'] = deque(uuid.UUID(id_str) for id_str in db_instance_data['current_version_ids_queue'])
-
-    #     nodes = {id: None for id in db_instance_data['node_subSnapshot_dic']}
-
-    #     def revive_node(node_id):
-    #         if nodes[node_id] is not None:
-    #             return nodes[node_id]
-
-    #         node_data = db_instance_data['node_subSnapshot_dic'][node_id]
-    #         parent_id = node_data['parent_id']
-
-    #         if parent_id is not None and parent_id in nodes:
-    #             parent = revive_node(parent_id)
-    #         else:
-    #             parent = None
-
-    #         node = Node_SubSnapshot(
-    #             parent=parent,
-    #             endpoint=db_instance_data['endpoint'],
-    #             id_snapshot=node_data['id_snapshot'],
-    #             dbs_paths_dic=node_data['dbs_paths_dic'],
-    #             deleted_records_db_path=node_data['deleted_records_db_path']
-    #         )
-
-    #         nodes[node_id] = node
-    #         return node
- 
-    #     for node_id in nodes:
-    #         revive_node(node_id)
-
-    #     db_instance = DBInstanceModel(
-    #         db_instance_identifier=db_instance_data['db_instance_identifier'],
-    #         allocated_storage=db_instance_data['allocated_storage'],
-    #         master_username=db_instance_data['master_username'],
-    #         master_user_password=db_instance_data['master_user_password'],
-    #         port=db_instance_data['port'],
-    #         status=db_instance_data['status'],
-    #         created_time=datetime.fromisoformat(db_instance_data['created_time']),
-    #         endpoint=db_instance_data['endpoint'],
-    #         _node_subSnapshot_dic=nodes,
-    #         _node_subSnapshot_name_to_id=db_instance_data['node_subSnapshot_name_to_id'],
-    #         _current_version_ids_queue=deque(
-    #             db_instance_data['current_version_ids_queue']),
-    #         pk_column = db_instance_data['pk_column'],
-    #         pk_value = db_instance_data['pk_value']      
-    #     )
-
-    #     return db_instance
-
     def get(self, db_instance_identifier):
         db_instance_data = self.dal.getDBInstance(db_instance_identifier)
     
         if not db_instance_data or len(db_instance_data) == 0:
             raise ValueError(f"DB Instance with identifier {db_instance_identifier} not found.")
-    
-        instance_json = db_instance_data[0][2]
+
+        instance_json = db_instance_data[0][1]
         instance_dict = json.loads(instance_json)
     
         instance_dict['allocated_storage'] = int(instance_dict['allocated_storage'])
@@ -138,8 +76,9 @@ class DBInstanceService(DBO):
         instance_dict['node_subSnapshot_dic'] = {uuid.UUID(k): v for k, v in instance_dict['node_subSnapshot_dic'].items()}
         instance_dict['_current_version_ids_queue'] = deque(uuid.UUID(id_str) for id_str in instance_dict['current_version_ids_queue'])
     
-        nodes = {id: None for id in instance_dict['node_subSnapshot_dic']}
-    
+        # nodes = {id: None for id in instance_dict['node_subSnapshot_dic']}
+        nodes = {id if isinstance(id, uuid.UUID) else uuid.UUID(id): None for id in instance_dict['node_subSnapshot_dic']}
+
         def revive_node(node_id):
             if nodes[node_id] is not None:
                 return nodes[node_id]
@@ -221,12 +160,17 @@ class DBInstanceService(DBO):
         snapshot_id = db_instance._node_subSnapshot_name_to_id.get(db_snapshot_identifier)
         if snapshot_id:
             snapshot = db_instance._node_subSnapshot_dic.get(snapshot_id)
-            return {
-                "SnapshotIdentifier": db_snapshot_identifier,
-                "DBInstanceIdentifier": db_instance_identifier,
-                "SnapshotCreationTime": snapshot.created_time,
-                "SnapshotType": snapshot.snapshot_type, 
-            }
+            print("1111111111111111111111")
+            print("snapshot_id:", snapshot_id)
+            print("db_instance._node_subSnapshot_dic:")
+            print(db_instance._node_subSnapshot_dic)
+            if snapshot:
+                return {
+                    "SnapshotIdentifier": db_snapshot_identifier,
+                    "DBInstanceIdentifier": db_instance_identifier,
+                    "SnapshotCreationTime":  snapshot.created_time if hasattr(snapshot, 'created_time') else None,
+                    "SnapshotType": snapshot.snapshot_type, 
+                }
         return None
     
     def modify_snapshot(self, db_instance_identifier, db_snapshot_identifier, **kwargs):
