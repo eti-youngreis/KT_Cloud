@@ -10,13 +10,15 @@ class BucketPolicyManager:
     def __init__(self, path_physical_object: str = "Bucket_policy.json", path_db:str = "Bucket_policy.db", base_directory: str = "D:/New folder/server"):
         '''Initialize ObjectManager with the database connection.'''
         self.object_manager = ObjectManager(path_db, "bucket_policy", path_physical_object)
+        self.object_manager.object_manager.create_management_table(BucketPolicy.object_name, BucketPolicy.table_structure)
         self.path_physical_object = os.path.join(base_directory, path_physical_object)
         self.storage_manager = StorageManager(path_physical_object)
         self.path_db = os.path.join(base_directory, path_db)
     
     
     def createInMemoryBucketPolicy(self, bucket_policy):
-        self.object_manager.save_in_memory(bucket_policy, "bucket_policy")
+        # self.object_manager.save_in_memory(bucket_policy, "bucket_policy")
+        pass
         
     def createPhysicalObject(self, bucket_policy:BucketPolicy):
         if self.storage_manager.is_file_exist(self.path_physical_object):
@@ -25,7 +27,7 @@ class BucketPolicyManager:
         else:
             data = {}
 
-        data[bucket_policy['bucket_name']] = bucket_policy
+        data[bucket_policy.bucket_name] = bucket_policy.to_dict()
         
         with open(self.path_physical_object, 'w') as file:
             json.dump(data, file, indent=4, ensure_ascii=False)
@@ -45,10 +47,11 @@ class BucketPolicyManager:
         
         return data.get(bucket_name, None)
     
-    def deleteInMemoryBucketPolicy(self, bucket_name: str):
-        self.object_manager.delete_from_memory(bucket_name)
+    def deleteInMemoryBucketPolicy(self, bucket_name: str, permmision):
+        # self.object_manager.delete_from_memory(bucket_name)
+        pass
         
-    def deletePhysicalObject(self, bucket_name: str) -> bool:
+    def deletePhysicalObject(self, bucket_name: str, permission) -> bool:
         """
         Delete the bucket policy from the physical JSON file.
         :param bucket_name: The name of the bucket to delete.
@@ -61,7 +64,13 @@ class BucketPolicyManager:
             data = json.load(file)
 
         if bucket_name in data:
-            del data[bucket_name]
+            if not permission:
+                data[bucket_name]['permissions']={}
+            else:
+                permissions = data[bucket_name]['permissions']
+                permissions.remove(permission)
+                data[bucket_name]['permissions'] = permissions
+        
             with open(self.path_physical_object, 'w') as file:
                 json.dump(data, file, indent=4, ensure_ascii=False)
             return True

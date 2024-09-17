@@ -18,15 +18,19 @@ policy_controller = BucketPolicyController(policy_service)
 #     "conditions": {"ip": ["192.168.1.0/24"], "role": "admin"},
 #     "version": "2024-09-16"
 # }
-policy = {
-    "policy_id":"147",
-    "bucket_name": "my-bucket",
-    "permissions":{
-            "read", "write", "list"
-        }
-}
-new_policy = policy_controller.create_bucket_policy(policy)
-print("Created Bucket policy:", new_policy)
+# policy = {
+#     "policy_id":"147",
+#     "bucket_name": "my-bucket!",
+#     "permissions":{
+#             "read", "write", "list"
+#         }
+# }
+# new_policy = policy_controller.create_bucket_policy(policy)
+# print("Created Bucket policy:", new_policy)
+# policy_controller.create_bucket_policy("your_bucket")
+policy_controller.modify_bucket_policy("your_bucket", "delete")
+# policy_controller.delete_bucket_policy("your_bucket", "read")
+# print(policy_controller.get_bucket_policy("your_bucket"))
 # print(policy_controller.get_bucket_policy("user-uploads"))
 
 # update = policy_controller.modify_bucket_policy("user-uploads",{

@@ -8,20 +8,20 @@ class BucketPolicyController:
         self.service = service
 
 
-    def create_bucket_policy(self, bucket_policy):
-        return self.service.create(bucket_policy)
+    def create_bucket_policy(self, bucket_name):
+        return self.service.create(bucket_name)
 
 
-    def delete_bucket_policy(self, bucket_name):
-        self.service.delete(bucket_name)
+    def delete_bucket_policy(self, bucket_name, permission):
+        self.service.delete(bucket_name, permission)
 
 
     # def put_bucket_object(self, updates):
     #     self.service.put(updates)
     
 
-    def modify_bucket_policy(self, bucket_name, permissions):
-        self.service.modify(bucket_name, permissions)
+    def modify_bucket_policy(self, bucket_name, new_permmision,allow_versions=None):
+        self.service.modify(bucket_name, new_permmision, allow_versions)
 
 
     def get_bucket_policy(self, bucket_name):
