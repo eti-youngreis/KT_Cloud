@@ -45,7 +45,7 @@ class ObjectManager:
         table_name = self._convert_object_name_to_management_table_name(object_name)
 
         if not self._is_management_table_exist(table_name):
-            self.create_management_table(table_name)
+            self.create_management_table(object_name)
         
         if columns is None:
             self._insert_object_to_management_table(table_name, object_info)
