@@ -57,10 +57,10 @@ class Node_SubSnapshot:
 
     def __init__(self, parent=None, endpoint=None, **kwargs):
         self.id_snapshot = kwargs.get('id_snapshot', uuid.uuid4())
-
+        self.snapshot_type= "manual"
         self.parent_id = parent.id_snapshot if parent else None
         self.dbs_paths_dic = kwargs.get('dbs_paths_dic', {})
-
+        self.created_time = None
         if self.parent_id and not kwargs.get('dbs_paths_dic'):
             self.dbs_paths_dic = self.clone_databases_schema(parent.dbs_paths_dic)
 
@@ -72,7 +72,9 @@ class Node_SubSnapshot:
             id_snapshot=str(self.id_snapshot),
             parent_id=str(self.parent_id) if self.parent_id else None,
             dbs_paths_dic=self.dbs_paths_dic,
-            deleted_records_db_path=self.deleted_records_db_path
+            deleted_records_db_path=self.deleted_records_db_path,
+            snapshot_type=self.snapshot_type
+            created_time=self.created_time.isoformat()
         )    
 
     def _create_deleted_records_db_path(self, endpoint):

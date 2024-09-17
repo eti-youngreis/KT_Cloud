@@ -63,6 +63,13 @@ class DBInstanceService(DBO):
     def get(self, db_instance_identifier):
         db_instance_data = self.dal.getDBInstance(db_instance_identifier)
 
+        db_instance_data['allocated_storage'] = int(db_instance_data['allocated_storage'])
+        db_instance_data['port'] = int(db_instance_data['port'])
+        db_instance_data['created_time'] = datetime.fromisoformat(db_instance_data['created_time'])
+
+        db_instance_data['node_subSnapshot_dic'] = {uuid.UUID(k): v for k, v in db_instance_data['node_subSnapshot_dic'].items()}
+        db_instance_data['_current_version_ids_queue'] = deque(uuid.UUID(id_str) for id_str in db_instance_data['current_version_ids_queue'])
+
         nodes = {id: None for id in db_instance_data['node_subSnapshot_dic']}
 
         def revive_node(node_id):
@@ -110,6 +117,7 @@ class DBInstanceService(DBO):
 
     def create_snapshot(self, db_instance_identifier, db_snapshot_identifier):
         db_instance = self.get(db_instance_identifier)
+        setattr(db_instance,'created_time', datetime.now())
         db_instance._node_subSnapshot_name_to_id[db_snapshot_identifier] = db_instance._last_node_of_current_version.id_snapshot
         self._create_child_to_node(db_instance)
         self.dal.modifyDBInstance(db_instance)
@@ -186,6 +194,22 @@ class DBInstanceService(DBO):
         db_instance._current_version_ids_queue.append(
             db_instance._last_node_of_current_version.id_snapshot)
         db_instance._node_subSnapshot_dic[db_instance._last_node_of_current_version.id_snapshot] = db_instance._last_node_of_current_version
+
+    def execute_query(self, db_instance_identifier, query, db_name):
+        db_instance = self.get(db_instance_identifier)
+        query_type = query.strip().split()[0].upper()
+
+        if query_type == 'SELECT':
+            return SQLCommandHelper.select(db_instance._current_version_ids_queue, db_name, query, set(db_instance._current_version_ids_queue))
+        elif query_type == 'INSERT':
+            return SQLCommandHelper.insert(db_instance._last_node_of_current_version, query, db_name)
+        elif query_type == 'CREATE':
+            if 'TABLE' in query.upper():
+                return SQLCommandHelper.create_table(query, db_instance._last_node_of_current_version.dbs_paths_dic[db_name])
+        elif query_type == 'DELETE':
+            return SQLCommandHelper.delete_record(db_instance._current_version_ids_queue, query, db_name)
+        else:
+            raise ValueError(f"Unsupported query type: {query_type}")
 
 
 class SQLCommandHelper:
@@ -361,8 +385,7 @@ class SQLCommandHelper:
         if match:
             return match.group(1)
         else:
-            raise InvalidQueryError(f"Failed to extract table name from the '{
-                                    query_type}' query.")
+            raise InvalidQueryError(f"Failed to extract table name from the '{query_type}' query.")
 
     @staticmethod
     def _union_deleted_records(nodes_queue, table_name):
@@ -634,12 +657,10 @@ class SQLCommandHelper:
                                 """
                                 SQLCommandHelper._run_query(
                                     current_node.deleted_records_db_path, insert_deleted_query)
-                            print(f"Records from {table_name} marked as deleted in DB: {
-                                  db_name} at snapshot: {current_node.id_snapshot}")
+                            print(f"Records from {table_name} marked as deleted in DB: {db_name} at snapshot: {current_node.id_snapshot}")
                             return
                         else:
-                            print(f"Table {table_name} not found in DB: {
-                                  db_name}. Continuing to next DB...")
+                            print(f"Table {table_name} not found in DB: {db_name}. Continuing to next DB...")
                 except sqlite3.Error as e:
                     print(f"Error while accessing database {db_name}: {e}")
                     raise InvalidQueryError(
