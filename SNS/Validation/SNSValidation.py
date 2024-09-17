@@ -1,20 +1,17 @@
-from SNS.DataAccess.SNSManager import SNSManager
+from SNS.DataAccess.SNSManager import SNSTopicManager
 from SNS.Model.SNSModel import Protocol
 import re
 
 
-def validate_topic_name(sns_manager: SNSManager, topic_name: str):
+def validate_topic_name(sns_manager: SNSTopicManager, topic_name: str):
     '''Validate topic name.'''
     if not topic_name:
         raise ValueError('Topic name cannot be empty.')
-    if not topic_name.isalnum():
-        raise ValueError(
-            'Topic name can only contain alphanumeric characters.')
     if sns_manager.is_exist_topic(topic_name):
         raise ValueError('Topic already exists.')
 
 
-def validate_topic_name_exist(sns_manager: SNSManager, topic_name: str):
+def validate_topic_name_exist(sns_manager: SNSTopicManager, topic_name: str):
     '''Validate topic name does not exist.'''
     if not topic_name:
         raise ValueError('Topic name cannot be empty.')
