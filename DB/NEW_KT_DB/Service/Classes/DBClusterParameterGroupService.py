@@ -1,18 +1,24 @@
 from abc import abstractmethod
+import json
+import os
+import sys
 from typing import Optional, Dict
 # from DataAccess import ObjectManager
-from Abc import DBO
-from DB.KT_DB.Models.ParameterGroupModel import ParameterGroupModel
-from DB.KT_DB.Validation.Validation import is_valid_user_group_name, is_valid
-from KT_DB.Models.DBClusterParameterGroupModel import DBClusterParameterGroupModel
-from DataAccess import ClusterManager
+from NEW_KT_DB.Service.Abc.DBO import DBO
+# from DB.KT_DB.Models.ParameterGroupModel import ParameterGroupModel
+from NEW_KT_DB.Validation.GeneralValidations import is_valid_user_group_name, is_valid
+from NEW_KT_DB.Models import DBClusterParameterGroupModel
+from NEW_KT_DB.DataAccess import DBClusterManager#, DBClusterParameterGroupManager
+from NEW_KT_DB.DataAccess import DBClusterParameterGroupManager
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
+from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
-class ParameterGroupService(DBO):
+class DBClusterParameterGroupService(DBO):
     """
     Service class for managing generic parameter groups.
     """
 
-    def __init__(self, dal, dal_cluster: ClusterManager):
+    def __init__(self, dal:DBClusterParameterGroupManager, dal_cluster: DBClusterManager, storage_manager: StorageManager):
         """
         Initialize the service with a ObjectManager instance.
 
@@ -21,8 +27,9 @@ class ParameterGroupService(DBO):
         """
         self.dal = dal
         self.dal_cluster = dal_cluster
+        self.storage_manager=storage_manager
 
-    def create(self, group_name: str, group_family: str, description: Optional[str] = None, is_cluster: bool = True):
+    def create(self, group_name: str, group_family: str, description: Optional[str] = None):
         """
         Create a new parameter group.
 
@@ -36,15 +43,17 @@ class ParameterGroupService(DBO):
             raise ValueError(f"group_name {group_name} is not valid")
         if self.dal.is_identifier_exist(group_name):
             raise ValueError(f"ParameterGroup with NAME '{group_name}' already exists.")
-        if is_cluster:
-            group = DBClusterParameterGroupModel(group_name, group_family, description)
-        else:
-            group = ParameterGroupModel(group_name, group_family, description)
-        self.dal.create(group.to_dict(), group_name)
+        group = DBClusterParameterGroupModel(group_name, group_family, description)
+        parameter_group_dict=group.to_dict()
+        self.dal.create(parameter_group_dict, group_name)
+        file_name=f'db_cluster_parameter_groups/db_cluster_parameter_group_{group_name}.json'
+        self.storage_manager.create_file(file_name, json.dumps(parameter_group_dict))
+        # with open(file_name, 'w') as json_file:
+            # json.dump(parameter_group_dict, json_file, indent=4)
         print(f"Creating parameter group '{group_name}' in family '{group_family}' with description '{description}'")
         return self.describe(group_name)
 
-    def delete(self, group_name: str, class_name: str):
+    def delete(self, group_name: str):
         """
         Delete an existing parameter group.
 
@@ -55,12 +64,16 @@ class ParameterGroupService(DBO):
             raise ValueError("You can't delete a default parameter group")
         if not self.dal.is_identifier_exist(group_name):
             raise ValueError(f"Parameter Group '{group_name}' does not exist.")
-        data = self.dal_cluster.get_all_objects()
+        data = self.dal_cluster.get_all_clusters()
         clusters = list(data.values())
         for c in clusters:
             if c['group_name'] == group_name:
                 raise ValueError("Can't delete parameter group associated with any DB clusters")
         self.dal.delete(group_name)
+        file_name = f'db_cluster_parameter_groups/db_cluster_parameter_group_{group_name}.json'
+        self.storage_manager.delete_file(file_name)
+        # if os.path.exists(file_name):
+        #     os.remove(file_name)
         print(f"Deleting parameter group '{group_name}'")
 
     def describe_group(self, title: str, parameter_group_name: str = None, max_records: int = 100, marker: str = None) -> Dict:
@@ -92,35 +105,6 @@ class ParameterGroupService(DBO):
         if marker is None:
             return {title: parameter_groups_local}
         return {'Marker': marker, title: parameter_groups_local}
-
-    def describe_parameters(self, group_name: str, source: str, max_records: int, marker: str) -> Dict:
-        """
-        Describe the parameters of a specific parameter group.
-
-        :param group_name: The name of the parameter group to describe.
-        :param source: The source of the parameter (e.g., user-defined, system).
-        :param max_records: The maximum number of records to return.
-        :param marker: The marker to start listing from. Used for pagination.
-        :return: A dictionary containing details about the parameters of the group.
-        """
-        data = self.get(group_name)
-        parameters_local = []
-        count = 0
-        for p in data['parameters']:
-            if p.parameter_name == marker or marker is None:
-                marker = None
-                if p.source == source:
-                    count += 1
-                    if count <= max_records:
-                        parameters_local.append(p.describe())
-                    else:
-                        marker = p.parameter_name
-                        break
-
-        result = {'Parameters': parameters_local}
-        if marker is not None:
-            result['Marker'] = marker
-        return result
 
     def camel_to_snake_case(name: str) -> str:
         """
@@ -165,10 +149,14 @@ class ParameterGroupService(DBO):
         new_data = {'parameters': update}
         updated_data = {**parameter_group, **new_data}
         self.dal.update(group_name, updated_data)
+        file_name=f'db_cluster_parameter_groups/db_cluster_parameter_group_{group_name}.json' 
+        self.storage_manager.create_file(file_name, json.dump(updated_data))
+        # with open(file_name, 'w') as json_file:
+        #     json.dump(updated_data, json_file, indent=4)
         return {title: group_name}
 
-    @abstractmethod
-    def describe(self, name: str, arn: str, data: Dict) -> Dict:
+    # @abstractmethod
+    def describe(self, data: Dict) -> Dict:
         """
         Abstract method to describe a parameter group.
 
@@ -178,9 +166,12 @@ class ParameterGroupService(DBO):
         :return: A dictionary containing the description of the parameter group.
         """
         describe = {
-            name: data['group_name'],
+            'DBClusterParameterGroupName': data['group_name'],
             'DBParameterGroupFamily': data['group_family'],
             'Description': data['description'],
-            arn: f'arn:aws:rds:region:account:dbcluster-parameter_group/{data["group_name"]}'
+            'DBClusterParameterGroupArn': f'arn:aws:rds:region:account:dbcluster-parameter_group/{data["group_name"]}'
         }
         return describe
+
+    def get(self, group_name: str)->Dict:
+        return self.dal.get(group_name)
