@@ -16,7 +16,7 @@ from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 @pytest.fixture
 def sns_topic_service(storage_manager: StorageManager):
     service = SNSTopicService(SNSTopicManager(ObjectManager(
-        'sns_test_db')), storage_manager, 'test_service_directory')
+        'sns_test_db.db')), storage_manager, 'test_service_directory')
     yield service
 
 
