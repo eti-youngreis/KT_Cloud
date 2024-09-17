@@ -25,7 +25,7 @@ class DBSnapshotController:
             return {
                 "SnapshotIdentifier": db_snapshot_identifier,
                 "DBInstanceIdentifier": db_instance_identifier,
-                "SnapshotCreationTime": snapshot.created_time 
+                "SnapshotCreationTime": snapshot.created_time ,
                 "SnapshotType": snapshot.snapshot_type, 
                 
             }
