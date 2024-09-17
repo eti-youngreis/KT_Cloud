@@ -3,6 +3,7 @@ from collections import deque
 import os
 from ..Service.Classes.DBInstanceService import SQLCommandHelper
 from ..Service.Classes.DBInstanceService import DbSnapshotIdentifierNotFoundError
+from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 import uuid
 
 
