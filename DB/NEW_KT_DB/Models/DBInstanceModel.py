@@ -1,8 +1,6 @@
 from datetime import datetime
 from collections import deque
 import os
-from ..Service.Classes.DBInstanceService import SQLCommandHelper
-from ..Service.Classes.DBInstanceService import DbSnapshotIdentifierNotFoundError
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 import uuid
 
@@ -33,8 +31,6 @@ class DBInstanceModel:
 
         self._last_node_of_current_version = self._node_subSnapshot_dic.get(self._current_version_ids_queue[-1])
 
-        self.pk_column = kwargs.get('pk_column', 'db_instance_identifier')
-        self.pk_value = kwargs.get('pk_value', self.db_instance_identifier)
         
     def to_dict(self):
         return ObjectManager.convert_object_attributes_to_dictionary(
@@ -44,15 +40,12 @@ class DBInstanceModel:
             master_user_password=self.master_user_password,
             port=self.port,
             status=self.status,
-            created_time=self.created_time.isoformat(),
+            created_time=self.created_time.isoformat() if self.created_time is not None else None,
             endpoint=self.endpoint,
 
             node_subSnapshot_dic={str(k): v.to_dict() for k, v in self._node_subSnapshot_dic.items()},
             node_subSnapshot_name_to_id=self._node_subSnapshot_name_to_id,
-            current_version_ids_queue=[str(id_snapshot) for id_snapshot in self._current_version_ids_queue],
-
-            pk_column = self.pk_column,
-            pk_value = self.pk_value
+            current_version_ids_queue=[str(id_snapshot) for id_snapshot in self._current_version_ids_queue]
         )
 
 
@@ -77,7 +70,7 @@ class Node_SubSnapshot:
             dbs_paths_dic=self.dbs_paths_dic,
             deleted_records_db_path=self.deleted_records_db_path,
             snapshot_type=self.snapshot_type,
-            created_time=self.created_time.isoformat()
+            created_time=self.created_time.isoformat() if self.created_time is not None else None,
         )    
 
     def _create_deleted_records_db_path(self, endpoint):
@@ -88,6 +81,8 @@ class Node_SubSnapshot:
         return deleted_records_db_path
 
     def clone_databases_schema(self, dbs_paths_dic):
+        from DB.NEW_KT_DB.Service.Classes.DBInstanceService import SQLCommandHelper
+
         dbs_paths_new_dic = {}
         for db, db_path in dbs_paths_dic.items():
             parts = db_path.split(os.sep)

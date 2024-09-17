@@ -1,7 +1,6 @@
 from typing import Dict, Any
 import json
-from DataAccess import ObjectManager
-
+from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 
 class DBInstanceManager:
     object_name = __name__.split('.')[-1].replace('Manager', '').lower()
@@ -19,7 +18,7 @@ class DBInstanceManager:
 
     def createInMemoryDBInstance(self, db_instance):
         metadata = json.dumps(db_instance.to_dict())
-        data = (db_instance.db_instance_identifier, 'db_instance', metadata)
+        data = (db_instance.db_instance_identifier, metadata)
         self.object_manager.save_in_memory(self.object_name, data)
 
     def modifyDBInstance(self, db_instance):
@@ -30,10 +29,10 @@ class DBInstanceManager:
 
     def describeDBInstance(self, db_instance_identifier) -> Dict[str, Any]:
         criteria = f"db_instance_identifier = '{db_instance_identifier}'"
-        result = self.object_manager.get_from_memory(self.object_name, ["*"], criteria)
+        result = self.object_manager.get_from_memory(self.object_name, "*", criteria)
 
         if result:
-            metadata = json.loads(result[0][2])  
+            metadata = json.loads(result[0][1])  
             return metadata
         else:
             raise ValueError(f"DB Instance with identifier {db_instance_identifier} not found.")

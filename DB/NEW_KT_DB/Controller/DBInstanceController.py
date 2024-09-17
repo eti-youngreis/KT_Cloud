@@ -1,4 +1,4 @@
-from Service import DBInstanceService
+from DB.NEW_KT_DB.Service.Classes.DBInstanceService import DBInstanceService
 
 class DBInstanceController:
     def __init__(self, service: DBInstanceService):

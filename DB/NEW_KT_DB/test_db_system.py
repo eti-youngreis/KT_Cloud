@@ -1,10 +1,16 @@
+import sys
+import os
+# Add the project root directory to the Python path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+sys.path.append(project_root)
+
 from DB.NEW_KT_DB.DataAccess.DBManager import DBManager
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 from DB.NEW_KT_DB.DataAccess.DBInstanceManager import DBInstanceManager
 from DB.NEW_KT_DB.Service.Classes.DBInstanceService import DBInstanceService
-from DB.NEW_KT_DB.Controller.DBInstanceController import DBInstanceController
 from DB.NEW_KT_DB.Controller.DBSnapshotController import DBSnapshotController
-import os
+from DB.NEW_KT_DB.Controller.DBInstanceController import DBInstanceController
+
 
 def main():
     # יצירת מופעים של המחלקות הנדרשות
