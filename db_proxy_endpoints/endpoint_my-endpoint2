@@ -1,0 +1,1 @@
+{"DBProxyName": "my-proxy", "DBProxyEndpointName": "my-endpoint2", "Status": "creating", "TargetRole": "READ_ONLY", "Endpoint": "", "CreateDate": "2024-09-17T08:41:26.107028", "IsDefault": false}

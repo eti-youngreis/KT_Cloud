@@ -67,7 +67,7 @@ class DBManager:
 
         # add documentation here
         set_clause = ', '.join([f'{k} = ?' for k in updates.keys()])
-        values = list(updates.values())
+        values = tuple(updates.values())
     
         update_statement = f'''
             UPDATE {table_name}
@@ -90,7 +90,25 @@ class DBManager:
 
         self.execute_query_without_results(delete_statement)
 
-
+    # Tem-M
+    def get_columns_from_table(self, table_name):
+        '''Get the columns from the specified table.'''
+        try:
+            get_columns_query = f"""PRAGMA table_info({table_name});"""
+            cols = self.execute_query_with_multiple_results(get_columns_query)
+            return [col[1] for col in cols]
+        except Exception as e:
+            print(f"Error occurred while fetching columns from table {table_name}: {e}")
+            return []
+    
+    def get_all_data_from_table(self, table_name):
+        try:
+            get_all_data_query = f"""SELECT * FROM {table_name}"""
+            return self.execute_query_with_multiple_results(get_all_data_query)
+        except Exception as e:
+            print(f"Error occurred while fetching data from table {table_name}: {e}")
+            return []
+    
     # rachel-8511, Riki7649255
     def select_and_return_records_from_table(self, table_name: str, columns: List[str] = ['*'], criteria: Optional[str] = None) -> Dict[int, Dict[str, Any]]:
         '''Select records from the specified table based on criteria.
@@ -101,14 +119,21 @@ class DBManager:
         Returns:
             Dict[int, Dict[str, Any]]: A dictionary where keys are object_ids and values are metadata.
         '''
-        columns_clause = ', '.join(columns)
+        cols = columns
+        if cols == ['*']:
+            cols = self.get_columns_from_table(table_name)
+            
+        columns_clause = ', '.join(cols)
         query = f'SELECT {columns_clause} FROM {table_name}'
         if criteria:
-            query += f' WHERE {criteria}'
+            query += f' WHERE {criteria};'
+        
         try:
             results = self.execute_query_with_multiple_results(query)
-            return {result[0]: dict(zip(columns, result[1:])) for result in results}
+            return {result[0]: dict(zip(cols if columns != ['*'] else cols[1:], result[1:])) for result in results}
         except OperationalError as e:
+            raise Exception(f'Error selecting from {table_name}: {e}')   
+        except TypeError as e:
             raise Exception(f'Error selecting from {table_name}: {e}')
     
     def is_exists_in_table(self, table_name:str, criteria:str):

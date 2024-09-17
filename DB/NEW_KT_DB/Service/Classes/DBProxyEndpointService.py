@@ -1,9 +1,12 @@
 from typing import Dict, Optional, List, Any
-from Models.DBProxyEndpointModel import DBProxyEndpoint
-from Abc.DBO import DBO
-from Validation.GeneralValidations import *
-from Validation.DBProxyEndpointValidations import *
-from DataAccess.DBProxyEndpointManager import DBProxyEndpointManager
+from datetime import datetime
+import json
+from DB.NEW_KT_DB.Models.DBProxyEndpointModel import DBProxyEndpoint
+from DB.NEW_KT_DB.Service.Abc.DBO import DBO
+from DB.NEW_KT_DB.Validation.GeneralValidations import *
+from DB.NEW_KT_DB.Validation.DBProxyEndpointValidations import *
+from DB.NEW_KT_DB.DataAccess.DBProxyEndpointManager import DBProxyEndpointManager
+from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 # Exceptions
 class ParamValidationFault(Exception):
@@ -29,16 +32,36 @@ class InvalidDBProxyEndpointStateFault(Exception):
 
 
 
-class DBProxyendpointService(DBO):
-    def __init__(self, dal: DBProxyEndpointManager):
-        self.dal = dal
-        self.path = "DB\NEW_KT_DB\server\db_proxy_endpoints"
+class DBProxyEndpointService(DBO):
+    def __init__(self, dal: DBProxyEndpointManager, storage:StorageManager, db_proxy_service):
+        self.dal:DBProxyEndpointManager = dal
+        self.storage:StorageManager = storage
    
+    def _convert_endpoint_name_to_endpoint_file_name(self, DBProxyEndpointName:str):
+        return "endpoint_"+DBProxyEndpointName
     
+    def _get_json(self, object_dict):
+        def custom_serializer(obj):
+            if isinstance(obj, datetime):
+                return obj.isoformat()
+            raise TypeError(f"Type {type(obj)} not serializable")
 
-    def create(self, DBProxyName:str, DBProxyEndpointName:str, TargetRole:str = 'READ_WRITE', Tags:Optional[List[Dict[str:str]]] = None, IsDefault:bool = False):
+        object_dict = {k: v for k, v in object_dict.items() if v is not None}
+        object_json = json.dumps(object_dict, default=custom_serializer)
+        return object_json
+
+    # def _load_json(json_str):
+    #     def custom_deserializer(obj):
+    #         if 'datetime' in obj:
+    #             return datetime.fromisoformat(obj['datetime'])
+    #         return obj
+    #     json_dict = json.loads(json_str, object_hook=custom_deserializer)
+    #     return json_dict
+
+
+    def create(self, DBProxyName:str, DBProxyEndpointName:str, TargetRole:str = 'READ_WRITE', Tags:Optional[List[Dict[str, str]]] = None, IsDefault:bool = False):
         '''Create a new DBProxy endpoint.'''
-        # create object in code
+        # Validations
         if not validate_name(DBProxyName):
             raise ParamValidationFault("DBProxyName is not valid")
         if not validate_name(DBProxyEndpointName):
@@ -47,63 +70,102 @@ class DBProxyendpointService(DBO):
             raise ParamValidationFault(f"TargetRole {TargetRole} is not valid, must be 'READ_WRITE'|'READ_ONLY'")
         if not validate_tags(Tags):
             raise ParamValidationFault(f"Tags {Tags} are not valid, must be List of dicts [{'Key': 'string','Value': 'string'}]")
-        if self.dal.IsDBProxyEndpointExistsInMemory(DBProxyEndpointName):
+        if self.dal.is_exists(DBProxyEndpointName):
             raise DBProxyEndpointAlreadyExistsFault(f'db proxy endpoint {DBProxyEndpointName} already exists')
+        
+        # create object
         db_proxy_endpoint:DBProxyEndpoint = DBProxyEndpoint(DBProxyName, DBProxyEndpointName, TargetRole, Tags, IsDefault)
     
         # create physical object as described in task
+        file_name = self._convert_endpoint_name_to_endpoint_file_name(DBProxyEndpointName)
+        content = self._get_json(db_proxy_endpoint.to_dict())
+        self.storage.create_file(file_name, content)
         
-        
-        # save in memory using DBClusterManager.createInMemoryDBCluster() function
-        self.dal.createInMemoryDBProxyEndpoint(DBProxyEndpointName, db_proxy_endpoint.to_dict())
-        return self.describe(DBProxyEndpointName)
+        # save in memory 
+        self.dal.create(db_proxy_endpoint)
+        return self.describe(DBProxyEndpointName=DBProxyEndpointName)
 
 
-    def delete(self, DBProxyEndpointName):
+    def delete(self, DBProxyEndpointName:str):
         '''Delete an existing DBProxy endpoint.'''
+        
+        # Validations
         if not validate_name(DBProxyEndpointName):
             raise ParamValidationFault("DBProxyEndpointName is not valid") 
         db_proxy_endpoint_description = self.describe(DBProxyEndpointName)
-        if not self.dal.IsDBProxyEndpointExistsInMemory(DBProxyEndpointName):
+        if not self.dal.is_exists(DBProxyEndpointName):
             raise DBProxyEndpointNotFoundFault(f'db proxy endpoint {DBProxyEndpointName} not found')
-        self.dal.deleteInMemoryDBProxyEndpoint(DBProxyEndpointName)
+        
+        # Delete phisical object
+        file_name = self._convert_endpoint_name_to_endpoint_file_name(DBProxyEndpointName)
+        self.storage.delete_file(file_name)
+        
+        # Delete from table
+        self.dal.delete(DBProxyEndpointName)
         return db_proxy_endpoint_description
 
 
-    def describe(self,DBProxyName:Optional[str],
-                DBProxyEndpointName:Optional[str],
-                Filters:Optional[List[Dict[str:Any]]],
-                Marker:Optional[str],
-                MaxRecords:Optional[int]):
+    def describe(self,
+                DBProxyEndpointName:Optional[str] = None,
+                DBProxyName:Optional[str] = None,
+                Filters:Optional[List[Dict[str, Any]]] = None,
+                Marker:Optional[str] = None,
+                MaxRecords:Optional[int] = None):
         '''Describe the details of DBProxy endpoint.'''
+        
+        # Validations
         if Filters and not check_filters_validation(Filters):
             raise ParamValidationFault("filters are not valid, filters must be list of dicts [{'Name': 'string','Values': ['string',]},]")
-        if DBProxyEndpointName and not self.dal.IsDBProxyEndpointExistsInMemory(DBProxyEndpointName):
+        if DBProxyEndpointName and not self.dal.is_exists(DBProxyEndpointName):
             raise DBProxyEndpointNotFoundFault(f'db proxy endpoint {DBProxyEndpointName} not found')
-        return self.dal.describeDBProxyEndpoint(DBProxyName,
+        
+        # Describe in query
+        return self.dal.describe(
                 DBProxyEndpointName,
-                Filters,
-                Marker,
-                MaxRecords)
+                Filters)
+
+    
 
 
-    def modify(self, DBProxyEndpointName:str, NewDBProxyEndpointName:Optional[str]):
+    def modify(self, DBProxyEndpointName:str, NewDBProxyEndpointName:Optional[str] =  None):
         '''Modify an existing DBProxy endpoint.'''
+        
+        # Validations
         if not validate_name(DBProxyEndpointName):
             raise ParamValidationFault("DBProxyEndpointName is not valid") 
-        if not validate_name(NewDBProxyEndpointName):
-            raise ParamValidationFault("newDBProxyEndpointName is not valid")  
+        
         if not self.dal.IsDBProxyEndpointExistsInMemory(DBProxyEndpointName):
             raise DBProxyEndpointNotFoundFault(f'db proxy endpoint {DBProxyEndpointName} not found')
-        if self.dal.IsDBProxyEndpointExistsInMemory(NewDBProxyEndpointName):
-            raise DBProxyEndpointAlreadyExistsFault(f'db proxy endpoint name {NewDBProxyEndpointName} already exists')
-        db_proxy_endpoint_metadata = self.describe(DBProxyEndpointName)
-        endpoint_state = db_proxy_endpoint_metadata['Status']
-        if endpoint_state != 'available':
-            raise InvalidDBProxyEndpointStateFault(f"db proxy endpoint state is {endpoint_state}. can modify only in available state")
-        self.dal.deleteInMemoryDBProxyEndpoint(DBProxyEndpointName)
-        self.dal.createInMemoryDBProxyEndpoint(NewDBProxyEndpointName, db_proxy_endpoint_metadata)
-        return self.describe(NewDBProxyEndpointName) 
+        
+        
+        # If need changes:
+        if NewDBProxyEndpointName:
+            
+            # Validations
+            
+            if not validate_name(NewDBProxyEndpointName):
+                raise ParamValidationFault("newDBProxyEndpointName is not valid") 
+            
+            if self.dal.IsDBProxyEndpointExistsInMemory(NewDBProxyEndpointName):
+                raise DBProxyEndpointAlreadyExistsFault(f'db proxy endpoint name {NewDBProxyEndpointName} already exists') 
+            
+            # Check if state is valid
+            endpoint_state = self.dal.select(DBProxyEndpointName, ['Status'])['Status']
+            if endpoint_state != 'available':
+                raise InvalidDBProxyEndpointStateFault(f"db proxy endpoint state is {endpoint_state}. can modify only in available state")
+            
+            # Change phisical object
+            old_file_name = self._convert_endpoint_name_to_endpoint_file_name(DBProxyEndpointName)
+            new_file_name = self._convert_endpoint_name_to_endpoint_file_name(NewDBProxyEndpointName)
+            self.storage.rename_file(old_file_name, new_file_name)
+            
+            # Change in memory
+            db_proxy_endpoint = self.dal.get(DBProxyEndpointName)
+            db_proxy_endpoint.DBProxyEndpointName = NewDBProxyEndpointName
+            self.dal.delete(DBProxyEndpointName)
+            self.dal.create(db_proxy_endpoint)
+            DBProxyEndpointName = NewDBProxyEndpointName
+        return self.describe(DBProxyEndpointName) 
 
 
     def get(self):
