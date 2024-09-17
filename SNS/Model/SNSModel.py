@@ -27,10 +27,8 @@ class SNSTopicModel:
 
     pk_column = 'topic_name'
     table_name = 'sns_topic'
-    table_schema = [
-        'topic_name TEXT PRIMARY KEY',
-        'subscribers TEXT'
-    ]
+    table_schema = 'topic_name text primary key not null, subscribers text'
+    
 
     def __init__(self, topic_name: str):
         self.topic_name: str = topic_name
@@ -41,5 +39,13 @@ class SNSTopicModel:
         return ObjectManager.convert_object_attributes_to_dictionary(
             topic_name=self.topic_name,
             subscribers={protocol.value: [subscriber for subscriber in subscribers]
-                         for protocol, subscribers in self.subscribers.items}
+                         for protocol, subscribers in self.subscribers.items()}
+        )
+
+    
+    def to_sql(self):
+        return ObjectManager.convert_object_attributes_to_sql(
+            topic_name=self.topic_name,
+            subscribers={protocol.value: [subscriber for subscriber in subscribers]
+                         for protocol, subscribers in self.subscribers.items()}
         )
