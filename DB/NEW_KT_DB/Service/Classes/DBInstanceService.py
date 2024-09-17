@@ -15,23 +15,19 @@ class DBInstanceService(DBO):
         self.dal = dal
 
     def create(self, **kwargs):
-
-        # Validation
+        # Perform validations
+        # Validation.validate_db_instance_params(kwargs)
         
-        db_instance_identifier = kwargs.get('db_instance_identifier')
-        if self.dal.is_db_instance_exists(db_instance_identifier):
-            raise ValueError(f"DB Instance with identifier {db_instance_identifier} already exists.")
-
+        # Create DBInstance model
         db_instance = DBInstanceModel(**kwargs)
-
+        # Save to management table
+        self.dal.createInMemoryDBInstance(db_instance)
         # Create physical database if db_name is provided
         if 'db_name' in kwargs:
             SQLCommandHelper.create_database(
                 kwargs['db_name'], db_instance._last_node_of_current_version, db_instance.endpoint)
 
-        self.dal.createInMemoryDBInstance(db_instance)
         return db_instance
-
 
     def delete(self, db_instance_identifier):
         '''Delete an existing DBInstance.'''
