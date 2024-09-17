@@ -4,7 +4,7 @@ from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 class ObjectManager:
 
 
-    def __init__(self, db_file: str,type, storage_path="D:\\s3_project\\server"):
+    def __init__(self, db_file: str):
         """Initialize ObjectManager with the database connection."""
         self.object_manager = ObjectManagerDB(db_file)
 
