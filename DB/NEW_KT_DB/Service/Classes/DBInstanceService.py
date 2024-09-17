@@ -110,7 +110,9 @@ class DBInstanceService(DBO):
             _node_subSnapshot_dic=nodes,
             _node_subSnapshot_name_to_id=db_instance_data['node_subSnapshot_name_to_id'],
             _current_version_ids_queue=deque(
-                db_instance_data['current_version_ids_queue'])
+                db_instance_data['current_version_ids_queue']),
+            pk_column = db_instance_data['pk_column'],
+            pk_value = db_instance_data['pk_value']      
         )
 
         return db_instance

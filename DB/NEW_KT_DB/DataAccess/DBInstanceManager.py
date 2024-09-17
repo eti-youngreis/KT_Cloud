@@ -6,11 +6,21 @@ from DataAccess import ObjectManager
 class DBInstanceManager:
     def __init__(self, db_file: str):
         self.object_manager = ObjectManager(db_file)
-        self.table_name = 'db_instance'
+        # self.table_name = 'db_instance'
+        self._create_db_instance_managment_table()
+
+    def _create_db_instance_managment_table(self):
+        table_structure = f'''
+        db_instance_identifier TEXT PRIMARY KEY,
+        metadata TEXT NOT NULL
+        '''
+        object_name = self.__class__.__name__.replace('Manager', '')
+        self.object_manager.create_management_table(object_name, table_structure, pk_column_data_type='TEXT')
+
       
     def createInMemoryDBInstance(self, db_instance):
         metadata = json.dumps(db_instance.to_dict())
-        data = (db_instance.db_instance_identifier, metadata)
+        data = (db_instance.db_instance_identifier,'db_instance', metadata)
         self.object_manager.save_in_memory(self.table_name, data)
 
     def modifyDBInstance(self, db_instance):
@@ -24,7 +34,7 @@ class DBInstanceManager:
         result = self.object_manager.get_from_memory(self.table_name, ["*"], criteria)
 
         if result:
-            metadata = json.loads(result[0][1])  
+            metadata = json.loads(result[0][2])  
             return metadata
         else:
             raise ValueError(f"DB Instance with identifier { db_instance_identifier} not found.")

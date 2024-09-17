@@ -33,6 +33,8 @@ class DBInstanceModel:
 
         self._last_node_of_current_version = self._node_subSnapshot_dic.get(self._current_version_ids_queue[-1])
 
+        self.pk_column = kwargs.get('pk_column', 'db_instance_identifier')
+        self.pk_value = kwargs.get('pk_value', self.db_instance_identifier)
         
     def to_dict(self):
         return ObjectManager.convert_object_attributes_to_dictionary(
@@ -48,6 +50,9 @@ class DBInstanceModel:
             node_subSnapshot_dic={str(k): v.to_dict() for k, v in self._node_subSnapshot_dic.items()},
             node_subSnapshot_name_to_id=self._node_subSnapshot_name_to_id,
             current_version_ids_queue=[str(id_snapshot) for id_snapshot in self._current_version_ids_queue]
+
+            pk_column = self.pk_column,
+            pk_value = self.pk_value
         )
 
 
