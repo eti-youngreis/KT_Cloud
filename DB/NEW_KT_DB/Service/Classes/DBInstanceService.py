@@ -1,6 +1,7 @@
 import datetime
 from DataAccess import DBInstanceManager
 from Models import DBInstanceModel
+from DB.NEW_KT_DB.Models.DBInstanceModel import Node_SubSnapshot
 from Abc import DBO
 from Validation import Validation
 from collections import deque
@@ -227,19 +228,23 @@ class DBInstanceService(DBO):
             db_instance._last_node_of_current_version.id_snapshot)
         db_instance._node_subSnapshot_dic[db_instance._last_node_of_current_version.id_snapshot] = db_instance._last_node_of_current_version
 
+
     def execute_query(self, db_instance_identifier, query, db_name):
         db_instance = self.get(db_instance_identifier)
         query_type = query.strip().split()[0].upper()
 
         if query_type == 'SELECT':
-            return SQLCommandHelper.select(db_instance._current_version_ids_queue, db_name, query, set(db_instance._current_version_ids_queue))
+            node_queue = [db_instance._node_subSnapshot_dic[id] for id in db_instance._current_version_ids_queue]
+            return SQLCommandHelper.select(node_queue, db_name, query, set(db_instance._current_version_ids_queue))
+
         elif query_type == 'INSERT':
             return SQLCommandHelper.insert(db_instance._last_node_of_current_version, query, db_name)
         elif query_type == 'CREATE':
             if 'TABLE' in query.upper():
                 return SQLCommandHelper.create_table(query, db_instance._last_node_of_current_version.dbs_paths_dic[db_name])
         elif query_type == 'DELETE':
-            return SQLCommandHelper.delete_record(db_instance._current_version_ids_queue, query, db_name)
+            node_queue = [db_instance._node_subSnapshot_dic[id] for id in db_instance._current_version_ids_queue]
+            return SQLCommandHelper.delete_record(node_queue, query, db_name)
         else:
             raise ValueError(f"Unsupported query type: {query_type}")
 

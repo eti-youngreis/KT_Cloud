@@ -19,7 +19,6 @@ class DBInstanceController:
     def get_db_instance(self, db_instance_identifier):
         return self.service.get(db_instance_identifier)
 
-
     def stop_db_instance(self, db_instance_identifier):
         return self.service.stop(db_instance_identifier)
 
