@@ -169,7 +169,13 @@ class DBManager:
 
     def is_object_exist(self, table_name:str, criteria:str):
         """check if rows exists in table"""
-        return self.select_and_return_records_from_table(table_name, criteria=criteria) != {}
+        try:
+            in_memory_object = self.get_data_from_table(table_name, criteria=criteria)
+            if in_memory_object:
+                return True
+        except Exception as e:
+            print(Exception(f"Error checking if object {criteria} exists in {table_name}: {e}"))
+            return False
 
 
     def is_table_exist(self, table_name: str) -> bool:
