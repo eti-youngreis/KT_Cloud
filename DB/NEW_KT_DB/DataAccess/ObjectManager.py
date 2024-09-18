@@ -98,8 +98,7 @@ class ObjectManager:
         return self.db_manager.get_all_data_from_table(table_name)
 
     
-    @staticmethod
-    def convert_object_attributes_to_dictionary(**kwargs):
+   
     @staticmethod
     def convert_object_attributes_to_dictionary(**kwargs):
 
