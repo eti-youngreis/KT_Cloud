@@ -4,9 +4,9 @@ from DataAccess import ObjectManager
 
 class Snapshot:
 
-    def __init__(self, db_name: str, creation_date: datetime, owner_alias: str, status: str,
+    def __init__(self, db_instance_identifier: str, creation_date: datetime, owner_alias: str, status: str,
                  description: str = None, progress: str = None, url_snapshot: str = None):
-            self.db_name = db_name
+            self.db_instance_identifier = db_instance_identifier
             self.creation_date = creation_date
             self.owner_alias = owner_alias
             self.status = status
@@ -19,7 +19,7 @@ class Snapshot:
         '''Retrieve the data of the DB snapshot as a dictionary.'''
         
         return ObjectManager.convert_object_attributes_to_dictionary(
-            db_name = self.db_name,
+            db_instance_identifier = self.db_instance_identifier,
             creation_date = self.creation_date,
             owner_alias = self.owner_alias,
             status = self.status,
