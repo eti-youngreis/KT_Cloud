@@ -55,6 +55,7 @@ class SNSTopicService:
 
         # update physical object
         self.storage_manager.delete_file(self.get_file_path(topic_name))
+        print(type(list(sns_topic.subscribers.keys())[0]), sns_topic.topic_name)
         self.storage_manager.create_file(
             file_path=self.get_file_path(topic_name),
             content=sns_topic.to_dict()
@@ -99,7 +100,7 @@ class SNSTopicService:
         '''Notify subscribers of an SNS topic.'''
         subscribers = self.get_subscribers(topic_name)
         for protocol, endpoints in subscribers.items():
-            SNSTopicService.notificate_functions[protocol.value](
+            SNSTopicService.notificate_functions[protocol](
                 self, endpoints, message)
 
     def _send_email(self, endpoints: List[str], message: str):

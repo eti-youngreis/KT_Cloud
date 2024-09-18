@@ -1,31 +1,40 @@
+
 import json
 import os
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
-from DB.NEW_KT_DB.Test.GeneralTests import test_file_exists
 from SNS.DataAccess.SNSManager import SNSTopicManager
 from SNS.Model.SNSModel import Protocol, SNSTopicModel
 from SNS.Service.SNSService import SNSTopicService
 
 
 import pytest
-from unittest.mock import Mock
 from SNS.Service.SNSService import SNSTopicService
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 
 @pytest.fixture
-def sns_topic_service(storage_manager: StorageManager):
-    service = SNSTopicService(SNSTopicManager(ObjectManager(
-        'sns_test_db.db')), storage_manager, 'test_service_directory')
+def sns_object_manager():
+    return ObjectManager('sns_test_db.db')
+
+
+@pytest.fixture
+def sns_topic_manager(sns_object_manager: ObjectManager):
+    return SNSTopicManager(sns_object_manager)
+
+
+@pytest.fixture
+def sns_topic_service(storage_manager: StorageManager, sns_topic_manager: SNSTopicManager):
+    service = SNSTopicService(
+        sns_topic_manager, storage_manager, 'test_service_directory')
     yield service
 
 
 @pytest.fixture
-def sns_topic(sns_topic_service: SNSTopicService):
-    sns_topic = SNSTopicModel('test_topic')
-    sns_topic_service.create(sns_topic.topic_name)
-    yield sns_topic
-    sns_topic_service.delete(sns_topic.topic_name)
+def sns_topic(sns_topic_service: SNSTopicService, sns_topic_manager: SNSTopicManager):
+    sns_topic_model = SNSTopicModel('test_topic')
+    sns_topic_service.create(sns_topic_model.topic_name)
+    yield sns_topic_model
+    sns_topic_manager.delete_topic(sns_topic_model.topic_name)
 
 
 @pytest.fixture
@@ -35,9 +44,10 @@ def storage_manager():
     storage_manager.delete_directory('test_directory')
 
 
-def test_create_sns_topic_with_valid_name(sns_topic: SNSTopicModel, storage_manager: StorageManager):
+def test_create_sns_topic_with_valid_name(sns_topic_service: SNSTopicService, sns_topic: SNSTopicModel, storage_manager: StorageManager):
     assert sns_topic_service.sns_manager.is_exist_topic(sns_topic.topic_name)
-    test_file_exists(sns_topic_service.get_file_path(sns_topic.topic_name))
+    is_file_exist(storage_manager, sns_topic_service.get_file_path(
+        sns_topic.topic_name))
 
 
 def test_create_sns_topic_with_existing_name(sns_topic: SNSTopicModel, sns_topic_service: SNSTopicService):
@@ -50,11 +60,12 @@ def test_create_sns_topic_with_empty_name(sns_topic_service: SNSTopicService):
         sns_topic_service.create(None)
 
 
-def test_delete_sns_topic_with_valid_name(sns_topic: SNSTopicModel, sns_topic_service: SNSTopicService):
+def test_delete_sns_topic_with_valid_name(sns_topic: SNSTopicModel, sns_topic_service: SNSTopicService, storage_manager: StorageManager):
     sns_topic_service.delete(sns_topic.topic_name)
     assert not sns_topic_service.sns_manager.is_exist_topic(
         sns_topic.topic_name)
-    test_file_exists(sns_topic_service.get_file_path(sns_topic.topic_name))
+    is_file_exist(storage_manager, sns_topic_service.get_file_path(
+        sns_topic.topic_name))
 
 
 def test_delete_sns_topic_with_non_existing_name(sns_topic_service: SNSTopicService):
@@ -147,6 +158,10 @@ def test_get(sns_topic: SNSTopicModel, sns_topic_service: SNSTopicService):
     assert sns_topic_service.get(sns_topic.topic_name) == sns_topic
 
 
+def test_manager_get(sns_topic: SNSTopicModel, sns_topic_manager: SNSTopicManager):
+    assert sns_topic_manager.get_topic(sns_topic.topic_name) == sns_topic
+
+
 def test_get_with_non_existing_sns_topic(sns_topic_service: SNSTopicService):
     with pytest.raises(ValueError):
         sns_topic_service.get('non_existing_topic')
@@ -183,3 +198,7 @@ def test_send_email(sns_topic_service: SNSTopicService):
 
     sns_topic_service._send_email(
         [test_email, test_email2], 'Test message')
+
+
+def is_file_exist(storage_manager: StorageManager, file_path: str):
+    return storage_manager.is_file_exist(file_path)
