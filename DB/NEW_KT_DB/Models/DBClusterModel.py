@@ -30,16 +30,43 @@ class Cluster:
         self.storage_encrypted = kwargs.get('storage_encrypted', None)
         self.storage_type = kwargs.get('storage_type', 'aurora')
         self.tags  = kwargs.get('tags', None)
-        self.created_at = datetime.now()
+        self.created_at = kwargs.get('created_at', datetime.now())
         self.status = 'available'
         self.primary_writer_instance = None
         self.reader_instances = []
         self.cluster_endpoint = None
         self.instances_endpoints = {}  # Added attribute to store endpoints
 
-        self.pk_column = kwargs.get('pk_column', 'ClusterID')
+        self.pk_column = kwargs.get('pk_column', 'db_cluster_identifier')
         self.pk_value = kwargs.get('pk_value', self.db_cluster_identifier)
-
+        self.table_schema = """ db_cluster_identifier TEXT PRIMARY KEY,
+                                engine TEXT,
+                                allocated_storage INTEGER,
+                                copy_tags_to_snapshot BOOLEAN,
+                                db_cluster_instance_class TEXT,
+                                database_name TEXT,
+                                db_cluster_parameter_group_name TEXT,
+                                db_subnet_group_name TEXT,
+                                deletion_protection BOOLEAN,
+                                engine_version TEXT,
+                                master_username TEXT,
+                                master_user_password TEXT,
+                                manage_master_user_password BOOLEAN,
+                                option_group_name TEXT,
+                                port INTEGER,
+                                replication_source_identifier TEXT,
+                                storage_encrypted BOOLEAN,
+                                storage_type TEXT,
+                                tags TEXT,
+                                created_at TEXT,
+                                status TEXT,
+                                primary_writer_instance TEXT,
+                                reader_instances TEXT,
+                                cluster_endpoint TEXT,
+                                instances_endpoints TEXT,
+                                pk_column TEXT,
+                                pk_value TEXT
+                                """
 
     def to_dict(self) -> Dict:
         '''Retrieve the data of the DB cluster as a dictionary.'''
@@ -65,7 +92,7 @@ class Cluster:
             storage_encrypted=self.storage_encrypted,
             storage_type=self.storage_type,
             tags=self.tags,
-            # created_at=self.created_at,
+            created_at=self.created_at.isoformat(),
             status=self.status,
             primary_writer_instance=self.primary_writer_instance,
             reader_instances=self.reader_instances,
@@ -74,74 +101,6 @@ class Cluster:
             pk_column=self.pk_column,
             pk_value=self.pk_value
         )
-
-    # def to_dict(self) -> Dict:
-    #     '''Retrieve the data of the DB cluster as a dictionary.'''
-
-    #     return ObjectManager.convert_object_attributes_to_dictionary(
-    #         db_cluster_identifier=self.db_cluster_identifier, 
-    #         engine=self.engine, 
-    #         availability_zones=self.availability_zones, 
-    #         copy_tags_to_snapshot=self.copy_tags_to_snapshot, 
-    #         database_name=self.database_name, 
-    #         db_cluster_parameter_group_name=self.db_cluster_parameter_group_name, 
-    #         db_subnet_group_name=self.db_subnet_group_name, 
-    #         deletion_protection=self.deletion_protection, 
-    #         enable_cloudwatch_logs_exports=self.enable_cloudwatch_logs_exports, 
-    #         enable_global_write_forwarding=self.enable_global_write_forwarding, 
-    #         enable_http_endpoint=self.enable_http_endpoint, 
-    #         enable_limitless_database=self.enable_limitless_database, 
-    #         enable_local_write_forwarding=self.enable_local_write_forwarding, 
-    #         engine_version=self.engine_version, 
-    #         global_cluster_identifier=self.global_cluster_identifier, 
-    #         option_group_name=self.option_group_name, 
-    #         port=self.port, 
-    #         replication_source_identifier=self.replication_source_identifier, 
-    #         scaling_configuration=self.scaling_configuration, 
-    #         storage_encrypted=self.storage_encrypted, 
-    #         storage_type=self.storage_type, 
-    #         tags=self.tags, 
-    #         created_at=self.created_at, 
-    #         status=self.status, 
-    #         primary_writer_instance = self.primary_writer_instance,
-    #         reader_instances = self.reader_instances,
-    #         endpoints=self.endpoints,
-    #         pk_column=self.pk_column,
-    #         pk_value=self.pk_value
-    #     )
-    def cluster_to_dict(cluster):
-        # Create a dictionary with the key as the cluster identifier
-        cluster_dict = {
-            cluster.db_cluster_identifier: {
-                "engine": cluster.engine,
-                "allocated_storage": cluster.allocated_storage,
-                "copy_tags_to_snapshot": cluster.copy_tags_to_snapshot,
-                "db_cluster_instance_class": cluster.db_cluster_instance_class,
-                "database_name": cluster.database_name,
-                "db_cluster_parameter_group_name": cluster.db_cluster_parameter_group_name,
-                "db_subnet_group_name": cluster.db_subnet_group_name,
-                "deletion_protection": cluster.deletion_protection,
-                "engine_version": cluster.engine_version,
-                "master_username": cluster.master_username,
-                "master_user_password": cluster.master_user_password,
-                "manage_master_user_password": cluster.manage_master_user_password,
-                "option_group_name": cluster.option_group_name,
-                "port": cluster.port,
-                "replication_source_identifier": cluster.replication_source_identifier,
-                "storage_encrypted": cluster.storage_encrypted,
-                "storage_type": cluster.storage_type,
-                "tags": cluster.tags,
-                # "created_at": str(cluster.created_at),  # Uncomment if needed
-                "status": cluster.status,
-                "primary_writer_instance": cluster.primary_writer_instance,
-                "reader_instances": cluster.reader_instances,
-                "cluster_endpoint": cluster.cluster_endpoint,
-                "instances_endpoints": cluster.instances_endpoints,
-                "pk_column": cluster.pk_column,
-                "pk_value": cluster.pk_value
-            }
-        }
-        return cluster_dict
 
     def to_sql(self):
         # Convert the model instance to a dictionary
