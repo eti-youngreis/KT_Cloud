@@ -15,14 +15,10 @@ class TagObjectManager:
     def __init__(self, db_file: str = "Tags.db"):
         """Initialize ObjectManager with the database connection."""
         self.object_manager = ObjectManager(db_file)
-        self.create_table()
 
-    def create_table(self):
         table_columns = "Key TEXT PRIMARY KEY", "Value TEXT"
         columns_str = ", ".join(table_columns)
-        self.object_manager.object_manager.db_manager.create_table(
-            "mng_Tags", columns_str
-        )
+        self.object_manager.object_manager.db_manager.create_table("mng_Tags", columns_str)
 
     def createInMemoryTagObject(self, tag: TagObject):
         return self.object_manager.save_in_memory(
@@ -38,7 +34,6 @@ class TagObjectManager:
         return self.object_manager.get_from_memory(object_name=TagObject.OBJECT_NAME)
 
     def putTagObject(self, last_key: str, updates: str = None):
-        print(updates)
         if  not updates:
             raise ValueError("No fields to update")
 

@@ -37,13 +37,3 @@ class TagObjectService:
     
     def describe(self):
         return self.tag_dal.describeTagObject()
-
-
-if __name__ == "__main__":
-    tagObjectService = TagObjectService()
-    tagObjectService.create("hh","b")
-    print(tagObjectService.get("hh"))
-    tagObjectService.modify("hh","n","f")
-    print(tagObjectService.get("n"))
-    tagObjectService.delete("n")
-    print(tagObjectService.describe())

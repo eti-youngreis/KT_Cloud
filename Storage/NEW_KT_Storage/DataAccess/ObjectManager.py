@@ -1,8 +1,3 @@
-import sys
-import os
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..",'..','..')))
-
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager as ObjectManagerDB
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
@@ -55,4 +50,3 @@ class ObjectManager:
     def get_all_objects_from_memory(self, object_name):
 
         return self.object_manager.get_all_objects_from_memory(object_name)
-

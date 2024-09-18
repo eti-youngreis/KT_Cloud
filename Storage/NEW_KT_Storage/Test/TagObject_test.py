@@ -2,9 +2,9 @@ import pytest
 import sys
 import os
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..","..")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
-from NEW_KT_Storage.Service.Classes.TagObjectService import TagObjectService
+from Storage.NEW_KT_Storage.Service.Classes.TagObjectService import TagObjectService
 from Models.TagObjectModel import TagObject
 
 
