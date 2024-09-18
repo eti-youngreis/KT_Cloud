@@ -41,10 +41,10 @@ class ObjectManager:
         else:
             return self.object_manager.get_from_memory(object_name, columns, criteria)
 
+    @staticmethod
+    def convert_object_attributes_to_dictionary(**kwargs):
 
-    def convert_object_attributes_to_dictionary(self, **kwargs):
-
-        return self.object_manager.convert_object_attributes_to_dictionary(**kwargs)
+        return ObjectManagerDB.convert_object_attributes_to_dictionary(**kwargs)
 
 
     def get_all_objects_from_memory(self, object_name):
