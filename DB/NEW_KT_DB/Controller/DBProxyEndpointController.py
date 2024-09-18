@@ -6,24 +6,30 @@ class DBProxyEndpointController:
 
 
     def create_db_proxy_endpoint(self, DBProxyName:str, DBProxyEndpointName:str, TargetRole:str = 'READ_WRITE', Tags:Optional[List[Dict[str, str]]] = None):
-        self.service.create(DBProxyName, DBProxyEndpointName, TargetRole, Tags)
+        """Create a db proxy endpoint"""
+        return self.service.create(DBProxyName, DBProxyEndpointName, TargetRole, Tags)
 
 
     def delete_db_proxy_endpoint(self, DBProxyEndpointName:str):
-        self.service.delete(DBProxyEndpointName)
+        """Delete a db proxy endpoint"""
+        return self.service.delete(DBProxyEndpointName)
 
 
     def modify_db_proxy_endpoint(self, DBProxyEndpointName:str, NewDBProxyEndpointName:Optional[str] =  None):
-        self.service.modify(DBProxyEndpointName, NewDBProxyEndpointName)
+        """Modify a db proxy endpoint"""
+        return self.service.modify(DBProxyEndpointName, NewDBProxyEndpointName)
     
     
-    def describe_db_proxy_endpoint(self, DBProxyName:Optional[str] = None,
+    def describe_db_proxy_endpoint(self, 
                 DBProxyEndpointName:Optional[str] = None,
+                DBProxyName:Optional[str] = None,
                 Filters:Optional[List[Dict[str, Any]]] = None,
                 Marker:Optional[str] = None,
                 MaxRecords:Optional[int] = None):
-        self.service.describe(DBProxyName,
+        """Describe a db proxy endpoint"""
+        return self.service.describe(
                 DBProxyEndpointName,
+                DBProxyName,
                 Filters,
                 Marker,
                 MaxRecords)

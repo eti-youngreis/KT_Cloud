@@ -74,7 +74,7 @@ class DBProxyEndpointService(DBO):
             raise DBProxyEndpointAlreadyExistsFault(f'db proxy endpoint {DBProxyEndpointName} already exists')
         
         # create object
-        db_proxy_endpoint:DBProxyEndpoint = DBProxyEndpoint(self.dal.object_manager, DBProxyName, DBProxyEndpointName, TargetRole, Tags, IsDefault)
+        db_proxy_endpoint:DBProxyEndpoint = DBProxyEndpoint(DBProxyEndpointName, DBProxyName, TargetRole, Tags, IsDefault=IsDefault)
     
         # create physical object as described in task
         file_name = self._convert_endpoint_name_to_endpoint_file_name(DBProxyEndpointName)
@@ -134,7 +134,7 @@ class DBProxyEndpointService(DBO):
         if not validate_name(DBProxyEndpointName):
             raise ParamValidationFault("DBProxyEndpointName is not valid") 
         
-        if not self.dal.IsDBProxyEndpointExistsInMemory(DBProxyEndpointName):
+        if not self.dal.is_exists(DBProxyEndpointName):
             raise DBProxyEndpointNotFoundFault(f'db proxy endpoint {DBProxyEndpointName} not found')
         
         
@@ -146,11 +146,11 @@ class DBProxyEndpointService(DBO):
             if not validate_name(NewDBProxyEndpointName):
                 raise ParamValidationFault("newDBProxyEndpointName is not valid") 
             
-            if self.dal.IsDBProxyEndpointExistsInMemory(NewDBProxyEndpointName):
+            if self.dal.is_exists(NewDBProxyEndpointName):
                 raise DBProxyEndpointAlreadyExistsFault(f'db proxy endpoint name {NewDBProxyEndpointName} already exists') 
             
             # Check if state is valid
-            endpoint_state = self.dal.select(DBProxyEndpointName, ['Status'])['Status']
+            endpoint_state = self.dal.select(DBProxyEndpointName, ['Status'])[0]['Status']
             if endpoint_state != 'available':
                 raise InvalidDBProxyEndpointStateFault(f"db proxy endpoint state is {endpoint_state}. can modify only in available state")
             
@@ -159,11 +159,11 @@ class DBProxyEndpointService(DBO):
             new_file_name = self._convert_endpoint_name_to_endpoint_file_name(NewDBProxyEndpointName)
             self.storage.rename_file(old_file_name, new_file_name)
             
-            # Change in memory
-            db_proxy_endpoint = self.dal.get(DBProxyEndpointName)
-            db_proxy_endpoint.DBProxyEndpointName = NewDBProxyEndpointName
+            # Change in memorys
+            db_proxy_endpoint_data = self.dal.select(DBProxyEndpointName)[0]
+            db_proxy_endpoint_data = {**db_proxy_endpoint_data, 'DBProxyEndpointName':NewDBProxyEndpointName}
             self.dal.delete(DBProxyEndpointName)
-            self.dal.create(db_proxy_endpoint)
+            self.dal.create(db_proxy_endpoint_data)
             DBProxyEndpointName = NewDBProxyEndpointName
         return self.describe(DBProxyEndpointName) 
 
