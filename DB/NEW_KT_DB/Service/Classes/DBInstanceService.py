@@ -258,7 +258,7 @@ class DBInstanceService(DBO):
                 return SQLCommandHelper.select(node_queue, db_name, query, set(db_instance._current_version_ids_queue))
 
             elif query_type == 'INSERT':
-                return SQLCommandHelper.insert(db_instance._last_node_of_current_version, query, db_name)
+                return SQLCommandHelper.insert(db_instance._last_node_of_current_version, query, db_instance._last_node_of_current_version.dbs_paths_dic[db_name])
             elif query_type == 'CREATE':
                 if 'TABLE' in query.upper():
                     return SQLCommandHelper.create_table(query, db_instance._last_node_of_current_version.dbs_paths_dic[db_name])
@@ -600,10 +600,11 @@ class SQLCommandHelper:
             DatabaseNotFoundError: If the database path corresponding to the table name is not found.
             ConnectionError: If the INSERT operation fails or returns no results.
         """
-        global record_id
 
         table_name = SQLCommandHelper._extract_table_name_from_query(
             "INSERT", query)
+        print("WWWWWWWWWWWWWWWWWWWWWW-table_name")    
+        print(table_name)    
 
         if db_path not in last_node_of_current_version.dbs_paths_dic.values():
             raise DatabaseNotFoundError(f"Database path: '{db_path}' for table '{
@@ -640,9 +641,9 @@ class SQLCommandHelper:
             # Create new values with _record_id
             new_values_list = []
             for value in values_list:
-                new_values = f"{record_id}, {value}"
+                new_values = f"{SQLCommandHelper.record_id}, {value}"
                 new_values_list.append(new_values)
-                record_id += 1
+                SQLCommandHelper.record_id += 1
 
             # Constructing the new query with _record_id column
             new_values_section = "),(".join(new_values_list)
@@ -756,7 +757,7 @@ class SQLCommandHelper:
             # Create a connection to the database (creates the file if it doesn't exist)
             conn = sqlite3.connect(db_path)
             last_node_of_current_version.dbs_paths_dic[db_name] = db_path
-            
+
         except AlreadyExistsError as e:
             raise  # Reraise the already exists error for higher-level handling
         except sqlite3.Error as e:
