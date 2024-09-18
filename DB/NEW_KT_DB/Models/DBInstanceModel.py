@@ -55,10 +55,13 @@ class Node_SubSnapshot:
         self.id_snapshot = kwargs.get('id_snapshot', uuid.uuid4())
         self.snapshot_type= "manual"
         self.parent_id = parent.id_snapshot if parent else None
-        self.dbs_paths_dic = kwargs.get('dbs_paths_dic', {})
+        
         self.created_time = None
-        if self.parent_id and not kwargs.get('dbs_paths_dic'):
+        
+        if parent and not kwargs.get('dbs_paths_dic'):
             self.dbs_paths_dic = self.clone_databases_schema(parent.dbs_paths_dic)
+        else:
+            self.dbs_paths_dic = kwargs.get('dbs_paths_dic', {})
 
         self.deleted_records_db_path = kwargs.get('deleted_records_db_path', self._create_deleted_records_db_path(endpoint))
 
@@ -98,5 +101,5 @@ class Node_SubSnapshot:
         return dbs_paths_new_dic
 
     def create_child(self, endpoint):
-        child = Node_SubSnapshot(parent_id=self.id_snapshot, endpoint=endpoint)
+        child = Node_SubSnapshot(parent=self, endpoint=endpoint)
         return child

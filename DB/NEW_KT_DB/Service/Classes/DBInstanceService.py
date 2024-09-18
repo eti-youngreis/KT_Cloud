@@ -21,12 +21,13 @@ class DBInstanceService(DBO):
         
         # Create DBInstance model
         db_instance = DBInstanceModel(**kwargs)
-        # Save to management table
-        self.dal.createInMemoryDBInstance(db_instance)
         # Create physical database if db_name is provided
         if 'db_name' in kwargs:
             SQLCommandHelper.create_database(
                 kwargs['db_name'], db_instance._last_node_of_current_version, db_instance.endpoint)
+
+        # Save to management table
+        self.dal.createInMemoryDBInstance(db_instance)
 
         return db_instance
 
@@ -98,7 +99,7 @@ class DBInstanceService(DBO):
                 dbs_paths_dic=node_data['dbs_paths_dic'],
                 deleted_records_db_path=node_data['deleted_records_db_path']
             )
-    
+
             nodes[node_id] = node
             return node
     
@@ -145,11 +146,13 @@ class DBInstanceService(DBO):
                 f"Snapshot identifier '{db_snapshot_identifier}' not found.")
 
         node_id = db_instance._node_subSnapshot_name_to_id[db_snapshot_identifier]
-        snapshot = db_instance._node_subSnapshot_dic.get(node_id)
-
+        snapshot_id_uuid = uuid.UUID(node_id)
+        snapshot = db_instance._node_subSnapshot_dic.get(snapshot_id_uuid)
+        
         if snapshot:
             self._update_queue_to_current_version(snapshot, db_instance)
             self._create_child_to_node(db_instance)
+
 
         self.dal.modifyDBInstance(db_instance)
 
@@ -221,17 +224,18 @@ class DBInstanceService(DBO):
         while height > queue_len:
             non_shared_nodes_deque.appendleft(snapshot_to_restore.id_snapshot)
             snapshot_to_restore = db_instance._node_subSnapshot_dic.get(
-                snapshot_to_restore.parent_id)
+                uuid.UUID(snapshot_to_restore.parent_id))
             height -= 1
 
         while height < queue_len:
-            db_instance._current_version_ids_queue.popleft()
+            # db_instance._current_version_ids_queue.popleft()
+            db_instance._current_version_ids_queue.pop()
             queue_len -= 1
 
-        while snapshot_to_restore.id_snapshot != db_instance._current_version_ids_queue[-1]:
+        while snapshot_to_restore.id_snapshot != str(db_instance._current_version_ids_queue[-1]):
             non_shared_nodes_deque.appendleft(snapshot_to_restore.id_snapshot)
             snapshot_to_restore = db_instance._node_subSnapshot_dic.get(
-                snapshot_to_restore.parent_id)
+                uuid.UUID(snapshot_to_restore.parent_id))
             db_instance._current_version_ids_queue.popleft()
 
         db_instance._current_version_ids_queue.extend(non_shared_nodes_deque)
@@ -248,21 +252,21 @@ class DBInstanceService(DBO):
     def execute_query(self, db_instance_identifier, query, db_name):
         db_instance = self.get(db_instance_identifier)
         query_type = query.strip().split()[0].upper()
+        if db_instance:
+            if query_type == 'SELECT':
+                node_queue = [db_instance._node_subSnapshot_dic[id] for id in db_instance._current_version_ids_queue]
+                return SQLCommandHelper.select(node_queue, db_name, query, set(db_instance._current_version_ids_queue))
 
-        if query_type == 'SELECT':
-            node_queue = [db_instance._node_subSnapshot_dic[id] for id in db_instance._current_version_ids_queue]
-            return SQLCommandHelper.select(node_queue, db_name, query, set(db_instance._current_version_ids_queue))
-
-        elif query_type == 'INSERT':
-            return SQLCommandHelper.insert(db_instance._last_node_of_current_version, query, db_name)
-        elif query_type == 'CREATE':
-            if 'TABLE' in query.upper():
-                return SQLCommandHelper.create_table(query, db_instance._last_node_of_current_version.dbs_paths_dic[db_name])
-        elif query_type == 'DELETE':
-            node_queue = [db_instance._node_subSnapshot_dic[id] for id in db_instance._current_version_ids_queue]
-            return SQLCommandHelper.delete_record(node_queue, query, db_name)
-        else:
-            raise ValueError(f"Unsupported query type: {query_type}")
+            elif query_type == 'INSERT':
+                return SQLCommandHelper.insert(db_instance._last_node_of_current_version, query, db_name)
+            elif query_type == 'CREATE':
+                if 'TABLE' in query.upper():
+                    return SQLCommandHelper.create_table(query, db_instance._last_node_of_current_version.dbs_paths_dic[db_name])
+            elif query_type == 'DELETE':
+                node_queue = [db_instance._node_subSnapshot_dic[id] for id in db_instance._current_version_ids_queue]
+                return SQLCommandHelper.delete_record(node_queue, query, db_name)
+            else:
+                raise ValueError(f"Unsupported query type: {query_type}")
 
 
 class SQLCommandHelper:
@@ -752,7 +756,7 @@ class SQLCommandHelper:
             # Create a connection to the database (creates the file if it doesn't exist)
             conn = sqlite3.connect(db_path)
             last_node_of_current_version.dbs_paths_dic[db_name] = db_path
-            print(f"Database created successfully at path: {db_path}")
+            
         except AlreadyExistsError as e:
             raise  # Reraise the already exists error for higher-level handling
         except sqlite3.Error as e:

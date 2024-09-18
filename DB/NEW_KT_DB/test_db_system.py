@@ -34,6 +34,9 @@ def main():
         db_name="testdb"
     )
     print(f"DB instance created: {instance_id}")
+   
+
+
 
     description = db_instance_controller.describe_db_instance(instance_id)
     print(f"DB instance description: {description}")
@@ -67,6 +70,7 @@ def main():
 
     db_snapshot_controller.delete_snapshot(instance_id, snapshot_id)
     print(f"Snapshot deleted: {snapshot_id}")
+
 
     # Testing query execution
     print("\nTesting query execution:")
