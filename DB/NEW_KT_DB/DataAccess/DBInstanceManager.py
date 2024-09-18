@@ -75,7 +75,7 @@ class DBInstanceManager:
         Return: True if the DBInstance exists, otherwise False.
         """
         # Check if the object exists by its primary key in the management table
-        return self.object_manager.db_manager.is_object_exist(
+        return bool(self.object_manager.db_manager.is_object_exist(
             self.object_manager._convert_object_name_to_management_table_name(DBInstance.object_name), 
             criteria=f"{DBInstance.pk_column} = '{db_instance_identifier}'"
-        )
+        ))

@@ -16,13 +16,16 @@ class DBInstanceController:
         """
         return self.service.create(**kwargs)
 
-    def delete_db_instance(self, db_instance_identifier: str):
+    def delete_db_instance(self,db_instance_identifier,skip_final_snapshot=False,final_db_snapshot_identifier=None,delete_automated_backups=False):
         """
-        Delete a DBInstance by its identifier.
+        Delete a DBInstance by its identifier with options to handle final snapshots and automated backups.
 
         Params: db_instance_identifier: The primary key (ID) of the DBInstance to delete.
+                skip_final_snapshot: If True, skip creating a final snapshot before deletion. Defaults to False.
+                final_db_snapshot_identifier: If skip_final_snapshot is False, specify an identifier for the final DB snapshot.
+                delete_automated_backups: If True, delete automated backups along with the DBInstance. Defaults to False.
         """
-        self.service.delete(db_instance_identifier)
+        self.service.delete(db_instance_identifier,skip_final_snapshot,final_db_snapshot_identifier,delete_automated_backups)
 
     def modify_db_instance(self, **kwargs):
         """

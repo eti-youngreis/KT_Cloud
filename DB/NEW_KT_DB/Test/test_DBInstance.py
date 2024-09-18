@@ -66,10 +66,10 @@ def test_delete_db_instance(db_instance_controller):
     
     db_instance_controller.create_db_instance(**attributes)
     
-    db_instance_controller.delete_db_instance({
-        "db_instance_identifier": "db123",
-        "skip_final_snapshot": True
-    })
+    db_instance_controller.delete_db_instance(
+        db_instance_identifier="db123",
+        skip_final_snapshot= True
+    )
     with pytest.raises(DBInstanceNotFoundError):
         db_instance_controller.describe_db_instance("db123")
 
@@ -83,22 +83,22 @@ def test_delete_with_snapshot_invalide_params_db_instance(db_instance_controller
     db_instance_controller.create_db_instance(**attributes)
     
     with pytest.raises(ParamValidationError):
-        db_instance_controller.delete_db_instance({
-            "db_instance_identifier": "db123",
-            "skip_final_snapshot": False
-        })
+        db_instance_controller.delete_db_instance(
+            db_instance_identifier= "db123",
+            skip_final_snapshot= False
+        )
 
     with pytest.raises(DBInstanceNotFoundError):
-        db_instance_controller.delete_db_instance({
-            "db_instance_identifier": "invalide_id",
-            "skip_final_snapshot": True
-        })
+        db_instance_controller.delete_db_instance(
+            db_instance_identifier= "invalide_id",
+            skip_final_snapshot= True
+        )
     
-    db_instance_controller.delete_db_instance({
-        "db_instance_identifier": "db123",
-        "skip_final_snapshot": False,
-        "final_db_snapshot_identifier":"final_db_snapshot_identifier_db123"
-    })
+    db_instance_controller.delete_db_instance(
+        db_instance_identifier="db123",
+        skip_final_snapshot= False,
+        final_db_snapshot_identifier="final_db_snapshot_identifier_db123"
+    )
 
     snapshot_service.describe_db_instance("final_db_snapshot_identifier_db123")   
 

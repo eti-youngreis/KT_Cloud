@@ -52,29 +52,15 @@ class DBInstanceService(DBO):
         
         return {'DBInstance': db_instance.to_dict()}
         
-    def delete(self, kwargs):
+    def delete(self, db_instance_identifier,skip_final_snapshot=False,final_db_snapshot_identifier=None,delete_automated_backups=False):
         """
-        Delete an existing DBInstance.
-        
-        Params: kwargs: dict containing the necessary attributes for deleting a DB instance.
-                       Required field: 'db_instance_identifier'
-                       Optional fields: 'skip_final_snapshot', 'final_db_snapshot_identifier', 'delete_automated_backups'
-        
-        Raises: DBInstanceNotFoundError: if the DB instance does not exist.
-               ParamValidationError: if skip_final_snapshot is False but final_db_snapshot_identifier is not provided.
-        
-        Return: None
+        Delete a DBInstance by its identifier with options to handle final snapshots and automated backups.
+
+        Params: db_instance_identifier: The primary key (ID) of the DBInstance to delete.
+                skip_final_snapshot: If True, skip creating a final snapshot before deletion. Defaults to False.
+                final_db_snapshot_identifier: If skip_final_snapshot is False, specify an identifier for the final DB snapshot.
+                delete_automated_backups: If True, delete automated backups along with the DBInstance. Defaults to False.
         """
-        required_params = ['db_instance_identifier']
-        all_params = ['skip_final_snapshot', 'final_db_snapshot_identifier', 'delete_automated_backups']
-        all_params.extend(required_params)
-        
-        # Validate required and extra parameters
-        check_required_params(required_params, kwargs)
-        check_extra_params(all_params, kwargs)
-        
-        db_instance_identifier = kwargs['db_instance_identifier']
-        
         if not self.dal.is_db_instance_exist(db_instance_identifier):
             raise DBInstanceNotFoundError('This DB instance identifier does not exist')
         
@@ -82,12 +68,12 @@ class DBInstanceService(DBO):
         db_instance = self.get(db_instance_identifier)
         
         # Handle final snapshot before deletion if required
-        if 'skip_final_snapshot' not in kwargs or kwargs['skip_final_snapshot'] == False:
-            if 'final_db_snapshot_identifier' not in kwargs:
+        if skip_final_snapshot == False:
+            if final_db_snapshot_identifier is None:
                 raise ParamValidationError('If skip_final_snapshot is False, final_db_snapshot_identifier must be specified')
             create_db_snapshot(
-                db_instance_identifier=kwargs['db_instance_identifier'],
-                db_snapshot_identifier=kwargs['final_db_snapshot_identifier']
+                db_instance_identifier=db_instance_identifier,
+                db_snapshot_identifier=final_db_snapshot_identifier
             )
         
         self.dal.deleteInMemoryDBInstance(db_instance_identifier)
