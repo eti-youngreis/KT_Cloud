@@ -25,6 +25,14 @@ class StorageManager:
             file.write(content)
 
 
+    def get_content_file(self, file_path: str, part_size: int = None, offset: int = 0):
+        with open(file_path, 'r') as part_file:
+            part_file.seek(offset)
+            if part_size:
+                return part_file.read(part_size)
+            return part_file.read() 
+
+
     def rename_file(self, old_file_path: str, new_file_path: str) -> None:
         """
         Rename or move a file.
@@ -66,6 +74,28 @@ class StorageManager:
         full_path = os.path.join(self.base_directory, file_path)
         if os.path.exists(full_path):
             os.remove(full_path)
+
+
+    def write_to_file(self, file_path: str, content: str = '', mode: str = 'w'):
+        """
+        Writes content to a file. If mode is 'w', it will overwrite the file.
+        If mode is 'a', it will append to the file.
+        """
+        if mode not in ['w', 'a']:
+            raise ValueError("Invalid mode. Use 'w' for overwrite and 'a' for append.")
+        
+        full_path = os.path.join(self.base_directory, file_path)
+        if os.path.exists(full_path):
+            try:
+                with open(full_path, mode) as file:
+                    print(file_path,"fff")
+                    print(content,"jjjj")
+                    file.write(content)
+            except IOError as e:
+                raise Exception(f"Error writing to file: {e}")
+        else:
+            raise FileNotFoundError(f"The file '{file_path}' does not exist.")
+        
 
     # ---- DIRECTORY OPERATIONS ---- #
 
