@@ -118,5 +118,7 @@ class BucketObjectService(STO):
             raise ValueError("Incorrect bucket name")
         if not self.storage_manager.is_directory_exist(bucket_name):
             raise ValueError("Bucket not found")
+        if self.storage_manager.list_files_in_directory(bucket_name)==[]:
+            raise ValueError("There are no objects in the bucket")
 
         return self.dal.getAllObjects(bucket_name)

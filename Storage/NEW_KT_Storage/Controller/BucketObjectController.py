@@ -21,22 +21,3 @@ class BucketObjectController:
         return self.service.get_all(bucket_name)
 
 
-if __name__ == "__main__":
-    pass
-    # object_service = BucketObjectService("C:\\Users\\user1\\Desktop\\server")
-    # object_controller = BucketObjectController(object_service)
-
-    # create
-    # object_controller.create_bucket_object(bucket_name='my_bucket', object_key='hello')
-
-    # get
-    # print(object_controller.get_bucket_object("my_bucket","mmmm"))
-
-    # delete
-    # object_controller.delete_bucket_object(bucket_name='my_bucket',object_key='yyyy')
-
-    # get_all
-    # print("all objects in bucket",object_controller.list_all_objects("my_bucket"))
-
-    # put
-    # object_controller.put_bucket_object(bucket_name="my_bucket",object_key="michal_obj",content="gfff")
