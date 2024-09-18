@@ -34,6 +34,9 @@ def main():
         db_name="testdb"
     )
     print(f"DB instance created: {instance_id}")
+   
+
+
 
     description = db_instance_controller.describe_db_instance(instance_id)
     print(f"DB instance description: {description}")
@@ -68,6 +71,7 @@ def main():
     db_snapshot_controller.delete_snapshot(instance_id, snapshot_id)
     print(f"Snapshot deleted: {snapshot_id}")
 
+
     # Testing query execution
     print("\nTesting query execution:")
     create_table_query = "CREATE TABLE test_table (id INTEGER PRIMARY KEY, name TEXT)"
@@ -86,9 +90,6 @@ def main():
     db_instance_controller.delete_db_instance(instance_id)
     print(f"DB instance deleted: {instance_id}")
 
-    if os.path.exists(db_file):
-        os.remove(db_file)
-        print(f"Database file {db_file} deleted")
 
 if __name__ == "__main__":
     main()
