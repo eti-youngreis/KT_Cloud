@@ -10,115 +10,196 @@ from DataAccess.StorageManager import StorageManager
 from Models.BucketPolicyModel import BucketPolicy
 
 class BucketPolicyManager:
-    def __init__(self, path_physical_object: str = "Bucket_policy.json", path_db:str = "BucketPolicy.db", base_directory: str = "D:/New folder/server"):
-        '''Initialize ObjectManager with the database connection.'''
-        self.path_db = os.path.join(base_directory, path_db)
-        self.object_manager = ObjectManager(path_db)
-        self.object_manager.object_manager.create_management_table(BucketPolicy.object_name, BucketPolicy.table_structure)
-        self.path_physical_object = os.path.join(base_directory, path_physical_object)
-        self.storage_manager = StorageManager(path_physical_object)
-    
-    
-    def createInMemoryBucketPolicy(self, bucket_policy):
-        self.object_manager.save_in_memory("BucketPolicy", bucket_policy.to_sql())
+    """
+    A class to manage bucket policies, both in-memory and physical storage.
 
-        
-    def createPhysicalObject(self, bucket_policy:BucketPolicy):
-        if self.storage_manager.is_file_exist(self.path_physical_object):
-            with open(self.path_physical_object, 'r') as file:
+    This class provides methods for creating, retrieving, updating, and deleting
+    bucket policies either in a physical file (JSON) or an in-memory database.
+
+    Attributes:
+    -----------
+    db_path : str
+        Path to the SQLite database used for in-memory storage.
+    object_manager : ObjectManager
+        Manages the in-memory bucket policies in the SQLite database.
+    policy_path : str
+        Path to the physical JSON file where bucket policies are stored.
+    storage_manager : StorageManager
+        Manages file operations such as checking if the file exists.
+
+    Methods:
+    --------
+    createInMemoryBucketPolicy(bucket_policy):
+        Stores the bucket policy in the in-memory database.
+    createPhysicalPolicy(bucket_policy):
+        Saves the bucket policy to a physical JSON file.
+    getBucketPolicy(bucket_name):
+        Retrieves a bucket policy by bucket name from the physical storage.
+    deleteInMemoryBucketPolicy(bucket_name):
+        Deletes the bucket policy from the in-memory database.
+    deletePhysicalPolicy(bucket_name):
+        Deletes the bucket policy from the physical JSON file.
+    describeBucketPolicy(bucket_name):
+        Describes the bucket policy for a specific bucket.
+    putBucketPolicy(bucket_policy):
+        Updates the bucket policy in both in-memory and physical storage.
+    """
+
+    def __init__(self, policy_path: str = "Bucket_policy.json", db_path:str = "BucketPolicy.db", base_directory: str = "D:/New folder/server"):
+        """
+        Initializes the BucketPolicyManager with paths for the policy JSON file and the in-memory database.
+
+        Parameters:
+        -----------
+        policy_path : str, optional
+            The path where the bucket policy JSON file is stored (default is "Bucket_policy.json").
+        db_path : str, optional
+            The path where the SQLite database is stored (default is "BucketPolicy.db").
+        base_directory : str, optional
+            The base directory where files will be stored (default is "D:/New folder/server").
+        """
+        self.db_path = os.path.join(base_directory, db_path)
+        self.object_manager = ObjectManager(db_path)
+        self.object_manager.object_manager.create_management_table(BucketPolicy.object_name, BucketPolicy.table_structure)
+        self.policy_path = os.path.join(base_directory, policy_path)
+        self.storage_manager = StorageManager(policy_path)
+    
+    def createInMemoryBucketPolicy(self, bucket_policy: BucketPolicy):
+        """
+        Stores the bucket policy in the in-memory database.
+
+        Parameters:
+        -----------
+        bucket_policy : BucketPolicy
+            The bucket policy to be saved in-memory.
+        """
+        self.object_manager.save_in_memory("BucketPolicy", bucket_policy.to_sql())
+    
+    def createPhysicalPolicy(self, bucket_policy: BucketPolicy) -> bool:
+        """
+        Saves the bucket policy to a physical JSON file.
+
+        Parameters:
+        -----------
+        bucket_policy : BucketPolicy
+            The bucket policy to be saved to a physical file.
+
+        Returns:
+        --------
+        bool
+            True if the policy was successfully saved, False otherwise.
+        """
+        if self.storage_manager.is_file_exist(self.policy_path):
+            with open(self.policy_path, 'r') as file:
                 data = json.load(file)
         else:
             data = {}
 
         data[bucket_policy.bucket_name] = bucket_policy.to_dict()
         
-        with open(self.path_physical_object, 'w') as file:
+        with open(self.policy_path, 'w') as file:
             json.dump(data, file, indent=4, ensure_ascii=False)
         return True
     
-    def get(self, bucket_name: str) -> Optional[Dict]:
+    def getBucketPolicy(self, bucket_name: str) -> Optional[Dict]:
         """
-        Retrieve a bucket policy by its bucket name.
-        :param bucket_name: The name of the bucket.
-        :return: The bucket policy as a dictionary, or None if not found.
+        Retrieve a bucket policy by its bucket name from physical storage.
+
+        Parameters:
+        -----------
+        bucket_name : str
+            The name of the bucket whose policy is to be retrieved.
+
+        Returns:
+        --------
+        Optional[Dict]
+            A dictionary representing the bucket policy if found, otherwise None.
         """
-        if not self.storage_manager.is_file_exist(self.path_physical_object):
+        if not self.storage_manager.is_file_exist(self.policy_path):
             return None
 
-        with open(self.path_physical_object, 'r') as file:
+        with open(self.policy_path, 'r') as file:
             data = json.load(file)
 
         return data.get(bucket_name, None)
     
     def deleteInMemoryBucketPolicy(self, bucket_name: str):
-        # self.object_manager.delete_from_memory(bucket_name)
+        """
+        Deletes the bucket policy from the in-memory database.
 
+        Parameters:
+        -----------
+        bucket_name : str
+            The name of the bucket whose policy is to be deleted.
+        """
         criteria = f"bucket_name = '{bucket_name}'"
         self.object_manager.delete_from_memory_by_criteria("BucketPolicy", criteria=criteria)
-        
-    def deletePhysicalObject(self, bucket_name: str) -> bool:
+    
+    def deletePhysicalPolicy(self, bucket_name: str) -> bool:
         """
-        Delete the bucket policy from the physical JSON file.
-        :param bucket_name: The name of the bucket to delete.
-        :return: True if the policy was deleted, False otherwise.
+        Deletes the bucket policy from the physical JSON file.
+
+        Parameters:
+        -----------
+        bucket_name : str
+            The name of the bucket whose policy is to be deleted.
+
+        Returns:
+        --------
+        bool
+            True if the policy was successfully deleted, False otherwise.
         """
-        if not self.storage_manager.is_file_exist(self.path_physical_object):
+        if not self.storage_manager.is_file_exist(self.policy_path):
             return False
 
-        with open(self.path_physical_object, 'r') as file:
+        with open(self.policy_path, 'r') as file:
             data = json.load(file)
 
         if bucket_name in data:
             del data[bucket_name]
-            with open(self.path_physical_object, 'w') as file:
+            with open(self.policy_path, 'w') as file:
                 json.dump(data, file, indent=4, ensure_ascii=False)
             return True
         
         return False
 
-
     def describeBucketPolicy(self, bucket_name: str) -> Optional[Dict]:
         """
-        Describe the bucket policy for a specific bucket.
-        :param bucket_name: The name of the bucket.
-        :return: The bucket policy as a dictionary, or None if not found.
-        """
-        return self.get(bucket_name)
+        Describes the bucket policy for a specific bucket by retrieving it.
 
+        Parameters:
+        -----------
+        bucket_name : str
+            The name of the bucket whose policy is to be described.
+
+        Returns:
+        --------
+        Optional[Dict]
+            A dictionary representing the bucket policy if found, otherwise None.
+        """
+        return self.getBucketPolicy(bucket_name)
 
     def putBucketPolicy(self, bucket_policy: BucketPolicy):
-        # add code to extract all data from self and send it as new updates
         """
-        Apply or modify the bucket policy for a specific bucket.
-        :param bucket_policy: The BucketPolicyModel object to store.
+        Updates or applies the bucket policy in both in-memory and physical storage.
+
+        Parameters:
+        -----------
+        bucket_policy : BucketPolicy
+            The bucket policy to be updated or applied.
         """
-        with open(self.path_physical_object, 'r') as file:
-            data = json.load(file)
+        if self.storage_manager.is_file_exist(self.policy_path):
+            with open(self.policy_path, 'r') as file:
+                data = json.load(file)
 
-        # Add or update the policy in the file
-        data[bucket_policy['bucket_name']] = bucket_policy
+            # Add or update the policy in the file
+            data[bucket_policy.bucket_name] = bucket_policy.to_dict()
 
-        with open(self.path_physical_object, 'w') as file:
-            json.dump(data, file, indent=4, ensure_ascii=False)
-            
-        permissions = json.dumps(bucket_policy['permissions'])
-        updates = f"permissions = '{permissions}'"
-        criteria = f"bucket_name = '{bucket_policy['bucket_name']}'"
-        self.object_manager.update_in_memory("BucketPolicy", updates=updates, criteria=criteria)
-    
-    
-    # def describe(self, policy_id: str) -> Optional[Dict]:
-    #     """
-    #     Retrieve a bucket policy by its ID.
-    #     :param policy_id: The ID of the bucket policy to retrieve.
-    #     :return: The bucket policy as a dictionary, or None if not found.
-    #     """
-    #     if not self.storage_manager.is_file_exist(self.path_physical_object):
-    #         return None
-
-    #     with open(self.path_physical_object, 'r') as file:
-    #         data = json.load(file)
+            with open(self.policy_path, 'w') as file:
+                json.dump(data, file, indent=4, ensure_ascii=False)
         
-    #     return data.get(policy_id, None)
-    
-
+        # Update the in-memory database
+        permissions = json.dumps(bucket_policy.permissions)
+        updates = f"permissions = '{permissions}'"
+        criteria = f"bucket_name = '{bucket_policy.bucket_name}'"
+        self.object_manager.update_in_memory("BucketPolicy", updates=updates, criteria=criteria)
