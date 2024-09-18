@@ -5,7 +5,7 @@ import smtplib
 from typing import Dict, List
 from SNS.DataAccess.SNSManager import SNSTopicManager
 from SNS.Model.SNSModel import Protocol, SNSTopicModel
-from SNS.Validation.SNSValidation import validate_protocol, validate_topic_name, validate_topic_name_exist, validate_endpoint
+from SNS.Validation.SNSValidation import validate_endpoint_exist, validate_protocol, validate_topic_name, validate_topic_name_exist, validate_endpoint
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 
@@ -51,6 +51,10 @@ class SNSTopicService:
 
         # add subscriber to sns topic
         sns_topic = self.get(topic_name)
+
+        if protocol not in sns_topic.subscribers:
+            sns_topic.subscribers[protocol] = []
+
         sns_topic.subscribers[protocol].append(endpoint)
 
         # update physical object
@@ -59,14 +63,13 @@ class SNSTopicService:
             file_path=self.get_file_path(topic_name),
             content=json.dumps(sns_topic.to_dict())
         )
-
         self.sns_manager.update_topic(sns_topic)
 
     def unsubscribe(self, topic_name: str, protocol: Protocol, endpoint: str):
         '''Unsubscribe from an SNS topic.'''
         # validations
         validate_protocol(protocol)
-        validate_endpoint(protocol, endpoint)
+        validate_endpoint_exist(self.sns_manager, topic_name, protocol, endpoint)
         validate_topic_name_exist(self.sns_manager, topic_name)
 
         # remove subscriber from sns topic
@@ -81,7 +84,7 @@ class SNSTopicService:
         self.storage_manager.delete_file(self.get_file_path(topic_name))
         self.storage_manager.create_file(
             file_path=self.get_file_path(topic_name),
-            content=sns_topic.to_dict()
+            content=json.dumps(sns_topic.to_dict())
         )
 
         self.sns_manager.update_topic(sns_topic)
@@ -99,14 +102,12 @@ class SNSTopicService:
         '''Notify subscribers of an SNS topic.'''
         subscribers = self.get_subscribers(topic_name)
         for protocol, endpoints in subscribers.items():
-            SNSTopicService.notificate_functions[protocol.value](
-                self, endpoints, message)
+            if len(endpoints) > 0:
+                SNSTopicService.notificate_functions[protocol](
+                    self, endpoints, message)
 
     def _send_email(self, endpoints: List[str], message: str):
         '''Send an email to subscribers of an SNS topic.'''
-        from dotenv import load_dotenv
-
-        load_dotenv()
 
         for endpoint in endpoints:
             try:
@@ -129,5 +130,5 @@ class SNSTopicService:
                 print(f"Failed to send email to {endpoint}: {str(e)}")
 
     notificate_functions = {
-        Protocol.EMAIL: _send_email,
+        Protocol.EMAIL.value: _send_email,
     }
