@@ -11,10 +11,16 @@ import re
 from typing import List, Tuple
 import uuid
 import json
+import time
 
 class DBInstanceService(DBO):
     def __init__(self, dal: DBInstanceManager):
         self.dal = dal
+
+    def close_connections(self):
+        time.sleep(0.1) 
+        if hasattr(self.dal, 'close_connections'):
+            self.dal.close_connections()
 
     def create(self, **kwargs):
         # Perform validations
