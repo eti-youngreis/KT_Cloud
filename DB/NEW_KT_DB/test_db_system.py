@@ -90,9 +90,6 @@ def main():
     db_instance_controller.delete_db_instance(instance_id)
     print(f"DB instance deleted: {instance_id}")
 
-    if os.path.exists(db_file):
-        os.remove(db_file)
-        print(f"Database file {db_file} deleted")
 
 if __name__ == "__main__":
     main()
