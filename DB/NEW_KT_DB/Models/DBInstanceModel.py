@@ -10,7 +10,7 @@ from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 class DBInstance:
     BASE_PATH = "db_instances"
-    table_name = 'db_instance'
+    object_name = 'db_instance'
     pk_column = 'db_instance_id'
     pk_column_data_type = 'TEXT'
     table_structure = 'db_instance_id VARCHAR(255) PRIMARY KEY NOT NULL, allocated_storage INT NOT NULL, master_username VARCHAR(255) NOT NULL, master_user_password VARCHAR(255) NOT NULL, db_name VARCHAR(255) NOT NULL, port INT NOT NULL, status VARCHAR(50) NOT NULL, created_time DATETIME NOT NULL, endpoint VARCHAR(255) NOT NULL, databases TEXT NOT NULL, pk_value VARCHAR(255) NOT NULL'

@@ -38,7 +38,6 @@ class DBClusterService:
             self.storage_manager.create_directory(directory)
     
     def get_file_path(self, cluster_name: str):
-        # return os.path.join(self.directory, cluster_name + '.json')
         return str(self.directory)+'\\'+str(cluster_name)+'.json'
 
     def is_cluster_exist(self, cluster_identifier: str):
@@ -94,20 +93,12 @@ class DBClusterService:
         cluster = DBClusterModel.Cluster(**kwargs)
 
         # Create physical folder structure
-        # desktop_path = os.path.join(os.path.expanduser('~'), 'Desktop')
-        # cluster_directory = os.path.join(desktop_path, f'Clusters/{cluster.db_cluster_identifier}')
         cluster_directory = str(self.directory)+'\\'+str(cluster.db_cluster_identifier)
         self.storage_manager.create_directory(cluster_directory)
-        # os.makedirs(cluster_directory, exist_ok=True)
 
         # Set cluster endpoint
         cluster.cluster_endpoint = cluster_directory
 
-        # storage_manager = StorageManager('Instances')
-        # instance_manager = DBInstanceManager.D('Clusters/instances.db')
-        # instanceService = DBInstanceService(instance_manager,storage_manager, 'Instances')
-        # instanceController = DBInstanceController.DBInstanceController(instanceService)
-        # Create the primary writer instance
         primary_instance_name = f'{cluster.db_cluster_identifier}-primary'
         primary_instance = instance_controller.create_db_instance(
             db_instance_identifier=primary_instance_name,
@@ -116,48 +107,25 @@ class DBClusterService:
             master_username=cluster.master_username,
             master_user_password=cluster.master_user_password
         )
-        # primary_instance = {
-        #     "DBInstance": {
-        #         "db_instance_identifier": "my-db-instance-1",
-        #         "endpoint": {
-        #             "address": "my-db-instance-1.123456789012.us-west-2.rds.amazonaws.com",
-        #             "port": 3306,
-        #             "hosted_zone_id": "Z1PVIF0EXAMPLE"
-        #         },
-        #     }
-        # }
 
         # Retrieve primary instance details
         primary_instance_json_string = primary_instance.get("DBInstance")
-        # primary_instance_json_data = json.loads(primary_instance_json_string)
         cluster.instances_endpoints["primary_instance"] = primary_instance_json_string.get("endpoint")
         cluster.primary_writer_instance = primary_instance_json_string.get('db_instance_identifier')
 
         # # Create configuration file
-        # cluster_config_path = os.path.join(cluster_directory, 'cluster_config.json')
-        # cluster_dict = cluster.to_dict()
-        # try:
-        #     with open(cluster_config_path, 'w') as file:
-        #         json.dump(cluster_dict, file, indent=4)
-        # except IOError as e:
-        #     raise RuntimeError(f"Failed to write configuration file: {e}")
         configuration_file_path = cluster_directory+'\\'+cluster.db_cluster_identifier + "_configurations.json"
         json_object = json.dumps(cluster.to_dict())
-        # file_path = self.get_file_path(cluster.db_cluster_identifier+"_configurations")
         self.storage_manager.create_file(
             file_path=configuration_file_path, content=json_object)
         
         cluster_to_sql = cluster.to_sql()
-        # ccc = cluster.to_dict()
-        # bbb = json.dumps(ccc)
-        # Store the cluster information in the database
         return self.dal.createInMemoryDBCluster(cluster_to_sql)
 
-        # return {"DBCluster": ccc}
 
 
 
-    def delete(self, cluster_identifier:str):
+    def delete(self,instance_controller, cluster_identifier:str):
         '''Delete an existing DBCluster.'''
         
         # if not self.is_cluster_exist(cluster_identifier):
@@ -168,7 +136,23 @@ class DBClusterService:
 
         directory_path = str(self.directory)+'\\'+str(cluster_identifier)
         self.storage_manager.delete_directory(directory_path)
-    
+
+        columns = ['db_cluster_identifier', 'engine', 'allocated_storage', 'copy_tags_to_snapshot',
+                'db_cluster_instance_class', 'database_name', 'db_cluster_parameter_group_name',
+                'db_subnet_group_name', 'deletion_protection', 'engine_version', 'master_username',
+                'master_user_password', 'manage_master_user_password', 'option_group_name', 'port',
+                'replication_source_identifier', 'storage_encrypted', 'storage_type', 'tags',
+                'created_at', 'status', 'primary_writer_instance', 'reader_instances', 'cluster_endpoint',
+                'instances_endpoints', 'pk_column', 'pk_value']
+        
+        #update configurations
+        current_cluster = self.describe(cluster_identifier)
+        cluster_dict = dict(zip(columns, current_cluster[0]))
+        instance_controller.delete_db_instance(db_instance_identifier = cluster_dict['primary_writer_instance'],final_db_snapshot_identifier = True)
+        if cluster_dict['reader_instances'] != [] :
+            for id in cluster_dict['reader_instances']:
+                instance_controller.delete_db_instance(db_instance_identifier = id, final_db_snapshot_identifier = True)
+
 
         self.dal.deleteInMemoryDBCluster(cluster_identifier)
 
@@ -232,7 +216,6 @@ class DBClusterService:
         file_path = self.get_file_path(cluster_id+'_configurations')
         self.storage_manager.delete_file(file_path)
         self.storage_manager.create_file(file_path, cluster_string)
-        # self.storage_manager.create_file(file_path, json.dumps(current_cluster))
 
 
 

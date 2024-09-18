@@ -72,7 +72,6 @@ class Cluster:
         '''Retrieve the data of the DB cluster as a dictionary.'''
 
         return ObjectManager.ObjectManager.convert_object_attributes_to_dictionary(
-            self,
             db_cluster_identifier=self.db_cluster_identifier,
             engine=self.engine,
             allocated_storage=self.allocated_storage,

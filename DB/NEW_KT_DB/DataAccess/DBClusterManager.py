@@ -54,27 +54,8 @@ class DBClusterManager:
     def modifyDBCluster(self, cluster_id, updates):
         self.object_manager.update_in_memory(self.object_name, updates, criteria=f" {self.pk_column} = '{cluster_id}'")
 
-    # def select(self, name:Optional[str] = None, columns = ["*"]):
-    #     data = self.object_manager.get_from_memory(self.object_name,criteria=f" {self.pk_column} = {name}")
-    #     if data:
-    #         data_to_return = [{col:data[col] for col in columns}]
-    #         data_to_return[self.pk_column] = name
-    #         return data_to_return
-            
-    #     else:
-    #         raise ValueError(f"db cluster with name '{name}' not found")
-
-    # def is_exists(self, name):
-    #     """check if object exists in table"""
-    #     try:
-    #         self.select(name)
-    #         return True
-    #     except:
-    #         return False
-
     def get(self, cluster_id: str):
         data = self.object_manager.get_from_memory(self.object_name, criteria=f" {self.pk_column} = '{cluster_id}'")
-        # get_from_memory(self, object_name, columns=None, criteria=None)
         if data:
             data_mapping = {'db_cluster_identifier':cluster_id}
             for key, value in data[cluster_id].items():
