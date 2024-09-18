@@ -13,7 +13,7 @@ The tests cover the following scenarios:
 These tests ensure the proper functioning of the DBSnapshotController and its ability to manage database snapshots.
 """
 import pytest
-from DB.NEW_KT_DB.Service.Classes.DBInstanceService import DbSnapshotIdentifierNotFoundError
+from DB.NEW_KT_DB.Exceptions.DBInstanceExceptions import DbSnapshotIdentifierNotFoundError
 
 
 # Tests for DBSnapshotController

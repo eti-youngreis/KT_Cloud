@@ -17,7 +17,8 @@ These tests ensure the correct behavior of the SQLCommandHelper class and the un
 import pytest
 import sqlite3
 import os
-from DB.NEW_KT_DB.Service.Classes.DBInstanceService import SQLCommandHelper, DatabaseCreationError, InvalidQueryError
+from DB.NEW_KT_DB.Service.Classes.DBInstanceService import SQLCommandHelper
+from DB.NEW_KT_DB.Exceptions.DBInstanceExceptions import SQLCommandHelper, DatabaseCreationError, InvalidQueryError
 
 class TestSQLCommands:
     def test_clone_database_schema(self, temp_db_path):

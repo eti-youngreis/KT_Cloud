@@ -1,5 +1,6 @@
 from datetime import datetime
 from DB.NEW_KT_DB.DataAccess.DBInstanceManager import DBInstanceManager
+from DB.NEW_KT_DB.Exceptions.DBInstanceExceptions import DbSnapshotIdentifierNotFoundError, InvalidQueryError, DatabaseNotFoundError, AlreadyExistsError, DatabaseCreationError
 from DB.NEW_KT_DB.Models.DBInstanceModel import DBInstanceModel, Node_SubSnapshot
 from DB.NEW_KT_DB.Service.Abc.DBO import DBO
 # from Validation import Validation
@@ -768,37 +769,3 @@ class SQLCommandHelper:
             # Close the connection to the database if it was opened
             if conn:
                 conn.close()
-
-
-class DbSnapshotIdentifierNotFoundError(Exception):
-    """Raised when a db snapshot identifier is not found."""
-    pass
-
-
-class AlreadyExistsError(Exception):
-    """Raised when an object already exists."""
-    pass
-
-
-class DatabaseCreationError(Exception):
-    """Raised when there is an error creating the database."""
-    pass
-
-
-class InvalidQueryError(Exception):
-    """Raised when a query is not properly constructed or contains syntax errors."""
-    pass
-
-
-class DatabaseCloneError(Exception):
-    """Custom exception for database cloning errors."""
-    pass
-
-
-class DatabaseCloneError(Exception):
-    """Custom exception for database cloning errors."""
-    pass
-
-class DatabaseNotFoundError(Exception):
-    """Raised when a database is not found."""
-    pass

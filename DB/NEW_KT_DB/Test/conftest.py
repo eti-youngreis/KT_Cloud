@@ -1,6 +1,8 @@
 import pytest
-import os
 from tempfile import TemporaryDirectory
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 from DB.NEW_KT_DB.Controller.DBInstanceController import DBInstanceController
 from DB.NEW_KT_DB.Controller.DBSnapshotController import DBSnapshotController
 from DB.NEW_KT_DB.Service.Classes.DBInstanceService import DBInstanceService
