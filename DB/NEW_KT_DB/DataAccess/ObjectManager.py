@@ -100,6 +100,8 @@ class ObjectManager:
     
     @staticmethod
     def convert_object_attributes_to_dictionary(**kwargs):
+    @staticmethod
+    def convert_object_attributes_to_dictionary(**kwargs):
 
         dict = {}
         for key, value in kwargs.items():
