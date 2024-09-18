@@ -14,14 +14,4 @@ class BucketController:
     def get_bucket(self, bucket_name):
        return self.service.get(bucket_name)
 
-def main():
-    bucket_service = BucketService()
-
-    bucket_controller = BucketController(service=bucket_service)
-
-    bucket_controller.create_bucket("Malki-bucket", "Malki")
-    # print(bucket_controller.get_bucket("Malki-bucket"))
-    # bucket_controller.delete_bucket("check_bucket")
-
-main()
 
