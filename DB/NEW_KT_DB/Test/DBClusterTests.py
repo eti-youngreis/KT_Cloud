@@ -203,7 +203,7 @@ def test_get_all_clusters(db_cluster_controller_with_cleanup):
     assert isinstance(res, list)
 
 
-zxzxzx
+
 
 
 
