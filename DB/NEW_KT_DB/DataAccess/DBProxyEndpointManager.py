@@ -40,7 +40,7 @@ class DBProxyEndpointManager:
             return data_mapping
         
         if name:
-            data = self.object_manager.get_from_memory(DBProxyEndpoint.object_name, criteria=f'{DBProxyEndpoint.pk_column} = {name}')
+            data = self.object_manager.get_from_memory(DBProxyEndpoint.object_name, criteria=f'{DBProxyEndpoint.pk_column} = "{name}"')
             if data:
                 return [map_data_to_col_value_dict(data)]
             else:

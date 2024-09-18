@@ -38,11 +38,11 @@ class DBProxyEndpoint:
         return self.object_manager.convert_object_attributes_to_dictionary(
             DBProxyName = self.DBProxyName,
             DBProxyEndpointName = self.DBProxyEndpointName,
-            Status = self.Status,
             TargetRole = self.TargetRole,
             Tags = self.Tags,
-            Endpoint = self.Endpoint,
+            Status = self.Status,
             CreateDate = self.CreatedDate,
+            Endpoint = self.Endpoint,
             IsDefault = self.IsDefault
             
         )
