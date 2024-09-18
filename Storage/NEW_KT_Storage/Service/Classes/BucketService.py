@@ -7,9 +7,11 @@ class BucketService:
         self.storage_manager = StorageManager(storage_path)
         self.bucket_manager = BucketManager("D:/s3_project/tables/Buckets.db")
         self.create_table()
-        data_list = self.bucket_manager.object_manager.get_all_objects_from_memory("Bucket")
-        self.buckets = [Bucket(bucket_name=row[0], owner=row[1],region=row[2],create_at=row[3]) for row in data_list]
+        self.buckets = self.load_buckets()
 
+    def load_buckets(self):
+        data_list = self.bucket_manager.object_manager.get_all_objects_from_memory("Bucket")
+        return [Bucket(bucket_name=row[0], owner=row[1],region=row[2],create_at=row[3]) for row in data_list]
     def create_table(self):
         table_columns = "object_id TEXT PRIMARY KEY", "Owner TEXT", "Region TEXT", "created_at DATETIME"
         columns_str = ", ".join(table_columns)
