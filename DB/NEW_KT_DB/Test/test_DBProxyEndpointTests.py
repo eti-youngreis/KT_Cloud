@@ -5,7 +5,8 @@ from DB.NEW_KT_DB.DataAccess.DBManager import DBManager
 from DB.NEW_KT_DB.DataAccess.DBProxyEndpointManager import DBProxyEndpointManager
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 from DB.NEW_KT_DB.Service.Classes.DBProxyEndpointService import DBProxyEndpointService
-from DB.NEW_KT_DB.Service.Classes.DBProxyEndpointService import DBProxyNotFoundFault, DBProxyEndpointAlreadyExistsFault,DBProxyEndpointNotFoundFault, DBProxyEndpointQuotaExceededFault, ParamValidationFault
+from DB.NEW_KT_DB.Exceptions.DBProxyEndpointExceptions import *
+from DB.NEW_KT_DB.Exceptions.GeneralExeptions import InvalidParamException
 from DB.NEW_KT_DB.Controller.DBProxyEndpointController import DBProxyEndpointController
 from DB.NEW_KT_DB.Models.DBProxyEndpointModel import DBProxyEndpoint
 from DB.NEW_KT_DB.Test.GeneralTests import test_file_exists
@@ -118,7 +119,7 @@ def test_create_db_proxy_endpoint_with_existing_name(setup_db_proxy_endpoint: tu
     # Create first
     db_proxy_name, endpoint_name, target_role, endpoint = setup_db_proxy_endpoint
     # Create sec
-    with pytest.raises(DBProxyEndpointAlreadyExistsFault):
+    with pytest.raises(DBProxyEndpointAlreadyExistsException):
         endpoint_controller.create_db_proxy_endpoint(db_proxy_name, endpoint_name, target_role)
 
 # def test_exceed_db_proxy_endpoints_quota(endpoint_controller:DBProxyEndpointController):
@@ -154,7 +155,7 @@ def test_delete_non_exist_db_proxy_endpoint(endpoint_controller:DBProxyEndpointC
     endpoint_name = "non-exist-endpoint"
     
     # Delete
-    with pytest.raises(DBProxyEndpointNotFoundFault):
+    with pytest.raises(DBProxyEndpointNotFoundException):
         endpoint_controller.delete_db_proxy_endpoint(endpoint_name)
 
 def test_delete_non_valid_state_db_proxy_endpoint(endpoint_controller:DBProxyEndpointController):
@@ -197,7 +198,7 @@ def test_modify_name_to_db_proxy_endpoint(setup_db_proxy_endpoint: tuple[Literal
 def test_modify_non_exist_db_proxy_endpoint(endpoint_controller:DBProxyEndpointController):
     endpoint_name = "non-exist-endpoint"
     new_name = "your-endpoint"
-    with pytest.raises(DBProxyEndpointNotFoundFault):
+    with pytest.raises(DBProxyEndpointNotFoundException):
         endpoint_controller.modify_db_proxy_endpoint(endpoint_name, new_name)
         
 
@@ -212,7 +213,7 @@ def test_describe_db_proxy_endpoint(setup_db_proxy_endpoint: tuple[Literal['my-p
 
 def test_describe_non_exist_db_proxy_endpoint(endpoint_controller:DBProxyEndpointController):
     endpoint_name = "non-exist-endpoint"
-    with pytest.raises(DBProxyEndpointNotFoundFault):
+    with pytest.raises(DBProxyEndpointNotFoundException):
         endpoint_controller.describe_db_proxy_endpoint(DBProxyEndpointName=endpoint_name)
 
 
@@ -265,7 +266,7 @@ def test_describe_with_non_correct_filters(setup_db_proxy_endpoint: tuple[Litera
     def test_filters(filters):
         nonlocal endpoint_controller
         nonlocal endpoint_name
-        with pytest.raises(ParamValidationFault):
+        with pytest.raises(InvalidParamException):
             endpoint_controller.describe_db_proxy_endpoint(DBProxyEndpointName=endpoint_name, Filters=filters)
             
     # str filters

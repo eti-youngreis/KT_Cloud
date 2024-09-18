@@ -5,7 +5,7 @@ import json
 
 class DBProxyEndpoint:
     pk_column = 'DBProxyEndpointName'
-    object_name = 'DBProxyEndpoints'
+    object_name = 'DBProxyEndpoint'
     foreign_table_name = 'db_proxies' # will change by DBProxy.object_name
     table_structure = f"""
     DBProxyEndpointName VARCHAR(63) PRIMARY KEY NOT NULL,
@@ -25,7 +25,7 @@ class DBProxyEndpoint:
                  Tags:Optional[List[Dict[str, str]]] = None, 
                  Status:str = 'creating',
                  created_date = datetime.now(),
-                 endpoint:str = '',
+                 endpoint:str ='',
                  IsDefault:bool = False): 
         self.DBProxyName=DBProxyName
         self.DBProxyEndpointName=DBProxyEndpointName
@@ -33,7 +33,7 @@ class DBProxyEndpoint:
         self.Tags = Tags
         self.Status = Status
         self.CreatedDate = created_date
-        self.Endpoint = endpoint
+        self.Endpoint = endpoint if endpoint else DBProxyEndpointName+'.rds.amazonaws.com'
         self.IsDefault = IsDefault
         self.Status = 'available'
 

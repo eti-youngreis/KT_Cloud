@@ -7,28 +7,9 @@ from DB.NEW_KT_DB.Validation.GeneralValidations import *
 from DB.NEW_KT_DB.Validation.DBProxyEndpointValidations import *
 from DB.NEW_KT_DB.DataAccess.DBProxyEndpointManager import DBProxyEndpointManager
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
+from DB.NEW_KT_DB.Exceptions.DBProxyEndpointExceptions import *
+from DB.NEW_KT_DB.Exceptions.GeneralExeptions import InvalidParamException
 
-# Exceptions
-class ParamValidationFault(Exception):
-    pass
-
-class DBProxyNotFoundFault(Exception):
-    pass
-
-class DBProxyEndpointNotFoundFault(Exception):
-    pass
-
-class DBProxyEndpointAlreadyExistsFault(Exception):
-    pass
-
-class DBProxyEndpointQuotaExceededFault(Exception):
-    pass
-
-class InvalidDBProxyStateFault(Exception):
-    pass
-
-class InvalidDBProxyEndpointStateFault(Exception):
-    pass
 
 
 
@@ -63,15 +44,15 @@ class DBProxyEndpointService(DBO):
         '''Create a new DBProxy endpoint.'''
         # Validations
         if not validate_name(DBProxyName):
-            raise ParamValidationFault("DBProxyName is not valid")
+            raise InvalidParamException("DBProxyName is not valid")
         if not validate_name(DBProxyEndpointName):
-            raise ParamValidationFault("DBProxyEndpointName is not valid") 
+            raise InvalidParamException("DBProxyEndpointName is not valid") 
         if not validate_target_role:
-            raise ParamValidationFault(f"TargetRole {TargetRole} is not valid, must be 'READ_WRITE'|'READ_ONLY'")
+            raise InvalidParamException(f"TargetRole {TargetRole} is not valid, must be 'READ_WRITE'|'READ_ONLY'")
         if not validate_tags(Tags):
-            raise ParamValidationFault(f"Tags {Tags} are not valid, must be List of dicts [{'Key': 'string','Value': 'string'}]")
+            raise InvalidParamException(f"Tags {Tags} are not valid, must be List of dicts [{'Key': 'string','Value': 'string'}]")
         if self.dal.is_exists(DBProxyEndpointName):
-            raise DBProxyEndpointAlreadyExistsFault(f'db proxy endpoint {DBProxyEndpointName} already exists')
+            raise DBProxyEndpointAlreadyExistsException(f'db proxy endpoint {DBProxyEndpointName} already exists')
         
         # create object
         db_proxy_endpoint:DBProxyEndpoint = DBProxyEndpoint(DBProxyEndpointName, DBProxyName, TargetRole, Tags, IsDefault=IsDefault)
@@ -91,10 +72,10 @@ class DBProxyEndpointService(DBO):
         
         # Validations
         if not validate_name(DBProxyEndpointName):
-            raise ParamValidationFault("DBProxyEndpointName is not valid") 
+            raise InvalidParamException("DBProxyEndpointName is not valid") 
         db_proxy_endpoint_description = self.describe(DBProxyEndpointName)
         if not self.dal.is_exists(DBProxyEndpointName):
-            raise DBProxyEndpointNotFoundFault(f'db proxy endpoint {DBProxyEndpointName} not found')
+            raise DBProxyEndpointNotFoundException(f'db proxy endpoint {DBProxyEndpointName} not found')
         
         # Delete phisical object
         file_name = self._convert_endpoint_name_to_endpoint_file_name(DBProxyEndpointName)
@@ -115,9 +96,9 @@ class DBProxyEndpointService(DBO):
         
         # Validations
         if Filters and not check_filters_validation(Filters):
-            raise ParamValidationFault("filters are not valid, filters must be list of dicts [{'Name': 'string','Values': ['string',]},]")
+            raise InvalidParamException("filters are not valid, filters must be list of dicts [{'Name': 'string','Values': ['string',]},]")
         if DBProxyEndpointName and not self.dal.is_exists(DBProxyEndpointName):
-            raise DBProxyEndpointNotFoundFault(f'db proxy endpoint {DBProxyEndpointName} not found')
+            raise DBProxyEndpointNotFoundException(f'db proxy endpoint {DBProxyEndpointName} not found')
         
         # Describe in query
         return self.dal.describe(
@@ -132,10 +113,10 @@ class DBProxyEndpointService(DBO):
         
         # Validations
         if not validate_name(DBProxyEndpointName):
-            raise ParamValidationFault("DBProxyEndpointName is not valid") 
+            raise InvalidParamException("DBProxyEndpointName is not valid") 
         
         if not self.dal.is_exists(DBProxyEndpointName):
-            raise DBProxyEndpointNotFoundFault(f'db proxy endpoint {DBProxyEndpointName} not found')
+            raise DBProxyEndpointNotFoundException(f'db proxy endpoint {DBProxyEndpointName} not found')
         
         
         # If need changes:
@@ -144,15 +125,15 @@ class DBProxyEndpointService(DBO):
             # Validations
             
             if not validate_name(NewDBProxyEndpointName):
-                raise ParamValidationFault("newDBProxyEndpointName is not valid") 
+                raise InvalidParamException("newDBProxyEndpointName is not valid") 
             
             if self.dal.is_exists(NewDBProxyEndpointName):
-                raise DBProxyEndpointAlreadyExistsFault(f'db proxy endpoint name {NewDBProxyEndpointName} already exists') 
+                raise DBProxyEndpointAlreadyExistsException(f'db proxy endpoint name {NewDBProxyEndpointName} already exists') 
             
             # Check if state is valid
             endpoint_state = self.dal.select(DBProxyEndpointName, ['Status'])[0]['Status']
             if endpoint_state != 'available':
-                raise InvalidDBProxyEndpointStateFault(f"db proxy endpoint state is {endpoint_state}. can modify only in available state")
+                raise InvalidDBProxyEndpointStateException(f"db proxy endpoint state is {endpoint_state}. can modify only in available state")
             
             # Change phisical object
             old_file_name = self._convert_endpoint_name_to_endpoint_file_name(DBProxyEndpointName)
@@ -168,7 +149,6 @@ class DBProxyEndpointService(DBO):
         return self.describe(DBProxyEndpointName) 
 
 
-    def get(self):
+    def get(self, DBProxyEndpointName):
         '''get code object.'''
-        # return real time object
-        pass
+        return self.dal.get(DBProxyEndpointName)
