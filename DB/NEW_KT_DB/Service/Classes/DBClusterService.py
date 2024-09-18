@@ -62,8 +62,8 @@ class DBClusterService:
             raise ValueError("Missing required parameters")
 
         # Perform validations
-        # if self.dal.is_exists(kwargs.get('db_cluster_identifier')):
-        #     raise ValueError(f"Cluster {kwargs.get('db_cluster_identifier')} already exists")
+        if self.dal.is_db_instance_exist(kwargs.get('db_cluster_identifier')):
+            raise ValueError(f"Cluster {kwargs.get('db_cluster_identifier')} already exists")
         
         if not validate_db_cluster_identifier(kwargs.get('db_cluster_identifier')):
             raise ValueError(f"Invalid DBClusterIdentifier: {kwargs.get('db_cluster_identifier')}")
@@ -128,8 +128,8 @@ class DBClusterService:
     def delete(self,instance_controller, cluster_identifier:str):
         '''Delete an existing DBCluster.'''
         
-        # if not self.is_cluster_exist(cluster_identifier):
-        #     raise ValueError("Cluster does not exist!!")
+        if not self.dal.is_db_instance_exist(cluster_identifier):
+            raise ValueError("Cluster does not exist!!")
           
         file_path = self.get_file_path(cluster_identifier+"_configurations")
         self.storage_manager.delete_file(file_path=file_path)
@@ -148,10 +148,10 @@ class DBClusterService:
         #update configurations
         current_cluster = self.describe(cluster_identifier)
         cluster_dict = dict(zip(columns, current_cluster[0]))
-        instance_controller.delete_db_instance(db_instance_identifier = cluster_dict['primary_writer_instance'],final_db_snapshot_identifier = True)
-        if cluster_dict['reader_instances'] != [] :
+        instance_controller.delete_db_instance(db_instance_identifier = cluster_dict['primary_writer_instance'],skip_final_snapshot = True)
+        if cluster_dict['reader_instances'] != '[]' :
             for id in cluster_dict['reader_instances']:
-                instance_controller.delete_db_instance(db_instance_identifier = id, final_db_snapshot_identifier = True)
+                instance_controller.delete_db_instance(db_instance_identifier = id, skip_final_snapshot = True)
 
 
         self.dal.deleteInMemoryDBCluster(cluster_identifier)
@@ -159,8 +159,8 @@ class DBClusterService:
 
     def describe(self, cluster_id):
         '''Describe the details of DBCluster.'''
-        # if not self.is_cluster_exist(cluster_id):
-        #     raise ValueError("Cluster does not exist!!")
+        if not self.dal.is_db_instance_exist(cluster_id):
+            raise ValueError("Cluster does not exist!!")
         
         return self.dal.describeDBCluster(cluster_id)
 
@@ -168,8 +168,8 @@ class DBClusterService:
     def modify(self, cluster_id: str, **kwargs):
         '''Modify an existing DBCluster.'''
 
-        # if not self.is_cluster_exist(cluster_id):
-        #     raise ValueError("Cluster does not exist!!")
+        if not self.dal.is_db_instance_exist(cluster_id):
+            raise ValueError("Cluster does not exist!!")
         
         if 'db_cluster_identifier' in kwargs and not validate_db_cluster_identifier(kwargs.get('db_cluster_identifier')):
             raise ValueError(f"Invalid DBClusterIdentifier: {kwargs.get('db_cluster_identifier')}")
@@ -216,6 +216,11 @@ class DBClusterService:
         file_path = self.get_file_path(cluster_id+'_configurations')
         self.storage_manager.delete_file(file_path)
         self.storage_manager.create_file(file_path, cluster_string)
+
+
+    def get_all_cluster(self):
+        return self.dal.get_all_clusters()
+
 
 
 
