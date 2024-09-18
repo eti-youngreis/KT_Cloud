@@ -4,7 +4,7 @@ from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 class ObjectManager:
 
 
-    def __init__(self, db_file: str,type, storage_path="D:\\s3_project\\server"):
+    def __init__(self, db_file: str):
         """Initialize ObjectManager with the database connection."""
         self.object_manager = ObjectManagerDB(db_file)
 
@@ -42,9 +42,9 @@ class ObjectManager:
             return self.object_manager.get_from_memory(object_name, columns, criteria)
 
 
-    def convert_object_attributes_to_dictionary(self, **kwargs):
-
-        return self.object_manager.convert_object_attributes_to_dictionary(**kwargs)
+    @staticmethod
+    def convert_object_attributes_to_dictionary(**kwargs):        
+        return ObjectManagerDB.convert_object_attributes_to_dictionary(**kwargs)
 
 
     def get_all_objects_from_memory(self, object_name):

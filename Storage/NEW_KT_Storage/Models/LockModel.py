@@ -14,22 +14,17 @@ class LockModel:
         self.object_key = object_key
         self.retain_until = retain_until
         self.lock_mode = lock_mode
-        # attributes for memory management in database
-        # self.pk_column = 'lock_id'
-        self.pk_column = 'object_id'
+        self.pk_column = 'LockId'
         self.pk_value = self.lock_id
-#             table_columns = "LockId TEXT PRIMARY KEY", "BucketKey TEXT", "ObjectKey TEXT","RetainUntil" ,"LockMode TEXT", "Unit TEXT"
 
     def to_dict(self) -> Dict:
         '''Retrieve the data of the DB cluster as a dictionary.'''
-        return ObjectManager(db_file=f"D:\\s3_project\\tables\\Locks.db", type="Lock")\
-            .convert_object_attributes_to_dictionary(
+        return ObjectManager.convert_object_attributes_to_dictionary(
             object_id = self.lock_id,
             bucket_key = self.bucket_key,
             object_key=self.object_key,
             retain_until=self.retain_until,
             lock_mode=self.lock_mode,
-            pk_column=self.pk_column,
         )
         
     def to_sql(self):
@@ -44,5 +39,5 @@ class LockModel:
 
     def default_converter(self, obj):
         if isinstance(obj, datetime):
-            return obj.isoformat()  # Convert datetime to ISO 8601 string
+            return obj.strftime('%Y-%m-%d %H:%M:%S') # Convert datetime to ISO 8601 string
         raise TypeError(f"Object of type {type(obj)} is not JSON serializable")

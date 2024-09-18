@@ -14,8 +14,7 @@ class EmptyResultsetError(Exception):
 class DBManager:
     def __init__(self, db_file: str):
         '''Initialize the database connection and create tables if they do not exist.'''
-        self.connection = sqlite3.connect(db_file)
-
+        self.db_path = db_file
 
     def _is_resultset_empty(self, resultset):
         if resultset == None or not resultset:
@@ -24,8 +23,10 @@ class DBManager:
 
     def execute_query_with_multiple_results(self, query: str):
         '''Execute a given query and return the results.'''
+        connection = None
         try:
-            c = self.connection.cursor()
+            connection = sqlite3.connect(self.db_path)
+            c = connection.cursor()
             c.execute(query)
             results = c.fetchall()
 
@@ -34,16 +35,19 @@ class DBManager:
                 execute_query_with_multiple_results should return one or more records as a result.
                 try to fix your query or use execute_query_without_results() instead.''', query)
 
-            self.connection.commit() 
             return results if results else None
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
-
+        finally:
+            if connection:
+                connection.close()
 
     def execute_query_with_single_result(self, query: str):
         '''Execute a given query and return a single result.'''
+        connection = None
         try:
-            c = self.connection.cursor()
+            connection = sqlite3.connect(self.db_path)
+            c = connection.cursor()
             c.execute(query)
             result = c.fetchone()
             # Check if more than one result exists
@@ -59,36 +63,46 @@ class DBManager:
                 execute_query_with_single_result should return exactly one record as a result.
                 try to fix your query or use execute_query_with_multiple_results() instead.''')
 
-            self.connection.commit()
+            connection.commit()
             return result if result else None
         
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
-
+        finally:
+            if connection:
+                connection.close()
 
     def execute_query_without_results(self, query: str):
         '''Execute a given query without waiting for any result.'''
+        connection = None
         try:
-            c = self.connection.cursor()
+            connection = sqlite3.connect(self.db_path)
+            c = connection.cursor()
             c.execute(query)
-            self.connection.commit()
+            connection.commit()
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
-
+        finally:
+            if connection:
+                connection.close()
 
     def _execute_query_with_or_without_results(self, query: str):
+        connection = None
         try:
-            c = self.connection.cursor()
+            connection = sqlite3.connect(self.db_path)
+            c = connection.cursor()
             c.execute(query)
             if not c.fetchall():
                 optional_results = None
             else:
                 optional_results = c.fetchall()
-            self.connection.commit()
+            connection.commit()
             return optional_results
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
-
+        finally:
+            if connection:
+                connection.close()
 
     def create_table(self, table_name, table_structure):
         '''create a table in a given db by given table_structure'''
@@ -169,7 +183,13 @@ class DBManager:
 
     def is_object_exist(self, table_name:str, criteria:str):
         """check if rows exists in table"""
-        return self.select_and_return_records_from_table(table_name, criteria=criteria) != {}
+        try:
+            in_memory_object = self.get_data_from_table(table_name, criteria=criteria)
+            if in_memory_object:
+                return True
+        except Exception as e:
+            print(Exception(f"Error checking if object {criteria} exists in {table_name}: {e}"))
+            return False
 
 
     def is_table_exist(self, table_name: str) -> bool:
