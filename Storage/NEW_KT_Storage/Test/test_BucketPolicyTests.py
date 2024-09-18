@@ -45,6 +45,7 @@ def setup_bucket_policy(bucketPolicy_controller:BucketPolicyController):
     return bucket_name, permissions, allow_versions, bucket_policy
 
 def _test_is_description_is_correct(description, bucket_name, permissions, allow_versions):
+    
     assert description['bucket_name'] == bucket_name
     assert description['permissions'] == permissions
     assert description['allow_versions'] == allow_versions
@@ -56,24 +57,31 @@ def test_create_bucket_policy_success(setup_bucket_policy):
     
 
 def test_create_invalid_bucket_name(bucketPolicy_controller):
+    
     with pytest.raises(ParamValidationFault):
         bucketPolicy_controller.create_bucket_policy()
         
 def test_create_inavlid_permission(bucketPolicy_controller):
+    
     with pytest.raises(ParamValidationFault):
         bucketPolicy_controller.create_bucket_policy(bucket_name="my_bucket", permissions="yyy")
         
 def test_create_invalud_allow_versions(bucketPolicy_controller):
+    
     with pytest.raises(ParamValidationFault):
         bucketPolicy_controller.create_bucket_policy(bucket_name="my_bucket", allow_versions="yes")
         
 
 def test_modify_bucket_policy(bucketPolicy_controller, setup_bucket_policy):
-    # Create a bucket first
-    bucket_name, permissions, allow_versions, bucket_policy = setup_bucket_policy
     
-    # Modify the permissions
+    bucket_name, permissions, allow_versions, bucket_policy = setup_bucket_policy
     bucketPolicy_controller.modify_bucket_policy(bucket_name, update_permmisions=['WRITE'])
+
+def test_modify_when_allow_versions_invalid(bucketPolicy_controller, setup_bucket_policy):
+    
+    bucket_name, permissions, allow_versions, bucket_policy = setup_bucket_policy
+    with pytest.raises(ParamValidationFault):
+        bucketPolicy_controller.modify_bucket_policy(bucket_name, allow_versions="")
     
 
 # def test_modify_when_the_permission_exist(bucketPolicy_controller, setup_bucket_policy):
