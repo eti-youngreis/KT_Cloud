@@ -1,9 +1,6 @@
-import os
-import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..','..','..')))
 
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager as ObjectManagerDB
-# from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
+from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 class ObjectManager:
 
@@ -30,6 +27,7 @@ class ObjectManager:
 
 
     def update_in_memory(self, object_name, updates, criteria):
+
         self.object_manager.update_in_memory(object_name, updates, criteria)
 
 
