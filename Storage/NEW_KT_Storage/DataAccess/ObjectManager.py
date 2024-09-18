@@ -5,6 +5,7 @@ class ObjectManager:
 
 
     def __init__(self, db_file: str):
+    def __init__(self, db_file: str):
         """Initialize ObjectManager with the database connection."""
         self.object_manager = ObjectManagerDB(db_file)
 
@@ -41,6 +42,8 @@ class ObjectManager:
         else:
             return self.object_manager.get_from_memory(object_name, columns, criteria)
 
+    @staticmethod
+    def convert_object_attributes_to_dictionary(**kwargs):
 
     @staticmethod
     def convert_object_attributes_to_dictionary(**kwargs):        
