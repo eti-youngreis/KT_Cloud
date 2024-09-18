@@ -47,7 +47,6 @@ class ObjectManager:
         table_name = self._convert_object_name_to_management_table_name(object_name)
 
         if not self._is_management_table_exist(object_name):
-        if not self._is_management_table_exist(object_name):
             self.create_management_table(object_name)
         
         if columns is None:
