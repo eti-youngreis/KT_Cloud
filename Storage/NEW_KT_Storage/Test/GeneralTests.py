@@ -1,5 +1,5 @@
 import pytest
-from KT_STORAGE import StorageManager 
+from KT_Cloud.Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 
 def storage_manager():

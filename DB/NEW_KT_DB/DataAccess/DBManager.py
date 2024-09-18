@@ -3,6 +3,7 @@ from typing import Dict, Any, List, Optional, Tuple
 import json
 from sqlite3 import OperationalError
 
+
 class EmptyResultsetError(Exception):
     def __init__(self, message, query):
         super().__init__(message)
@@ -11,11 +12,11 @@ class EmptyResultsetError(Exception):
     def __str__(self):
         return f"{self.args[0]} | Query: {self.query}"
 
+
 class DBManager:
     def __init__(self, db_file: str):
         '''Initialize the database connection and create tables if they do not exist.'''
         self.connection = sqlite3.connect(db_file)
-
 
     def _is_resultset_empty(self, resultset):
         if resultset == None or not resultset:
@@ -34,11 +35,10 @@ class DBManager:
                 execute_query_with_multiple_results should return one or more records as a result.
                 try to fix your query or use execute_query_without_results() instead.''', query)
 
-            self.connection.commit() 
+            self.connection.commit()
             return results if results else None
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
-
 
     def execute_query_with_single_result(self, query: str):
         '''Execute a given query and return a single result.'''
@@ -61,10 +61,9 @@ class DBManager:
 
             self.connection.commit()
             return result if result else None
-        
+
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
-
 
     def execute_query_without_results(self, query: str):
         '''Execute a given query without waiting for any result.'''
@@ -74,7 +73,6 @@ class DBManager:
             self.connection.commit()
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
-
 
     def _execute_query_with_or_without_results(self, query: str):
         try:
@@ -89,12 +87,10 @@ class DBManager:
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
 
-
     def create_table(self, table_name, table_structure):
         '''create a table in a given db by given table_structure'''
         create_statement = f'''CREATE TABLE IF NOT EXISTS {table_name} ({table_structure})'''
         self.execute_query_without_results(create_statement)
-
 
     def insert_data_into_table(self, table_name, data, columns=None):
         if columns is None:
@@ -102,7 +98,6 @@ class DBManager:
         else:
             insert_statement = f'''INSERT INTO {table_name}({columns}) VALUES {data}'''
         self.execute_query_without_results(insert_statement)
-
 
     def update_records_in_table(self, table_name: str, updates: str, criteria=None) -> None:
         '''Update records in the specified table based on criteria.'''
@@ -116,7 +111,6 @@ class DBManager:
 
         self.execute_query_without_results(update_statement)
 
-
     def delete_data_from_table(self, table_name: str, criteria: str) -> None:
         '''Delete a record from the specified table based on criteria.'''
 
@@ -126,7 +120,6 @@ class DBManager:
         '''
 
         self.execute_query_without_results(delete_statement)
-    
 
     def get_column_names_of_table(self, table_name):
         '''Get the columns from the specified table.'''
@@ -143,7 +136,6 @@ class DBManager:
             print(f"Error occurred while fetching columns from table {table_name}: {e}")
             return []
 
-
     def get_all_data_from_table(self, table_name):
         try:
             get_all_data_query = f"""SELECT * FROM {table_name}"""
@@ -151,7 +143,6 @@ class DBManager:
         except Exception as e:
             print(f"Error occurred while fetching data from table {table_name}: {e}")
             return []
-
 
     def get_data_from_table(self, table_name, columns='*', criteria=None):
         try:
@@ -161,13 +152,12 @@ class DBManager:
                 get_all_data_query = f"""SELECT {columns} FROM {table_name} WHERE {criteria}"""
 
             return self.execute_query_with_multiple_results(get_all_data_query)
-        
+
         except Exception as e:
             print(f"Error occurred while fetching data from table {table_name}: {e}")
             return []
 
-
-    def is_object_exist(self, table_name:str, criteria:str):
+    def is_object_exist(self, table_name: str, criteria: str):
         """check if rows exists in table"""
         try:
             in_memory_object = self.get_data_from_table(table_name, criteria=criteria)
@@ -176,7 +166,6 @@ class DBManager:
         except Exception as e:
             print(Exception(f"Error checking if object {criteria} exists in {table_name}: {e}"))
             return False
-
 
     def is_table_exist(self, table_name: str) -> bool:
         """Check if a table exists in the database."""
@@ -191,8 +180,6 @@ class DBManager:
         except Exception as e:
             print(Exception(f"Error checking if table {table_name} exists: {e}"))
             return False
-
-
 
     def describe_table(self, table_name: str) -> Dict[str, str]:
         '''Describe table structure.'''
