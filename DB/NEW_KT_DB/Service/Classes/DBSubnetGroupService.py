@@ -17,16 +17,15 @@ from Validation.GeneralValidations import *
 
 
 class DBSubnetGroupService:
-    def __init__(self, db_subnet_group_manager: DBSubnetGroupManager):
+    def __init__(self, db_subnet_group_manager: DBSubnetGroupManager, storage_manager: StorageManager):
         self.manager = db_subnet_group_manager
         self.bucket = "db_subnet_groups"
-        self.storage_manager = StorageManager()
+        self.storage_manager = storage_manager()
         self.storage_manager.create_bucket(self.bucket)
-        self.version_manager = VersionManager()
         self.subnet_groups = dict()
 
     def create_db_subnet_group(self, **kwargs):
-        # object
+        # validate the arguments
         if not kwargs.get("db_subnet_group_name"):
             raise ValueError("Missing required argument db_subnet_group_name")
 
@@ -47,6 +46,7 @@ class DBSubnetGroupService:
                 + len(kwargs["description"])
             )
 
+        # create an object from the arguments received
         subnet_group = DBSubnetGroup(**kwargs)
         # save in management table
         # in try except block in case the server was shut down and re-run and local collection doesn't include all subnetGroups
@@ -58,7 +58,7 @@ class DBSubnetGroupService:
             )
 
         # physical object
-        # version = 0 assume created for the first time
+        # version is 0 because the object is being created (first version)
         self.storage_manager.create(
             self.bucket, subnet_group.db_subnet_group_name, subnet_group.to_bytes(), "0"
         )
@@ -66,16 +66,16 @@ class DBSubnetGroupService:
         self.subnet_groups[kwargs["db_subnet_group_name"]] = subnet_group
 
     def get_db_subnet_group(self, db_subnet_group_name: str) -> DBSubnetGroup:
+        # try to get the object from the local collection (hash table)
         try:
             data = self.subnet_groups[db_subnet_group_name]
+        # if it's not in the collection, get it from the manager and save it in the collection
         except KeyError:
             data = self.manager.get(db_subnet_group_name)
             self.subnet_groups[db_subnet_group_name] = data
         return data
 
-    def modify_db_subnet_group(
-        self, db_subnet_group_name: str, **updates
-    ) -> DBSubnetGroup:
+    def modify_db_subnet_group(self, db_subnet_group_name: str, **updates) -> DBSubnetGroup:
         if not db_subnet_group_name:
             raise ValueError("Missing required argument db_subnet_group_name")
 
@@ -87,11 +87,14 @@ class DBSubnetGroupService:
                 + len(updates["description"])
             )
 
+        # get the object 
         subnet_group = self.get_db_subnet_group(db_subnet_group_name)
 
+        # update the object based ont the arguments sent
         for key, value in updates.items():
             setattr(subnet_group, key, value)
 
+        # send to DBSubnetGroupManager to modify in DB
         self.manager.modify(subnet_group)
         # version = str(int(self.version_manager.get(self.bucket, subnet_group.db_subnet_group_name).version_id)+1)
         # for now we override the basic version, when the latest version id can be retrieved, we will make a new version as old_version_id + 1
@@ -115,9 +118,6 @@ class DBSubnetGroupService:
             del self.subnet_groups[db_subnet_group_name]
 
     def describe_db_subnet_group(self, db_subnet_group_name: str) -> Dict:
-        if not db_subnet_group_name:
-            raise ValueError("Missing required argument db_subnet_group_name")
-
         return self.manager.describe(db_subnet_group_name)
 
     def list_db_subnet_groups(self):

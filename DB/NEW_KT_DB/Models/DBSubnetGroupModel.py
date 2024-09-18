@@ -13,7 +13,7 @@ from DataAccess.ObjectManager import ObjectManager
 class DBSubnetGroup:
 
     pk_column = "db_subnet_group_name"
-    table_name = "DBSubnetGroup"
+    object_name = "DBSubnetGroup"
     table_structure = f"""
         db_subnet_group_name primary key not null,
         db_subnet_group_description TEXT NOT NULL,
@@ -25,7 +25,8 @@ class DBSubnetGroup:
 
     def __init__(self, *args, **kwargs):
         try:
-            if not args and kwargs:
+            # prefer kwargs
+            if kwargs:
                 self.db_subnet_group_name = kwargs["db_subnet_group_name"]
                 self.db_subnet_group_description = kwargs["db_subnet_group_description"]
                 self.vpc_id = kwargs["vpc_id"]
@@ -33,13 +34,12 @@ class DBSubnetGroup:
                 self.db_subnet_group_arn = kwargs.get("db_subnet_group_arn", None)
             else:
                 if args:
-                    print(
-                        "\033[1;31mWarning: args received in DBSubnetGroup constructor, validations can't be easily performed\033[0m"
-                    )
+                    print("\033[1;31mWarning: args received in DBSubnetGroup constructor, validations can't be easily performed\033[0m")
                     try:
                         self.db_subnet_group_name = args[0]
                         self.db_subnet_group_description = args[1]
                         self.vpc_id = args[2]
+                        # allow for optional parameters not to be sent when using args and not kwargs?
                         self.subnets = args[3]
                         self.db_subnet_group_arn = args[4]
                         self.status = args[5]
@@ -48,10 +48,13 @@ class DBSubnetGroup:
                 else:
                     raise ValueError("Invalid arguments provided")
 
+            # if subnets weren't provided
             if not self.subnets:
                 self.subnets = []
+            # if subnets were received as a string (from DB query) convert them to a list of dictionaries
             if type(self.subnets) is not list:
                 self.subnets = ast.literal_eval(self.subnets)
+            # if subnets were received as a list of strings
             try:
                 if len(self.subnets) > 0 and type(self.subnets[0]) is not dict:
                     self.subnets = [ast.literal_eval(subnet) for subnet in self.subnets]
@@ -87,6 +90,7 @@ class DBSubnetGroup:
         return json.loads(bytes.decode("utf-8"))
 
     def to_sql_insert(self):
+        """converts the object into a string that can be place in a SQL insert statement"""
         # Convert the model instance to a dictionary
         data_dict = self.to_dict()
         values = (
@@ -104,6 +108,7 @@ class DBSubnetGroup:
         return values
 
     def to_sql_update(self):
+        """convert object into a string that can be place in a SQL update statement"""
         data_dict = self.to_dict()
         del data_dict["db_subnet_group_name"]
         updates = ", ".join(
