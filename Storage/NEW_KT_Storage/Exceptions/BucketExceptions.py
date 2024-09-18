@@ -1,3 +1,4 @@
+from Storage.NEW_KT_Storage.Exceptions.GeneralExeptions import ObjectNotFoundException
 class BucketAlreadyExistsError(Exception):
     """Raised when trying to create a bucket that already exists."""
     def __init__(self, bucket_name):
@@ -20,8 +21,8 @@ class BucketNotFoundError(Exception):
     """Raised when trying to access or delete a bucket that does not exist."""
     def __init__(self, bucket_name):
         self.bucket_name = bucket_name
-        super().__init__(f"The bucket '{bucket_name}' does not exist.")
-
+        # super().__init__(f"The bucket '{bucket_name}' does not exist.")
+        super().__init__(ObjectNotFoundException(bucket_name))
 class InvalidRegionError(Exception):
     """Raised when the region provided is invalid."""
     def __init__(self, region):

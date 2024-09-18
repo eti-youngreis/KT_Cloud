@@ -138,7 +138,7 @@ def test_delete_bucket_twice(bucket_service):
     bucket_service.create(bucket_name, "owner123")
     bucket_service.delete(bucket_name)
     assert length == len(bucket_service.buckets)
-    with pytest.raises(BucketNotFoundError, match=f"The bucket '{bucket_name}' does not exist."):
+    with pytest.raises(BucketNotFoundError, match=f'{bucket_name} not found.'):
         bucket_service.delete(bucket_name)
 def test_get_with_valid_bucket(bucket_service):
     """Test for get valid bucket"""
@@ -167,7 +167,7 @@ def test_get_bucket_with_non_string_name(bucket_service):
 def test_delete_nonexistent_bucket(bucket_service):
     """Test for deleting a nonexistent bucket."""
     bucket_name = "nonexistent-bucket"
-    with pytest.raises(BucketNotFoundError, match=f"The bucket '{bucket_name}' does not exist."):
+    with pytest.raises(BucketNotFoundError, match=f'{bucket_name} not found.'):
         bucket_service.delete(bucket_name)
 
 def test_get_bucket_existing(bucket_service):
@@ -180,13 +180,13 @@ def test_get_bucket_existing(bucket_service):
 def test_get_bucket_with_empty_name(bucket_service):
     """Test for getting a bucket with an empty name."""
     bucket_name = ""
-    with pytest.raises(BucketNotFoundError, match=f"The bucket '{bucket_name}' does not exist."):
+    with pytest.raises(BucketNotFoundError, match=f'{bucket_name} not found.'):
         bucket_service.get(bucket_name)
 
 def test_get_bucket_nonexistent(bucket_service):
     """Test check if buckt exist"""
     bucket_name = "nonexistent-bucket"
-    with pytest.raises(BucketNotFoundError, match=f"The bucket '{bucket_name}' does not exist."):
+    with pytest.raises(BucketNotFoundError, match=f'{bucket_name} not found.'):
         bucket_service.get(bucket_name)
 
 
