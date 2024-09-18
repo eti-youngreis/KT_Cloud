@@ -14,7 +14,6 @@ class TagObject:
 
     def to_dict(self) -> Dict:
         """Retrieve the data of the DB cluster as a dictionary."""
-
         return ObjectManager.convert_object_attributes_to_dictionary(
             key=self.key,
             value=self.value,
