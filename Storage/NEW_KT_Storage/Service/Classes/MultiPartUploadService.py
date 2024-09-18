@@ -37,6 +37,7 @@ class MultipartUploadService:
                 parts.append((part_number, part_data))
                 part_number += 1
         return parts
+
     
     def upload_part(self,upload_id: str,part_number,part_data):
         criteria=f'object_id ="{upload_id}"'
@@ -85,17 +86,18 @@ class MultipartUploadService:
     
 
     def convert_to_object(self, obj_dict: dict) -> MultipartUploadModel:
-        """
-        ממיר אובייקט מהטבלה בצורת מילון לאובייקט מסוג MultipartUploadModel.
-        """
-        print(obj_dict[0],"ooooooooooooooo")
-        multipart_upload = MultipartUploadModel(
-            bucket_name=obj_dict[0][2],
-            object_key=obj_dict[0][1],
-            upload_id=obj_dict[0][0],
-            parts=obj_dict[0][3]
-        )
-        return multipart_upload
+            """
+            ממיר אובייקט מהטבלה בצורת מילון לאובייקט מסוג MultipartUploadModel.
+            """
+            if not obj_dict or not obj_dict[0]:
+                raise ValueError("לא נמצאו נתונים להמיר ל-MultipartUploadModel")
+            multipart_upload = MultipartUploadModel(
+                bucket_name=obj_dict[0][2],
+                object_key=obj_dict[0][1],
+                upload_id=obj_dict[0][0],
+                parts=json.loads(obj_dict[0][3]) if isinstance(obj_dict[0][3], str) else obj_dict[0][3]
+            )
+            return multipart_upload
 
     
     def select_all_from_table(self,db_file: str, table_name: str):
