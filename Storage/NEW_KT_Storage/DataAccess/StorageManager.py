@@ -1,5 +1,7 @@
+import json
 import os
 import shutil
+from typing import Dict, Callable
 
 
 class StorageManager:
@@ -67,6 +69,27 @@ class StorageManager:
         if os.path.exists(full_path):
             os.remove(full_path)
 
+    def read_json(self,file_path:str):
+        full_path = os.path.join(self.base_directory, file_path)
+        with open(full_path, 'r') as file:
+            return json.load(file)
+
+    def write_json(self, file_path: str, data: Dict, default_converter: Callable = None):
+        """
+        Write JSON data to a file with optional custom converter.
+
+        :param file_path: Path to the file where JSON will be written
+        :param data: Dictionary to be written as JSON
+        :param default_converter: Optional function to convert non-serializable objects
+        """
+        full_path = os.path.join(self.base_directory, file_path)
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+
+        with open(full_path, 'w', encoding='utf-8') as file:
+            if default_converter:
+                json.dump(data, file, indent=4, ensure_ascii=False, default=default_converter)
+            else:
+                json.dump(data, file, indent=4, ensure_ascii=False)
 
     def write_to_file(self, file_path: str, content: str = '', mode: str = 'w'):
         """
