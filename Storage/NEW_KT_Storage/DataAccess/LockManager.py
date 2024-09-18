@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Dict, Any
 import sys
 sys.path.append('../NEW_KT_Storage')
 from Storage.NEW_KT_Storage.DataAccess.ObjectManager import ObjectManager
