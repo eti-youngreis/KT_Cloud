@@ -29,7 +29,7 @@ class ObjectManager:
         self.object_manager.delete_from_memory_by_pk(object_name, pk_column, pk_value)
 
 
-    def update_in_memory(self, object_name, updates, criteria=None):
+    def update_in_memory(self, object_name, updates, criteria):
         self.object_manager.update_in_memory(object_name, updates, criteria)
 
 

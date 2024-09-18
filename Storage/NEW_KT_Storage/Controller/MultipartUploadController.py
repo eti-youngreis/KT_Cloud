@@ -41,22 +41,22 @@ if __name__ == "__main__":
     
     # Initiates the upload
     bucket_name = "my_bucket"
-    object_key = "my_file_shani_3.txt"
-    # upload_id = controller.initiate_upload(bucket_name, object_key)
-    # print(f"Upload ID: {upload_id}")
+    object_key = "my_file_shana-6.txt"
+    upload_id = controller.initiate_upload(bucket_name, object_key)
+    print(f"Upload ID: {upload_id}")
     
     # # Uploads the file parts
-    # # controller.service.upload_part(upload_id, 1, "aaaa")
-    # # controller.service.upload_part(upload_id, 2, "bbbb")
-    # file_path = "C:/Users/shana/Desktop/a/my_file.txt"
-    # controller.upload_file_parts(upload_id, file_path)
+    # controller.service.upload_part(upload_id, 1, "aaaa")
+    # controller.service.upload_part(upload_id, 2, "bbbb")
+    file_path = "C:/Users/shana/Desktop/a/my_file.txt"
+    controller.upload_file_parts(upload_id, file_path)
     # print("File parts uploaded.")
 
-    # list_parts = controller.list_parts(upload_id)
-    # print(list_parts, "list_parts")
+    list_parts = controller.list_parts(upload_id)
+    print(list_parts, "list_parts")
 
     # # Completes the upload
-    complete_file_path = controller.complete_upload('af9f23ac-007a-4b98-9238-43fe4c7a2c56', bucket_name, object_key)
+    complete_file_path = controller.complete_upload(upload_id, bucket_name, object_key)
     print(f"Upload complete! File saved at: {complete_file_path}")
 
     # Displays all existing multipart uploads

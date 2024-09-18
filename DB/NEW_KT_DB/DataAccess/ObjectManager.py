@@ -31,7 +31,7 @@ class ObjectManager:
             self.db_manager.insert_data_into_table(table_name, object_info, columns_to_populate)
 
 
-    def _update_object_in_management_table_by_criteria(self, table_name, updates, criteria=None):
+    def _update_object_in_management_table_by_criteria(self, table_name, updates, criteria):
         self.db_manager.update_records_in_table(table_name, updates, criteria)
 
 
