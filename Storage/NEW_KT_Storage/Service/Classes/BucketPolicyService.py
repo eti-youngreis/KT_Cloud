@@ -22,7 +22,7 @@ class BucketPolicyService(STO):
 
     def create(self,bucket_name, permissions=[], allow_versions=True) -> bool:
 
-        if not bucket_name:
+        if bucket_name == None:
             raise ParamValidationFault("bucket name is missing")
         
         if permissions != []:
