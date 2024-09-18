@@ -59,7 +59,7 @@ class Node_SubSnapshot:
         self.created_time = None
         
         if parent and not kwargs.get('dbs_paths_dic'):
-            self.dbs_paths_dic = self.clone_databases_schema(parent.dbs_paths_dic)
+            self.dbs_paths_dic = self.clone_databases_schema(parent.dbs_paths_dic,endpoint)
         else:
             self.dbs_paths_dic = kwargs.get('dbs_paths_dic', {})
 
@@ -83,17 +83,13 @@ class Node_SubSnapshot:
             deleted_records_db_path, "deleted_db.db")
         return deleted_records_db_path
 
-    def clone_databases_schema(self, dbs_paths_dic):
+    def clone_databases_schema(self, dbs_paths_dic,endpoint):
         from DB.NEW_KT_DB.Service.Classes.DBInstanceService import SQLCommandHelper
 
         dbs_paths_new_dic = {}
         for db, db_path in dbs_paths_dic.items():
-            parts = db_path.split(os.sep)
-            if len(parts) < 2:
-                raise ValueError(
-                    f"Path '{db_path}' does not have enough parts to modify")
-            parts[-2] = str(self.id_snapshot)
-            new_path = os.sep.join(parts)
+            db_filename = os.path.basename(db_path)
+            new_path = os.path.join(endpoint, str(self.id_snapshot), db_filename)
             directory = os.path.dirname(new_path)
             os.makedirs(directory, exist_ok=True)
             SQLCommandHelper.clone_database_schema(db_path, new_path)

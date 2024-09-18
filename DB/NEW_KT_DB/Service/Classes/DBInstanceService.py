@@ -466,7 +466,6 @@ class SQLCommandHelper:
 
         for node in nodes_queue:
             db_path = node.deleted_records_db_path
-            print("union_deleted_records: ", db_path)
             conn = sqlite3.connect(db_path)
             cursor = conn.cursor()
 
@@ -521,18 +520,22 @@ class SQLCommandHelper:
 
         table_name = table_name_match.group(1)
 
+        with sqlite3.connect(current_db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}'")
+            if not cursor.fetchone():
+                raise ValueError(f"Table '{table_name}' does not exist in the most recent version of the database.")
+
         # Union the deleted records from the queues
         deleted_records = SQLCommandHelper._union_deleted_records(
             queue, table_name)
         deleted_records_map = {}
-        print("deleted_records :", deleted_records)
         # Build a mapping by record_id
         for _record_id, snapshot_id, _ in deleted_records:
             if _record_id not in deleted_records_map:
                 deleted_records_map[_record_id] = set()
             deleted_records_map[_record_id].add(snapshot_id)
 
-        print("deleted_records_map: ", deleted_records_map)
 
         for node in queue:
             db_path = node.dbs_paths_dic.get(db_id)
@@ -540,6 +543,11 @@ class SQLCommandHelper:
                 try:
                     with sqlite3.connect(db_path) as conn:
                         cursor = conn.cursor()
+
+                        cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}'")
+                        if not cursor.fetchone():
+                            print(f"Table '{table_name}' does not exist in node {node.id_snapshot}. Skipping...")
+                            continue
 
                         # Execute the original query
                         cursor.execute(query)
@@ -610,8 +618,6 @@ class SQLCommandHelper:
 
         table_name = SQLCommandHelper._extract_table_name_from_query(
             "INSERT", query)
-        print("WWWWWWWWWWWWWWWWWWWWWW-table_name")    
-        print(table_name)    
 
         if db_path not in last_node_of_current_version.dbs_paths_dic.values():
             raise DatabaseNotFoundError(f"Database path: '{db_path}' for table '{
@@ -661,7 +667,6 @@ class SQLCommandHelper:
             raise ValueError("Unsupported INSERT query format.")
 
         # For debugging, this should now print the correct query
-        print("query: ", query)
         SQLCommandHelper._run_query(db_path, query)
 
     @staticmethod
@@ -711,7 +716,6 @@ class SQLCommandHelper:
                             # Find the records to delete and insert them into 'deleted_records_in_version'
                             find_records_query = delete_query.replace(
                                 "DELETE", f"SELECT _record_id")
-                            print("find_records_query", find_records_query)
                             records_to_delete = SQLCommandHelper._run_query(
                                 db_path, find_records_query)
                             for record_id in records_to_delete:
@@ -754,7 +758,6 @@ class SQLCommandHelper:
             endpoint, str(last_node_of_current_version.id_snapshot))
         os.makedirs(db_path, exist_ok=True)
         db_path = os.path.join(db_path, db_filename)
-        print(db_path)
 
         try:
             if os.path.exists(db_path):
