@@ -3,11 +3,13 @@ from typing import Dict
 import sys
 import json
 
-sys.path.append('C:/Users/תמר מליק/bootcamp/project/KT_Cloud/NEW_KT_Storage')
+sys.path.append('../NEW_KT_Storage')
 from Storage.NEW_KT_Storage.DataAccess.ObjectManager import ObjectManager
 
 class LockModel:
 
+    table_structure = ", ".join(["LockId TEXT PRIMARY KEY", "BucketKey TEXT", "ObjectKey TEXT","RetainUntil DateTime" ,"LockMode TEXT"])
+    
     def __init__(self, bucket_key: str, object_key: str, retain_until: datetime, lock_mode: str): 
         self.lock_id = '.'.join([bucket_key, object_key])
         self.bucket_key = bucket_key

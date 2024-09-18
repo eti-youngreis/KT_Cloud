@@ -4,7 +4,7 @@ import sys
 import threading
 import time
 
-sys.path.append('C:/Users/תמר מליק/bootcamp/project/KT_Cloud')
+sys.path.append('../KT_Cloud')
 from Storage.NEW_KT_Storage.Models.LockModel import LockModel
 from Storage.NEW_KT_Storage.DataAccess.LockManager import LockManager
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager

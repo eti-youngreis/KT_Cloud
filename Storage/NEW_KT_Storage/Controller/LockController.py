@@ -1,15 +1,16 @@
 import sys
 import time
-sys.path.append('C:/Users/תמר מליק/bootcamp/project/KT_Cloud')
+sys.path.append('../KT_Cloud')
 from Storage.NEW_KT_Storage.Service.Classes.LockService import LockService
 
 
 class LockController:
     def __init__(self, service: LockService):
         self.service = service
+        
     def create_lock(self, bucket_key: str, lock_mode: str, amount: int, unit: str, object_key: str = '*'):
-
         return self.service.create_lock(bucket_key= bucket_key, object_key=object_key, lock_mode=lock_mode, amount=amount, unit=unit)
+
 
     def delete_lock(self, lock_id: str):
         self.service.delete_lock(lock_id)
@@ -29,7 +30,7 @@ def main():
 
     # Create a lock
     bucket_key = "test3_bucket"
-    object_key = "today8bj"
+    object_key = "today7bj"
     lock_mode = "all"  
     amount = 1
     unit = "m"  

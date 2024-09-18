@@ -8,9 +8,10 @@ from Storage.NEW_KT_Storage.Models.LockModel import LockModel
 class LockManager:
     def __init__(self, db_file: str):
         '''Initialize ObjectManager with the database connection.'''
-        self.object_manager = ObjectManager(db_file= db_file)
+        self.object_manager = ObjectManager(db_file=db_file)
         self.object_name = "Lock"
-        self.create_table()
+        self.table_structure = LockModel.table_structure
+        self.object_manager.object_manager.db_manager.create_table("mng_Locks", self.table_structure)
 
     def create_table(self):
             table_columns = "LockId TEXT PRIMARY KEY", "BucketKey TEXT", "ObjectKey TEXT","RetainUntil DateTime" ,"LockMode TEXT"
