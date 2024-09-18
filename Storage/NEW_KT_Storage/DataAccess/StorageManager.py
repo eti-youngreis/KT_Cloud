@@ -67,6 +67,26 @@ class StorageManager:
         if os.path.exists(full_path):
             os.remove(full_path)
 
+
+    def write_to_file(self, file_path: str, content: str = '', mode: str = 'w'):
+        """
+        Writes content to a file. If mode is 'w', it will overwrite the file.
+        If mode is 'a', it will append to the file.
+        """
+        if mode not in ['w', 'a']:
+            raise ValueError("Invalid mode. Use 'w' for overwrite and 'a' for append.")
+        
+        full_path = os.path.join(self.base_directory, file_path)
+        if os.path.exists(full_path):
+            try:
+                with open(full_path, mode) as file:
+                    file.write(content)
+            except IOError as e:
+                raise Exception(f"Error writing to file: {e}")
+        else:
+            raise FileNotFoundError(f"The file '{file_path}' does not exist.")
+        
+
     # ---- DIRECTORY OPERATIONS ---- #
 
     def create_directory(self, dir_path: str) -> None:

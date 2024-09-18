@@ -1,7 +1,7 @@
 from typing import Dict, Any
 import json
 import sqlite3
-from KT_Cloud.Storage.NEW_KT_Storage.DataAccess.ObjectManager import ObjectManager
+from DataAccess import ObjectManager
 
 class BucketObjectManager:
     def __init__(self, db_file: str):

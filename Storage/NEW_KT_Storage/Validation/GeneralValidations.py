@@ -21,9 +21,8 @@ def is_valid_engine_name(engine_name: str) -> bool:
     pattern = r'^[\w-]+$'
     return bool(re.match(pattern, engine_name))
 
-# def is_valid_number(num: int, min: int = -sys.maxsize - 1, max: int = sys.maxsize) -> bool:
-#     if num is int:
-#         return min <= num <= max
+def is_valid_number(num: int, min: int = -sys.maxsize - 1, max: int = sys.maxsize) -> bool:
+    return min <= num <= max
 
 def is_valid_optionGroupName(option_group_name: str) -> bool:
     '''Check if the option group name is valid.'''

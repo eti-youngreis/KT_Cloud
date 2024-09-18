@@ -106,11 +106,11 @@ def main():
     service = ObjectVersioningService(manager)
     controller = ObjectVersioningController(service)
 
-    controller.create_version_object("books", "shabos")
+    #controller.create_version_object("books", "shabos")
 
-    v = controller.get_version_object("books", "shabos", "booksshabos_v20240918111400")
-    print(v)
+    #v = controller.get_version_object("books", "shabos", "booksshabos_v20240918122201")
+    #print(v)
 
-    #controller.delete_version_object("books", "shabos", "booksshabos_v20240918111212")
+    controller.delete_version_object("books", "shabos", "booksshabos_v20240918122201")
 if __name__ == "__main__":
     main()

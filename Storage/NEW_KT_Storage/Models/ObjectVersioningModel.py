@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Dict
-from KT_Cloud.Storage.NEW_KT_Storage.DataAccess.ObjectManager import ObjectManager
+from KT_Cloud.DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 import json
 
 class VersionObject:
