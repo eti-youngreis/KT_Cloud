@@ -1,7 +1,8 @@
 from datetime import datetime
+import json
 from typing import Dict, Optional
 import uuid
-from DataAccess import ObjectManager
+# from DataAccess import ObjectManager
 
 class BucketPolicy:
     pk_column = 'policy_id'
@@ -10,9 +11,9 @@ class BucketPolicy:
                 policy_id VARCHAR(255) PRIMARY KEY NOT NULL,
                 bucket_name VARCHAR(255) NOT NULL,
                 permissions TEXT NOT NULL,
-                allow_versions BOOLEAN
+                allow_versions BOOLEAN NOT NULL
             '''
-    def __init__(self, bucket_name: str, permissions: dict, allow_versions=True):
+    def __init__(self, bucket_name: str, permissions: list, allow_versions=True):
         # , pk_column, pk_value
         self.policy_id = self._generate_policy_id(bucket_name)
         self.bucket_name = bucket_name
@@ -30,11 +31,12 @@ class BucketPolicy:
         #     permissions = self.permissions,
         #     allow_versions=self.allow_versions
         # )
-        return self.convert_object_attributes_to_dictionary(  bucket_name=self.bucket_name,
+        return self.convert_object_attributes_to_dictionary(
             policy_id=self.policy_id,
+            bucket_name=self.bucket_name,
             permissions = self.permissions,
             allow_versions=self.allow_versions)
-       
+    
     def convert_object_attributes_to_dictionary(self, **kwargs):
         dict = {}
         for key, value in kwargs.items():
@@ -52,9 +54,9 @@ class BucketPolicy:
         
         return policy_id
     
-    # def to_sql(self):
-    #     # Convert the model instance to a dictionary
-    #     data_dict = self.to_dict()
-    #     values = '(' + ", ".join(f'\'{json.dumps(v)}\'' if isinstance(v, dict) or isinstance(v, list) else f'\'{v}\'' if isinstance(v, str) else f'\'{str(v)}\''
-    #                        for v in data_dict.values()) + ')'
-    #     return values
+    def to_sql(self):
+        # Convert the model instance to a dictionary
+        data_dict = self.to_dict()
+        values = '(' + ", ".join(f'\'{json.dumps(v)}\'' if isinstance(v, dict) or isinstance(v, list) else f'\'{v}\'' if isinstance(v, str) else f'\'{str(v)}\''
+                                for v in data_dict.values()) + ')'
+        return values

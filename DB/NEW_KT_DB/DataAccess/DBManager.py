@@ -113,7 +113,6 @@ class DBManager:
         '''
         if criteria:
             update_statement = update_statement + f''' WHERE {criteria}'''
-
         self.execute_query_without_results(update_statement)
 
 

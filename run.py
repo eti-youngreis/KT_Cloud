@@ -27,9 +27,7 @@ policy_controller = BucketPolicyController(policy_service)
 # }
 # new_policy = policy_controller.create_bucket_policy(policy)
 # print("Created Bucket policy:", new_policy)
-# policy_controller.create_bucket_policy("your_bucket")
-policy_controller.modify_bucket_policy("your_bucket", "delete")
-# policy_controller.delete_bucket_policy("your_bucket", "read")
+
 # print(policy_controller.get_bucket_policy("your_bucket"))
 # print(policy_controller.get_bucket_policy("user-uploads"))
 
@@ -39,4 +37,10 @@ policy_controller.modify_bucket_policy("your_bucket", "delete")
 #         } )
 
 # delete = policy_controller.delete_bucket_policy("user-uploads")
+
+
+# policy_controller.create_bucket_policy("my_bucket4")
+# policy_controller.modify_bucket_policy("my_bucket5", "put")
+# policy_controller.delete_bucket_policy("my_bucket2", "delete")
+print(policy_controller.create_bucket_policy("my_bucket71", "read", False))
 
