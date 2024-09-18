@@ -36,10 +36,3 @@ class MultipartUploadModel:
             parts=self.parts
 
         )
-    # def to_dict(self):
-    #     return {
-    #         'upload_id': self.upload_id,
-    #         'object_key': self.object_key,
-    #         'bucket_name': self.bucket_name,
-    #         'parts': self.parts
-    #     }
