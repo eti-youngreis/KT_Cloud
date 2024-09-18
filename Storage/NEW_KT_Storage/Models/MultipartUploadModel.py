@@ -29,7 +29,7 @@ class MultipartUploadModel:
     
     
     def to_dict(self):
-        return self.objectManager.convert_object_attributes_to_dictionary(
+        return ObjectManager.convert_object_attributes_to_dictionary(
             pk_value=self.pk_value,
             object_key=self.object_key,
             bucket_name=self.bucket_name,

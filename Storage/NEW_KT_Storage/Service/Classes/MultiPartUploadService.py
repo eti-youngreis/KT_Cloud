@@ -10,23 +10,20 @@ from Models.MultipartUploadModel import MultipartUploadModel
 from Models.PartModel import PartModel
 from DataAccess.MultipartUploadManager import MultipartUploadManager
 from DataAccess.StorageManager import StorageManager
+# from Service.Classes.BucketObjectService import BucketObjectService
 
 class MultipartUploadService:
     def __init__(self, db_file: str, storage_path: str):
         self.multipart_manager = MultipartUploadManager(db_file)
         self.storage_manager = StorageManager(storage_path)
+        # self.bucketObjectService=BucketObjectService(db_file)
 
     def initiate_multipart_upload(self, bucket_name: str, object_key: str) -> str:
-        """
-        יוזם העלאת קובץ מרובת חלקים ומחזיר את ה-upload_id.
-        """
         multipart_upload = MultipartUploadModel(bucket_name=bucket_name, object_key=object_key,upload_id=str(uuid.uuid4()))
         upload_id = self.multipart_manager.create_multipart_upload(multipart_upload)
         return upload_id
     
-    # פונקציה לפיצול קובץ לחלקים
-    def split_file_into_parts(self,file_path: str, part_size: int = 5 * 1024 * 1024):
-        """מפצל קובץ לחלקים לפי גודל מוגדר מראש"""
+    def split_file_into_parts(self,file_path: str, part_size: int =1024):
         parts = []
         with open(file_path, 'r') as file:
             part_number = 1
@@ -63,16 +60,15 @@ class MultipartUploadService:
 
  
     
-    def complete_upload(self, upload_id: str,bucket_name:str, object_key: str):
+    def complete_upload(self, upload_id: str,bucket_name:str=None, object_key: str=None):
         criteria=f'object_id ="{upload_id}"'
         obj=self.multipart_manager.object_manager.get_from_memory(self.multipart_manager.object_name,criteria=criteria)
         multipart_upload =self.convert_to_object(obj)
-        print("dddddddddd")
         if isinstance(multipart_upload.parts, str):
             multipart_upload.parts = json.loads(multipart_upload.parts)
 
-        complete_file_path = os.path.join(self.storage_manager.base_directory, f'{bucket_name}/complete_{multipart_upload.object_key}')
-
+        complete_file_path = os.path.join(self.storage_manager.base_directory, f'{multipart_upload.bucket_name}/complete_{multipart_upload.object_key}')
+        # self.bucketObjectService.create(bucket_name=multipart_upload.bucket_name,object_key='complete_{multipart_upload.object_key}',content='' )
         with open(complete_file_path, 'w') as complete_file:
             for part in sorted(multipart_upload.parts, key=lambda x: int(x['PartNumber'])):
                 part_file_path = complete_file_path = os.path.join(self.storage_manager.base_directory,f"{part['FilePath']}")
@@ -81,14 +77,10 @@ class MultipartUploadService:
         for part in multipart_upload.parts:
             os.remove(os.path.join(self.storage_manager.base_directory,f"{part['FilePath']}"))
         self.multipart_manager.complete_multipart_upload(multipart_upload)
-        print(complete_file_path,"dddddddddd")
         return complete_file_path
     
 
     def convert_to_object(self, obj_dict: dict) -> MultipartUploadModel:
-            """
-            ממיר אובייקט מהטבלה בצורת מילון לאובייקט מסוג MultipartUploadModel.
-            """
             if not obj_dict or not obj_dict[0]:
                 raise ValueError("לא נמצאו נתונים להמיר ל-MultipartUploadModel")
             multipart_upload = MultipartUploadModel(

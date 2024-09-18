@@ -22,7 +22,7 @@ class MultipartUploadController:
     def list_parts(self,upload_id: str):
         return self.service.list_parts(upload_id)
     
-    def complete_upload(self, upload_id: str, bucket_name: str, object_key: str) -> str:
+    def complete_upload(self, upload_id: str, bucket_name: str=None, object_key: str=None) -> str:
         """
         משלים את תהליך ההעלאה ומאחד את כל החלקים לקובץ אחד.
         """
@@ -44,9 +44,11 @@ if __name__ == "__main__":
     print(f"Upload ID: {upload_id}")
     
     # מעלה את חלקי הקובץ
-    file_path = "C:/Users/shana/Desktop/a/my_file.txt"
-    controller.upload_file_parts(upload_id, file_path)
-    print("File parts uploaded.")
+    controller.service.upload_part(upload_id,1,"aaaa")
+    controller.service.upload_part(upload_id,2,"bbbb")
+    # file_path = "C:/Users/shana/Desktop/a/my_file.txt"
+    # controller.upload_file_parts(upload_id, file_path)
+    # print("File parts uploaded.")
 
     list_parts=controller.list_parts(upload_id)
     print(list_parts,"list_parts")
