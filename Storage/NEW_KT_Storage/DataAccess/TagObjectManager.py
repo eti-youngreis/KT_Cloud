@@ -12,24 +12,43 @@ from DataAccess.ObjectManager import ObjectManager
 
 
 class TagObjectManager:
-    def __init__(self, db_file: str = "tag"):
+    def __init__(self, db_file: str = "Tags.db"):
         """Initialize ObjectManager with the database connection."""
-        self.object_manager = ObjectManager("tag",db_file)
-        # self.object_manager.create_table()
+        self.object_manager = ObjectManager(db_file)
+        self.create_table()
+
+    def create_table(self):
+        table_columns = "Key TEXT PRIMARY KEY", "Value TEXT"
+        columns_str = ", ".join(table_columns)
+        self.object_manager.object_manager.db_manager.create_table(
+            "mng_Tags", columns_str
+        )
 
     def createInMemoryTagObject(self, tag: TagObject):
-        return self.object_manager.save_in_memory(tag)
+        return self.object_manager.save_in_memory(
+            object_name=TagObject.OBJECT_NAME, object_info=tag.to_sql()
+        )
 
-    def deleteInMemoryTagObject(self, tag: TagObject):
-        return self.object_manager.delete_from_memory(tag)
+    def deleteInMemoryTagObject(self, key: str):
+        return self.object_manager.delete_from_memory_by_pk(
+            object_name=TagObject.OBJECT_NAME, pk_column=TagObject.PK_COULMN, pk_value=key
+        )
 
-    def describeTagObject(self, tag: TagObject):
-        return self.object_manager.get_from_memory(tag)
+    def describeTagObject(self):
+        return self.object_manager.get_from_memory(object_name=TagObject.OBJECT_NAME)
 
-    def putTagObject(self, tag: TagObject):
-        return self.object_manager.update_in_memory(tag)
+    def putTagObject(self, last_key: str, updates: str = None):
+        print(updates)
+        if  not updates:
+            raise ValueError("No fields to update")
 
-    def get_tag_object_from_memory(self, tag:TagObject):
-        return self.object_manager.get_from_memory(tag)
-    
-        
+        return self.object_manager.update_in_memory(
+            object_name=TagObject.OBJECT_NAME,
+            updates=updates,
+            criteria=f""" {TagObject.PK_COULMN}='{last_key}' """,
+        )
+
+    def get_tag_object_from_memory(self, key: str):
+        return self.object_manager.get_from_memory(
+            object_name=TagObject.OBJECT_NAME, criteria=f""" {TagObject.PK_COULMN}='{key}' """
+        )

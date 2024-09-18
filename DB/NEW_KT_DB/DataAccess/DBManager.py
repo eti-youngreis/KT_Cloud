@@ -143,6 +143,7 @@ class DBManager:
             print(f"Error occurred while fetching columns from table {table_name}: {e}")
             return []
 
+
     def get_all_data_from_table(self, table_name):
         try:
             get_all_data_query = f"""SELECT * FROM {table_name}"""
