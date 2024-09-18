@@ -18,9 +18,10 @@ class LockController:
     def get_lock(self, lock_id: str):
         return self.service.get_lock(lock_id)
     
-    def can_update_object(self, bucket_key: str, object_key: str):
-        return self.service.can_update_object(bucket_key, object_key)
+    def is_object_updatable(self, bucket_key: str, object_key: str):
+        return self.service.is_object_updatable(bucket_key, object_key)
     
-    def can_delete_object(self, bucket_key: str, object_key: str):
-        return self.service.can_delete_object(bucket_key, object_key)
+    def is_object_deleteable(self, bucket_key: str, object_key: str):
+        return self.service.is_object_deletable(bucket_key, object_key)
     
+

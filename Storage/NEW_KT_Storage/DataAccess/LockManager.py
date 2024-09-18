@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Dict, Any
 import sys
-sys.path.append('C:/Users/תמר מליק/bootcamp/project/KT_Cloud/NEW_KT_Storage')
+sys.path.append('../NEW_KT_Storage')
 from Storage.NEW_KT_Storage.DataAccess.ObjectManager import ObjectManager
 from Storage.NEW_KT_Storage.Models.LockModel import LockModel
 
@@ -10,13 +10,7 @@ class LockManager:
         '''Initialize ObjectManager with the database connection.'''
         self.object_manager = ObjectManager(db_file=db_file)
         self.object_name = "Lock"
-        self.table_structure = LockModel.table_structure
-        self.object_manager.object_manager.db_manager.create_table("mng_Locks", self.table_structure)
-
-    def create_table(self):
-            table_columns = "LockId TEXT PRIMARY KEY", "BucketKey TEXT", "ObjectKey TEXT","RetainUntil DateTime" ,"LockMode TEXT"
-            columns_str = ", ".join(table_columns)
-            self.object_manager.object_manager.db_manager.create_table("mng_Locks", columns_str)
+        self.object_manager.object_manager.db_manager.create_table("mng_Locks", LockModel.table_structure)
 
     def createInMemoryLock(self, lock: LockModel):
         self.object_manager.save_in_memory(self.object_name, lock.to_sql())

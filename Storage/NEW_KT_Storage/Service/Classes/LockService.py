@@ -127,7 +127,7 @@ class LockService:
         cleanup_thread.start()
 
 
-    def can_update_object(self, bucket_key: str, object_key: str):
+    def is_object_updatable(self, bucket_key: str, object_key: str):
         """Check if an object can be updated."""        
         lock_id = f"{bucket_key}.{object_key}"
         if lock_id in self.lock_map:
@@ -137,7 +137,7 @@ class LockService:
         return True
 
 
-    def can_delete_object(self, bucket_key: str, object_key: str):
+    def is_object_deletable(self, bucket_key: str, object_key: str):
         """Check if an object can be deleted."""        
         lock_id = f"{bucket_key}.{object_key}"
         if lock_id in self.lock_map:
