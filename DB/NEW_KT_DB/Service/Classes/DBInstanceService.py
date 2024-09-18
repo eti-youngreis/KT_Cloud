@@ -159,11 +159,9 @@ class DBInstanceService(DBO):
         db_instance = self.get(db_instance_identifier)
         snapshot_id = db_instance._node_subSnapshot_name_to_id.get(db_snapshot_identifier)
         if snapshot_id:
-            snapshot = db_instance._node_subSnapshot_dic.get(snapshot_id)
-            print("1111111111111111111111")
-            print("snapshot_id:", snapshot_id)
-            print("db_instance._node_subSnapshot_dic:")
-            print(db_instance._node_subSnapshot_dic)
+            snapshot_id_uuid = uuid.UUID(snapshot_id)
+            snapshot = db_instance._node_subSnapshot_dic.get(snapshot_id_uuid)
+
             if snapshot:
                 return {
                     "SnapshotIdentifier": db_snapshot_identifier,
