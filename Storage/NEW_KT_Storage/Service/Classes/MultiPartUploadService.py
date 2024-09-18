@@ -35,7 +35,7 @@ class MultipartUploadService:
         part_number = 1
         offset = 0  # Track the current position in the file
         while True:
-            part_data = self.storage_manager.get_content_file(file_path, part_size=part_size, offset=offset)
+            part_data = self.storage_manager.get_file_content(file_path, part_size=part_size, offset=offset)
             if not part_data:
                 break
             parts.append((part_number, part_data))
@@ -83,7 +83,7 @@ class MultipartUploadService:
         self.bucketObjectService.create(bucket_name=multipart_upload.bucket_name, object_key=multipart_upload.object_key, content='')
         for part in sorted(multipart_upload.parts, key=lambda x: int(x['PartNumber'])):
             part_file_path = os.path.join(self.storage_manager.base_directory, f"{part['FilePath']}")
-            content = self.storage_manager.get_content_file(part_file_path)
+            content = self.storage_manager.get_file_content(part_file_path)
             self.storage_manager.write_to_file(complete_file_path, content, mode='a')
         for part in multipart_upload.parts:
             self.storage_manager.delete_file(os.path.join(self.storage_manager.base_directory, f"{part['FilePath']}"))

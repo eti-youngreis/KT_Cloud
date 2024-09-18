@@ -24,7 +24,7 @@ class BucketObject:
 
     def to_dict(self) -> Dict:
         '''Retrieve the data of the DB cluster as a dictionary.'''
-        return ObjectManager.convert_object_attributes_to_dictionary(
+        return ObjectManager("C:\\Users\\user1\\Desktop\\server\\object.db","Objects").convert_object_attributes_to_dictionary(
             pk_value=self.pk_value,
             bucket_name=self.bucket_name,
             object_key=self.object_key,

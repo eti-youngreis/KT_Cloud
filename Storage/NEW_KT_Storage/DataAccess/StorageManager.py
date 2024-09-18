@@ -25,7 +25,7 @@ class StorageManager:
             file.write(content)
 
 
-    def get_content_file(self, file_path: str, part_size: int = None, offset: int = 0):
+    def get_file_content(self, file_path: str, part_size: int = None, offset: int = 0):
         with open(file_path, 'r') as part_file:
             part_file.seek(offset)
             if part_size:
