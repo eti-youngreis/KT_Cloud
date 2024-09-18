@@ -1,4 +1,3 @@
-
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager as ObjectManagerDB
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
