@@ -5,6 +5,8 @@ from datetime import datetime
 from Storage.NEW_KT_Storage.DataAccess.ObjectManager import ObjectManager
 
 class Bucket:
+
+    table_structure = ", ".join(["object_id TEXT PRIMARY KEY", "Owner TEXT", "Region TEXT", "created_at DATETIME"])
     def __init__(self, bucket_name: str, owner: str, region=None, create_at=None):
         self.bucket_name = bucket_name
         self.owner = owner

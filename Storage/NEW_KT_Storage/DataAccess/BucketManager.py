@@ -7,10 +7,9 @@ class BucketManager:
         """Initialize BucketManager with the database connection."""
         self.object_manager = ObjectManager(db_file=db_file)
         self.object_name = "Bucket"
-        self.table_structure = ", ".join(["object_id TEXT PRIMARY KEY", "Owner TEXT", "Region TEXT", "created_at DATETIME"])
         self.create_table()
     def create_table(self):
-            self.object_manager.object_manager.db_manager.create_table("mng_Buckets", self.table_structure)
+            self.object_manager.object_manager.db_manager.create_table("mng_Buckets", Bucket.table_structure)
 
     def createInMemoryBucket(self, bucket: Bucket):
         self.object_manager.save_in_memory(self.object_name,bucket.to_sql())
