@@ -10,40 +10,6 @@ from DataAccess.StorageManager import StorageManager
 from Models.BucketPolicyModel import BucketPolicy
 
 class BucketPolicyManager:
-    """
-    A class to manage bucket policies, both in-memory and physical storage.
-
-    This class provides methods for creating, retrieving, updating, and deleting
-    bucket policies either in a physical file (JSON) or an in-memory database.
-
-    Attributes:
-    -----------
-    db_path : str
-        Path to the SQLite database used for in-memory storage.
-    object_manager : ObjectManager
-        Manages the in-memory bucket policies in the SQLite database.
-    policy_path : str
-        Path to the physical JSON file where bucket policies are stored.
-    storage_manager : StorageManager
-        Manages file operations such as checking if the file exists.
-
-    Methods:
-    --------
-    createInMemoryBucketPolicy(bucket_policy):
-        Stores the bucket policy in the in-memory database.
-    createPhysicalPolicy(bucket_policy):
-        Saves the bucket policy to a physical JSON file.
-    getBucketPolicy(bucket_name):
-        Retrieves a bucket policy by bucket name from the physical storage.
-    deleteInMemoryBucketPolicy(bucket_name):
-        Deletes the bucket policy from the in-memory database.
-    deletePhysicalPolicy(bucket_name):
-        Deletes the bucket policy from the physical JSON file.
-    describeBucketPolicy(bucket_name):
-        Describes the bucket policy for a specific bucket.
-    putBucketPolicy(bucket_policy):
-        Updates the bucket policy in both in-memory and physical storage.
-    """
 
     def __init__(self, policy_path: str = "Bucket_policy.json", db_path:str = "BucketPolicy.db", base_directory: str = "D:/New folder/server"):
         """
@@ -193,13 +159,13 @@ class BucketPolicyManager:
                 data = json.load(file)
 
             # Add or update the policy in the file
-            data[bucket_policy.bucket_name] = bucket_policy.to_dict()
+            data[bucket_policy['bucket_name']] = bucket_policy
 
             with open(self.policy_path, 'w') as file:
                 json.dump(data, file, indent=4, ensure_ascii=False)
         
         # Update the in-memory database
-        permissions = json.dumps(bucket_policy.permissions)
+        permissions = json.dumps(bucket_policy['permissions'])
         updates = f"permissions = '{permissions}'"
-        criteria = f"bucket_name = '{bucket_policy.bucket_name}'"
+        criteria = f"bucket_name = '{bucket_policy['bucket_name']}'"
         self.object_manager.update_in_memory("BucketPolicy", updates=updates, criteria=criteria)

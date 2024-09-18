@@ -16,23 +16,13 @@ class IsExistPermissionFault(Exception):
     pass
 
 class IsNotExistFault(Exception):
+    """Exception raised when a bucket_name does not exist in the policy."""
+    pass
+class IsNotExistPermissionFault(Exception):
     """Exception raised when a permission does not exist in the policy."""
     pass
 
-
 class BucketPolicyService(STO):
-    """
-    Service class to handle operations related to bucket policies.
-
-    This class provides methods for creating, retrieving, updating, and deleting
-    bucket policies using the underlying `BucketPolicyManager` for storage.
-
-    Attributes:
-    -----------
-    dal : BucketPolicyManager
-        Data access layer (DAL) to interact with the policy storage.
-
-    """
 
     def __init__(self, dal: BucketPolicyManager):
         """
@@ -58,21 +48,26 @@ class BucketPolicyService(STO):
         allow_versions : bool, optional
             Whether or not to allow versioning (default is True).
 
-        Raises:
-        -------
-        ParamValidationFault
-            If the bucket name is not provided.
-
         Returns:
         --------
         bool
             True if the policy was created successfully, False otherwise.
         """
-        if bucket_name is None:
-            raise ParamValidationFault("bucket name is missing")
+        # Ensure bucket_name is provided
+        if not bucket_name or not isinstance(bucket_name, str):
+            raise ParamValidationFault("Bucket name must be a valid non-empty string.")
+        # Ensure permissions is a list and contains valid permission strings
+        if not isinstance(permissions, list):
+            raise ParamValidationFault("Permissions must be a list.")
         
-        if permissions != []:
-            permissions = [permissions]
+        valid_permissions = {'READ', 'WRITE', 'DELETE', 'CREATE'}  # Example permissions
+        for permission in permissions:
+            if permission not in valid_permissions:
+                raise ParamValidationFault(f"Invalid permission: {permission}")
+
+        # Ensure allow_versions is boolean
+        if not isinstance(allow_versions, bool):
+            raise ParamValidationFault("allow_versions must be a boolean value.")
 
         bucket_policy = BucketPolicy(bucket_name, permissions=permissions, allow_versions=allow_versions)
         
@@ -91,6 +86,9 @@ class BucketPolicyService(STO):
         bucket_name : str
             The name of the bucket whose policy is to be deleted.
         """
+        # Check if the bucket exists before attempting to delete
+        if not self.dal.getBucketPolicy(bucket_name):
+            raise IsNotExistFault(f"Bucket policy for '{bucket_name}' does not exist.")
         # Delete physical object
         self.dal.deletePhysicalPolicy(bucket_name)
         # Delete from memory
@@ -110,6 +108,9 @@ class BucketPolicyService(STO):
         Dict
             The bucket policy if found, otherwise None.
         """
+        # Check if the bucket exists before attempting to delete
+        if not self.dal.getBucketPolicy(bucket_name):
+            raise IsNotExistFault(f"Bucket policy for '{bucket_name}' does not exist.")
         return self.dal.getBucketPolicy(bucket_name)
     
     def put(self, **updates):
@@ -139,6 +140,9 @@ class BucketPolicyService(STO):
         Dict
             The bucket policy details.
         """
+        # Check if the bucket exists before attempting to delete
+        if not self.dal.getBucketPolicy(bucket_name):
+            raise IsNotExistFault(f"Bucket policy for '{bucket_name}' does not exist.")
         return self.dal.describeBucketPolicy(bucket_name)
 
     def modify(self, bucket_name: str, update_permissions: list = [], allow_versions=None) -> bool:
@@ -162,9 +166,13 @@ class BucketPolicyService(STO):
         bucket_policy = self.dal.getBucketPolicy(bucket_name)
         
         if update_permissions:
+            
             bucket_policy['permissions'] = self._update_permissions(bucket_name, update_permissions)
             
         if allow_versions is not None:
+            # Ensure allow_versions is boolean
+            if not isinstance(allow_versions, bool):
+                raise ParamValidationFault("allow_versions must be a boolean value.")
             bucket_policy['allow_versions'] = allow_versions
         
         self.dal.putBucketPolicy(bucket_policy)
@@ -186,10 +194,18 @@ class BucketPolicyService(STO):
         list
             The updated list of permissions.
         """
+        if not self.dal.getBucketPolicy(bucket_name):
+            raise IsNotExistFault(f"Bucket policy for '{bucket_name}' does not exist.")
         bucket_policy = self.dal.getBucketPolicy(bucket_name)
         policy_permissions = bucket_policy['permissions']
         
+        if not isinstance(update_permissions, list):
+            raise ParamValidationFault("Permissions must be a list.")
+        
         for permission in update_permissions:
+            valid_permissions = {'READ', 'WRITE', 'DELETE', 'CREATE'}
+            if permission not in valid_permissions:
+                raise ParamValidationFault(f"Permission {permission} already exists in the bucket policy.")
             if permission in policy_permissions:
                 policy_permissions.remove(permission)
             else:

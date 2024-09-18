@@ -20,8 +20,8 @@ class BucketPolicyController:
     #     self.service.put(updates)
     
 
-    def modify_bucket_policy(self, bucket_name, new_permmision=[],allow_versions=None):
-        self.service.modify(bucket_name, new_permmision, allow_versions)
+    def modify_bucket_policy(self, bucket_name, update_permmisions=[],allow_versions=None):
+        self.service.modify(bucket_name, update_permmisions, allow_versions)
 
 
     def get_bucket_policy(self, bucket_name):
