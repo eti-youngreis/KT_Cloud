@@ -4,13 +4,18 @@ from Storage.NEW_KT_Storage.DataAccess.BucketManager import BucketManager
 import Storage.NEW_KT_Storage.Validation.BucketValidations as BucketValidations
 class BucketService:
     def __init__(self,storage_path="D:/s3_project/server"):
-        # self.buckets = Account().buckets
         self.storage_manager = StorageManager(storage_path)
         self.bucket_manager = BucketManager("D:/s3_project/tables/Buckets.db")
+        self.create_table()
         data_list = self.bucket_manager.object_manager.get_all_objects_from_memory("Bucket")
-        self.buckets = [Bucket(bucket_name=row[0], owner=row[1]) for row in data_list]
+        self.buckets = [Bucket(bucket_name=row[0], owner=row[1],region=row[2],create_at=row[3]) for row in data_list]
 
-    def create(self, bucket_name: str, owner: str):
+    def create_table(self):
+        table_columns = "object_id TEXT PRIMARY KEY", "Owner TEXT", "Region TEXT", "created_at DATETIME"
+        columns_str = ", ".join(table_columns)
+        self.bucket_manager.object_manager.object_manager.db_manager.create_table("mng_Buckets", columns_str)
+
+    def create(self, bucket_name: str, owner: str,region:str):
         """Create a new Bucket."""
         if BucketValidations.bucket_exists(self.buckets, bucket_name):
             raise ValueError("This bucket already exists.")
@@ -22,7 +27,8 @@ class BucketService:
             raise ValueError("Owner name contains invalid characters.")
         if not BucketValidations.is_length_owner_valid(owner):
             raise ValueError("Owner is not in the valid length")
-        new_bucket = Bucket(bucket_name, owner)
+
+        new_bucket = Bucket(bucket_name, owner, region)
         self.buckets.append(new_bucket)
         self.storage_manager.create_directory(f'buckets/{bucket_name}')
         self.bucket_manager.createInMemoryBucket(new_bucket)
