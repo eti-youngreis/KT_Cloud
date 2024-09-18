@@ -88,8 +88,6 @@ class StorageManager:
         if os.path.exists(full_path):
             try:
                 with open(full_path, mode) as file:
-                    print(file_path,"fff")
-                    print(content,"jjjj")
                     file.write(content)
             except IOError as e:
                 raise Exception(f"Error writing to file: {e}")

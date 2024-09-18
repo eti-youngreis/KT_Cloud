@@ -20,7 +20,6 @@ class BucketObjectManager:
         self.object_manager.object_manager.create_management_table(self.object_name, table_structure)
 
     def createInMemoryBucketObject(self, bucket_object: BucketObject):
-        print(bucket_object.bucket_name,"jjjjjjjjjjjjjjjjjjj")
         self.object_manager.save_in_memory(self.object_name, bucket_object.to_sql())
 
     def deleteInMemoryBucketObject(self, bucket_name, object_name):
