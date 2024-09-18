@@ -166,7 +166,6 @@ class DBClusterParameterGroupService(DBO):
         self.storage_manager.write_to_file(file_name, json.dumps(parameter_group_dict))
         return {title: group_name}
 
-    # @abstractmethod
     def describe(self, data: tuple) -> Dict:
         """
         Abstract method to describe a parameter group.
@@ -184,8 +183,19 @@ class DBClusterParameterGroupService(DBO):
         }
         return describe
 
-    def get(self, group_name: str)->Dict:
-        result= self.dal.get(group_name)
+    def get(self, group_name: str) -> Dict:
+        """
+        Retrieve a parameter group by its name.
+    
+        :param group_name: The name of the parameter group to retrieve.
+        :return: A dictionary representing the parameter group.
+        :raises ValueError: If the parameter group does not exist.
+        
+        This method queries the data access layer (DAL) to retrieve the parameter group with the specified name.
+        If no parameter group is found, it raises a ValueError indicating that the parameter group does not exist.
+        Otherwise, it returns the first result as a dictionary.
+        """
+        result = self.dal.get(group_name)
         if result == []:
-                raise ValueError(f"Parameter Group '{group_name}' does not exist.")
-        return result[0] 
+            raise ValueError(f"Parameter Group '{group_name}' does not exist.")
+        return result[0]
