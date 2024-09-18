@@ -18,12 +18,7 @@ class DBInstanceManager:
 
         Params db_instance: DBInstance object to be saved in memory.
         """
-        # Get the column names for the management table
-        columns = self.object_manager.db_manager.get_column_names_of_table(
-            self.object_manager._convert_object_name_to_management_table_name(DBInstance.object_name)
-        )
-        columns_str = ', '.join(columns)
-        self.object_manager.save_in_memory(DBInstance.object_name, db_instance.to_sql(), columns=columns_str)
+        self.object_manager.save_in_memory(DBInstance.object_name, db_instance.to_sql())
 
     def deleteInMemoryDBInstance(self, db_instance_identifier: str):
         """
