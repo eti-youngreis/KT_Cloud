@@ -1,11 +1,11 @@
 from typing import Dict, Optional
-from KT_Cloud.Storage.NEW_KT_Storage.Models import AclObjectModel
+from Models import aclObjectModel
 from Abc import STO
 from Validation import Validation
-from DataAccess import BucketObjectManager
+from DataAccess import AclObjectManager
 
-class BucketObjectService(STO):
-    def __init__(self, dal: BucketObjectManager):
+class AclObjectService(STO):
+    def __init__(self, dal: AclObjectManager):
         self.dal = dal
     
     

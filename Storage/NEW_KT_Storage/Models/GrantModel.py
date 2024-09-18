@@ -2,24 +2,28 @@ from datetime import datetime
 from typing import Dict
 from DataAccess import ObjectManager
 import uuid
-class AclObject:
+class BucketObject:
 
     def __init__(self, **kwargs): 
 
         # add relevant attributes in this syntax:
         # self.bucket_object_identifier = kwargs['bucket_object_identifier']
         # self.engine = kwargs['engine']
+
         self.acl_id = str(uuid.uuid1())
         self.name=kwargs['name'] 
-        self.grants=kwargs['grants'] if kwargs['grants'] else []
-        self.owner = kwargs['owner'] 
+        self.owner = kwargs['owner']
+        self.grants = kwargs['grants'] if kwargs['grants'] else []  # רשימה של Grants
         self.pk_column = "acl_id"
-        self.pk_value = self.acl_id
+        self.pk_value =kwargs['name'] 
+        self.objectManager = ObjectManager(db_file="D:\\s3_project\\tables\\Buckets.db")
 
         # self.permissions =kwargs['permissions'] or []
         # self.default_acl=kwargs['default_acl'] 
-        self.version_id=kwargs['version_id']
-   
+        
+        # self.version_id=kwargs['version_id']
+       
+
 
 
         # attributes for memory management in database
