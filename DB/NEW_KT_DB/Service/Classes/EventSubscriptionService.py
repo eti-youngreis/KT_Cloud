@@ -6,6 +6,7 @@ import os
 from DB.NEW_KT_DB.DataAccess.EventSubscriptionManager import EventSubscriptionManager
 from DB.NEW_KT_DB.Models.EventSubscriptionModel import EventSubscription, SourceType, EventCategory
 from DB.NEW_KT_DB.Service.Abc.DBO import DBO
+from DB.NEW_KT_DB.Validation.EventSubscriptionValidations import validate_subscription_name_exist
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 
@@ -80,5 +81,6 @@ class EventSubscriptionService(DBO):
 
     def get(self, subscription_name: str, columns=['*']) -> EventSubscription:
         '''get code object.'''
+        validate_subscription_name_exist(self.dal, subscription_name)
         # return real time object
-        return self.dal.describeEventSubscription(subscription_name=subscription_name, columns=columns)
+        return self.dal.describeEventSubscriptionById(subscription_name=subscription_name, columns=columns)

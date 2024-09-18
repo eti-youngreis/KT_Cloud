@@ -1,4 +1,6 @@
+from collections import defaultdict
 from enum import Enum
+import json
 from typing import Dict, List, Tuple
 
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
@@ -49,7 +51,7 @@ class EventSubscription:
     ) -> None:
         self.subscription_name = subscription_name
         self.source_type = source_type
-        self.sources = {source_type.value: set() for source_type in SourceType}
+        self.sources: Dict[SourceType, set] = defaultdict(set)
 
         for source_type, source_id in sources:
             self.sources[source_type.value].add(source_id)
@@ -69,16 +71,21 @@ class EventSubscription:
                      for source_type, sources in self.sources.items()},
             event_categories=[
                 event_category.value for event_category in self.event_categories],
-            sns_topic_arn=self.sns_topic_arn,
-            pk_column=self.pk_column,
-            pk_value=self.pk_value
+            sns_topic_arn=self.sns_topic_arn
         )
 
     def to_sql(self) -> str:
         data = self.to_dict()
-        values = ', '.join(f"'{value}'" for value in data.values())
-        return values
+        values = []
+        for _, value in data.items():
+            if isinstance(value, dict):
+                value = json.dumps(value)
+            elif isinstance(value, list):
+                value = json.dumps(value)
+            values.append(f"'{value}'")
+        return f"({', '.join(values)})"
 
     @staticmethod
     def get_object_name() -> str:
         return __class__.__name__.removesuffix('Model')
+
