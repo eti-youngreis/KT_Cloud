@@ -18,10 +18,6 @@ from GeneralTests import *
 def parameter_group_manager():
     return DBClusterParameterGroupManager(':memory:')
 
-# @pytest.fixture
-# def cluster_manager():
-#     return DBClusterManager(':memory:')
-
 @pytest.fixture
 def cluster_manager():
     # Create a mock for DBClusterManager and its method get_all_clusters
@@ -107,22 +103,6 @@ def test_create_parameter_group_with_invalid_name(parameter_group_controller):
     with pytest.raises(ValueError, match=f"group_name {invalid_group_name} is not valid"):
         create_parameter_group(parameter_group_controller, invalid_group_name, "ValidFamily", "Valid Description")
 
-# def test_delete_parameter_group(parameter_group_controller):
-#     group_name = "TestGroup"
-#     file_name = generate_file_name_for_group(group_name)
-
-#     # Create the parameter group
-#     create_parameter_group(parameter_group_controller, group_name, "TestFamily", "Test Description")
-
-#     # Ensure the file exists before deletion
-#     assert_file_exists(file_name)
-
-#     # Delete the parameter group
-#     parameter_group_controller.delete_db_cluste_parameter_group(group_name)
-
-#     # Check if the file was deleted
-#     assert not os.path.exists(file_name), f"Expected file {file_name} was not deleted."
-
 def test_delete_parameter_group(parameter_group_controller, storage_manager):
     group_name = "TestGroup"
     file_name = generate_file_name_for_group(group_name)
@@ -162,23 +142,6 @@ def test_delete_nonexistent_parameter_group(parameter_group_controller):
     # Test if exception is raised when trying to delete a non-existent group
     with pytest.raises(ValueError, match=f"Parameter Group '{group_name}' does not exist."):
         parameter_group_controller.delete_db_cluste_parameter_group(group_name)
-
-# def test_delete_parameter_group_with_associated_cluster(parameter_group_controller, cluster_manager):
-#     group_name = "TestGroup"
-#     file_name = generate_file_name_for_group(group_name)
-
-#     # Create the parameter group
-#     create_parameter_group(parameter_group_controller, group_name, "TestFamily", "Test Description")
-
-#     # Associate the parameter group with a cluster
-#     cluster_manager.create_cluster({"cluster_id": "TestCluster", "group_name": group_name})
-
-#     # Attempt to delete the parameter group, expect an exception due to association with cluster
-#     with pytest.raises(ValueError, match="Can't delete parameter group associated with any DB clusters"):
-#         parameter_group_controller.delete_db_cluste_parameter_group(group_name)
-
-#     # Cleanup
-#     delete_file_if_exists(file_name)
 
 def test_delete_default_parameter_group(parameter_group_controller, storage_manager):
     group_name = "default"
@@ -348,28 +311,3 @@ def test_describe_group_without_parameter_group_name(parameter_group_controller,
     for p in mock_parameter_groups.values():
         file_name=generate_file_name_for_group(p['group_name'])
         delete_file_if_exists(storage_manager, file_name)
-
-
-# def test_describe_group_without_any_parameters(parameter_group_controller):
-#     # title = "Default Title"
-
-#     # Mock the return of get_all_groups method to simulate multiple parameter groups
-#     mock_parameter_groups = {
-#         "Group1": {"group_name": "Group1", "family": "TestFamily1", "description": "Description 1"},
-#         "Group2": {"group_name": "Group2", "family": "TestFamily2", "description": "Description 2"},
-#     }
-#     # for p in mock_parameter_groups.values():
-#     #     create_parameter_group(parameter_group_controller, p['group_name'], p['family'], p['description'])
-
-#     parameter_group_controller.get_all_groups = lambda: mock_parameter_groups
-
-#     # Call describe_group without any parameters (using default values)
-#     result = parameter_group_controller.describe_db_cluste_parameter_group()
-
-#     # Verify that all parameter groups are returned (up to max_records default which is 100)
-#     assert len(result["DBClusterParameterGroup"]) == len(mock_parameter_groups)
-#     assert result["DBClusterParameterGroup"][0]['DBClusterParameterGroupName'] == "Group1"
-#     assert result["DBClusterParameterGroup"][1]['DBClusterParameterGroupName'] == "Group2"
-
-#     # Check that marker is not returned since there are less than 100 records
-#     assert 'Marker' not in result

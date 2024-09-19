@@ -113,7 +113,7 @@ class DBClusterParameterGroupService(DBO):
             return {title: parameter_groups_local}
         return {'Marker': marker, title: parameter_groups_local}
 
-    def camel_to_snake_case(self, name: str) -> str:
+    def convert_camel_case_string_to_snake(self, name: str) -> str:
         """
         Convert a CamelCase string to snake_case.
 
@@ -122,14 +122,14 @@ class DBClusterParameterGroupService(DBO):
         """
         return ''.join(['_' + c.lower() if c.isupper() else c for c in name]).lstrip('_')
 
-    def convert_dict_keys_to_snake_case(self, input_dict: Dict) -> Dict:
+    def convert_dict_keys_from_camel_case_to_snake(self, input_dict: Dict) -> Dict:
         """
         Convert all keys in a dictionary from CamelCase to snake_case.
 
         :param input_dict: The input dictionary with CamelCase keys.
         :return: A new dictionary with snake_case keys.
         """
-        return {self.camel_to_snake_case(key): value for key, value in input_dict.items()}
+        return {self.convert_camel_case_string_to_snake(key): value for key, value in input_dict.items()}
 
     def modify(self, title: str, group_name: str, parameters: Optional[list[Dict[str, any]]] = None):
         """
@@ -152,7 +152,7 @@ class DBClusterParameterGroupService(DBO):
                 if new_parameter['ParameterName'] == old_parameter['parameter_name']:
                     if old_parameter['is_modifiable'] == False:
                         raise ValueError(f"You can't modify the parameter {old_parameter['parameter_name']}")
-                    new_parameter_updates = self.convert_dict_keys_to_snake_case(new_parameter)
+                    new_parameter_updates = self.convert_dict_keys_from_camel_case_to_snake(new_parameter)
                     updated_parameter = {**old_parameter, **new_parameter_updates}
                     parameters_in_parameter_group[idx] = updated_parameter
         self.dal.modifyDBCluster(group_name, f"parameters='{json.dumps(parameters_in_parameter_group)}'")

@@ -10,7 +10,7 @@ class DBClusterParameterGroupManager:
         '''Initialize ObjectManager with the database connection.'''
         self.object_manager = ObjectManager(db_file)
         self.object_manager.create_management_table(
-        DBClusterParameterGroup.get_object_name(), DBClusterParameterGroup.table_schema, 'TEXT')
+        DBClusterParameterGroup.get_object_name(), DBClusterParameterGroup.table_structure, 'TEXT')
 
 
     def createInMemoryDBCluster(self, data):
@@ -34,7 +34,3 @@ class DBClusterParameterGroupManager:
         if result !=[]:
             return True
         return False   
-
-
-
-
