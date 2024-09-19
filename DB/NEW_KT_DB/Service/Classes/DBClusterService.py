@@ -50,6 +50,37 @@ class DBClusterService:
             return False
         
         return True
+    
+    def _validate_parameters(self, **kwargs):
+        # Perform validations
+        if 'db_cluster_identifier' in kwargs and self.dal.is_db_instance_exist(kwargs.get('db_cluster_identifier')):
+            # raise ValueError(f"Cluster {kwargs.get('db_cluster_identifier')} already exists")
+            return False
+        if 'db_cluster_identifier' in kwargs and not validate_db_cluster_identifier(kwargs.get('db_cluster_identifier')):
+            # raise ValueError(f"Invalid DBClusterIdentifier: {kwargs.get('db_cluster_identifier')}")
+            return False
+        if not validate_engine(kwargs.get('engine', '')):
+            # raise ValueError(f"Invalid engine: {kwargs.get('engine')}")
+            return False
+        if 'database_name' in kwargs and kwargs['database_name'] and not validate_database_name(kwargs['database_name']):
+            # raise ValueError(f"Invalid DatabaseName: {kwargs['database_name']}")
+            return False
+        if 'db_cluster_parameter_group_name' in kwargs and kwargs['db_cluster_parameter_group_name'] and not validate_db_cluster_parameter_group_name(kwargs['db_cluster_parameter_group_name']):
+            # raise ValueError(f"Invalid DBClusterParameterGroupName: {kwargs['db_cluster_parameter_group_name']}")
+            return False
+        if kwargs.get('db_subnet_group_name') and not validate_db_subnet_group_name(kwargs.get('db_subnet_group_name')):
+            # raise ValueError(f"Invalid DBSubnetGroupName: {kwargs['db_subnet_group_name']}")
+            return False
+        if 'port' in kwargs and kwargs['port'] and not validate_port(kwargs['port']):
+            # raise ValueError(f"Invalid port: {kwargs['port']}. Valid range is 1150-65535.")
+            return False
+        if 'master_username' in kwargs and not validate_master_username(kwargs['master_username']):
+            # raise ValueError("Invalid master username")
+            return False
+        if 'master_user_password' in kwargs and not validate_master_user_password(kwargs['master_user_password'], kwargs.get('manage_master_user_password', False)):
+            # raise ValueError("Invalid master user password")
+            return False
+        return True
 
 
     def create(self, instance_controller, **kwargs):
@@ -61,34 +92,9 @@ class DBClusterService:
         if not check_required_params(required_params, **kwargs):
             raise ValueError("Missing required parameters")
 
-        # Perform validations
-        if self.dal.is_db_instance_exist(kwargs.get('db_cluster_identifier')):
-            raise ValueError(f"Cluster {kwargs.get('db_cluster_identifier')} already exists")
+        if self._validate_parameters(**kwargs) != True:
+            raise ValueError("Error")
         
-        if not validate_db_cluster_identifier(kwargs.get('db_cluster_identifier')):
-            raise ValueError(f"Invalid DBClusterIdentifier: {kwargs.get('db_cluster_identifier')}")
-
-        if not validate_engine(kwargs.get('engine', '')):
-            raise ValueError(f"Invalid engine: {kwargs.get('engine')}")
-
-        if 'database_name' in kwargs and kwargs['database_name'] and not validate_database_name(kwargs['database_name']):
-            raise ValueError(f"Invalid DatabaseName: {kwargs['database_name']}")
-
-        if 'db_cluster_parameter_group_name' in kwargs and kwargs['db_cluster_parameter_group_name'] and not validate_db_cluster_parameter_group_name(kwargs['db_cluster_parameter_group_name']):
-            raise ValueError(f"Invalid DBClusterParameterGroupName: {kwargs['db_cluster_parameter_group_name']}")
-
-        if kwargs.get('db_subnet_group_name') and not validate_db_subnet_group_name(kwargs.get('db_subnet_group_name')):
-            raise ValueError(f"Invalid DBSubnetGroupName: {kwargs['db_subnet_group_name']}")
-
-        if 'port' in kwargs and kwargs['port'] and not validate_port(kwargs['port']):
-            raise ValueError(f"Invalid port: {kwargs['port']}. Valid range is 1150-65535.")
-
-        if 'master_username' in kwargs and not validate_master_username(kwargs['master_username']):
-            raise ValueError("Invalid master username")
-
-        if 'master_user_password' in kwargs and not validate_master_user_password(kwargs['master_user_password'], kwargs.get('manage_master_user_password', False)):
-            raise ValueError("Invalid master user password")
-
         # Create the cluster object
         cluster = DBClusterModel.Cluster(**kwargs)
 
@@ -171,29 +177,8 @@ class DBClusterService:
         if not self.dal.is_db_instance_exist(cluster_id):
             raise ValueError("Cluster does not exist!!")
         
-        if 'db_cluster_identifier' in kwargs and not validate_db_cluster_identifier(kwargs.get('db_cluster_identifier')):
-            raise ValueError(f"Invalid DBClusterIdentifier: {kwargs.get('db_cluster_identifier')}")
-
-        if 'engine' in kwargs and not validate_engine(kwargs.get('engine', '')):
-            raise ValueError(f"Invalid engine: {kwargs.get('engine')}")
-
-        if 'database_name' in kwargs and kwargs['database_name'] and not validate_database_name(kwargs['database_name']):
-            raise ValueError(f"Invalid DatabaseName: {kwargs['database_name']}")
-
-        if 'db_cluster_parameter_group_name' in kwargs and kwargs['db_cluster_parameter_group_name'] and not validate_db_cluster_parameter_group_name(kwargs['db_cluster_parameter_group_name']):
-            raise ValueError(f"Invalid DBClusterParameterGroupName: {kwargs['db_cluster_parameter_group_name']}")
-
-        if kwargs.get('db_subnet_group_name') and not validate_db_subnet_group_name(kwargs.get('db_subnet_group_name')):
-            raise ValueError(f"Invalid DBSubnetGroupName: {kwargs['db_subnet_group_name']}")
-
-        if 'port' in kwargs and kwargs['port'] and not validate_port(kwargs['port']):
-            raise ValueError(f"Invalid port: {kwargs['port']}. Valid range is 1150-65535.")
-
-        if 'master_username' in kwargs and not validate_master_username(kwargs['master_username']):
-            raise ValueError("Invalid master username")
-
-        if 'master_user_password' in kwargs and not validate_master_user_password(kwargs['master_user_password'], kwargs.get('manage_master_user_password', False)):
-            raise ValueError("Invalid master user password")
+        if self._validate_parameters(**kwargs) != True:
+            raise ValueError("Error")
 
         str_parts = ', '.join(f"{key} = '{value}'" for key, value in kwargs.items())
 

@@ -58,16 +58,19 @@ def db_cluster_controller_with_cleanup(db_cluster_controller):
     # Finalizer to clean up after the test
     db_cluster_controller.delete_db_cluster('ClusterTest')
 
-def test_create_cluster_works(db_cluster_controller_with_cleanup):
+@pytest.fixture
+def db_cluster_valid_parameters():
     cluster_data = {
         'db_cluster_identifier': 'ClusterTest',
         'engine': 'mysql',
         'allocated_storage':5,
         'db_subnet_group_name': 'my-subnet-group'
         }
+    return cluster_data
 
-    res = db_cluster_controller_with_cleanup.create_db_cluster(**cluster_data)
-    # db_cluster_controller.delete_db_cluster('Cluster21')
+def test_create_cluster_works(db_cluster_controller_with_cleanup,db_cluster_valid_parameters):
+
+    res = db_cluster_controller_with_cleanup.create_db_cluster(**db_cluster_valid_parameters)
     assert res == None
 
 def test_create_cluster_missing_required_fields(db_cluster_controller):
@@ -90,30 +93,19 @@ def test_create_cluster_invalide_identifier(db_cluster_controller):
            db_cluster_controller.create_db_cluster(**cluster_data)
 
 
-def test_create_cluster_already_exist(db_cluster_controller):
-    cluster_data = {
-        'db_cluster_identifier': 'ClusterTest',
-        'engine': 'mysql',
-        'allocated_storage':5,
-        'db_subnet_group_name': 'my-subnet-group'
-        }
-    db_cluster_controller.create_db_cluster(**cluster_data)
+def test_create_cluster_already_exist(db_cluster_controller,db_cluster_valid_parameters):
+
+    db_cluster_controller.create_db_cluster(**db_cluster_valid_parameters)
     with pytest.raises(ValueError):
-           db_cluster_controller.create_db_cluster(**cluster_data)
+           db_cluster_controller.create_db_cluster(**db_cluster_valid_parameters)
 
     db_cluster_controller.delete_db_cluster('ClusterTest')
            
 
 
-def test_delete_cluster_works(db_cluster_controller):
-    cluster_data = {
-        'db_cluster_identifier': 'ClusterTest',
-        'engine': 'mysql',
-        'allocated_storage':5,
-        'db_subnet_group_name': 'my-subnet-group'
-        }
+def test_delete_cluster_works(db_cluster_controller,db_cluster_valid_parameters):
 
-    db_cluster_controller.create_db_cluster(**cluster_data)
+    db_cluster_controller.create_db_cluster(**db_cluster_valid_parameters)
     db_cluster_controller.delete_db_cluster('ClusterTest')
     with pytest.raises(ValueError):
         db_cluster_controller.delete_db_cluster('ClusterTest')
@@ -125,15 +117,9 @@ def test_delete_cluster_does_not_exist(db_cluster_controller):
 
 
 
-def test_describe_cluster_works(db_cluster_controller_with_cleanup):
-    cluster_data = {
-        'db_cluster_identifier': 'ClusterTest',
-        'engine': 'mysql',
-        'allocated_storage':5,
-        'db_subnet_group_name': 'my-subnet-group'
-        }
+def test_describe_cluster_works(db_cluster_controller_with_cleanup,db_cluster_valid_parameters):
 
-    db_cluster_controller_with_cleanup.create_db_cluster(**cluster_data)
+    db_cluster_controller_with_cleanup.create_db_cluster(**db_cluster_valid_parameters)
     res = db_cluster_controller_with_cleanup.describe_db_cluster('ClusterTest')
     assert isinstance(res, list)
 
@@ -142,15 +128,9 @@ def test_describe_cluster_does_not_exist(db_cluster_controller):
         db_cluster_controller.describe_db_cluster('ClusterTest')
 
 
-def test_modify_cluster_works(db_cluster_controller_with_cleanup):
-    cluster_data = {
-        'db_cluster_identifier': 'ClusterTest',
-        'engine': 'mysql',
-        'allocated_storage':5,
-        'db_subnet_group_name': 'my-subnet-group'
-        }
+def test_modify_cluster_works(db_cluster_controller_with_cleanup,db_cluster_valid_parameters):
 
-    db_cluster_controller_with_cleanup.create_db_cluster(**cluster_data)
+    db_cluster_controller_with_cleanup.create_db_cluster(**db_cluster_valid_parameters)
     update_data = {
         'engine': 'postgres',
         }
@@ -175,44 +155,17 @@ def test_modify_cluster_does_not_exist(db_cluster_controller):
         db_cluster_controller.modify_db_cluster('ClusterTest',**update_data)
 
 
-def test_modify_cluster_invalide_engine(db_cluster_controller_with_cleanup):
-    cluster_data = {
-        'db_cluster_identifier': 'ClusterTest',
-        'engine': 'mysql',
-        'allocated_storage':5,
-        'db_subnet_group_name': 'my-subnet-group'
-        }
+def test_modify_cluster_invalide_engine(db_cluster_controller_with_cleanup,db_cluster_valid_parameters):
 
-    db_cluster_controller_with_cleanup.create_db_cluster(**cluster_data)
+    db_cluster_controller_with_cleanup.create_db_cluster(**db_cluster_valid_parameters)
     update_data = {
         'engine': 'invalid',
         }
     with pytest.raises(ValueError):
         db_cluster_controller_with_cleanup.modify_db_cluster('ClusterTest',**update_data)
 
-def test_get_all_clusters(db_cluster_controller_with_cleanup):
-    cluster_data = {
-    'db_cluster_identifier': 'ClusterTest',
-    'engine': 'mysql',
-    'allocated_storage':5,
-    'db_subnet_group_name': 'my-subnet-group'
-    }
+def test_get_all_clusters(db_cluster_controller_with_cleanup, db_cluster_valid_parameters):
 
-    db_cluster_controller_with_cleanup.create_db_cluster(**cluster_data)
+    db_cluster_controller_with_cleanup.create_db_cluster(**db_cluster_valid_parameters)
     res = db_cluster_controller_with_cleanup.get_all_db_clusters()
     assert isinstance(res, list)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
