@@ -13,8 +13,9 @@ import uuid
 import json
 import time
 
+
 class DBInstanceService(DBO):
-    def __init__(self, dal: DBInstanceManager):
+    def __init__(self, dal: DBInstanceManager ):
         self.dal = dal
 
     def close_connections(self):
@@ -32,9 +33,12 @@ class DBInstanceService(DBO):
         if 'db_name' in kwargs:
             SQLCommandHelper.create_database(
                 kwargs['db_name'], db_instance._last_node_of_current_version, db_instance.endpoint)
-
+      
         # Save to management table
         self.dal.createInMemoryDBInstance(db_instance)
+
+        # storageManager=StorageManager(DBInstance.BASE_PATH)
+        # storage_dal.create_directory(self.endpoint)
 
         return db_instance
 
