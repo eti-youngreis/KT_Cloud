@@ -7,8 +7,6 @@ from DB.NEW_KT_DB.Controller.DBInstanceController import DBInstanceController
 from DB.NEW_KT_DB.Controller.DBSnapshotController import DBSnapshotController
 from DB.NEW_KT_DB.Service.Classes.DBInstanceService import DBInstanceService
 from DB.NEW_KT_DB.DataAccess.DBInstanceManager import DBInstanceManager
-from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
-from DB.NEW_KT_DB.DataAccess.DBManager import DBManager
 import time
 
 # Fixture to create a temporary database path
