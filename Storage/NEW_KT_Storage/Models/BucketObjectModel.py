@@ -10,20 +10,19 @@ class BucketObject:
     object_name = "Object"
     pk_column = "object_id"
 
-    def __init__(self, **kwargs):
-        # attributes related to S3
-        self.bucket_name = kwargs.get('bucket_name')
-        self.object_key = kwargs.get('object_key')
 
-        # versioning attributes
-        self.versions = kwargs.get('versions', None)
+
+    def __init__(self, bucket_name, object_key, encryption_id=None, lock_id=None):
+        # attributes related to S3
+        self.bucket_name = bucket_name
+        self.object_key = object_key
 
         # attributes for memory management in database
         self.pk_value = self.bucket_name+self.object_key
         self.created_at = datetime.now()
 
-        self.encryption_id = kwargs.get('encryption_id',None)
-        self.lock_id = kwargs.get('lock_id',None)
+        self.encryption_id = encryption_id
+        self.lock_id = lock_id
 
 
     def to_dict(self) -> Dict:
