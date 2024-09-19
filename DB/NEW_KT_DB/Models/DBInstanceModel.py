@@ -3,18 +3,45 @@ from collections import deque
 import os
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 import uuid
-
-
+from DB.NEW_KT_DB.Validation.DBInstanceValiditions import validate_allocated_storage, validate_master_user_name, validate_master_user_password, validate_port, validate_status
+from DB.NEW_KT_DB.Validation.GeneralValidations import is_valid_db_instance_identifier
 class DBInstanceModel:
     BASE_PATH = "db_instances"
 
     def __init__(self, **kwargs):
-        self.db_instance_identifier = kwargs['db_instance_identifier']
-        self.allocated_storage = kwargs.get('allocated_storage', 20)
-        self.master_username = kwargs.get('master_username', 'admin')
-        self.master_user_password = kwargs.get('master_user_password', 'default_password')
-        self.port = kwargs.get('port', 3306)
-        self.status = kwargs.get('status', 'available')
+
+        # Validate and set db_instance_identifier
+        if is_valid_db_instance_identifier(kwargs.get('db_instance_identifier'), 30):
+            self.db_instance_identifier = kwargs['db_instance_identifier']
+        else:
+            raise ValueError("Invalid DB Instance Identifier")
+        
+        # Validate and set allocated_storage
+        allocated_storage = kwargs.get('allocated_storage', 20)  # Default value is 20
+        validate_allocated_storage(allocated_storage)
+        self.allocated_storage = allocated_storage
+ 
+        # Validate and set master_user_name
+        master_user_name = kwargs.get('master_user_name', 'admin')  # Default value
+        validate_master_user_name(master_user_name)
+        self.master_username = master_user_name
+
+        # Validate and set master_user_password
+        master_user_password = kwargs.get('master_user_password', 'default_password')  # Default value
+        validate_master_user_password(master_user_password)
+        self.master_user_password = master_user_password
+
+        # Validate and set port
+        port = kwargs.get('port', 3306)  # Default value is 3306
+        validate_port(port)
+        self.port = port
+
+        # Validate and set status
+        status = kwargs.get('status', 'available')  # Default value is 'available'
+        validate_status(status)
+        self.status = status
+
+        # Set created_time (no validation required)
         self.created_time = kwargs.get('created_time', datetime.now())
         self.endpoint = os.path.join(
             DBInstanceModel.BASE_PATH, self.db_instance_identifier)
