@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from DataAccess.ObjectManager import ObjectManager
-
+import Exceptions.DBSubnetGroupExceptions as DBSubnetGroupExceptions
 
 class DBSubnetGroup:
 
@@ -44,9 +44,9 @@ class DBSubnetGroup:
                         self.db_subnet_group_arn = args[4]
                         self.status = args[5]
                     except IndexError:
-                        raise ValueError("Invalid arguments provided")
+                        raise DBSubnetGroupExceptions.MissingRequiredArgument()
                 else:
-                    raise ValueError("Invalid arguments provided")
+                    raise DBSubnetGroupExceptions.MissingRequiredArgument()
 
             # if subnets weren't provided
             if not self.subnets:
@@ -62,7 +62,7 @@ class DBSubnetGroup:
                 raise ValueError("Invalid subnets format")
 
         except KeyError as e:
-            raise ValueError(f"Missing required attribute for DBSubnetGroup: {str(e)}")
+            raise DBSubnetGroupExceptions.MissingRequiredArgument(self.db_subnet_group_name)
 
         # Ideally:
         # self.db_subnet_group_arn should be dynamically created according to vpc-id, account-id and
@@ -118,3 +118,12 @@ class DBSubnetGroup:
             ]
         )
         return updates
+
+    def to_str(self):
+        str_data = json.dumps(self.to_dict())
+        return str_data
+    
+    def from_str(str_data):
+        """convert a string into a DBSubnetGroup object"""
+        data_dict = json.loads(str_data)
+        return DBSubnetGroup(**data_dict)

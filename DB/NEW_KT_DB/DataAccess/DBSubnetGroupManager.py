@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from DataAccess import ObjectManager
 from Models.DBSubnetGroupModel import DBSubnetGroup
-
+import Exceptions.DBSubnetGroupExceptions as DBSubnetGroupExceptions
 
 class DBSubnetGroupManager:
     def __init__(self, object_manager: ObjectManager):
@@ -29,7 +29,7 @@ class DBSubnetGroupManager:
         if data:
             return DBSubnetGroup(*data[0])
         else:
-            raise ValueError(f"subnet group with name '{name}' not found")
+            raise DBSubnetGroupExceptions.DBSubnetGroupNotFound(f"subnet group with name '{name}' not found")
 
     def delete(self, name: str):
         exists = self.object_manager.get_from_memory(
@@ -41,7 +41,8 @@ class DBSubnetGroupManager:
                 DBSubnetGroup.object_name, DBSubnetGroup.pk_column, name
             )
         else:
-            raise ValueError(f"subnet group with name '{name}' doesn't exist")
+            raise DBSubnetGroupExceptions.DBSubnetGroupNotFound(f"subnet group with name '{name}' not found")
+
 
     def describe(self, name: str):
         # get the object from memory and return it in dictionary form

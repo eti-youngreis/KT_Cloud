@@ -12,15 +12,16 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 from Service.Classes.DBSubnetGroupService import DBSubnetGroupService
 from DataAccess.DBSubnetGroupManager import DBSubnetGroupManager
 from Controller.DBSubnetGroupController import DBSubnetGroupController
-from Storage.KT_Storage.DataAccess.StorageManager import StorageManager
+from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 from DataAccess.ObjectManager import ObjectManager
 from Models.DBSubnetGroupModel import DBSubnetGroup
+import Exceptions.DBSubnetGroupExceptions as DBSubnetGroupExceptions
 import sqlite3
 
 object_manager = ObjectManager("../object_management_db.db")
 
 manager = DBSubnetGroupManager(object_manager=object_manager)
-storage_manager = StorageManager()
+storage_manager = StorageManager("DB/s3")
 
 service = DBSubnetGroupService(manager, storage_manager=storage_manager)
 controller = DBSubnetGroupController(service)
@@ -55,16 +56,22 @@ def test_create(clear_table):
     )
 
     # check that file was created (no error raised on get)
-    storage_manager.get("db_subnet_groups", "subnet_group_1", "0")
+    storage_manager.is_file_exist("db_subnet_groups/subnet_group_1")
     # check that object was saved to management table (no error raised on get)
     controller.get_db_subnet_group("subnet_group_1")
 
     # check that file content is correct
-    from_storage = DBSubnetGroup(
-        **DBSubnetGroup.from_bytes_to_dict(
-            storage_manager.get("db_subnet_groups", "subnet_group_1", "0")["content"]
-        )
-    )
+    # storage manager doesn't have a get or read function
+    # from_storage = DBSubnetGroup(
+    #     **DBSubnetGroup.from_bytes_to_dict(
+    #         storage_manager.get("db_subnet_groups", "subnet_group_1", "0")["content"]
+    #     )
+    # )
+    
+    file = open("C:/Users/temim/בוטקפמ vast data/KT_Cloud/DB/s3/db_subnet_groups/subnet_group_1", "r")
+    str_data = file.read()
+    file.close()
+    from_storage = DBSubnetGroup.from_str(str_data)
     from_db = controller.get_db_subnet_group("subnet_group_1")
     # check values were stored correctly in management table as well as storage
 
@@ -104,7 +111,7 @@ def test_create(clear_table):
 
 
 def test_unique_constraint():
-    with pytest.raises(ValueError):
+    with pytest.raises(DBSubnetGroupExceptions.DBSubnetGroupAlreadyExists):
         controller.create_db_subnet_group(
             db_subnet_group_name="subnet_group_1",
             subnets=[
@@ -141,11 +148,15 @@ def test_modify():
         subnets=[{"subnet_id": "subnet-12345988"}, {"subnet_id": "subnet-876543881"}],
     )
 
-    from_storage = DBSubnetGroup(
-        **DBSubnetGroup.from_bytes_to_dict(
-            storage_manager.get("db_subnet_groups", "subnet_group_1", "0")["content"]
-        )
-    )
+    # from_storage = DBSubnetGroup(
+    #     **DBSubnetGroup.from_bytes_to_dict(
+    #         storage_manager.get("db_subnet_groups", "subnet_group_1", "0")["content"]
+    #     )
+    # )
+    file = open("C:/Users/temim/בוטקפמ vast data/KT_Cloud/DB/s3/db_subnet_groups/subnet_group_1", "r")
+    from_storage = DBSubnetGroup.from_str(file.read())
+    file.close()
+    
     from_db = controller.get_db_subnet_group("subnet_group_1")
     assert from_storage.db_subnet_group_name == from_db.db_subnet_group_name
     for subnet in from_storage.subnets:
@@ -183,8 +194,10 @@ def test_describe():
 def test_delete():
     controller.delete_db_subnet_group("subnet_group_1")
     with pytest.raises(FileNotFoundError):
-        storage_manager.get("db_subnet_groups", "subnet_group_1", "0")
-    with pytest.raises(Exception):
+        file = open("C:/Users/temim/בוטקפמ vast data/KT_Cloud/DB/s3/db_subnet_groups/subnet_group_1", "r")
+        from_storage = DBSubnetGroup.from_str(file.read())
+        file.close()
+    with pytest.raises(DBSubnetGroupExceptions.DBSubnetGroupNotFound):
         controller.get_db_subnet_group("subnet_group_1")
 
 
@@ -202,18 +215,23 @@ def test_insert_many(index):
     )
 
     # check that file was created (no error raised on get)
-    storage_manager.get("db_subnet_groups", f"subnet_group_{index}", "0")
+    file = open(f"C:/Users/temim/בוטקפמ vast data/KT_Cloud/DB/s3/db_subnet_groups/subnet_group_{index}", "r")
+    from_storage = DBSubnetGroup.from_str(file.read())
+    file.close()
     # check that object was saved to management table (no error raised on get)
     controller.get_db_subnet_group(f"subnet_group_{index}")
 
     # check that file content is correct
-    from_storage = DBSubnetGroup(
-        **DBSubnetGroup.from_bytes_to_dict(
-            storage_manager.get("db_subnet_groups", f"subnet_group_{index}", "0")[
-                "content"
-            ]
-        )
-    )
+    # from_storage = DBSubnetGroup(
+    #     **DBSubnetGroup.from_bytes_to_dict(
+    #         storage_manager.get("db_subnet_groups", f"subnet_group_{index}", "0")[
+    #             "content"
+    #         ]
+    #     )
+    # )
+    file = open(f"C:/Users/temim/בוטקפמ vast data/KT_Cloud/DB/s3/db_subnet_groups/subnet_group_{index}", "r")
+    from_storage = DBSubnetGroup.from_str(file.read())
+    file.close()
     from_db = controller.get_db_subnet_group(f"subnet_group_{index}")
     # check values were stored correctly in management table as well as storage
 
@@ -257,8 +275,10 @@ def test_delete_many_from_prev_test(index):
     db_subnet_group_name = f"subnet_group_{index}"
     controller.delete_db_subnet_group(db_subnet_group_name)
     with pytest.raises(FileNotFoundError):
-        storage_manager.get("db_subnet_groups", db_subnet_group_name, "0")
-    with pytest.raises(Exception):
+        file = open(f"C:/Users/temim/בוטקפמ vast data/KT_Cloud/DB/s3/db_subnet_groups/subnet_group_{index}", "r")
+        from_storage = DBSubnetGroup.from_str(file.read())
+        file.close()
+    with pytest.raises(DBSubnetGroupExceptions.DBSubnetGroupNotFound):
         controller.get_db_subnet_group(db_subnet_group_name)
 
 

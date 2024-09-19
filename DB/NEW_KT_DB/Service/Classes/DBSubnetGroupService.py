@@ -1,6 +1,7 @@
 from sqlite3 import IntegrityError
 from typing import List, Dict, Any
-
+import Exceptions.DBSubnetGroupExceptions as DBSubnetGroupExceptions
+import Validation.DBSubnetGroupValidations as DBSubnetGroupValidations
 import sys
 import os
 
@@ -11,41 +12,36 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from Models.DBSubnetGroupModel import DBSubnetGroup
 from DataAccess.DBSubnetGroupManager import DBSubnetGroupManager
-from Storage.KT_Storage.DataAccess.StorageManager import StorageManager
-from Storage.KT_Storage.DataAccess.VersionManager import VersionManager
-from Validation.GeneralValidations import *
+from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 
 class DBSubnetGroupService:
     def __init__(self, db_subnet_group_manager: DBSubnetGroupManager, storage_manager: StorageManager):
         self.manager = db_subnet_group_manager
         self.bucket = "db_subnet_groups"
-        self.storage_manager = storage_manager()
-        self.storage_manager.create_bucket(self.bucket)
+        self.storage_manager = storage_manager
+        self.storage_manager.create_directory(self.bucket)
         self.subnet_groups = dict()
 
     def create_db_subnet_group(self, **kwargs):
         # validate the arguments
         if not kwargs.get("db_subnet_group_name"):
-            raise ValueError("Missing required argument db_subnet_group_name")
+            raise DBSubnetGroupExceptions.MissingRequiredArgument("db_subnet_group_name")
 
-        if not is_length_in_range(kwargs["db_subnet_group_name"], 1, 255):
-            raise ValueError(
-                "invalid length for subnet group db_subnet_group_name: "
-                + len(kwargs["db_subnet_group_name"])
+        if kwargs["db_subnet_group_name"] in self.subnet_groups.keys():
+            raise DBSubnetGroupExceptions.DBSubnetGroupAlreadyExists(
+                kwargs["db_subnet_group_name"] 
             )
-
-        if kwargs["db_subnet_group_name"] in self.subnet_groups:
-            raise ValueError(
-                f"db_subnet_group_name {kwargs['db_subnet_group_name']} already exists"
-            )
-
-        if kwargs.get("description") and not is_length_in_range("description", 1, 255):
-            raise ValueError(
-                "invalid length for subnet group description: "
-                + len(kwargs["description"])
-            )
-
+        
+        # validate the arguments
+        DBSubnetGroupValidations.validate_subnet_group_name(kwargs["db_subnet_group_name"])
+        DBSubnetGroupValidations.validate_subnet_group_description(kwargs["db_subnet_group_description"])
+        
+        try:
+            c = kwargs["vpc_id"]
+        except KeyError:
+            raise DBSubnetGroupExceptions.MissingRequiredArgument("vpc_id")
+        
         # create an object from the arguments received
         subnet_group = DBSubnetGroup(**kwargs)
         # save in management table
@@ -53,14 +49,13 @@ class DBSubnetGroupService:
         try:
             self.manager.create(subnet_group)
         except IntegrityError as e:
-            raise ValueError(
-                f"db_subnet_group_name {kwargs['db_subnet_group_name']} already exists"
+            raise DBSubnetGroupExceptions.DBSubnetGroupAlreadyExists(
+                f"{kwargs['db_subnet_group_name']}"
             )
 
         # physical object
-        # version is 0 because the object is being created (first version)
-        self.storage_manager.create(
-            self.bucket, subnet_group.db_subnet_group_name, subnet_group.to_bytes(), "0"
+        self.storage_manager.create_file(
+            self.bucket + "/" + subnet_group.db_subnet_group_name, subnet_group.to_str()
         )
         # save in local collection (hash table) for quick access
         self.subnet_groups[kwargs["db_subnet_group_name"]] = subnet_group
@@ -79,13 +74,12 @@ class DBSubnetGroupService:
         if not db_subnet_group_name:
             raise ValueError("Missing required argument db_subnet_group_name")
 
-        if updates.get("description") and not is_length_in_range(
-            updates["description"], 1, 255
-        ):
-            raise ValueError(
-                "invalid length for subnet group description: "
-                + len(updates["description"])
-            )
+        # validate the arguments
+        DBSubnetGroupValidations.validate_subnet_group_name(db_subnet_group_name)
+        try:
+            DBSubnetGroupValidations.validate_subnet_group_description(updates.get("db_subnet_group_description"))
+        except KeyError:
+            pass
 
         # get the object 
         subnet_group = self.get_db_subnet_group(db_subnet_group_name)
@@ -98,20 +92,19 @@ class DBSubnetGroupService:
         self.manager.modify(subnet_group)
         # version = str(int(self.version_manager.get(self.bucket, subnet_group.db_subnet_group_name).version_id)+1)
         # for now we override the basic version, when the latest version id can be retrieved, we will make a new version as old_version_id + 1
-        self.storage_manager.create(
-            self.bucket, db_subnet_group_name, subnet_group.to_bytes(), "0"
+        self.storage_manager.write_to_file(
+            self.bucket + '/' + db_subnet_group_name, subnet_group.to_str()
         )
 
     def delete_db_subnet_group(self, db_subnet_group_name: str) -> None:
         if not db_subnet_group_name:
-            raise ValueError("Missing required argument db_subnet_group_name")
-
+            raise DBSubnetGroupExceptions.MissingRequiredArgument("db_subnet_group_name")
         # delete from management table
         self.manager.delete(db_subnet_group_name)
         # for now version id is 0
         # delete physical object from storage
-        self.storage_manager.delete_by_name(
-            bucket_name=self.bucket, version_id="0", key=db_subnet_group_name
+        self.storage_manager.delete_file(
+            self.bucket + '/' + db_subnet_group_name
         )
         # delete from local collection (hash table)
         if db_subnet_group_name in self.subnet_groups:
