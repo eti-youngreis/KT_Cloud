@@ -5,13 +5,16 @@ from datetime import datetime
 from Storage.NEW_KT_Storage.DataAccess.ObjectManager import ObjectManager
 
 class Bucket:
-    def __init__(self, bucket_name: str, owner: str, region, create_at=None):
+
+    table_structure = ", ".join(["BucketId TEXT PRIMARY KEY", "Owner TEXT", "Region TEXT", "created_at DATETIME"])
+    pk_column = "BucketId"
+
+    def __init__(self, bucket_name: str, owner: str, region=None, create_at=None):
         self.bucket_name = bucket_name
         self.owner = owner
-        self.pk_column = "object_id"
         self.pk_value = bucket_name
         self.create_at = create_at or datetime.now()
-        self.region = region
+        self.region = region or "us-east-1"
 
 
     def to_dict(self):
