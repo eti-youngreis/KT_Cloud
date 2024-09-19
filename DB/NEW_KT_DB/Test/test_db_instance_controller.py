@@ -17,18 +17,16 @@ from DB.NEW_KT_DB.Service.Classes.DBInstanceService import DbSnapshotIdentifierN
 
 class TestDBInstanceController:
 
-    class TestDBInstanceController:
-        @pytest.fixture(autouse=True)
-        def setup_and_teardown(self, db_instance_controller):
-            yield
-            db_instance_controller.close_connections()
-            time.sleep(0.1) 
-    
-    def test_create_db_instance(self, db_instance_controller):
-        # Test creating a new DB instance with valid parameters
+    # class TestDBInstanceController:
+    @pytest.fixture(autouse=True)
+    def setup_db_instance(self, db_instance_controller):
         instance = db_instance_controller.create_db_instance(db_instance_identifier="test-instance", allocated_storage=10)
-        assert instance.db_instance_identifier == "test-instance"
-        assert instance.allocated_storage == 10
+        yield instance
+        db_instance_controller.delete_db_instance("test-instance")
+    
+    def test_create_db_instance(self, setup_db_instance):
+        assert setup_db_instance.db_instance_identifier == "test-instance"
+        assert setup_db_instance.allocated_storage == 10
 
     def test_delete_db_instance(self, db_instance_controller):
         # Test deleting an existing DB instance
