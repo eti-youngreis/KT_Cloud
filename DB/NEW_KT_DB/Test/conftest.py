@@ -22,7 +22,7 @@ def temp_db_path():
 @pytest.fixture(scope="module")
 def db_setup(temp_db_path):
     # Initialize all necessary components
-    db_instance_manager = DBInstanceManager(temp_db_path)
+    db_instance_manager = DBInstanceManager(":memory:")
     db_instance_service = DBInstanceService(db_instance_manager)
     
     yield db_instance_service
