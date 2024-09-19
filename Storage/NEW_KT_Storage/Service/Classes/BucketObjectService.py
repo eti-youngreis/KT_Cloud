@@ -37,13 +37,13 @@ class BucketObjectService(STO):
     def create(self, **attributes):
         '''Create a new BucketObject.'''
         self.validation_for_object(**attributes)
-        if not self.storage_manager.is_directory_exist(attributes.get('bucket_name', None)):
-            raise ValueError("Bucket not found")
-
-        # create physical object
         bucket_name = attributes.get('bucket_name', None)
         object_key = attributes.get('object_key', None)
         full_path = bucket_name + "\\" + object_key
+        if self.storage_manager.is_file_exist(full_path):
+            raise ValueError("Object already exist")
+
+        # create physical object
         content = attributes.get('content', '')
         self.storage_manager.create_file(full_path, content)
 
@@ -105,7 +105,12 @@ class BucketObjectService(STO):
             raise ValueError("Object not found")
 
         if version_id is None:
-            return self.dal.describeBucketObject(bucket_name + object_key)
+            object= self.dal.describeBucketObject(bucket_name + object_key)
+            object_id, bucket_id, object_key, encryption_id, lock_id,created_at = object[0]
+            return BucketObject(object_id=object_id, bucket_name=bucket_id, object_key=object_key,
+                                          encryption_id=encryption_id, lock_id=lock_id)
+
+
         else:
             pass
             # call the function of get_version from version_controller
@@ -121,4 +126,9 @@ class BucketObjectService(STO):
         if self.storage_manager.list_files_in_directory(bucket_name)==[]:
             raise ValueError("There are no objects in the bucket")
 
-        return self.dal.getAllObjects(bucket_name)
+        # return self.dal.getAllObjects(bucket_name)
+        objects=self.dal.getAllObjects(bucket_name)
+        for index in range(len(objects)):
+            object_id,bucket_id,object_key,encryption_id,lock_id,created_at=objects[index]
+            objects[index]=BucketObject(object_id=object_id,bucket_name=bucket_id,object_key=object_key,encryption_id=encryption_id,lock_id=lock_id)
+        return objects
