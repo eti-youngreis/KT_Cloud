@@ -75,7 +75,7 @@ class BucketPolicyService(STO):
         # Save in-memory
         self.dal.createInMemoryBucketPolicy(bucket_policy)
         # Create a physical object
-        self.dal.createPhysicalPolicy(bucket_policy)
+        self.dal.createPolicy(bucket_policy)
         return self.describe(bucket_name)
 
     def delete(self, bucket_name: str):
@@ -91,7 +91,7 @@ class BucketPolicyService(STO):
         if not self.dal.getBucketPolicy(bucket_name):
             raise IsNotExistFault(f"Bucket policy for '{bucket_name}' does not exist.")
         # Delete physical object
-        self.dal.deletePhysicalPolicy(bucket_name)
+        self.dal.deletePolicy(bucket_name)
         # Delete from memory
         self.dal.deleteInMemoryBucketPolicy(bucket_name)
 

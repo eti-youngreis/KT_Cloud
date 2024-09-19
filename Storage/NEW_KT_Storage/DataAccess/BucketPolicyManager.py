@@ -41,7 +41,7 @@ class BucketPolicyManager:
         """
         self.object_manager.save_in_memory("BucketPolicy", bucket_policy.to_sql())
     
-    def createPhysicalPolicy(self, bucket_policy: BucketPolicy) -> bool:
+    def createPolicy(self, bucket_policy: BucketPolicy) -> bool:
         """
         Saves the bucket policy to a physical JSON file.
 
@@ -101,7 +101,7 @@ class BucketPolicyManager:
         criteria = f"bucket_name = '{bucket_name}'"
         self.object_manager.delete_from_memory_by_criteria("BucketPolicy", criteria=criteria)
     
-    def deletePhysicalPolicy(self, bucket_name: str) -> bool:
+    def deletePolicy(self, bucket_name: str) -> bool:
         """
         Deletes the bucket policy from the physical JSON file.
 
