@@ -4,6 +4,7 @@ import json
 import sys
 import os
 
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -47,7 +48,8 @@ class DBSubnetGroup:
                         raise DBSubnetGroupExceptions.MissingRequiredArgument()
                 else:
                     raise DBSubnetGroupExceptions.MissingRequiredArgument()
-
+            if not hasattr(self, "status"):
+                self.status = None
             # if subnets weren't provided
             if not self.subnets:
                 self.subnets = []

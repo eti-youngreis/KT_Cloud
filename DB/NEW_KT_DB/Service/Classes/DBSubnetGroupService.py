@@ -4,6 +4,8 @@ import Exceptions.DBSubnetGroupExceptions as DBSubnetGroupExceptions
 import Validation.DBSubnetGroupValidations as DBSubnetGroupValidations
 import sys
 import os
+from flask.views import View
+from injector import inject
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../..")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
@@ -15,7 +17,8 @@ from DataAccess.DBSubnetGroupManager import DBSubnetGroupManager
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 
-class DBSubnetGroupService:
+class DBSubnetGroupService(View):
+    @inject
     def __init__(self, db_subnet_group_manager: DBSubnetGroupManager, storage_manager: StorageManager):
         self.manager = db_subnet_group_manager
         self.bucket = "db_subnet_groups"
@@ -114,4 +117,7 @@ class DBSubnetGroupService:
         return self.manager.describe(db_subnet_group_name)
 
     def list_db_subnet_groups(self):
-        return self.manager.list_db_subnet_groups()
+        return self.subnet_groups.values()
+    
+    def describe_subnet_groups(self):
+        return [group.to_dict() for group in self.manager.list_db_subnet_groups()]

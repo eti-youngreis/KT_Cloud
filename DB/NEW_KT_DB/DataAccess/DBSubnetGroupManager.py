@@ -1,16 +1,18 @@
 from typing import Dict, Any, List
-
+from flask.views import View
+from injector import inject
 import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from DataAccess import ObjectManager
+from DataAccess.ObjectManager import ObjectManager
 from Models.DBSubnetGroupModel import DBSubnetGroup
 import Exceptions.DBSubnetGroupExceptions as DBSubnetGroupExceptions
 
-class DBSubnetGroupManager:
+class DBSubnetGroupManager(View):
+    @inject
     def __init__(self, object_manager: ObjectManager):
         self.object_manager = object_manager
         self.object_manager.create_management_table(
