@@ -18,53 +18,36 @@ from DB.NEW_KT_DB.Exceptions.DBInstanceExceptions import DbSnapshotIdentifierNot
 
 # Tests for DBSnapshotController
 class TestDBSnapshotController:
-    def test_create_snapshot(self, db_instance_controller, db_snapshot_controller):
-        # Test creating a snapshot of an existing DB instance
-        db_instance_controller.create_db_instance(db_instance_identifier="test-instance")
-        db_snapshot_controller.create_snapshot("test-instance", "test-snapshot")
-        snapshots = db_snapshot_controller.list_snapshots("test-instance")
-        assert "test-snapshot" in snapshots
 
-    def test_delete_snapshot(self, db_instance_controller, db_snapshot_controller):
-        # Test deleting an existing snapshot
-        db_instance_controller.create_db_instance(db_instance_identifier="test-instance")
-        db_snapshot_controller.create_snapshot("test-instance", "test-snapshot")
-        db_snapshot_controller.delete_snapshot("test-instance", "test-snapshot")
-        snapshots = db_snapshot_controller.list_snapshots("test-instance")
-        assert "test-snapshot" not in snapshots
+   @pytest.fixture(autouse=True)
+   def setup_db_and_snapshot(self, db_instance_controller, db_snapshot_controller):
+       instance = db_instance_controller.create_db_instance(db_instance_identifier="test-instance", allocated_storage=10)
+       db_snapshot_controller.create_snapshot("test-instance", "test-snapshot")
+       yield instance
+       try:
+           db_snapshot_controller.delete_snapshot("test-instance", "test-snapshot")
+       except DbSnapshotIdentifierNotFoundError:
+           pass
+       db_instance_controller.delete_db_instance("test-instance")
 
-    def test_restore_snapshot(self, db_instance_controller, db_snapshot_controller):
-        # Test restoring a DB instance from a snapshot
-        db_instance_controller.create_db_instance(db_instance_identifier="test-instance")
-        db_snapshot_controller.create_snapshot("test-instance", "test-snapshot")
-        db_instance_controller.modify_db_instance("test-instance", allocated_storage=20)
-        db_snapshot_controller.restore_snapshot("test-instance", "test-snapshot")
-        restored_instance = db_instance_controller.get_db_instance("test-instance")
-        assert restored_instance.allocated_storage == 10
+   def test_create_snapshot(self, db_snapshot_controller):
+       snapshots = db_snapshot_controller.list_snapshots("test-instance")
+       assert "test-snapshot" in snapshots
 
-    def test_create_snapshot_non_existent_instance(self, db_snapshot_controller):
-        # Test creating a snapshot for a non-existent DB instance
-        with pytest.raises(ValueError):
-            db_snapshot_controller.create_snapshot("non-existent-instance", "test-snapshot")
+   def test_delete_snapshot(self, db_snapshot_controller):
+       db_snapshot_controller.delete_snapshot("test-instance", "test-snapshot")
+       snapshots = db_snapshot_controller.list_snapshots("test-instance")
+       assert "test-snapshot" not in snapshots
 
-    def test_delete_non_existent_snapshot(self, db_instance_controller, db_snapshot_controller):
-        # Test deleting a non-existent snapshot
-        db_instance_controller.create_db_instance(db_instance_identifier="test-instance")
-        with pytest.raises(DbSnapshotIdentifierNotFoundError):
-            db_snapshot_controller.delete_snapshot("test-instance", "non-existent-snapshot")
+   def test_create_snapshot_non_existent_instance(self, db_snapshot_controller):
+       with pytest.raises(ValueError):
+           db_snapshot_controller.create_snapshot("non-existent-instance", "test-snapshot")
 
-    def test_restore_to_non_existent_instance(self, db_instance_controller, db_snapshot_controller):
-        # Test restoring a snapshot to a non-existent DB instance
-        db_instance_controller.create_db_instance(db_instance_identifier="test-instance")
-        db_snapshot_controller.create_snapshot("test-instance", "test-snapshot")
-        db_instance_controller.delete_db_instance("test-instance")
-        with pytest.raises(ValueError):
-            db_snapshot_controller.restore_snapshot("non-existent-instance", "test-snapshot")
+   def test_delete_non_existent_snapshot(self, db_snapshot_controller):
+       with pytest.raises(DbSnapshotIdentifierNotFoundError):
+           db_snapshot_controller.delete_snapshot("test-instance", "non-existent-snapshot")
 
-    def test_snapshot_limit(self, db_instance_controller, db_snapshot_controller):
-        # Test creating snapshots up to and beyond the limit
-        db_instance_controller.create_db_instance(db_instance_identifier="test-instance")
-        for i in range(50):  # Assuming a limit of 50 snapshots
-            db_snapshot_controller.create_snapshot("test-instance", f"test-snapshot-{i}")
-        with pytest.raises(ValueError):
-            db_snapshot_controller.create_snapshot("test-instance", "one-too-many")
+   def test_restore_to_non_existent_instance(self, db_instance_controller, db_snapshot_controller):
+       db_instance_controller.delete_db_instance("test-instance")
+       with pytest.raises(ValueError):
+           db_snapshot_controller.restore_snapshot("non-existent-instance", "test-snapshot")

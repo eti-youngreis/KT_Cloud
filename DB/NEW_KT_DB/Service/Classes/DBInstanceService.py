@@ -37,6 +37,7 @@ class DBInstanceService(DBO):
         # Save to management table
         self.dal.createInMemoryDBInstance(db_instance)
 
+        
         # storageManager=StorageManager(DBInstance.BASE_PATH)
         # storage_dal.create_directory(self.endpoint)
 
@@ -145,9 +146,12 @@ class DBInstanceService(DBO):
 
     def delete_snapshot(self, db_instance_identifier, db_snapshot_identifier):
         db_instance = self.get(db_instance_identifier)
-        db_instance._node_subSnapshot_name_to_id.pop(
-            db_snapshot_identifier, None)
+        if db_snapshot_identifier not in db_instance._node_subSnapshot_name_to_id:
+            raise DbSnapshotIdentifierNotFoundError(f"Snapshot '{db_snapshot_identifier}' not found for instance '{db_instance_identifier}'")
+
+        db_instance._node_subSnapshot_name_to_id.pop(db_snapshot_identifier, None)
         self.dal.modifyDBInstance(db_instance)
+
 
     def restore_version(self, db_instance_identifier, db_snapshot_identifier):
         db_instance = self.get(db_instance_identifier)
