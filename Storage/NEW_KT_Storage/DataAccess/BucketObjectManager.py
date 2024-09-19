@@ -9,7 +9,7 @@ class BucketObjectManager:
         # create the path of db
         db_file += "\\" + "object.db"
         self.object_manager = ObjectManager(db_file)
-        table_structure = ",".join(BucketObject.structure_columns)
+        table_structure = ",".join(BucketObject.table_structure)
         self.object_manager.object_manager.create_management_table(BucketObject.object_name,table_structure)
 
     def createInMemoryBucketObject(self, bucket_object: BucketObject):

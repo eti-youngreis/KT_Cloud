@@ -15,6 +15,7 @@ class TestBucketObjectService(unittest.TestCase):
 
         # Create a bucket directory
         self.bucket_name = "test_bucket"
+        self.object_key = "test_object.txt"
         os.makedirs(os.path.join(self.test_path, self.bucket_name), exist_ok=True)
 
     def tearDown(self):
@@ -28,11 +29,10 @@ class TestBucketObjectService(unittest.TestCase):
 
     def test_create_object(self):
         """Test creating a new object in a bucket"""
-        object_key = "test_object.txt"
         content = "This is a test file."
         attributes = {
             'bucket_name': self.bucket_name,
-            'object_key': object_key,
+            'object_key': self.object_key,
             'content': content
         }
 
@@ -40,23 +40,22 @@ class TestBucketObjectService(unittest.TestCase):
         self.bucket_service.create(**attributes)
 
         # Check if the file was created physically
-        full_path = os.path.join(self.test_path, self.bucket_name, object_key)
+        full_path = os.path.join(self.test_path, self.bucket_name, self.object_key)
         self.assertTrue(os.path.exists(full_path))
 
         # Check if the content is correct
         with open(full_path, 'r') as f:
             file_content = f.read()
         self.assertEqual(file_content, content)
-        self.bucket_service.delete(self.bucket_name,object_key)
+        self.bucket_service.delete(self.bucket_name,self.object_key)
 
 
     def test_delete_object(self):
         """Test deleting an object from a bucket"""
-        object_key = "test_object.txt"
         content = "This is a test file."
         attributes = {
             'bucket_name': self.bucket_name,
-            'object_key': object_key,
+            'object_key': self.object_key,
             'content': content
         }
 
@@ -64,19 +63,18 @@ class TestBucketObjectService(unittest.TestCase):
         self.bucket_service.create(**attributes)
 
         # Delete the object
-        self.bucket_service.delete(self.bucket_name, object_key)
+        self.bucket_service.delete(self.bucket_name, self.object_key)
 
         # Check if the file was deleted physically
-        full_path = os.path.join(self.test_path, self.bucket_name, object_key)
+        full_path = os.path.join(self.test_path, self.bucket_name, self.object_key)
         self.assertFalse(os.path.exists(full_path))
 
     def test_get_object(self):
         """Test retrieving an object from a bucket"""
-        object_key = "test_object.txt"
         content = "This is a test file."
         attributes = {
             'bucket_name': self.bucket_name,
-            'object_key': object_key,
+            'object_key': self.object_key,
             'content': content
         }
 
@@ -84,12 +82,10 @@ class TestBucketObjectService(unittest.TestCase):
         self.bucket_service.create(**attributes)
 
         # Retrieve the object and verify the data
-        bucket_object = self.bucket_service.get(self.bucket_name, object_key)
+        bucket_object = self.bucket_service.get(self.bucket_name, self.object_key)
         self.assertIsInstance(bucket_object, BucketObject)
         self.assertEqual(bucket_object.bucket_name, self.bucket_name)
-        # self.assertEqual(bucket_object["object_key"], object_key)
-        # self.assertEqual(bucket_object,[(self.bucket_name+object_key, self.bucket_name, object_key, 'None', 'None')])
-        self.bucket_service.delete(self.bucket_name,object_key)
+        self.bucket_service.delete(self.bucket_name,self.object_key)
 
     def test_get_all_objects(self):
         """Test retrieving all objects from a bucket"""
@@ -109,13 +105,12 @@ class TestBucketObjectService(unittest.TestCase):
 
     def test_put_object(self):
         """Test modifying an existing object in a bucket"""
-        object_key = "test_object.txt"
         original_content = "This is the original content."
         updated_content = "This is the updated content."
 
         attributes = {
             'bucket_name': self.bucket_name,
-            'object_key': object_key,
+            'object_key': self.object_key,
             'content': original_content
         }
 
@@ -125,28 +120,27 @@ class TestBucketObjectService(unittest.TestCase):
         # Update the object
         updated_attributes = {
             'bucket_name': self.bucket_name,
-            'object_key': object_key,
+            'object_key': self.object_key,
             'content': updated_content
         }
         self.bucket_service.put(**updated_attributes)
 
         # Check if the content was updated
-        full_path = os.path.join(self.test_path, self.bucket_name, object_key)
+        full_path = os.path.join(self.test_path, self.bucket_name, self.object_key)
         with open(full_path, 'r') as f:
             file_content = f.read()
         self.assertEqual(file_content, updated_content)
-        self.bucket_service.delete(self.bucket_name, object_key)
+        self.bucket_service.delete(self.bucket_name, self.object_key)
 
 
     def test_put_another_object(self):
         """add new object to bucket"""
-        object_key = "test_object.txt"
         original_content = "This is the original content."
         updated_content = "This is the updated content."
 
         attributes = {
             'bucket_name': self.bucket_name,
-            'object_key': object_key,
+            'object_key': self.object_key,
             'content': original_content
         }
 
@@ -163,17 +157,16 @@ class TestBucketObjectService(unittest.TestCase):
         self.bucket_service.put(**updated_attributes)
         all_objects = self.bucket_service.get_all(self.bucket_name)
         self.assertEqual(len(all_objects), 2)
-        self.bucket_service.delete(self.bucket_name, object_key)
+        self.bucket_service.delete(self.bucket_name, self.object_key)
         self.bucket_service.delete(self.bucket_name, new_object_key)
 
     def test_create_object_invalid_bucket(self):
         """Test creating an object with an invalid bucket name"""
-        object_key = "test_object.txt"
         content = "This is a test file."
         invalid_bucket_name = "invalid_bucket"
         attributes = {
             'bucket_name': invalid_bucket_name,
-            'object_key': object_key,
+            'object_key': self.object_key,
             'content': content
         }
 
@@ -209,10 +202,9 @@ class TestBucketObjectService(unittest.TestCase):
 
     def test_create_object_with_no_content(self):
         """Test creating an object with no content (empty file)"""
-        object_key = "empty_object.txt"
         attributes = {
             'bucket_name': self.bucket_name,
-            'object_key': object_key,
+            'object_key': self.object_key,
             'content': ""
         }
 
@@ -220,14 +212,14 @@ class TestBucketObjectService(unittest.TestCase):
         self.bucket_service.create(**attributes)
 
         # Check if the file was created physically
-        full_path = os.path.join(self.test_path, self.bucket_name, object_key)
+        full_path = os.path.join(self.test_path, self.bucket_name, self.object_key)
         self.assertTrue(os.path.exists(full_path))
 
         # Check if the content is empty
         with open(full_path, 'r') as f:
             file_content = f.read()
         self.assertEqual(file_content, "")
-        self.bucket_service.delete(self.bucket_name, object_key)
+        self.bucket_service.delete(self.bucket_name, self.object_key)
 
     def test_list_files_in_nonexistent_bucket(self):
         """Test retrieving all objects from a nonexistent bucket."""
@@ -240,7 +232,7 @@ class TestBucketObjectService(unittest.TestCase):
         """Test creating an object in a nonexistent bucket."""
         attributes = {
             'bucket_name': "nonexistent_bucket",
-            'object_key': "test_object.txt",
+            'object_key': self.object_key,
             'content': "This is a test file."
         }
 
@@ -265,30 +257,27 @@ class TestBucketObjectService(unittest.TestCase):
 
     def test_overwrite_existing_object(self):
         """Test overwriting an existing object."""
-        object_key = "test_object.txt"
         original_content = "Original content."
         updated_content = "Updated content."
 
         # Create the original object
-        self.bucket_service.create(bucket_name=self.bucket_name, object_key=object_key, content=original_content)
+        self.bucket_service.create(bucket_name=self.bucket_name, object_key=self.object_key, content=original_content)
 
         # Overwrite the object with new content
-        self.bucket_service.put(bucket_name=self.bucket_name, object_key=object_key, content=updated_content)
+        self.bucket_service.put(bucket_name=self.bucket_name, object_key=self.object_key, content=updated_content)
 
         # Check if the file content was updated
-        full_path = os.path.join(self.test_path, self.bucket_name, object_key)
+        full_path = os.path.join(self.test_path, self.bucket_name, self.object_key)
         with open(full_path, 'r') as f:
             file_content = f.read()
 
         self.assertEqual(file_content, updated_content)
-        self.bucket_service.delete(self.bucket_name,object_key)
+        self.bucket_service.delete(self.bucket_name,self.object_key)
 
     def test_get_object_from_empty_directory(self):
         """Test getting an object from an empty bucket."""
-        object_key = "test_object.txt"
-
         with self.assertRaises(ValueError):
-            self.bucket_service.get(self.bucket_name, object_key)
+            self.bucket_service.get(self.bucket_name, self.object_key)
 
     def test_create_and_delete_multiple_objects(self):
         """Test creating and deleting multiple objects in a bucket."""
@@ -328,25 +317,24 @@ class TestBucketObjectService(unittest.TestCase):
 
     def test_create_object_large_content(self):
         """Test creating an object with large content."""
-        object_key = "large_object.txt"
         large_content = "A" * 10 ** 6  # 1 MB of content
         attributes = {
             'bucket_name': self.bucket_name,
-            'object_key': object_key,
+            'object_key': self.object_key,
             'content': large_content
         }
 
         self.bucket_service.create(**attributes)
 
         # Check if the file was created physically
-        full_path = os.path.join(self.test_path, self.bucket_name, object_key)
+        full_path = os.path.join(self.test_path, self.bucket_name, self.object_key)
         self.assertTrue(os.path.exists(full_path))
 
         # Check if the content is correct
         with open(full_path, 'r') as f:
             file_content = f.read()
         self.assertEqual(file_content, large_content)
-        self.bucket_service.delete(self.bucket_name, object_key)
+        self.bucket_service.delete(self.bucket_name, self.object_key)
 
 
 

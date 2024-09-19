@@ -6,7 +6,7 @@ from Storage.NEW_KT_Storage.DataAccess.ObjectManager import ObjectManager
 
 class BucketObject:
 
-    structure_columns = "object_id TEXT PRIMARY KEY", "bucket_id TEXT", "object_key TEXT", "encryption_id INTEGER", "lock_id INTEGER","created_at TEXT"
+    table_structure = "object_id TEXT PRIMARY KEY", "bucket_id TEXT", "object_key TEXT", "encryption_id INTEGER", "lock_id INTEGER","created_at TEXT"
     object_name = "Object"
     pk_column = "object_id"
 
@@ -19,7 +19,6 @@ class BucketObject:
         self.versions = kwargs.get('versions', None)
 
         # attributes for memory management in database
-        self.pk_column = kwargs.get('pk_column', 'object_id')
         self.pk_value = self.bucket_name+self.object_key
         self.created_at = datetime.now()
 
