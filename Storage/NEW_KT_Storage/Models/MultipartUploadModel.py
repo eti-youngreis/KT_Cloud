@@ -9,6 +9,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from DataAccess.ObjectManager import ObjectManager
 
 class MultipartUploadModel:
+    TABLE_STRUCTURE = "object_id TEXT PRIMARY KEY,object_name TEXT NOT NULL, bucket_name TEXT NOT NULL,parts TEXT NOT NULL"
+
     def __init__(self,object_key: str,bucket_name:str,upload_id:str,parts=[]):
         """Create a unique upload model with bucket and object key"""
         self.upload_id =upload_id
