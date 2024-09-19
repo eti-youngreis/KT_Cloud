@@ -56,6 +56,7 @@ class BucketPolicyService(STO):
         # Ensure bucket_name is provided
         if not bucket_name or not isinstance(bucket_name, str):
             raise ParamValidationFault("Bucket name must be a valid non-empty string.")
+        
         # Ensure permissions is a list and contains valid permission strings
         if not isinstance(permissions, list):
             raise ParamValidationFault("Permissions must be a list.")
@@ -145,7 +146,7 @@ class BucketPolicyService(STO):
             raise IsNotExistFault(f"Bucket policy for '{bucket_name}' does not exist.")
         return self.dal.describeBucketPolicy(bucket_name)
 
-    def modify(self, bucket_name: str, update_permissions: list = [], allow_versions=None) -> bool:
+    def modify(self, bucket_name: str, update_permissions: list = [], allow_versions=None, action = None) -> bool:
         """
         Update an existing bucket policy.
 
@@ -163,11 +164,22 @@ class BucketPolicyService(STO):
         bool
             True if the policy was updated successfully, False otherwise.
         """
+        
+        #  Check if the bucket exists before attempting to delete
+        if not self.dal.getBucketPolicy(bucket_name):
+            raise IsNotExistFault(f"Bucket policy for '{bucket_name}' does not exist.")
+        
         bucket_policy = self.dal.getBucketPolicy(bucket_name)
         
-        if update_permissions:
-            
-            bucket_policy['permissions'] = self._update_permissions(bucket_name, update_permissions)
+        if action != None:
+            print("!!", action)
+            if action not in ["add", "delete"]:
+                raise ParamValidationFault("The action can be only add or delete")
+            if not update_permissions:
+                raise ParamValidationFault("permissions must be inilaize")
+
+                    
+            bucket_policy['permissions'] = self._update_permissions(bucket_name, action, update_permissions)
             
         if allow_versions is not None:
             # Ensure allow_versions is boolean
@@ -178,7 +190,7 @@ class BucketPolicyService(STO):
         self.dal.putBucketPolicy(bucket_policy)
         return True
         
-    def _update_permissions(self, bucket_name, update_permissions):
+    def _update_permissions(self, bucket_name, action, update_permissions):
         """
         Helper method to update the permissions of a bucket policy.
 
@@ -196,19 +208,42 @@ class BucketPolicyService(STO):
         """
         if not self.dal.getBucketPolicy(bucket_name):
             raise IsNotExistFault(f"Bucket policy for '{bucket_name}' does not exist.")
-        bucket_policy = self.dal.getBucketPolicy(bucket_name)
-        policy_permissions = bucket_policy['permissions']
         
+        # Ensure permissions is a list and contains valid permission strings
         if not isinstance(update_permissions, list):
             raise ParamValidationFault("Permissions must be a list.")
+        
+        bucket_policy = self.dal.getBucketPolicy(bucket_name)
+        policy_permissions = bucket_policy['permissions']
         
         for permission in update_permissions:
             valid_permissions = {'READ', 'WRITE', 'DELETE', 'CREATE'}
             if permission not in valid_permissions:
                 raise ParamValidationFault(f"Permission {permission} already exists in the bucket policy.")
+            
+        if action == "add":
+            policy_permissions = self._add_permissions(policy_permissions, update_permissions)
+        else:
+            policy_permissions = self._delete_permissions(policy_permissions, update_permissions)
+            
+    
+    def _add_permissions(self, policy_permissions, permissions = []):
+
+        for permission in permissions:
             if permission in policy_permissions:
-                policy_permissions.remove(permission)
-            else:
-                policy_permissions.append(permission)
+                raise IsExistPermissionFault("Permission already exist in the bucket")
+            policy_permissions.append(permission)
+            
+        return policy_permissions
+            
+    def _delete_permissions(self, policy_permissions, permissions = []):
+        
+        print("print" ,policy_permissions)
+        for permission in permissions:
+            if permission not in policy_permissions:
+                raise IsNotExistPermissionFault("Permission not exist in the bucket policy")
+            policy_permissions.remove(permission)
         
         return policy_permissions
+        
+        

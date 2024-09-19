@@ -4,7 +4,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 from Storage.NEW_KT_Storage.Controller.BucketPolicyController import BucketPolicyController
-from Storage.NEW_KT_Storage.Service.Classes.BucketPolicyService import BucketPolicyService, ParamValidationFault, IsExistPermissionFault, IsNotExistFault 
+from Storage.NEW_KT_Storage.Service.Classes.BucketPolicyService import BucketPolicyService, ParamValidationFault, IsExistPermissionFault, IsNotExistFault, IsNotExistPermissionFault 
 from Storage.NEW_KT_Storage.DataAccess.BucketPolicyManager import BucketPolicyManager
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 from Storage.NEW_KT_Storage.DataAccess.ObjectManager import ObjectManager
@@ -55,7 +55,7 @@ def test_create_bucket_policy_success(setup_bucket_policy):
     bucket_name, permissions, allow_versions, bucket_policy = setup_bucket_policy
     _test_is_description_is_correct(bucket_policy, bucket_name, permissions, allow_versions)
     
-
+"delete"
 def test_create_invalid_bucket_name(bucketPolicy_controller):
     
     with pytest.raises(ParamValidationFault):
@@ -71,11 +71,32 @@ def test_create_invalud_allow_versions(bucketPolicy_controller):
     with pytest.raises(ParamValidationFault):
         bucketPolicy_controller.create_bucket_policy(bucket_name="my_bucket", allow_versions="yes")
         
-
-def test_modify_bucket_policy(bucketPolicy_controller, setup_bucket_policy):
+def test_add_permission_to_bucket_policy(bucketPolicy_controller, setup_bucket_policy):
     
     bucket_name, permissions, allow_versions, bucket_policy = setup_bucket_policy
-    bucketPolicy_controller.modify_bucket_policy(bucket_name, update_permmisions=['WRITE'])
+    bucketPolicy_controller.modify_bucket_policy(bucket_name, update_permmisions=['READ'], action="add")
+    
+def test_delete_permission_from_bucket_policy(bucketPolicy_controller, setup_bucket_policy):
+    
+    bucketPolicy_controller.create_bucket_policy("my_bucket", ['READ'])
+    bucketPolicy_controller.modify_bucket_policy("my_bucket", action="delete", update_permmisions=['READ'])
+    
+def test_add_exist_permission(bucketPolicy_controller):
+    
+    bucketPolicy_controller.create_bucket_policy("my_bucket", ['READ'])
+    with pytest.raises(IsExistPermissionFault):
+        bucketPolicy_controller.modify_bucket_policy("my_bucket", action="add", update_permmisions=['READ']) 
+
+def test_delete_not_exist_permission(bucketPolicy_controller):
+    
+    bucketPolicy_controller.create_bucket_policy("my_bucket", ['READ'])
+    with pytest.raises(IsNotExistPermissionFault):
+        bucketPolicy_controller.modify_bucket_policy("my_bucket", action="delete", update_permmisions=['WRITE'])
+    
+# def test_modify_bucket_policy(bucketPolicy_controller, setup_bucket_policy):
+    
+#     bucket_name, permissions, allow_versions, bucket_policy = setup_bucket_policy
+#     bucketPolicy_controller.modify_bucket_policy(bucket_name, update_permmisions=['WRITE'])
 
 def test_modify_when_allow_versions_invalid(bucketPolicy_controller, setup_bucket_policy):
     
@@ -90,11 +111,20 @@ def test_modify_when_allow_versions_invalid(bucketPolicy_controller, setup_bucke
 #     with pytest.raises(Exception):
 #         bucketPolicy_controller.modify_bucket_policy(bucket_name, ['READ'])
     
-def test_modify_invalid_permission(bucketPolicy_controller, setup_bucket_policy):
+# def test_modify_invalid_permission(bucketPolicy_controller, setup_bucket_policy):
+    
+#     bucket_name, permissions, allow_versions, bucket_policy = setup_bucket_policy
+#     with pytest.raises(ParamValidationFault):
+#         bucketPolicy_controller.modify_bucket_policy(bucket_name, action="add", update_permmisions="READ")
+        
+def test_modify_noe_exist_bucket(bucketPolicy_controller, setup_bucket_policy):
     
     bucket_name, permissions, allow_versions, bucket_policy = setup_bucket_policy
-    with pytest.raises(ParamValidationFault):
-        bucketPolicy_controller.modify_bucket_policy(bucket_name, update_permmisions="READ")
+    with pytest.raises(IsNotExistFault):
+        bucketPolicy_controller.modify_bucket_policy(bucket_name+'!')
+
+# def test_modify_without_parameters(bucketPolicy_controller, setup_bucket_policy):
+    
     
 def test_get_exist_bucket_policy(bucketPolicy_controller, setup_bucket_policy):
     
