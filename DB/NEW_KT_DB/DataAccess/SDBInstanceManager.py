@@ -1,7 +1,7 @@
 from typing import Dict, Any
 import json
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
-from DB.NEW_KT_DB.Models.DBInstanceModel import DBInstanceModel
+from DB.NEW_KT_DB.Models.SDBInstanceModel import DBInstanceModel
 
 class DBInstanceManager:
     object_name = __name__.split('.')[-1].replace('Manager', '').lower()

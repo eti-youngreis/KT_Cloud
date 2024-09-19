@@ -1,4 +1,4 @@
-from DB.NEW_KT_DB.Service.Classes.DBInstanceService import DBInstanceService
+from DB.NEW_KT_DB.Service.Classes.SDBInstanceService import DBInstanceService
 """
 DBInstanceController
 

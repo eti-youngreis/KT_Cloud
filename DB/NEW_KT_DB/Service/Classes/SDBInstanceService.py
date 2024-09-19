@@ -28,9 +28,9 @@ Methods:
 """
 
 from datetime import datetime
-from DB.NEW_KT_DB.DataAccess.DBInstanceManager import DBInstanceManager
+from DB.NEW_KT_DB.DataAccess.SDBInstanceManager import DBInstanceManager
 from DB.NEW_KT_DB.Exceptions.DBInstanceExceptions import DbSnapshotIdentifierNotFoundError, InvalidQueryError, DatabaseNotFoundError, AlreadyExistsError, DatabaseCreationError
-from DB.NEW_KT_DB.Models.DBInstanceModel import DBInstanceModel, Node_SubSnapshot
+from DB.NEW_KT_DB.Models.SDBInstanceModel import DBInstanceModel, Node_SubSnapshot
 from DB.NEW_KT_DB.Service.Abc.DBO import DBO
 from DB.NEW_KT_DB.Validation.DBInstanceValiditions import validate_allocated_storage, validate_master_user_password, validate_port, validate_status
 from collections import deque
