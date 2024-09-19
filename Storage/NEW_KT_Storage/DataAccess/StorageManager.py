@@ -25,12 +25,20 @@ class StorageManager:
             file.write(content)
 
 
-    def get_file_content(self, file_path: str, part_size: int = None, offset: int = 0):
-        with open(file_path, 'r') as part_file:
+    def get_file_content(self, file_path: str, part_size: int = None, offset: int = 0) -> str:
+        """
+        Retrieve content from a file, with optional part size and offset.
+        :param file_path: Path of the file to read from.
+        :param part_size: Number of bytes to read from the file (default is None, meaning read the entire file).
+        :param offset: Position in the file to start reading from (default is 0).
+        :return: The content read from the file.
+        """
+        full_path = os.path.join(self.base_directory, file_path)
+        with open(full_path, 'r') as part_file:
             part_file.seek(offset)
             if part_size:
                 return part_file.read(part_size)
-            return part_file.read() 
+            return part_file.read()
 
 
     def rename_file(self, old_file_path: str, new_file_path: str) -> None:
