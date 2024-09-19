@@ -11,15 +11,15 @@ class ParamValidationFault(Exception):
     """Exception raised when a required parameter is missing."""
     pass
 
-class IsExistPermissionFault(Exception):
-    """Exception raised when a permission already exists in the policy."""
+class IsExistactionnFault(Exception):
+    """Exception raised when a actionn already exists in the policy."""
     pass
 
 class IsNotExistFault(Exception):
     """Exception raised when a bucket_name does not exist in the policy."""
     pass
-class IsNotExistPermissionFault(Exception):
-    """Exception raised when a permission does not exist in the policy."""
+class IsNotExistactionnFault(Exception):
+    """Exception raised when a actionn does not exist in the policy."""
     pass
 
 class BucketPolicyService(STO):
@@ -35,7 +35,7 @@ class BucketPolicyService(STO):
         """
         self.dal = dal
 
-    def create(self, bucket_name, permissions=[], allow_versions=True) -> bool:
+    def create(self, bucket_name, actions=[], allow_versions=True) -> bool:
         """
         Create a new bucket policy.
 
@@ -43,8 +43,8 @@ class BucketPolicyService(STO):
         -----------
         bucket_name : str
             The name of the bucket for which the policy is being created.
-        permissions : list, optional
-            A list of permissions for the bucket (default is an empty list).
+        actions : list, optional
+            A list of actions for the bucket (default is an empty list).
         allow_versions : bool, optional
             Whether or not to allow versioning (default is True).
 
@@ -57,20 +57,20 @@ class BucketPolicyService(STO):
         if not bucket_name or not isinstance(bucket_name, str):
             raise ParamValidationFault("Bucket name must be a valid non-empty string.")
         
-        # Ensure permissions is a list and contains valid permission strings
-        if not isinstance(permissions, list):
-            raise ParamValidationFault("Permissions must be a list.")
+        # Ensure actions is a list and contains valid actionn strings
+        if not isinstance(actions, list):
+            raise ParamValidationFault("actions must be a list.")
         
-        valid_permissions = {'READ', 'WRITE', 'DELETE', 'CREATE'}  # Example permissions
-        for permission in permissions:
-            if permission not in valid_permissions:
-                raise ParamValidationFault(f"Invalid permission: {permission}")
+        valid_actions = {'READ', 'WRITE', 'DELETE', 'CREATE'}  # Example actions
+        for actionn in actions:
+            if actionn not in valid_actions:
+                raise ParamValidationFault(f"Invalid actionn: {actionn}")
 
         # Ensure allow_versions is boolean
         if not isinstance(allow_versions, bool):
             raise ParamValidationFault("allow_versions must be a boolean value.")
 
-        bucket_policy = BucketPolicy(bucket_name, permissions=permissions, allow_versions=allow_versions)
+        bucket_policy = BucketPolicy(bucket_name, actions=actions, allow_versions=allow_versions)
         
         # Save in-memory
         self.dal.createInMemoryBucketPolicy(bucket_policy)
@@ -146,7 +146,7 @@ class BucketPolicyService(STO):
             raise IsNotExistFault(f"Bucket policy for '{bucket_name}' does not exist.")
         return self.dal.describeBucketPolicy(bucket_name)
 
-    def modify(self, bucket_name: str, update_permissions: list = [], allow_versions=None, action = None) -> bool:
+    def modify(self, bucket_name: str, update_actions: list = [], allow_versions=None, action = None) -> bool:
         """
         Update an existing bucket policy.
 
@@ -154,8 +154,8 @@ class BucketPolicyService(STO):
         -----------
         bucket_name : str
             The name of the bucket whose policy is being updated.
-        update_permissions : list, optional
-            The new permissions to add or remove (default is an empty list).
+        update_actions : list, optional
+            The new actions to add or remove (default is an empty list).
         allow_versions : bool, optional
             Whether to enable or disable versioning (default is None).
 
@@ -175,11 +175,11 @@ class BucketPolicyService(STO):
             print("!!", action)
             if action not in ["add", "delete"]:
                 raise ParamValidationFault("The action can be only add or delete")
-            if not update_permissions:
-                raise ParamValidationFault("permissions must be inilaize")
+            if not update_actions:
+                raise ParamValidationFault("actions must be inilaize")
 
                     
-            bucket_policy['permissions'] = self._update_permissions(bucket_name, action, update_permissions)
+            bucket_policy['actions'] = self._update_actions(bucket_name, action, update_actions)
             
         if allow_versions is not None:
             # Ensure allow_versions is boolean
@@ -190,60 +190,60 @@ class BucketPolicyService(STO):
         self.dal.putBucketPolicy(bucket_policy)
         return True
         
-    def _update_permissions(self, bucket_name, action, update_permissions):
+    def _update_actions(self, bucket_name, action, update_actions):
         """
-        Helper method to update the permissions of a bucket policy.
+        Helper method to update the actions of a bucket policy.
 
         Parameters:
         -----------
         bucket_name : str
-            The name of the bucket whose permissions are being updated.
-        update_permissions : list
-            The list of permissions to be added or removed.
+            The name of the bucket whose actions are being updated.
+        update_actions : list
+            The list of actions to be added or removed.
 
         Returns:
         --------
         list
-            The updated list of permissions.
+            The updated list of actions.
         """
         if not self.dal.getBucketPolicy(bucket_name):
             raise IsNotExistFault(f"Bucket policy for '{bucket_name}' does not exist.")
         
-        # Ensure permissions is a list and contains valid permission strings
-        if not isinstance(update_permissions, list):
-            raise ParamValidationFault("Permissions must be a list.")
+        # Ensure actions is a list and contains valid actionn strings
+        if not isinstance(update_actions, list):
+            raise ParamValidationFault("actions must be a list.")
         
         bucket_policy = self.dal.getBucketPolicy(bucket_name)
-        policy_permissions = bucket_policy['permissions']
+        policy_actions = bucket_policy['actions']
         
-        for permission in update_permissions:
-            valid_permissions = {'READ', 'WRITE', 'DELETE', 'CREATE'}
-            if permission not in valid_permissions:
-                raise ParamValidationFault(f"Permission {permission} already exists in the bucket policy.")
+        for actionn in update_actions:
+            valid_actions = {'READ', 'WRITE', 'DELETE', 'CREATE'}
+            if actionn not in valid_actions:
+                raise ParamValidationFault(f"actionn {actionn} already exists in the bucket policy.")
             
         if action == "add":
-            policy_permissions = self._add_permissions(policy_permissions, update_permissions)
+            policy_actions = self._add_actions(policy_actions, update_actions)
         else:
-            policy_permissions = self._delete_permissions(policy_permissions, update_permissions)
+            policy_actions = self._delete_actions(policy_actions, update_actions)
             
     
-    def _add_permissions(self, policy_permissions, permissions = []):
+    def _add_actions(self, policy_actions, actions = []):
 
-        for permission in permissions:
-            if permission in policy_permissions:
-                raise IsExistPermissionFault("Permission already exist in the bucket")
-            policy_permissions.append(permission)
+        for actionn in actions:
+            if actionn in policy_actions:
+                raise IsExistactionnFault("actionn already exist in the bucket")
+            policy_actions.append(actionn)
             
-        return policy_permissions
+        return policy_actions
             
-    def _delete_permissions(self, policy_permissions, permissions = []):
+    def _delete_actions(self, policy_actions, actions = []):
         
-        print("print" ,policy_permissions)
-        for permission in permissions:
-            if permission not in policy_permissions:
-                raise IsNotExistPermissionFault("Permission not exist in the bucket policy")
-            policy_permissions.remove(permission)
+        print("print" ,policy_actions)
+        for actionn in actions:
+            if actionn not in policy_actions:
+                raise IsNotExistactionnFault("actionn not exist in the bucket policy")
+            policy_actions.remove(actionn)
         
-        return policy_permissions
+        return policy_actions
         
         
