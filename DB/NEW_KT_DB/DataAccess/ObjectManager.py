@@ -3,6 +3,7 @@ import json
 import sqlite3
 
 from DB.NEW_KT_DB.DataAccess.DBManager import DBManager
+
 class ObjectManager:
     def __init__(self, db_file: str):
         '''Initialize ObjectManager with the database connection.'''
