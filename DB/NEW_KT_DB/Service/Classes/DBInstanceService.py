@@ -5,6 +5,7 @@ from DB.NEW_KT_DB.Models.DBInstanceModel import DBInstanceModel, Node_SubSnapsho
 from DB.NEW_KT_DB.Service.Abc.DBO import DBO
 from DB.NEW_KT_DB.Validation.DBInstanceValiditions import validate_allocated_storage, validate_master_user_password, validate_port, validate_status
 from collections import deque
+from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 import os
 import sqlite3
 import re
@@ -17,6 +18,8 @@ import time
 class DBInstanceService(DBO):
     def __init__(self, dal: DBInstanceManager ):
         self.dal = dal
+        self.storageManager = StorageManager(DBInstanceModel.BASE_PATH)
+
 
     def close_connections(self):
         time.sleep(0.1) 
@@ -28,7 +31,11 @@ class DBInstanceService(DBO):
         # Validation.validate_db_instance_params(kwargs)
         
         # Create DBInstance model
+
         db_instance = DBInstanceModel(**kwargs)
+        
+        self.storageManager.create_directory(db_instance.db_instance_identifier)
+
         # Create physical database if db_name is provided
         if 'db_name' in kwargs:
             SQLCommandHelper.create_database(
@@ -38,15 +45,14 @@ class DBInstanceService(DBO):
         self.dal.createInMemoryDBInstance(db_instance)
 
         
-        # storageManager=StorageManager(DBInstance.BASE_PATH)
-        # storage_dal.create_directory(self.endpoint)
+        
 
         return db_instance
 
     def delete(self, db_instance_identifier):
         '''Delete an existing DBInstance.'''
-        # Delete from memory using DBInstanceManager.deleteInMemoryDBInstance() function
         self.dal.deleteInMemoryDBInstance(db_instance_identifier)
+        self.storageManager.delete_directory(db_instance_identifier)
 
     def describe(self, db_instance_identifier):
         '''Describe the details of DBInstance.'''

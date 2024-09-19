@@ -1,25 +1,20 @@
 from typing import Dict, Any
 import json
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
+from DB.NEW_KT_DB.Models.DBInstanceModel import DBInstanceModel
 
 class DBInstanceManager:
     object_name = __name__.split('.')[-1].replace('Manager', '').lower()
     
     def __init__(self, db_file: str):
         self.object_manager = ObjectManager(db_file)
-        self._create_db_instance_managment_table()
+        self.object_manager.create_management_table(self.object_name, DBInstanceModel.table_structure, pk_column_data_type='TEXT')
 
     def close_connections(self):
         if hasattr(self.object_manager.db_manager, 'connection'):
             self.object_manager.db_manager.connection.close()
             self.object_manager.db_manager.connection = None
 
-    def _create_db_instance_managment_table(self):
-        table_structure = f'''
-        db_instance_identifier TEXT PRIMARY KEY,
-        metadata TEXT NOT NULL
-        '''
-        self.object_manager.create_management_table(self.object_name, table_structure, pk_column_data_type='TEXT')
 
     def createInMemoryDBInstance(self, db_instance):
         metadata = json.dumps(db_instance.to_dict())

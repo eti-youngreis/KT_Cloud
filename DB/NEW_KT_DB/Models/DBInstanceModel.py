@@ -5,9 +5,13 @@ from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 import uuid
 from DB.NEW_KT_DB.Validation.DBInstanceValiditions import validate_allocated_storage, validate_master_user_name, validate_master_user_password, validate_port, validate_status
 from DB.NEW_KT_DB.Validation.GeneralValidations import is_valid_db_instance_identifier
+
 class DBInstanceModel:
     BASE_PATH = "db_instances"
-
+    table_structure = f'''
+        db_instance_identifier TEXT PRIMARY KEY,
+        metadata TEXT NOT NULL
+        '''
     def __init__(self, **kwargs):
 
         # Validate and set db_instance_identifier
@@ -126,3 +130,4 @@ class Node_SubSnapshot:
     def create_child(self, endpoint):
         child = Node_SubSnapshot(parent=self, endpoint=endpoint)
         return child
+
