@@ -1,3 +1,31 @@
+"""
+DBInstanceModel
+
+This class represents the model for a database instance. It encapsulates the attributes
+and behavior of a database instance, including its configuration, state, and associated snapshots.
+
+The model includes validation for various attributes and manages the versioning of the database
+through a system of nodes and snapshots.
+
+Attributes:
+    db_instance_identifier: Unique identifier for the database instance.
+    allocated_storage: Amount of storage allocated to the instance.
+    master_username: Username for the master user of the database.
+    master_user_password: Password for the master user.
+    port: Port number on which the database instance accepts connections.
+    status: Current status of the database instance.
+    created_time: Timestamp of when the instance was created.
+    endpoint: File system path where the instance data is stored.
+    _node_subSnapshot_dic: Dictionary of snapshot nodes.
+    _node_subSnapshot_name_to_id: Mapping of snapshot names to their IDs.
+    _current_version_ids_queue: Queue of snapshot IDs representing the current version chain.
+
+Methods:
+    to_dict: Convert the instance attributes to a dictionary.
+
+The class also includes nested Node_SubSnapshot class for managing individual snapshots.
+"""
+
 from datetime import datetime
 from collections import deque
 import os

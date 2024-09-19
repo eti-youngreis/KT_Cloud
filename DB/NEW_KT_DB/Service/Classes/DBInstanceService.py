@@ -1,3 +1,32 @@
+"""
+DBInstanceService
+
+This class provides the core functionality for managing database instances and their snapshots.
+It handles the creation, deletion, modification, and querying of database instances,
+as well as managing snapshots and executing SQL queries.
+
+The service interacts directly with the database and file system to perform its operations.
+
+Key Features:
+    - Database instance lifecycle management (create, delete, modify, describe)
+    - Snapshot creation and management
+-Shell support for sql command in dbs in db_instance
+   
+
+Methods:
+    create: Create a new database instance.
+    delete: Delete an existing database instance.
+    describe: Get a description of a database instance.
+    modify: Modify an existing database instance.
+    get: Retrieve a specific database instance.
+    create_snapshot: Create a new snapshot of a database instance.
+    delete_snapshot: Delete an existing snapshot.
+    restore_version: Restore a database instance to a specific version.
+    execute_query: Execute a SQL query on a database instance.
+    stop: Stop a running database instance.
+    start: Start a stopped database instance.
+"""
+
 from datetime import datetime
 from DB.NEW_KT_DB.DataAccess.DBInstanceManager import DBInstanceManager
 from DB.NEW_KT_DB.Exceptions.DBInstanceExceptions import DbSnapshotIdentifierNotFoundError, InvalidQueryError, DatabaseNotFoundError, AlreadyExistsError, DatabaseCreationError

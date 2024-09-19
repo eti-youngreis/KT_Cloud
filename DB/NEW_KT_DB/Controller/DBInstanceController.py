@@ -1,4 +1,24 @@
 from DB.NEW_KT_DB.Service.Classes.DBInstanceService import DBInstanceService
+"""
+DBInstanceController
+
+This class serves as a controller for managing database instances. It provides an interface
+for creating, deleting, describing, modifying, and managing the state of database instances.
+
+The controller delegates most of its operations to a DBInstanceService.
+
+Methods:
+    create_db_instance: Create a new database instance.
+    delete_db_instance: Delete an existing database instance.
+    describe_db_instance: Get a description of a database instance.
+    modify_db_instance: Modify an existing database instance.
+    get_db_instance: Retrieve a specific database instance.
+    stop_db_instance: Stop a running database instance.
+    start_db_instance: Start a stopped database instance.
+    create_snapshot: Create a snapshot of a database instance.
+    delete_snapshot: Delete a snapshot of a database instance.
+    restore_version: Restore a database instance to a specific version.
+"""
 
 class DBInstanceController:
     def __init__(self, service: DBInstanceService):
