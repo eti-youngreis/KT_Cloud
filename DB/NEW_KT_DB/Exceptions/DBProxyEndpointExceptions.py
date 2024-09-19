@@ -9,6 +9,10 @@ class DBProxyEndpointNotFoundException(ObjectNotFoundException):
     def __init__(self, endpoint_name: str):
         super().__init__(DBProxyEndpoint.object_name, endpoint_name)
 
+class DBProxyNotFoundException(ObjectNotFoundException):
+    def __init__(self, db_proxy_name: str):
+        super().__init__(DBProxyEndpoint.object_name, db_proxy_name)
+
 class DBProxyEndpointAlreadyExistsException(ObjectAlreadyExistsException):
     def __init__(self, endpoint_name: str):
         super().__init__(DBProxyEndpoint.object_name, endpoint_name)

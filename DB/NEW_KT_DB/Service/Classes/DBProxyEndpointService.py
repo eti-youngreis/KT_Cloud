@@ -14,9 +14,10 @@ from DB.NEW_KT_DB.Exceptions.GeneralExeptions import InvalidParamException
 
 
 class DBProxyEndpointService(DBO):
-    def __init__(self, dal: DBProxyEndpointManager, storage:StorageManager):
+    def __init__(self, dal: DBProxyEndpointManager, storage:StorageManager, db_proxy_service):
         self.dal:DBProxyEndpointManager = dal
         self.storage:StorageManager = storage
+        self.db_proxy_service = db_proxy_service
    
     def _convert_endpoint_name_to_endpoint_file_name(self, DBProxyEndpointName:str):
         return "endpoint_"+DBProxyEndpointName
@@ -31,14 +32,6 @@ class DBProxyEndpointService(DBO):
         object_json = json.dumps(object_dict, default=custom_serializer)
         return object_json
 
-    # def _load_json(json_str):
-    #     def custom_deserializer(obj):
-    #         if 'datetime' in obj:
-    #             return datetime.fromisoformat(obj['datetime'])
-    #         return obj
-    #     json_dict = json.loads(json_str, object_hook=custom_deserializer)
-    #     return json_dict
-
 
     def create(self, DBProxyName:str, DBProxyEndpointName:str, TargetRole:str = 'READ_WRITE', Tags:Optional[List[Dict[str, str]]] = None, IsDefault:bool = False):
         '''Create a new DBProxy endpoint.'''
@@ -47,12 +40,14 @@ class DBProxyEndpointService(DBO):
             raise InvalidParamException("DBProxyName is not valid")
         if not validate_name(DBProxyEndpointName):
             raise InvalidParamException("DBProxyEndpointName is not valid") 
-        if not validate_target_role:
+        if not validate_target_role(TargetRole):
             raise InvalidParamException(f"TargetRole {TargetRole} is not valid, must be 'READ_WRITE'|'READ_ONLY'")
-        if not validate_tags(Tags):
-            raise InvalidParamException(f"Tags {Tags} are not valid, must be List of dicts [{'Key': 'string','Value': 'string'}]")
+        if Tags and not validate_tags(Tags):
+            raise InvalidParamException(f"Tags {Tags} are not valid, must be List of dicts [{{'Key': 'string','Value': 'string'}}]")
+        if not self.db_proxy_service.is_exists(DBProxyName):
+            raise DBProxyNotFoundException(DBProxyName)
         if self.dal.is_exists(DBProxyEndpointName):
-            raise DBProxyEndpointAlreadyExistsException(f'db proxy endpoint {DBProxyEndpointName} already exists')
+            raise DBProxyEndpointAlreadyExistsException(DBProxyEndpointName)
         
         # create object
         db_proxy_endpoint:DBProxyEndpoint = DBProxyEndpoint(DBProxyEndpointName, DBProxyName, TargetRole, Tags, IsDefault=IsDefault)
@@ -75,7 +70,11 @@ class DBProxyEndpointService(DBO):
             raise InvalidParamException("DBProxyEndpointName is not valid") 
         db_proxy_endpoint_description = self.describe(DBProxyEndpointName)
         if not self.dal.is_exists(DBProxyEndpointName):
-            raise DBProxyEndpointNotFoundException(f'db proxy endpoint {DBProxyEndpointName} not found')
+            raise DBProxyEndpointNotFoundException(DBProxyEndpointName)
+        # Check if state is valid
+        endpoint_state = self.dal.select_objects_attributes_in_col_value_dict(DBProxyEndpointName, ['Status'])[0]['Status']
+        if endpoint_state != 'available':
+            raise InvalidDBProxyEndpointStateException(DBProxyEndpointName, endpoint_state)
         
         # Delete phisical object
         file_name = self._convert_endpoint_name_to_endpoint_file_name(DBProxyEndpointName)
@@ -98,7 +97,7 @@ class DBProxyEndpointService(DBO):
         if Filters and not check_filters_validation(Filters):
             raise InvalidParamException("filters are not valid, filters must be list of dicts [{'Name': 'string','Values': ['string',]},]")
         if DBProxyEndpointName and not self.dal.is_exists(DBProxyEndpointName):
-            raise DBProxyEndpointNotFoundException(f'db proxy endpoint {DBProxyEndpointName} not found')
+            raise DBProxyEndpointNotFoundException(DBProxyEndpointName)
         
         # Describe in query
         return self.dal.describe(
@@ -108,7 +107,8 @@ class DBProxyEndpointService(DBO):
     
 
 
-    def modify(self, DBProxyEndpointName:str, NewDBProxyEndpointName:Optional[str] =  None):
+    def modify(self, DBProxyEndpointName:str, NewDBProxyEndpointName:Optional[str] = None,
+               TargetRole:Optional[str] = None, Tags:Optional[str] = None, Status:Optional[str] = None):
         '''Modify an existing DBProxy endpoint.'''
         
         # Validations
@@ -116,10 +116,15 @@ class DBProxyEndpointService(DBO):
             raise InvalidParamException("DBProxyEndpointName is not valid") 
         
         if not self.dal.is_exists(DBProxyEndpointName):
-            raise DBProxyEndpointNotFoundException(f'db proxy endpoint {DBProxyEndpointName} not found')
+            raise DBProxyEndpointNotFoundException(DBProxyEndpointName)
         
+        # Check if state is valid
+        endpoint_state = self.dal.select_objects_attributes_in_col_value_dict(DBProxyEndpointName, ['Status'])[0]['Status']
+        if endpoint_state != 'available':
+            raise InvalidDBProxyEndpointStateException(DBProxyEndpointName, endpoint_state)
         
-        # If need changes:
+        updates = {key: val for key in ['TargetRole', 'Tags', 'Status'] for val in [TargetRole, Tags, Status] if val is not None}
+        # If need to change the name:
         if NewDBProxyEndpointName:
             
             # Validations
@@ -128,12 +133,8 @@ class DBProxyEndpointService(DBO):
                 raise InvalidParamException("newDBProxyEndpointName is not valid") 
             
             if self.dal.is_exists(NewDBProxyEndpointName):
-                raise DBProxyEndpointAlreadyExistsException(f'db proxy endpoint name {NewDBProxyEndpointName} already exists') 
+                raise DBProxyEndpointAlreadyExistsException(NewDBProxyEndpointName) 
             
-            # Check if state is valid
-            endpoint_state = self.dal.select(DBProxyEndpointName, ['Status'])[0]['Status']
-            if endpoint_state != 'available':
-                raise InvalidDBProxyEndpointStateException(f"db proxy endpoint state is {endpoint_state}. can modify only in available state")
             
             # Change phisical object
             old_file_name = self._convert_endpoint_name_to_endpoint_file_name(DBProxyEndpointName)
@@ -141,11 +142,13 @@ class DBProxyEndpointService(DBO):
             self.storage.rename_file(old_file_name, new_file_name)
             
             # Change in memorys
-            db_proxy_endpoint_data = self.dal.select(DBProxyEndpointName)[0]
+            db_proxy_endpoint_data = self.dal.select_objects_attributes_in_col_value_dict(DBProxyEndpointName)[0]
             db_proxy_endpoint_data = {**db_proxy_endpoint_data, 'DBProxyEndpointName':NewDBProxyEndpointName}
             self.dal.delete(DBProxyEndpointName)
             self.dal.create(db_proxy_endpoint_data)
             DBProxyEndpointName = NewDBProxyEndpointName
+        if updates:
+            self.dal.modify(DBProxyEndpointName, updates)
         return self.describe(DBProxyEndpointName) 
 
 

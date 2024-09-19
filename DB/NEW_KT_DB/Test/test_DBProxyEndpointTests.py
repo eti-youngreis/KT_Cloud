@@ -1,4 +1,5 @@
 from typing import Dict, Literal, Optional
+from unittest.mock import MagicMock
 import pytest
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 from DB.NEW_KT_DB.DataAccess.DBManager import DBManager
@@ -9,7 +10,7 @@ from DB.NEW_KT_DB.Exceptions.DBProxyEndpointExceptions import *
 from DB.NEW_KT_DB.Exceptions.GeneralExeptions import InvalidParamException
 from DB.NEW_KT_DB.Controller.DBProxyEndpointController import DBProxyEndpointController
 from DB.NEW_KT_DB.Models.DBProxyEndpointModel import DBProxyEndpoint
-from DB.NEW_KT_DB.Test.GeneralTests import test_file_exists
+from DB.NEW_KT_DB.Test.GeneralTests import check_file_exists
 
 # Infrastructure to tests
 @pytest.fixture
@@ -29,10 +30,15 @@ def endpoint_manager(object_manager:ObjectManager) -> DBProxyEndpointManager:
     
 
 @pytest.fixture
-def endpoint_service(endpoint_manager:DBProxyEndpointManager, storage_manager:StorageManager) -> DBProxyEndpointService:
-    endpoint_service:DBProxyEndpointService = DBProxyEndpointService(endpoint_manager, storage_manager)
+def endpoint_service(endpoint_manager:DBProxyEndpointManager, storage_manager:StorageManager, db_proxy_service_mock) -> DBProxyEndpointService:
+    endpoint_service:DBProxyEndpointService = DBProxyEndpointService(endpoint_manager, storage_manager, db_proxy_service_mock)
     return endpoint_service
-    
+
+@pytest.fixture
+def db_proxy_service_mock():
+    mock = MagicMock()
+    mock.is_exists.side_effect = lambda db_proxy_name: db_proxy_name == 'my-proxy'
+    return mock   
 
 @pytest.fixture
 def endpoint_controller(endpoint_service:DBProxyEndpointService) -> DBProxyEndpointController:
@@ -98,21 +104,35 @@ def test_create_db_proxy_endpoint(endpoint_service:DBProxyEndpointService, setup
     
     # Check if phisical file exists
     endpoint_file_name = endpoint_service._convert_endpoint_name_to_endpoint_file_name(endpoint_name)
-    assert test_file_exists(storage_manager, endpoint_file_name)
+    assert check_file_exists(storage_manager, endpoint_file_name)
     
     # Check if data in table
     _test_exists_in_db(endpoint_manager, endpoint_name)
     
-    
+def test_create_with_non_valid_parameters(endpoint_controller:DBProxyEndpointController) :
+    valid_params = ["my-proxy","my-endpoint",'READ_WRITE',[{ 'Key': 'string','Value': 'string'}]]
+    non_valid_params = ["my_proxy","my_en455", "ff",{'Key': 1,'Value': 'string'}] 
+    with pytest.raises(InvalidParamException):
+        endpoint_controller.create_db_proxy_endpoint(valid_params[0], non_valid_params[1], valid_params[2], valid_params[3])
 
-# def test_create_when_db_proxy_not_exist(endpoint_controller:DBProxyEndpointController):
-#     db_proxy_name = "not-exist-proxy"
-#     endpoint_name = "my-endpoint"
-#     target_role = 'READ_WRITE'
+    with pytest.raises(InvalidParamException):
+        endpoint_controller.create_db_proxy_endpoint(valid_params[0], valid_params[1], non_valid_params[2], valid_params[3])
+
+    with pytest.raises(InvalidParamException):
+        endpoint_controller.create_db_proxy_endpoint(non_valid_params[0], valid_params[1], valid_params[2], valid_params[3])
+        
+    with pytest.raises(InvalidParamException):
+        endpoint_controller.create_db_proxy_endpoint(valid_params[0], valid_params[1], valid_params[2], non_valid_params[3])
+        
+
+def test_create_when_db_proxy_not_exist(endpoint_controller:DBProxyEndpointController):
+    db_proxy_name = "not-exist-proxy"
+    endpoint_name = "my-endpoint"
+    target_role = 'READ_WRITE'
     
-#     # Create
-#     with pytest.raises(DBProxyNotFoundFault):
-#         endpoint_controller.create_db_proxy_endpoint(db_proxy_name, endpoint_name, target_role)
+    # Create
+    with pytest.raises(DBProxyNotFoundException):
+        endpoint_controller.create_db_proxy_endpoint(db_proxy_name, endpoint_name, target_role)
     
 
 def test_create_db_proxy_endpoint_with_existing_name(setup_db_proxy_endpoint: tuple[Literal['my-proxy'], Literal['my-endpoint'], Literal['READ_WRITE'], dict[str, list[dict]]],endpoint_controller:DBProxyEndpointController):
@@ -122,14 +142,7 @@ def test_create_db_proxy_endpoint_with_existing_name(setup_db_proxy_endpoint: tu
     with pytest.raises(DBProxyEndpointAlreadyExistsException):
         endpoint_controller.create_db_proxy_endpoint(db_proxy_name, endpoint_name, target_role)
 
-# def test_exceed_db_proxy_endpoints_quota(endpoint_controller:DBProxyEndpointController):
-#     db_proxy_name = "my-proxy"
-#     endpoint_name = "my-endpoint"
-#     for i in range(19):
-#         endpoint_name_now = endpoint_name + "_" + str(i)
-#         endpoint_controller.create_db_proxy_endpoint(db_proxy_name, endpoint_name_now)
-#     with pytest.raises(DBProxyEndpointQuotaExceededFault):
-#         endpoint_controller.create_db_proxy_endpoint(db_proxy_name, endpoint_name)
+
 
 def test_delete_db_proxy_endpoint(setup_db_proxy_endpoint: tuple[Literal['my-proxy'], Literal['my-endpoint'], Literal['READ_WRITE'], dict[str, list[dict]]], endpoint_controller:DBProxyEndpointController,
                                   storage_manager:StorageManager, endpoint_manager:DBProxyEndpointManager, 
@@ -145,7 +158,7 @@ def test_delete_db_proxy_endpoint(setup_db_proxy_endpoint: tuple[Literal['my-pro
     
     # Check if phisical file not exists
     endpoint_file_name = endpoint_service._convert_endpoint_name_to_endpoint_file_name(endpoint_name)
-    assert not test_file_exists(storage_manager, endpoint_file_name)
+    assert not check_file_exists(storage_manager, endpoint_file_name)
     
     # Check if data not in table
     assert not _test_exists_in_db(endpoint_manager, endpoint_name)
@@ -158,12 +171,16 @@ def test_delete_non_exist_db_proxy_endpoint(endpoint_controller:DBProxyEndpointC
     with pytest.raises(DBProxyEndpointNotFoundException):
         endpoint_controller.delete_db_proxy_endpoint(endpoint_name)
 
-def test_delete_non_valid_state_db_proxy_endpoint(endpoint_controller:DBProxyEndpointController):
+def test_delete_non_valid_state_db_proxy_endpoint(endpoint_controller:DBProxyEndpointController, endpoint_service:DBProxyEndpointService):
     db_proxy_name = "my-proxy"
     endpoint_name = "my-endpoint"
     target_role = 'READ_WRITE'
     endpoint = endpoint_controller.create_db_proxy_endpoint(db_proxy_name, endpoint_name, target_role)
-    # await to functions to be async
+    state = 'not available'
+    endpoint_service.modify(endpoint_name,  Status= state)
+    with pytest.raises(InvalidDBProxyEndpointStateException):
+        endpoint_controller.delete_db_proxy_endpoint(endpoint_name)
+
 
 def test_modify_name_to_db_proxy_endpoint(setup_db_proxy_endpoint: tuple[Literal['my-proxy'], Literal['my-endpoint'], Literal['READ_WRITE'], 
                                                                          dict[str, list[dict]]],endpoint_service:DBProxyEndpointService,
@@ -184,8 +201,8 @@ def test_modify_name_to_db_proxy_endpoint(setup_db_proxy_endpoint: tuple[Literal
     # Check if phisical file is up-to-date
     old_endpoint_file_name = endpoint_service._convert_endpoint_name_to_endpoint_file_name(endpoint_name)
     new_endpoint_file_name = endpoint_service._convert_endpoint_name_to_endpoint_file_name(new_name)
-    assert not test_file_exists(storage_manager, old_endpoint_file_name)
-    assert test_file_exists(storage_manager, new_endpoint_file_name)
+    assert not check_file_exists(storage_manager, old_endpoint_file_name)
+    assert check_file_exists(storage_manager, new_endpoint_file_name)
     
     # Check if data in table in updated
     assert _test_exists_in_db(endpoint_manager, new_name)

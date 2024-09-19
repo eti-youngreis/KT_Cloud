@@ -31,10 +31,10 @@ class DBProxyEndpointManager:
 
     def get(self, name: str):
         """convert data to object"""
-        data_mapping = self.select(name)[0]
+        data_mapping = self.select_objects_attributes_in_col_value_dict(name)[0]
         return DBProxyEndpoint(**data_mapping)
     
-    def select(self, name:Optional[str] = None, columns:Optional[List[str]] =None):
+    def select_objects_attributes_in_col_value_dict(self, name:Optional[str] = None, columns:Optional[List[str]] =None):
         """select data dict about db proxy endpoint"""
         
         def map_data_to_col_value_dict(data, cols: Optional[List[str]] = None):
@@ -80,7 +80,7 @@ class DBProxyEndpointManager:
     def is_exists(self, name):
         """check if object exists in table"""
         try:
-            self.select(name)
+            self.select_objects_attributes_in_col_value_dict(name)
             return True
         except:
             return False
@@ -94,9 +94,9 @@ class DBProxyEndpointManager:
     def describe(self, name: Optional[str] = None, Filters:Optional[List[Dict[str, Any]]] = None):
         """describe db proxy endpoint""" 
         if name:
-            description = self.select(name)
+            description = self.select_objects_attributes_in_col_value_dict(name)
         else:
-            description = self.select()
+            description = self.select_objects_attributes_in_col_value_dict()
         # If there are filters return only objects that in conditions of all filters
         if Filters:
             description = [obj for obj in description if [col for col in obj.keys() if col not in Filters or obj[col] in Filters[col]] != []]
@@ -106,4 +106,5 @@ class DBProxyEndpointManager:
     def modify(self, name:str,updates:Dict):
         """modify db proxy endpoint in table"""
         criteria=f'{DBProxyEndpoint.pk_column} = "{name}"'
-        self.object_manager.update_in_memory(DBProxyEndpoint.object_name, updates, criteria)
+        set_clause = ', '.join([f"{key} = '{value}'" for key, value in updates.items()])
+        self.object_manager.update_in_memory(DBProxyEndpoint.object_name, set_clause, criteria)
