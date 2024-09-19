@@ -10,6 +10,8 @@ class BucketService:
         self.storage_manager = StorageManager(storage_path)
         self.bucket_manager = BucketManager("D:/s3_project/tables/Buckets.db")
         self.buckets = self.load_buckets()
+        self.bucket_manager.object_manager.object_manager.db_manager.create_table("mng_Buckets", Bucket.table_structure)
+
 
     def load_buckets(self):
         data_list = self.bucket_manager.object_manager.get_all_objects_from_memory("Bucket")

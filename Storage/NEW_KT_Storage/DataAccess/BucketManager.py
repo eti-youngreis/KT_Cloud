@@ -7,15 +7,12 @@ class BucketManager:
         """Initialize BucketManager with the database connection."""
         self.object_manager = ObjectManager(db_file=db_file)
         self.object_name = "Bucket"
-        self.create_table()
-    def create_table(self):
-            self.object_manager.object_manager.db_manager.create_table("mng_Buckets", Bucket.table_structure)
 
     def createInMemoryBucket(self, bucket: Bucket):
         self.object_manager.save_in_memory(self.object_name,bucket.to_sql())
 
-    def deleteInMemoryBucket(self, bucket:Bucket):
-        self.object_manager.delete_from_memory_by_pk(self.object_name,bucket.pk_column, bucket.bucket_name)
+    def deleteInMemoryBucket(self, bucket: Bucket):
+        self.object_manager.delete_from_memory_by_pk(self.object_name, Bucket.pk_column, bucket.bucket_name)
 
     def getBucket(self, bucket_name):
         return self.object_manager.get_from_memory(bucket_name)
