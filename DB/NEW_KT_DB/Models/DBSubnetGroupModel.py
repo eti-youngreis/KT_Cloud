@@ -67,8 +67,10 @@ class DBSubnetGroup:
         # Ideally:
         # self.db_subnet_group_arn should be dynamically created according to vpc-id, account-id and
         # subnet-group-name, and then dynamically added to the routing table
-
-        self.status = "pending"
+        
+        if not self.status and self.db_subnet_group_arn:
+            self.status = "available"
+            
         self.pk_value = self.db_subnet_group_name
 
     def to_dict(self) -> Dict[str, Any]:
