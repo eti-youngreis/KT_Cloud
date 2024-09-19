@@ -3,7 +3,7 @@ from DB.NEW_KT_DB.DataAccess.DBInstanceManager import DBInstanceManager
 from DB.NEW_KT_DB.Exceptions.DBInstanceExceptions import DbSnapshotIdentifierNotFoundError, InvalidQueryError, DatabaseNotFoundError, AlreadyExistsError, DatabaseCreationError
 from DB.NEW_KT_DB.Models.DBInstanceModel import DBInstanceModel, Node_SubSnapshot
 from DB.NEW_KT_DB.Service.Abc.DBO import DBO
-# from Validation import Validation
+from DB.NEW_KT_DB.Validation.DBInstanceValiditions import validate_allocated_storage, validate_master_user_password, validate_port, validate_status
 from collections import deque
 import os
 import sqlite3
@@ -62,12 +62,27 @@ class DBInstanceService(DBO):
             'status'
         ]
 
+        # Validate the provided attributes using specific validation functions
+        if 'allocated_storage' in kwargs:
+            validate_allocated_storage(kwargs['allocated_storage'])
+
+        if 'master_user_password' in kwargs:
+            validate_master_user_password(kwargs['master_user_password'])
+
+        if 'port' in kwargs:
+            validate_port(kwargs['port'])
+
+        if 'status' in kwargs:
+            validate_status(kwargs['status'])
+
+        # Update attributes after validation
         for attr, value in kwargs.items():
             if attr in modifiable_attributes:
                 setattr(db_instance, attr, value)
             else:
                 print(f"Warning: Attribute '{attr}' cannot be modified or does not exist.")
 
+        # Apply the changes to the database instance
         self.dal.modifyDBInstance(db_instance)
 
         return db_instance    

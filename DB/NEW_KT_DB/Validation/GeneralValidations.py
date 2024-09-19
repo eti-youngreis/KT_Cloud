@@ -76,3 +76,7 @@ def is_valid_user_group_name(input_string):
 def is_valid(value, list_valid, name):
     if not value in list_valid:
         raise ValueError(f"value {value} is invalid for {name}")
+
+def is_valid_length(value, min_length):
+    """Check if a string's length is greater than or equal to min_length."""
+    return isinstance(value, str) and len(value) >= min_length
