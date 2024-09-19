@@ -19,18 +19,8 @@ class MultipartUploadManager:
         # Initializes the manager with the database file and creates the necessary table.
         self.object_manager = ObjectManager(db_file=db_file)
         self.object_name = "MultipartUpload"
-        self.create_table()
+        self.object_manager.object_manager.create_management_table('MultipartUpload', MultipartUploadModel.TABLE_STRUCTURE)
 
-    def create_table(self):
-        # Creates the MultipartUpload table in the database with specified columns.
-        table_columns = (
-            "object_id TEXT PRIMARY KEY",
-            "object_name TEXT NOT NULL",
-            "bucket_name TEXT NOT NULL",
-            "parts TEXT NOT NULL"
-        )
-        columns_str = ", ".join(table_columns)
-        self.object_manager.object_manager.create_management_table('MultipartUpload', columns_str)
 
     def create_multipart_upload(self, multipart_upload: MultipartUploadModel) -> str:
         """Creates a multipart upload process and returns a unique UploadId."""
