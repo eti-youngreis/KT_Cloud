@@ -6,7 +6,7 @@ from NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 class DBClusterParameterGroup:
 
     pk_column = 'group_name'
-    table_schema = """
+    table_structure = """
         group_name TEXT PRIMARY KEY,
         group_family TEXT,
         description TEXT,
