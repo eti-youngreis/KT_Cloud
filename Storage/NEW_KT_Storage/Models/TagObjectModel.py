@@ -8,6 +8,8 @@ from datetime import datetime
 class TagObject:
     PK_COULMN = "Key"
     OBJECT_NAME = "Tag"
+    TABLE_STRUCTURE = ", ".join(["Key TEXT PRIMARY KEY", "Value TEXT"])
+
     def __init__(self, key: str, value: str):
         self.key = key
         self.value = value
