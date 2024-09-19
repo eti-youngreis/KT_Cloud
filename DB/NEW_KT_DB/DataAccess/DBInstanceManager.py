@@ -9,6 +9,11 @@ class DBInstanceManager:
         self.object_manager = ObjectManager(db_file)
         self._create_db_instance_managment_table()
 
+    def close_connections(self):
+        if hasattr(self.object_manager.db_manager, 'connection'):
+            self.object_manager.db_manager.connection.close()
+            self.object_manager.db_manager.connection = None
+
     def _create_db_instance_managment_table(self):
         table_structure = f'''
         db_instance_identifier TEXT PRIMARY KEY,

@@ -12,9 +12,18 @@ The tests cover the following functionality:
 - Stopping and starting a running database instance
 """
 import pytest
+import time
 from DB.NEW_KT_DB.Service.Classes.DBInstanceService import DbSnapshotIdentifierNotFoundError
 
 class TestDBInstanceController:
+
+    class TestDBInstanceController:
+        @pytest.fixture(autouse=True)
+        def setup_and_teardown(self, db_instance_controller):
+            yield
+            db_instance_controller.close_connections()
+            time.sleep(0.1) 
+    
     def test_create_db_instance(self, db_instance_controller):
         # Test creating a new DB instance with valid parameters
         instance = db_instance_controller.create_db_instance(db_instance_identifier="test-instance", allocated_storage=10)

@@ -10,9 +10,9 @@ class DBInstanceModel:
 
     def __init__(self, **kwargs):
         self.db_instance_identifier = kwargs['db_instance_identifier']
-        self.allocated_storage = kwargs['allocated_storage']
-        self.master_username = kwargs['master_username']
-        self.master_user_password = kwargs['master_user_password']
+        self.allocated_storage = kwargs.get('allocated_storage', 20)
+        self.master_username = kwargs.get('master_username', 'admin')
+        self.master_user_password = kwargs.get('master_user_password', 'default_password')
         self.port = kwargs.get('port', 3306)
         self.status = kwargs.get('status', 'available')
         self.created_time = kwargs.get('created_time', datetime.now())

@@ -35,6 +35,5 @@ class DBInstanceController:
     def restore_version(self, db_instance_identifier, db_snapshot_identifier):
         return self.service.restore_version(db_instance_identifier, db_snapshot_identifier)
 
-    
-
-    
+    def close_connections(self):
+        self.service.close_connections()
