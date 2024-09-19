@@ -138,7 +138,7 @@ def test_delete_parameter_group(parameter_group_controller, storage_manager):
     # Check if the file was deleted
     assert not os.path.exists(file_name), f"Expected file {file_name} was not deleted."
 
-def test_delete_parameter_group_with_associated_cluster(parameter_group_controller, cluster_manager, storage_manager):
+def test_delete_parameter_group_with_associated_cluster(parameter_group_controller, storage_manager):
     group_name = "TestGroup"
     file_name = generate_file_name_for_group(group_name)
 
@@ -146,7 +146,7 @@ def test_delete_parameter_group_with_associated_cluster(parameter_group_controll
     create_parameter_group(parameter_group_controller, group_name, "TestFamily", "Test Description")
 
     # Mock get_all_clusters to return a cluster associated with the parameter group
-    cluster_manager.get_all_clusters.return_value =[("","","","","","",group_name)] #{"TestCluster": {"group_name": group_name}}
+    parameter_group_controller.service.dal_cluster.get_all_clusters.return_value =[("","","","","","",group_name)] #{"TestCluster": {"group_name": group_name}}
 
     # Attempt to delete the parameter group, expect an exception due to association with cluster
     with pytest.raises(ValueError, match="Can't delete parameter group associated with any DB clusters"):
