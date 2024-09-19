@@ -30,35 +30,4 @@ class MultipartUploadController:
         Completes the upload process and merges all parts into a single file.
         """
         return self.service.complete_upload(upload_id, bucket_name, object_key)
-    
-if __name__ == "__main__":
-    db_file = "my_db.db"
-    storage_path = "C:/Users/shana/Desktop/a"
-    
-    controller = MultipartUploadController(db_file, storage_path)
-    
-    # Initiates the upload
-    bucket_name = "my_bucket"
-    object_key = "my_file_shana-6.txt"
-    upload_id = controller.initiate_upload(bucket_name, object_key)
-    print(f"Upload ID: {upload_id}")
-    
-    # Uploads the file parts
-    # controller.service.upload_part(upload_id, 1, "aaaa")
-    # controller.service.upload_part(upload_id, 2, "bbbb")
-    file_path = "C:/Users/shana/Desktop/a/my_file.txt"
-    controller.upload_file_parts(upload_id, file_path)
-    print("File parts uploaded.")
-
-    list_parts = controller.list_parts(upload_id)
-    print(list_parts, "list_parts")
-
-    # # # Completes the upload
-    complete_file_path = controller.complete_upload(upload_id, bucket_name, object_key)
-    print(f"Upload complete! File saved at: {complete_file_path}")
-
-    # Displays all existing multipart uploads
-    all_uploads = controller.service.select_all_from_table(db_file, "mng_MultipartUploads")
-    print("All multipart uploads:", all_uploads)
-    
-
+ 
