@@ -13,6 +13,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../.
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 from GeneralTests import *
 
+
 @pytest.fixture
 def parameter_group_manager():
     return DBClusterParameterGroupManager(':memory:')

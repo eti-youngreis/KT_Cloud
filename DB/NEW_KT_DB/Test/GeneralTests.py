@@ -5,6 +5,7 @@ import pytest
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
+
 @pytest.fixture
 def storage_manager():
     """Fixture to create an instance of StorageManager."""

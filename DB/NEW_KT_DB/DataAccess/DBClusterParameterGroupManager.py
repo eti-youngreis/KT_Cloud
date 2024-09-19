@@ -4,6 +4,7 @@ import sqlite3
 from NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 from NEW_KT_DB.Models.DBClusterParameterGroupModel import DBClusterParameterGroup
 
+
 class DBClusterParameterGroupManager:
     def __init__(self, db_file: str):
         '''Initialize ObjectManager with the database connection.'''

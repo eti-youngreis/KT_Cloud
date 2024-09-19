@@ -2,7 +2,6 @@ from abc import abstractmethod
 from typing import Dict, Optional, List
 from NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 
-
 class DBClusterParameterGroup:
 
     pk_column = 'group_name'
