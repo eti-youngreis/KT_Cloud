@@ -109,23 +109,54 @@ class DBInstanceModel:
 
 
 class Node_SubSnapshot:
+    """
+    A class representing a snapshot in a versioning system, used to store database schemas and deleted records.
+    Each snapshot can have a parent, and a new snapshot can be created by cloning the parent's database schema.
+    
+    Attributes:
+        id_snapshot (uuid): A unique identifier for the snapshot. Defaults to a new UUID if not provided.
+        parent_id (uuid): The identifier of the parent snapshot, if applicable.
+        dbs_paths_dic (dict): A dictionary mapping database names to their file paths.
+        deleted_records_db_path (str): The path where deleted records are stored for the snapshot.
+        snapshot_type (str): The type of snapshot (e.g., "manual").
+        created_time (datetime): The time when the snapshot was created.
+    """
 
     def __init__(self, parent=None, endpoint=None, **kwargs):
-        self.id_snapshot = kwargs.get('id_snapshot', uuid.uuid4())
-        self.snapshot_type= "manual"
-        self.parent_id = parent.id_snapshot if parent else None
+        """
+        Initialize a new Node_SubSnapshot instance. If a parent snapshot is provided, 
+        the databases are cloned from the parent, and paths are set for the current snapshot.
         
-        self.created_time = None
-        
+        Args:
+            parent (Node_SubSnapshot): The parent snapshot to clone from (optional).
+            endpoint (str): The base directory where the snapshot data will be stored.
+            **kwargs: Optional parameters including:
+                - id_snapshot (uuid): An optional unique identifier for the snapshot.
+                - dbs_paths_dic (dict): An optional dictionary of database paths.
+                - deleted_records_db_path (str): An optional path for storing deleted records.
+        """
+        self.id_snapshot = kwargs.get('id_snapshot', uuid.uuid4())  # Assign a new UUID if not provided.
+        self.snapshot_type = "manual"  # Snapshot type defaults to "manual".
+        self.parent_id = parent.id_snapshot if parent else None  # Assign parent ID if a parent exists.
+
+        self.created_time = None  # Creation time is not set on initialization.
+
+        # If there is a parent and no new dbs_paths_dic is provided, clone the parent's databases.
         if parent and not kwargs.get('dbs_paths_dic'):
-            self.dbs_paths_dic = self.clone_databases_schema(parent.dbs_paths_dic,endpoint)
+            self.dbs_paths_dic = self.clone_databases_schema(parent.dbs_paths_dic, endpoint)
         else:
             self.dbs_paths_dic = kwargs.get('dbs_paths_dic', {})
 
+        # Create or retrieve the path for deleted records in this snapshot.
         self.deleted_records_db_path = kwargs.get('deleted_records_db_path', self._create_deleted_records_db_path(endpoint))
 
-
     def to_dict(self):
+        """
+        Convert the Node_SubSnapshot instance to a dictionary, which can be used for storage or serialization.
+        
+        Returns:
+            dict: A dictionary containing the snapshot's attributes.
+        """
         return ObjectManager.convert_object_attributes_to_dictionary(
             id_snapshot=str(self.id_snapshot),
             parent_id=str(self.parent_id) if self.parent_id else None,
@@ -133,29 +164,58 @@ class Node_SubSnapshot:
             deleted_records_db_path=self.deleted_records_db_path,
             snapshot_type=self.snapshot_type,
             created_time=self.created_time.isoformat() if self.created_time is not None else None,
-        )    
+        )
 
     def _create_deleted_records_db_path(self, endpoint):
-        deleted_records_db_path = os.path.join(endpoint, str(self.id_snapshot))
-        os.makedirs(deleted_records_db_path, exist_ok=True)
-        deleted_records_db_path = os.path.join(
-            deleted_records_db_path, "deleted_db.db")
+        """
+        Create a path for storing deleted records in the snapshot. A directory is created 
+        with the snapshot's ID, and a SQLite database is initialized within that directory.
+        
+        Args:
+            endpoint (str): The base directory where the snapshot data is stored.
+        
+        Returns:
+            str: The full path to the deleted records database.
+        """
+        deleted_records_db_path = os.path.join(endpoint, str(self.id_snapshot))  # Create a folder for the snapshot.
+        os.makedirs(deleted_records_db_path, exist_ok=True)  # Ensure the directory exists.
+        deleted_records_db_path = os.path.join(deleted_records_db_path, "deleted_db.db")  # Define the path to the deleted records database.
         return deleted_records_db_path
 
-    def clone_databases_schema(self, dbs_paths_dic,endpoint):
+    def clone_databases_schema(self, dbs_paths_dic, endpoint):
+        """
+        Clone the database schemas from the parent snapshot to create a new snapshot. This is done by copying 
+        each database file to the new snapshot directory and cloning its schema.
+        
+        Args:
+            dbs_paths_dic (dict): A dictionary of database names and paths from the parent snapshot.
+            endpoint (str): The base directory where the cloned databases will be stored.
+        
+        Returns:
+            dict: A dictionary mapping the new database names to their cloned paths.
+        """
         from DB.NEW_KT_DB.Service.Classes.DBInstanceService import SQLCommandHelper
 
-        dbs_paths_new_dic = {}
+        dbs_paths_new_dic = {}  # Dictionary to store the new database paths.
         for db, db_path in dbs_paths_dic.items():
-            db_filename = os.path.basename(db_path)
-            new_path = os.path.join(endpoint, str(self.id_snapshot), db_filename)
+            db_filename = os.path.basename(db_path)  # Get the database filename.
+            new_path = os.path.join(endpoint, str(self.id_snapshot), db_filename)  # Create the new path for the cloned database.
             directory = os.path.dirname(new_path)
-            os.makedirs(directory, exist_ok=True)
-            SQLCommandHelper.clone_database_schema(db_path, new_path)
-            dbs_paths_new_dic[db] = new_path
+            os.makedirs(directory, exist_ok=True)  # Ensure the directory for the new path exists.
+            SQLCommandHelper.clone_database_schema(db_path, new_path)  # Clone the database schema.
+            dbs_paths_new_dic[db] = new_path  # Store the new path in the dictionary.
         return dbs_paths_new_dic
 
     def create_child(self, endpoint):
-        child = Node_SubSnapshot(parent=self, endpoint=endpoint)
+        """
+        Create a child snapshot from the current snapshot. The child will inherit the database schemas 
+        from the parent and store its own changes separately.
+        
+        Args:
+            endpoint (str): The base directory where the child snapshot data will be stored.
+        
+        Returns:
+            Node_SubSnapshot: A new child snapshot object.
+        """
+        child = Node_SubSnapshot(parent=self, endpoint=endpoint)  # Create a child snapshot.
         return child
-

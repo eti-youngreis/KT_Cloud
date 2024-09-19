@@ -12,8 +12,6 @@ The tests cover the following functionality:
 - Stopping and starting a running database instance
 """
 import pytest
-import time
-from DB.NEW_KT_DB.Service.Classes.DBInstanceService import DbSnapshotIdentifierNotFoundError
 
 class TestDBInstanceController:
 
