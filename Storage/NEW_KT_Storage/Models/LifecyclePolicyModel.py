@@ -6,10 +6,14 @@ from Storage.NEW_KT_Storage.DataAccess.ObjectManager import ObjectManager
 
 class LifecyclePolicy:
     pk_column = 'policy_name'
+    table_structure = ", ".join(
+        ["policy_name TEXT PRIMARY KEY", "status TEXT", "prefix TEXT", "expiration_days INT",
+         "transitions_days_GLACIER INT", "creation_date DATETIME"])
+
     def __init__(self,
             policy_name: str,
+            expiration_days: int,
             transitions_days_GLACIER: int,
-            expiration_days:int,
             status: str = 'Enabled',
             prefix: List[str] =[],
             lifecycle_policy_id: str = None,

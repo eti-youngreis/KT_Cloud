@@ -69,12 +69,12 @@ class StorageManager:
         if os.path.exists(full_path):
             os.remove(full_path)
 
-    def read_json(self,file_path:str):
+    def read_json_file(self,file_path:str):
         full_path = os.path.join(self.base_directory, file_path)
         with open(full_path, 'r') as file:
             return json.load(file)
 
-    def write_json(self, file_path: str, data: Dict, default_converter: Callable = None):
+    def write_json_file(self, file_path: str, data: Dict, default_converter: Callable = None):
         """
         Write JSON data to a file with optional custom converter.
 
