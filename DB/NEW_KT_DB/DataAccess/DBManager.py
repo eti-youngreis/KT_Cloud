@@ -14,8 +14,7 @@ class EmptyResultsetError(Exception):
 class DBManager:
     def __init__(self, db_file: str):
         '''Initialize the database connection and create tables if they do not exist.'''
-        self.connection = sqlite3.connect(db_file)
-
+        self.db_path = db_file
 
     def _is_resultset_empty(self, resultset):
         if resultset == None or not resultset:
@@ -25,7 +24,8 @@ class DBManager:
     def execute_query_with_multiple_results(self, query: str):
         '''Execute a given query and return the results.'''
         try:
-            c = self.connection.cursor()
+            connection = sqlite3.connect(self.db_path)
+            c = connection.cursor()
             c.execute(query)
             results = c.fetchall()
 
@@ -33,17 +33,18 @@ class DBManager:
                 raise EmptyResultsetError('''Error: No records found.
                 execute_query_with_multiple_results should return one or more records as a result.
                 try to fix your query or use execute_query_without_results() instead.''', query)
-
-            self.connection.commit() 
+            connection.commit()
             return results if results else None
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
-
+        finally:
+            self._close_connection(connection)
 
     def execute_query_with_single_result(self, query: str):
         '''Execute a given query and return a single result.'''
         try:
-            c = self.connection.cursor()
+            connection = sqlite3.connect(self.db_path)
+            c = connection.cursor()
             c.execute(query)
             result = c.fetchone()
             # Check if more than one result exists
@@ -59,35 +60,43 @@ class DBManager:
                 execute_query_with_single_result should return exactly one record as a result.
                 try to fix your query or use execute_query_with_multiple_results() instead.''')
 
-            self.connection.commit()
+            connection.commit()
             return result if result else None
         
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
+        finally:
+            self._close_connection(connection)
 
 
     def execute_query_without_results(self, query: str):
         '''Execute a given query without waiting for any result.'''
         try:
-            c = self.connection.cursor()
+            connection = sqlite3.connect(self.db_path)
+            c = connection.cursor()
             c.execute(query)
-            self.connection.commit()
+            connection.commit()
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
+        finally:
+            self._close_connection(connection)
 
 
     def _execute_query_with_or_without_results(self, query: str):
         try:
-            c = self.connection.cursor()
+            connection = sqlite3.connect(self.db_path)
+            c = connection.cursor()
             c.execute(query)
             if not c.fetchall():
                 optional_results = None
             else:
                 optional_results = c.fetchall()
-            self.connection.commit()
+            connection.commit()
             return optional_results
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
+        finally:
+            self._close_connection(connection)
 
 
     def create_table(self, table_name, table_structure):
@@ -205,3 +214,9 @@ class DBManager:
                 raise Exception(f'table {table_name} not found')
         except OperationalError as e:
             raise Exception(f'Error describing table {table_name}: {e}')
+        
+        
+    def _close_connection(self, connection = None) -> None:
+        """Close the database connection if it is open."""
+        if connection:
+            connection.close()
