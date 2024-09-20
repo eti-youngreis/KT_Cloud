@@ -42,7 +42,7 @@ class EventSubscription:
     """
 
     pk_column = 'subscription_name'
-    table_schema = """
+    table_structure = """
         subscription_name TEXT PRIMARY KEY,
         sources TEXT,
         source_type TEXT,

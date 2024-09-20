@@ -17,7 +17,7 @@ class SNSTopicManager:
         """
         self.object_manager = object_manager
         self.object_manager.create_management_table(
-            SNSTopicModel.get_object_name(), SNSTopicModel.table_schema, pk_column_data_type='TEXT')
+            SNSTopicModel.get_object_name(), SNSTopicModel.table_structure, pk_column_data_type='TEXT')
 
     def create_topic(self, sns_model: SNSTopicModel):
         """

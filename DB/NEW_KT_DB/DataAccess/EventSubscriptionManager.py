@@ -18,7 +18,7 @@ class EventSubscriptionManager:
         """
         self.object_manager = ObjectManager(db_file)
         self.object_manager.create_management_table(
-            EventSubscription.get_object_name(), EventSubscription.table_schema, pk_column_data_type='TEXT')
+            EventSubscription.get_object_name(), EventSubscription.table_structure, pk_column_data_type='TEXT')
 
     def createInMemoryEventSubscription(self, event_subscription: EventSubscription) -> None:
         """

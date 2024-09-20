@@ -20,7 +20,7 @@ class Protocol(Enum):
 
 class SNSTopicModel:
     pk_column = 'topic_name'
-    table_schema = 'topic_name TEXT PRIMARY KEY NOT NULL, subscribers TEXT'
+    table_structure = 'topic_name TEXT PRIMARY KEY NOT NULL, subscribers TEXT'
 
     def __init__(self, topic_name: str, subscribers: Dict[Protocol, List[str]] = None):
         self.topic_name: str = topic_name
