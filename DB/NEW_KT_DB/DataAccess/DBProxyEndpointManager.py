@@ -17,8 +17,23 @@ class DBProxyEndpointManager:
         values = '(' + ", ".join(f'\'{json.dumps(v)}\'' if isinstance(v, dict) or isinstance(v, list) else f'\'{v}\'' if isinstance(v, str) else f'\'{str(v)}\''
                            for v in data_dict.values()) + ')'
         return values
-
     
+    def _map_query_data_to_col_value_dict(data, cols: Optional[List[str]] = None):
+            """
+            Maps the given data to a dictionary where keys are column names and values are data values.
+
+            Args:
+                data: The data values to be mapped in tuple as they ware returned from query.
+                cols: Optional. The list of column names. If not provided, all columns from the default table structure will be used.
+
+            Returns:
+                A dictionary mapping column names to data values.
+            """
+            if not cols:
+                cols = DBProxyEndpointManager.convert_table_structure_to_columns_arr(DBProxyEndpoint.table_structure)
+            data_mapping = {col: val for col, val in zip(cols, data)}
+            return data_mapping
+
     def __init__(self, object_manager:ObjectManager):
         self.object_manager:ObjectManager = object_manager
         self.object_manager.create_management_table(DBProxyEndpoint.object_name, DBProxyEndpoint.table_structure)
@@ -34,24 +49,20 @@ class DBProxyEndpointManager:
         data_mapping = self.select_objects_attributes_in_col_value_dict(name)[0]
         return DBProxyEndpoint(**data_mapping)
     
+    
     def select_objects_attributes_in_col_value_dict(self, name:Optional[str] = None, columns:Optional[List[str]] =None):
-        """select data dict about db proxy endpoint"""
-        
-        def map_data_to_col_value_dict(data, cols: Optional[List[str]] = None):
-            """
-            Maps the given data to a dictionary where keys are column names and values are data values.
+        """Selects data attributes of DBProxyEndpoint objects.
 
             Args:
-                data: The data values to be mapped.
-                cols: Optional. The list of column names. If not provided, all columns from the default table structure will be used.
+                name: Optional. The unique name of the object to select. If not provided, all objects are selected.
+                columns: Optional. The list of columns to retrieve. If not provided, all columns are selected.
 
             Returns:
-                A dictionary mapping column names to data values.
+                A list of dictionaries where keys are column names and values are data values.
+        
+            Raises:
+                ValueError: If no data is found based on the criteria
             """
-            if not cols:
-                cols = DBProxyEndpointManager.convert_table_structure_to_columns_arr(DBProxyEndpoint.table_structure)
-            data_mapping = {col: val for col, val in zip(cols, data)}
-            return data_mapping
         
         # cast columns arr to str for query
         if columns:
@@ -70,7 +81,7 @@ class DBProxyEndpointManager:
             # convert columns str to arr in back for function map_data_to_col_value_dict
             if columns:
                 columns = columns.split(",")
-            data = [map_data_to_col_value_dict(row, columns) for row in data]
+            data = [self._map_query_data_to_col_value_dict(row, columns) for row in data]
             return data
             
         else:
