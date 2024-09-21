@@ -1,6 +1,6 @@
 import datetime
 from typing import Optional, Dict
-from Service.Classes.DBInstanceService import DBInstanceService
+from Service.Classes.DBInstanceNaiveService import DBInstanceService
 
 class DBInstanceController:
 

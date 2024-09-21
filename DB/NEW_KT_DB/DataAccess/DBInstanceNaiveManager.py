@@ -4,7 +4,7 @@ from typing import Dict, Any, List
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from DataAccess.ObjectManager import ObjectManager
-from Models.DBInstanceModel import DBInstance
+from Models.DBInstanceNaiveModel import DBInstance
 
 class DBInstanceManager:
     def __init__(self, object_manager: ObjectManager):
