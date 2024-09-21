@@ -14,6 +14,13 @@ from Exceptions import DBClusterExceptions
 from Controller.DBInstanceController import DBInstanceController
 
 
+CLUSTER_DATA = {
+    'db_cluster_identifier': 'ClusterTest',
+    'engine': 'mysql',
+    'allocated_storage':5,
+    'db_subnet_group_name': 'my-subnet-group'
+    }
+
 @pytest.fixture
 def object_manager():
     return ObjectManager('Clusters/instances.db')
@@ -25,10 +32,6 @@ def db_instance_manager(object_manager):
 @pytest.fixture
 def db_instance_service(db_instance_manager):
     return DBInstanceService(db_instance_manager)
-
-# @pytest.fixture
-# def snapshot_service(object_manager):
-#     return SnapShotService(SnapShotManager(object_manager))
 
 @pytest.fixture
 def db_instance_controller(db_instance_service):
@@ -59,16 +62,9 @@ def db_cluster_controller_with_cleanup(db_cluster_controller):
     # Finalizer to clean up after the test
     db_cluster_controller.delete_db_cluster('ClusterTest')
 
-cluster_data = {
-    'db_cluster_identifier': 'ClusterTest',
-    'engine': 'mysql',
-    'allocated_storage':5,
-    'db_subnet_group_name': 'my-subnet-group'
-    }
-
 def test_create_cluster_works(db_cluster_controller_with_cleanup):
 
-    res = db_cluster_controller_with_cleanup.create_db_cluster(**cluster_data)
+    res = db_cluster_controller_with_cleanup.create_db_cluster(**CLUSTER_DATA)
     assert res == None
 
 def test_create_cluster_missing_required_fields(db_cluster_controller):
@@ -92,15 +88,15 @@ def test_create_cluster_invalide_identifier(db_cluster_controller):
 
 def test_create_cluster_already_exist(db_cluster_controller):
 
-    db_cluster_controller.create_db_cluster(**cluster_data)
+    db_cluster_controller.create_db_cluster(**CLUSTER_DATA)
     with pytest.raises(DBClusterExceptions.DBClusterAlreadyExists):
-           db_cluster_controller.create_db_cluster(**cluster_data)
+           db_cluster_controller.create_db_cluster(**CLUSTER_DATA)
 
     db_cluster_controller.delete_db_cluster('ClusterTest')
            
 def test_delete_cluster_works(db_cluster_controller):
 
-    db_cluster_controller.create_db_cluster(**cluster_data)
+    db_cluster_controller.create_db_cluster(**CLUSTER_DATA)
     db_cluster_controller.delete_db_cluster('ClusterTest')
     with pytest.raises(DBClusterExceptions.DBClusterNotFoundException):
         db_cluster_controller.delete_db_cluster('ClusterTest')      
@@ -111,7 +107,7 @@ def test_delete_cluster_does_not_exist(db_cluster_controller):
 
 def test_describe_cluster_works(db_cluster_controller_with_cleanup):
 
-    db_cluster_controller_with_cleanup.create_db_cluster(**cluster_data)
+    db_cluster_controller_with_cleanup.create_db_cluster(**CLUSTER_DATA)
     res = db_cluster_controller_with_cleanup.describe_db_cluster('ClusterTest')
     assert isinstance(res, list)
 
@@ -122,7 +118,7 @@ def test_describe_cluster_does_not_exist(db_cluster_controller):
 
 def test_modify_cluster_works(db_cluster_controller_with_cleanup):
 
-    db_cluster_controller_with_cleanup.create_db_cluster(**cluster_data)
+    db_cluster_controller_with_cleanup.create_db_cluster(**CLUSTER_DATA)
     update_data = {
         'engine': 'postgres',
         }
@@ -149,7 +145,7 @@ def test_modify_cluster_does_not_exist(db_cluster_controller):
 
 def test_modify_cluster_invalide_engine(db_cluster_controller_with_cleanup):
 
-    db_cluster_controller_with_cleanup.create_db_cluster(**cluster_data)
+    db_cluster_controller_with_cleanup.create_db_cluster(**CLUSTER_DATA)
     update_data = {
         'engine': 'invalid',
         }
@@ -158,6 +154,6 @@ def test_modify_cluster_invalide_engine(db_cluster_controller_with_cleanup):
 
 def test_get_all_clusters(db_cluster_controller_with_cleanup):
 
-    db_cluster_controller_with_cleanup.create_db_cluster(**cluster_data)
+    db_cluster_controller_with_cleanup.create_db_cluster(**CLUSTER_DATA)
     res = db_cluster_controller_with_cleanup.get_all_db_clusters()
     assert isinstance(res, list)
