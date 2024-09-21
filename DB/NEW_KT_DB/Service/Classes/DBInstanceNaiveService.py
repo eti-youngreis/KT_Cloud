@@ -2,12 +2,11 @@ import os
 import shutil
 import sys
 from typing import Dict, Optional
-from Exception.exception import DBInstanceNotFoundError, ParamValidationError
-from Validation.DBInstanceValidition import check_extra_params, check_required_params, is_valid_db_instance_identifier
-from Models.DBInstanceModel import DBInstance
+from Exceptions.DBInstanceNaiveException import DBInstanceNotFoundError, ParamValidationError,AlreadyExistsError
+from Validation.DBInstanceNaiveValidition import check_extra_params, check_required_params, is_valid_db_instance_identifier
+from Models.DBInstanceNaiveModel import DBInstance
 from Service.Abc.DBO import DBO
-from DataAccess.DBInstanceManager import DBInstanceManager
-from Exception.exception import AlreadyExistsError
+from DataAccess.DBInstanceNaiveManager import DBInstanceManager
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../')))
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
