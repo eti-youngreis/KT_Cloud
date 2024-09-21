@@ -81,21 +81,34 @@ class TestSQLCommands:
         result = SQLCommandHelper._run_query(temp_db_path, "SELECT * FROM test")
         assert result == [(0,1, 'test_name')]
 
-    def test_select(self, temp_db_path):
-        # Test selecting data from a table
-        conn = sqlite3.connect(temp_db_path)
-        conn.execute("CREATE TABLE test (_record_id INTEGER,id INTEGER PRIMARY KEY, name TEXT)")
-        conn.execute("INSERT INTO test (name) VALUES ('test_name')")
-        conn.close()
+    def test_select(self, db_instance_controller, db_snapshot_controller):
+        # Create a test instance
+        db_instance_controller.create_db_instance(db_instance_identifier="test-instance-for-select", allocated_storage=10)
 
-        class MockNode:
-            def __init__(self):
-                self.dbs_paths_dic = {'test_db': temp_db_path}
-                self.deleted_records_db_path = temp_db_path + "_deleted"
+        # Create the database
+        db_instance_controller.execute_query("test-instance-for-select", "CREATE DATABASE test-instance-for-select", "test-instance-for-select")
 
-        mock_queue = [MockNode()]
-        result = SQLCommandHelper.select(mock_queue, 'test_db', "SELECT * FROM test", set())
-        assert result == [(0,1, 'test_name')]
+        # Create a table
+        create_table_query = "CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT)"
+        db_instance_controller.execute_query("test-instance-for-select", create_table_query, "test-instance-for-select")
+
+        # Insert data
+        insert_query = "INSERT INTO test (name) VALUES ('test_name')"
+        db_instance_controller.execute_query("test-instance-for-select", insert_query, "test-instance-for-select")
+
+        # Create a snapshot
+        db_snapshot_controller.create_snapshot("test-instance-for-select", "test-snapshot")
+
+        # Perform select
+        select_query = "SELECT * FROM test"
+        result = db_instance_controller.execute_query("test-instance-for-select", select_query, "test-instance-for-select")
+
+        # Assert the result
+        assert result == [(0, 1, 'test_name')]
+
+        # Clean up
+        db_instance_controller.delete_db_instance("]test-instance-for-select")
+        db_snapshot_controller.delete_snapshot("test-instance-for-select", "test-snapshot")
 
     def test_delete_record(self, temp_db_path):
         # Test deleting a record from a table

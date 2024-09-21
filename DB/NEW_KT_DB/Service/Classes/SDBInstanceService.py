@@ -320,7 +320,11 @@ class DBInstanceService(DBO):
                 return SQLCommandHelper.insert(db_instance._last_node_of_current_version, query, db_instance._last_node_of_current_version.dbs_paths_dic[db_name])
             elif query_type == 'CREATE':
                 if 'TABLE' in query.upper():
+                    print(db_instance._last_node_of_current_version.dbs_paths_dic)
+                    print(db_name)
                     return SQLCommandHelper.create_table(query, db_instance._last_node_of_current_version.dbs_paths_dic[db_name])
+                elif 'DATABASE' in query.upper():
+                    return SQLCommandHelper.create_database(db_name, db_instance._last_node_of_current_version, db_instance.endpoint)
             elif query_type == 'DELETE':
                 node_queue = [db_instance._node_subSnapshot_dic[id] for id in db_instance._current_version_ids_queue]
                 return SQLCommandHelper.delete_record(node_queue, query, db_name)
