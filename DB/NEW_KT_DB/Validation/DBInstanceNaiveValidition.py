@@ -1,6 +1,6 @@
 import re
 
-from Exception.exception import ParamValidationError, MissingRequireParamError
+from Exceptions.DBInstanceNaiveException import ParamValidationError, MissingRequireParamError
 
 
 def check_required_params(required_params, kwargs):
