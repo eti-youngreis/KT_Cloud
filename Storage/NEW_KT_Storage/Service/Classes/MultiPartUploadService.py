@@ -146,18 +146,5 @@ class MultipartUploadService:
         )
         return multipart_upload
 
-    def select_all_from_table(self, db_file: str, table_name: str):
-        # Retrieves and returns all data from a specified table in the SQLite database
-        try:
-            conn = sqlite3.connect(db_file)
-            cursor = conn.cursor()
-            query = f"SELECT * FROM {table_name}"
-            cursor.execute(query)
-            rows = cursor.fetchall()
-            cursor.close()
-            conn.close()
-            return rows
-        except sqlite3.Error as e:
-            print(f"An error occurred: {e}")
-            return None
+
 
