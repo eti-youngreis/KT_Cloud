@@ -5,7 +5,7 @@ import uuid
 
 class BucketPolicy:
     """
-    A class to represent a bucket policy, which defines permissions and
+    A class to represent a bucket policy, which defines actions and
     versioning for a bucket.
     
     Attributes:
@@ -20,8 +20,8 @@ class BucketPolicy:
         Unique identifier for the bucket policy.
     bucket_name : str
         Name of the bucket to which this policy applies.
-    permissions : list
-        A list of permissions associated with the bucket.
+    actions : list
+        A list of actions associated with the bucket.
     allow_versions : bool
         Boolean indicating whether versioning is allowed for the bucket.
     """
@@ -31,27 +31,27 @@ class BucketPolicy:
     table_structure = '''
                 policy_id VARCHAR(255) PRIMARY KEY NOT NULL,
                 bucket_name VARCHAR(255) NOT NULL,
-                permissions TEXT NOT NULL,
+                actions TEXT NOT NULL,
                 allow_versions BOOLEAN NOT NULL
             '''
 
-    def __init__(self, bucket_name: str, permissions: list, allow_versions=True):
+    def __init__(self, bucket_name: str, actions: list, allow_versions=True):
         """
         Initializes a BucketPolicy instance with the given bucket name,
-        permissions, and versioning option.
+        actions, and versioning option.
 
         Parameters:
         -----------
         bucket_name : str
             The name of the bucket.
-        permissions : list
-            A list of permissions for the bucket (e.g., read, write).
+        actions : list
+            A list of actions for the bucket (e.g., read, write).
         allow_versions : bool, optional
             Specifies whether versioning is allowed (default is True).
         """
         self.policy_id = self._generate_policy_id(bucket_name)
         self.bucket_name = bucket_name
-        self.permissions = permissions
+        self.actions = actions
         self.allow_versions = allow_versions
 
     def to_dict(self) -> Dict:
@@ -66,7 +66,7 @@ class BucketPolicy:
         return self.convert_object_attributes_to_dictionary(
             policy_id=self.policy_id,
             bucket_name=self.bucket_name,
-            permissions=self.permissions,
+            actions=self.actions,
             allow_versions=self.allow_versions
         )
     
