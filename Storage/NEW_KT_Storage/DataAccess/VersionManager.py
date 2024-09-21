@@ -9,8 +9,8 @@ from Storage.NEW_KT_Storage.DataAccess.ObjectManager import ObjectManager
 from Storage.NEW_KT_Storage.Validation.ObjectVersioningValidition import *
 class VersionManager:
 
-    def __init__(self, db_file: str = "C:\\Users\\OWNER\\Desktop\\server\\versionDB.db",
-                 base_directory: str = "C:\\Users\\OWNER\\Desktop\\server\\versions"):
+
+    def __init__(self, db_file: str = "versionDB.db", base_directory: str = "versions"):
         '''Initialize VersionManager with the database connection and storage paths.'''
         self.base_directory = base_directory
         self.path_db = os.path.join(base_directory, db_file)
