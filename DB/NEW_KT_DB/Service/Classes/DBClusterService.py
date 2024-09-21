@@ -27,6 +27,7 @@ from Validation.DBClusterValiditions import (
     validate_master_user_password,
     validate_master_username
 )
+import Exceptions.DBClusterExceptions as DBClusterExceptions
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 class DBClusterService:
@@ -54,33 +55,23 @@ class DBClusterService:
     def _validate_parameters(self, **kwargs):
         # Perform validations
         if 'db_cluster_identifier' in kwargs and self.dal.is_db_instance_exist(kwargs.get('db_cluster_identifier')):
-            # raise ValueError(f"Cluster {kwargs.get('db_cluster_identifier')} already exists")
-            return False
-        if 'db_cluster_identifier' in kwargs and not validate_db_cluster_identifier(kwargs.get('db_cluster_identifier')):
-            # raise ValueError(f"Invalid DBClusterIdentifier: {kwargs.get('db_cluster_identifier')}")
-            return False
-        if not validate_engine(kwargs.get('engine', '')):
-            # raise ValueError(f"Invalid engine: {kwargs.get('engine')}")
-            return False
-        if 'database_name' in kwargs and kwargs['database_name'] and not validate_database_name(kwargs['database_name']):
-            # raise ValueError(f"Invalid DatabaseName: {kwargs['database_name']}")
-            return False
-        if 'db_cluster_parameter_group_name' in kwargs and kwargs['db_cluster_parameter_group_name'] and not validate_db_cluster_parameter_group_name(kwargs['db_cluster_parameter_group_name']):
-            # raise ValueError(f"Invalid DBClusterParameterGroupName: {kwargs['db_cluster_parameter_group_name']}")
-            return False
-        if kwargs.get('db_subnet_group_name') and not validate_db_subnet_group_name(kwargs.get('db_subnet_group_name')):
-            # raise ValueError(f"Invalid DBSubnetGroupName: {kwargs['db_subnet_group_name']}")
-            return False
-        if 'port' in kwargs and kwargs['port'] and not validate_port(kwargs['port']):
-            # raise ValueError(f"Invalid port: {kwargs['port']}. Valid range is 1150-65535.")
-            return False
-        if 'master_username' in kwargs and not validate_master_username(kwargs['master_username']):
-            # raise ValueError("Invalid master username")
-            return False
-        if 'master_user_password' in kwargs and not validate_master_user_password(kwargs['master_user_password'], kwargs.get('manage_master_user_password', False)):
-            # raise ValueError("Invalid master user password")
-            return False
-        return True
+            raise DBClusterExceptions.DBClusterAlreadyExists(kwargs.get('db_cluster_identifier'))
+        
+        if 'db_cluster_identifier' in kwargs :
+            validate_db_cluster_identifier(kwargs.get('db_cluster_identifier'))
+        validate_engine(kwargs.get('engine', ''))
+        validate_db_subnet_group_name(kwargs.get('db_subnet_group_name'))
+
+        if 'database_name' in kwargs:
+            validate_database_name(kwargs['database_name'])
+        if 'db_cluster_parameter_group_name' in kwargs :
+            validate_db_cluster_parameter_group_name(kwargs['db_cluster_parameter_group_name'])
+        if 'port' in kwargs:
+            validate_port(kwargs['port'])
+        if 'master_username' in kwargs :
+            validate_master_username(kwargs['master_username'])
+        if 'master_user_password' in kwargs :
+            validate_master_user_password(kwargs['master_user_password'], kwargs.get('manage_master_user_password', False))
 
 
     def create(self, instance_controller, **kwargs):
@@ -89,11 +80,9 @@ class DBClusterService:
 
         # Validate required parameters
         required_params = ['db_cluster_identifier', 'engine', 'db_subnet_group_name', 'allocated_storage']
-        if not check_required_params(required_params, **kwargs):
-            raise ValueError("Missing required parameters")
+        check_required_params(required_params, **kwargs)
+        self._validate_parameters(**kwargs)
 
-        if self._validate_parameters(**kwargs) != True:
-            raise ValueError("Error")
         
         # Create the cluster object
         cluster = DBClusterModel.Cluster(**kwargs)
@@ -135,7 +124,7 @@ class DBClusterService:
         '''Delete an existing DBCluster.'''
         
         if not self.dal.is_db_instance_exist(cluster_identifier):
-            raise ValueError("Cluster does not exist!!")
+            raise DBClusterExceptions.DBClusterNotFoundException(cluster_identifier)
           
         file_path = self.get_file_path(cluster_identifier+"_configurations")
         self.storage_manager.delete_file(file_path=file_path)
@@ -166,7 +155,7 @@ class DBClusterService:
     def describe(self, cluster_id):
         '''Describe the details of DBCluster.'''
         if not self.dal.is_db_instance_exist(cluster_id):
-            raise ValueError("Cluster does not exist!!")
+            raise DBClusterExceptions.DBClusterNotFoundException(cluster_id)
         
         return self.dal.describeDBCluster(cluster_id)
 
@@ -175,10 +164,9 @@ class DBClusterService:
         '''Modify an existing DBCluster.'''
 
         if not self.dal.is_db_instance_exist(cluster_id):
-            raise ValueError("Cluster does not exist!!")
+            raise DBClusterExceptions.DBClusterNotFoundException(cluster_id)
         
-        if self._validate_parameters(**kwargs) != True:
-            raise ValueError("Error")
+        self._validate_parameters(**kwargs)
 
         str_parts = ', '.join(f"{key} = '{value}'" for key, value in kwargs.items())
 
