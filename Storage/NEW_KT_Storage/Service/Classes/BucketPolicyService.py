@@ -11,15 +11,15 @@ class ParamValidationFault(Exception):
     """Exception raised when a required parameter is missing."""
     pass
 
-class IsExistactionnFault(Exception):
-    """Exception raised when a actionn already exists in the policy."""
+class IsExistactionFault(Exception):
+    """Exception raised when a action already exists in the policy."""
     pass
 
 class IsNotExistFault(Exception):
     """Exception raised when a bucket_name does not exist in the policy."""
     pass
-class IsNotExistactionnFault(Exception):
-    """Exception raised when a actionn does not exist in the policy."""
+class IsNotExistactionFault(Exception):
+    """Exception raised when a action does not exist in the policy."""
     pass
 
 class BucketPolicyService(STO):
@@ -57,14 +57,14 @@ class BucketPolicyService(STO):
         if not bucket_name or not isinstance(bucket_name, str):
             raise ParamValidationFault("Bucket name must be a valid non-empty string.")
         
-        # Ensure actions is a list and contains valid actionn strings
+        # Ensure actions is a list and contains valid action strings
         if not isinstance(actions, list):
             raise ParamValidationFault("actions must be a list.")
         
         valid_actions = {'READ', 'WRITE', 'DELETE', 'CREATE'}  # Example actions
-        for actionn in actions:
-            if actionn not in valid_actions:
-                raise ParamValidationFault(f"Invalid actionn: {actionn}")
+        for action in actions:
+            if action not in valid_actions:
+                raise ParamValidationFault(f"Invalid action: {action}")
 
         # Ensure allow_versions is boolean
         if not isinstance(allow_versions, bool):
@@ -172,14 +172,15 @@ class BucketPolicyService(STO):
         bucket_policy = self.dal.getBucketPolicy(bucket_name)
         
         if action != None:
-            print("!!", action)
             if action not in ["add", "delete"]:
                 raise ParamValidationFault("The action can be only add or delete")
             if not update_actions:
                 raise ParamValidationFault("actions must be inilaize")
 
+        if update_actions and not action:
+            raise ParamValidationFault("The action must be intilaize")
                     
-            bucket_policy['actions'] = self._update_actions(bucket_name, action, update_actions)
+        bucket_policy['actions'] = self._update_actions(bucket_name, action, update_actions)
             
         if allow_versions is not None:
             # Ensure allow_versions is boolean
@@ -209,40 +210,39 @@ class BucketPolicyService(STO):
         if not self.dal.getBucketPolicy(bucket_name):
             raise IsNotExistFault(f"Bucket policy for '{bucket_name}' does not exist.")
         
-        # Ensure actions is a list and contains valid actionn strings
+        # Ensure actions is a list and contains valid action strings
         if not isinstance(update_actions, list):
             raise ParamValidationFault("actions must be a list.")
         
         bucket_policy = self.dal.getBucketPolicy(bucket_name)
         policy_actions = bucket_policy['actions']
         
-        for actionn in update_actions:
+        for action1 in update_actions:
             valid_actions = {'READ', 'WRITE', 'DELETE', 'CREATE'}
-            if actionn not in valid_actions:
-                raise ParamValidationFault(f"actionn {actionn} already exists in the bucket policy.")
-            
+            if action1 not in valid_actions:
+                raise ParamValidationFault(f"action {action1} already exists in the bucket policy.")
+
         if action == "add":
-            policy_actions = self._add_actions(policy_actions, update_actions)
+            return self._add_actions(policy_actions, update_actions)
         else:
-            policy_actions = self._delete_actions(policy_actions, update_actions)
+            return self._delete_actions(policy_actions, update_actions)
             
     
     def _add_actions(self, policy_actions, actions = []):
 
-        for actionn in actions:
-            if actionn in policy_actions:
-                raise IsExistactionnFault("actionn already exist in the bucket")
-            policy_actions.append(actionn)
-            
+        for action in actions:
+            if action in policy_actions:
+                raise IsExistactionFault("action already exist in the bucket")
+            policy_actions.append(action) 
+
         return policy_actions
             
     def _delete_actions(self, policy_actions, actions = []):
         
-        print("print" ,policy_actions)
-        for actionn in actions:
-            if actionn not in policy_actions:
-                raise IsNotExistactionnFault("actionn not exist in the bucket policy")
-            policy_actions.remove(actionn)
+        for action in actions:
+            if action not in policy_actions:
+                raise IsNotExistactionFault("action not exist in the bucket policy")
+            policy_actions.remove(action)
         
         return policy_actions
         
