@@ -17,18 +17,18 @@ def cleanup(lifecycle_manager):
 # Happy path unit tests
 def test_create_lifecycle_policy(lifecycle_manager):
     policy = LifecyclePolicy("test_policy", 30, 60, "active", ["prefix1"])
-    lifecycle_manager.storage_manager.write_json_file = Mock()
+    lifecycle_manager.storage_manager.write_to_json_file = Mock()
     lifecycle_manager.object_manager.save_in_memory = Mock()
 
     lifecycle_manager.create(policy)
 
-    lifecycle_manager.storage_manager.write_json_file.assert_called_once()
+    lifecycle_manager.storage_manager.write_to_json_file.assert_called_once()
     lifecycle_manager.object_manager.save_in_memory.assert_called_once()
 
 
 def test_get_existing_policy(lifecycle_manager):
     expected_policy = LifecyclePolicy("test_policy", 30, 60, "active", ["prefix1"])
-    lifecycle_manager._read_json = Mock(return_value={"test_policy": expected_policy.__dict__})
+    lifecycle_manager.read_json_file= Mock(return_value={"test_policy": expected_policy.__dict__})
 
     result = lifecycle_manager.get("test_policy")
 
@@ -40,19 +40,18 @@ def test_update_existing_policy(lifecycle_manager):
     original_policy = LifecyclePolicy("test_policy", 30, 60, "active", ["prefix1"])
     updated_policy = LifecyclePolicy("test_policy", 45, 90, "inactive", ["prefix2"])
 
-    lifecycle_manager._read_json = Mock(return_value={"test_policy": original_policy.__dict__})
-    lifecycle_manager._write_json = Mock()
+    lifecycle_manager.read_json_file = Mock(return_value={"test_policy": original_policy.__dict__})
+    lifecycle_manager.write_to_json_file = Mock()
     lifecycle_manager.object_manager.update_in_memory = Mock()
 
     lifecycle_manager.update("test_policy", updated_policy)
-
-    lifecycle_manager._write_json.assert_called_once()
+    lifecycle_manager.write_to_json_file.assert_called_once()
     lifecycle_manager.object_manager.update_in_memory.assert_called_once()
 
 
 # Unhappy path unit tests
 def test_get_non_existing_policy(lifecycle_manager):
-    lifecycle_manager._read_json = Mock(return_value={})
+    lifecycle_manager.read_json_file = Mock(return_value={})
 
     result = lifecycle_manager.get("non_existing_policy")
 
@@ -60,18 +59,18 @@ def test_get_non_existing_policy(lifecycle_manager):
 
 
 def test_delete_non_existing_policy(lifecycle_manager):
-    lifecycle_manager._read_json = Mock(return_value={})
-    lifecycle_manager._write_json = Mock()
+    lifecycle_manager.read_json_file = Mock(return_value={})
+    lifecycle_manager.write_to_json_file = Mock()
     lifecycle_manager.object_manager.delete_from_memory_by_pk = Mock()
 
     lifecycle_manager.delete("non_existing_policy")
 
-    lifecycle_manager._write_json.assert_not_called()
+    lifecycle_manager.write_to_json_file.assert_not_called()
     lifecycle_manager.object_manager.delete_from_memory_by_pk.assert_called_once()
 
 
 def test_describe_non_existing_policy(lifecycle_manager):
-    lifecycle_manager._read_json = Mock(return_value={})
+    lifecycle_manager.read_json_file = Mock(return_value={})
 
     with pytest.raises(KeyError):
         lifecycle_manager.describe("non_existing_policy")
