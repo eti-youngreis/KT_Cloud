@@ -98,7 +98,7 @@ class DBInstanceManager:
 
         return result
 
-    def is_db_instance_exists(self, db_instance_identifier):
+    def isDbInstanceExists(self, db_instance_identifier):
         try:
             self.object_manager.get_from_memory(
                 self.object_name, db_instance_identifier)
