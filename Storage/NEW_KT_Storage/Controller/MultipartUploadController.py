@@ -15,7 +15,7 @@ class MultipartUploadController:
         """
         return self.service.initiate_multipart_upload(bucket_name, object_key)
     
-    def upload_file_parts(self, upload_id: str, file_path: str, part_size: int = 4):
+    def upload_file_parts(self, upload_id: str, file_path: str, part_size: int = 1024):
         """
         Uploads the parts of the file based on the upload_id.
         """
