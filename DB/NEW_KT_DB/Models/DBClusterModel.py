@@ -69,34 +69,6 @@ class Cluster:
 
         self.pk_column = kwargs.get('pk_column', 'db_cluster_identifier')
         self.pk_value = kwargs.get('pk_value', self.db_cluster_identifier)
-        self.table_schema = """ db_cluster_identifier TEXT PRIMARY KEY,
-                                engine TEXT,
-                                allocated_storage INTEGER,
-                                copy_tags_to_snapshot BOOLEAN,
-                                db_cluster_instance_class TEXT,
-                                database_name TEXT,
-                                db_cluster_parameter_group_name TEXT,
-                                db_subnet_group_name TEXT,
-                                deletion_protection BOOLEAN,
-                                engine_version TEXT,
-                                master_username TEXT,
-                                master_user_password TEXT,
-                                manage_master_user_password BOOLEAN,
-                                option_group_name TEXT,
-                                port INTEGER,
-                                replication_source_identifier TEXT,
-                                storage_encrypted BOOLEAN,
-                                storage_type TEXT,
-                                tags TEXT,
-                                created_at TEXT,
-                                status TEXT,
-                                primary_writer_instance TEXT,
-                                reader_instances TEXT,
-                                cluster_endpoint TEXT,
-                                instances_endpoints TEXT,
-                                pk_column TEXT,
-                                pk_value TEXT
-                                """
 
     def to_dict(self) -> Dict:
         '''Retrieve the data of the DB cluster as a dictionary.'''

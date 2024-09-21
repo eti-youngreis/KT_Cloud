@@ -1,21 +1,15 @@
-from typing import Dict, Optional
-
+import json
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
+from typing import Dict, Optional
 from DataAccess import DBClusterManager
 from Models import DBClusterModel
 from Abc import DBO
 from Validation import DBClusterValiditions
 from DataAccess import DBClusterManager
-
-
-# from DBInstanceService import DBInstanceService
-import os
-import json
 from Validation.DBClusterValiditions import (
     validate_db_cluster_identifier, 
     validate_engine, 
@@ -118,8 +112,6 @@ class DBClusterService:
         return self.dal.createInMemoryDBCluster(cluster_to_sql)
 
 
-
-
     def delete(self,instance_controller, cluster_identifier:str):
         '''Delete an existing DBCluster.'''
         
@@ -193,8 +185,3 @@ class DBClusterService:
 
     def get_all_cluster(self):
         return self.dal.get_all_clusters()
-
-
-
-
-        

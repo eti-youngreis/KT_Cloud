@@ -15,14 +15,11 @@ class DBClusterController:
         self.service = service
         self.instance_controller = instance_controller
 
-
     def create_db_cluster(self, **kwargs):
         self.service.create(self.instance_controller,**kwargs)
 
-
     def delete_db_cluster(self , cluster_identifier):
         self.service.delete(self.instance_controller, cluster_identifier)
-
 
     def modify_db_cluster(self, cluster_identifier, **updates):
         self.service.modify(cluster_identifier,**updates)
@@ -32,6 +29,3 @@ class DBClusterController:
 
     def get_all_db_clusters(self):
         return self.service.get_all_cluster()
-    
-
-
