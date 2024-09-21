@@ -17,7 +17,6 @@ class LifecyclePolicyController:
         self.service.delete(policy_name=policy_name)
 
     def modify(self, policy_name:str, expiration_days: int = None, transitions_days_GLACIER: int = None, status:str = None, prefix = []):
-        #prefix valid
         self.service.modify(policy_name=policy_name, expiration_days= expiration_days, transitions_days_GLACIER=transitions_days_GLACIER,status=status,prefix=prefix)
 
     def describe(self, policy_name):
