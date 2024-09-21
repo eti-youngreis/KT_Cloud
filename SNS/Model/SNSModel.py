@@ -30,6 +30,11 @@ class SNSTopicModel:
             self.subscribers = subscribers
         self.pk_value = topic_name
 
+    def __eq__(self, value: object) -> bool:
+        if not isinstance(value, SNSTopicModel):
+            return False
+        return self.topic_name == value.topic_name and self.subscribers == value.subscribers
+    
     def to_dict(self):
         return {
             'topic_name': self.topic_name,

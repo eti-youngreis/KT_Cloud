@@ -64,8 +64,8 @@ class EventSubscription:
             subscription_name (str): The name of the subscription.
             sources (List[Tuple[SourceType, str]]): List of source types and their IDs.
             event_categories (List[EventCategory]): List of event categories.
-            sns_topic_arn (str): The ARN of the SNS topic.
-            source_type (SourceType): The type of the source.
+            sns_topic_arn (str): The SNS topic to which notifications will be sent.
+            source_type (SourceType): The type of source for which notifications will be received.
         """
         self.subscription_name = subscription_name
         self.source_type = source_type
@@ -78,6 +78,14 @@ class EventSubscription:
         self.sns_topic_arn = sns_topic_arn
 
         self.pk_value = self.subscription_name
+
+    def __eq__(self, value: object) -> bool:
+        """
+        Compare two EventSubscription objects for equality.
+        """
+        if not isinstance(value, EventSubscription):
+            return False
+        return all([self.__getattribute__(attr) == value.__getattribute__(attr) for attr, _ in self.__dict__.items()]) and len(self.__dict__) == len(value.__dict__)
 
     def to_dict(self) -> Dict:
         """

@@ -3,7 +3,7 @@ import pytest
 
 
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
-from DB.NEW_KT_DB.Test.GeneralTests import is_file_exist, is_object_equal
+from DB.NEW_KT_DB.Test.GeneralTests import is_file_exist
 from SNS.DataAccess.SNSManager import SNSTopicManager
 from SNS.Model.SNSModel import Protocol, SNSTopicModel
 from SNS.Service.SNSService import SNSTopicService
@@ -47,7 +47,8 @@ def test_create_sns_topic(sns_topic_service: SNSTopicService, test_sns_topic: SN
     """
     Verify that creating a topic with a valid name succeeds.
     """
-    assert sns_topic_service.sns_manager.is_topic_exist(test_sns_topic.topic_name)
+    assert sns_topic_service.sns_manager.is_topic_exist(
+        test_sns_topic.topic_name)
     assert is_file_exist(
         storage_manager, sns_topic_service.get_file_path(test_sns_topic.topic_name))
 
@@ -145,8 +146,9 @@ def test_get_sns_topic(test_sns_topic: SNSTopicModel, sns_topic_service: SNSTopi
     """
     Verify retrieving an existing topic works.
     """
-    assert is_object_equal(sns_topic_service.get(
-        test_sns_topic.topic_name), test_sns_topic)
+
+    # Assuming that __eq__ is implemented for SNSTopicModel
+    assert sns_topic_service.get(test_sns_topic.topic_name) == test_sns_topic
 
 
 def test_notify_subscribers(test_sns_topic: SNSTopicModel, sns_topic_service: SNSTopicService):

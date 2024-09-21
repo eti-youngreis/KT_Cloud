@@ -3,7 +3,6 @@ import pytest
 from DB.NEW_KT_DB.Service.Classes.EventSubscriptionService import EventSubscriptionService
 from DB.NEW_KT_DB.DataAccess.EventSubscriptionManager import EventSubscriptionManager
 from DB.NEW_KT_DB.Models.EventSubscriptionModel import EventCategory, EventSubscription, SourceType
-from DB.NEW_KT_DB.Test.GeneralTests import is_object_equal
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 
@@ -53,8 +52,9 @@ def event_subscription(event_subscription_service: EventSubscriptionService):
 
 
 def test_create(event_subscription_service: EventSubscriptionService, event_subscription: EventSubscription):
-    assert is_object_equal(event_subscription, event_subscription_service.get_by_id(
-        event_subscription.subscription_name))
+    # Assuming that __eq__ is implemented for EventSubscription
+    assert event_subscription == event_subscription_service.get_by_id(
+        event_subscription.subscription_name)
 
     assert event_subscription_service.storage_manager.is_file_exist(
         event_subscription_service.get_file_path(event_subscription.subscription_name))
@@ -77,22 +77,24 @@ def test_modify(event_subscription_service: EventSubscriptionService, event_subs
     event_subscription_service.modify(
         event_subscription.subscription_name, event_categories=updated_event_subscription.event_categories)
 
-    assert is_object_equal(updated_event_subscription, event_subscription_service.get_by_id(
-        event_subscription.subscription_name))
+    # Assuming that __eq__ is implemented for EventSubscription
+    assert updated_event_subscription == event_subscription_service.get_by_id(
+        event_subscription.subscription_name)
 
     updated_event_subscription.sns_topic_arn = 'new_sns_topic_arn'
     event_subscription_service.modify(
         event_subscription.subscription_name, sns_topic_arn=updated_event_subscription.sns_topic_arn)
-
-    assert is_object_equal(updated_event_subscription, event_subscription_service.get_by_id(
-        event_subscription.subscription_name))
+    # Assuming that __eq__ is implemented for EventSubscription
+    assert updated_event_subscription == event_subscription_service.get_by_id(
+        event_subscription.subscription_name)
 
     updated_event_subscription.source_type = SourceType.DB_CLUSTER
     event_subscription_service.modify(
         event_subscription.subscription_name, source_type=updated_event_subscription.source_type)
 
-    assert is_object_equal(updated_event_subscription, event_subscription_service.get_by_id(
-        event_subscription.subscription_name))
+    # Assuming that __eq__ is implemented for EventSubscription
+    assert updated_event_subscription == event_subscription_service.get_by_id(
+        event_subscription.subscription_name)
 
 
 def test_describe_by_id(event_subscription_service: EventSubscriptionService, event_subscription: EventSubscription):
@@ -106,9 +108,12 @@ def test_describe(event_subscription_service: EventSubscriptionService, event_su
 
 
 def test_get(event_subscription_service: EventSubscriptionService, event_subscription: EventSubscription):
-    assert is_object_equal(event_subscription, event_subscription_service.get({'subscription_name': event_subscription.subscription_name})[0])
+    # Assuming that __eq__ is implemented for EventSubscription
+    assert event_subscription == event_subscription_service.get(
+        {'subscription_name': event_subscription.subscription_name})[0]
 
 
 def test_get_by_id(event_subscription_service: EventSubscriptionService, event_subscription: EventSubscription):
-    assert is_object_equal(event_subscription, event_subscription_service.get_by_id(
-        event_subscription.subscription_name))
+    # Assuming that __eq__ is implemented for EventSubscription
+    assert event_subscription == event_subscription_service.get_by_id(
+        event_subscription.subscription_name)
