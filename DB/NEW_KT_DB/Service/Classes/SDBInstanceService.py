@@ -328,10 +328,6 @@ class DBInstanceService(DBO):
             else:
                 raise ValueError(f"Unsupported query type: {query_type}")
 
-
-#################
-from DB.NEW_KT_DB.DataAccess.SQLCommandManager import SQLCommandManager
-
 class SQLCommandHelper:
     record_id = 0
 
