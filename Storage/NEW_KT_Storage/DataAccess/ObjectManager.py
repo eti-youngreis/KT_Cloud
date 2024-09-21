@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..','..','..')))
+
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager as ObjectManagerDB
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
