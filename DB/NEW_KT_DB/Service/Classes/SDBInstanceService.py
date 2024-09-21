@@ -334,10 +334,10 @@ from DB.NEW_KT_DB.DataAccess.SQLCommandManager import SQLCommandManager
 
 class SQLCommandHelper:
     record_id = 0
-    
-@staticmethod
-def clone_database_schema(source_db_path: str, new_db_path: str) -> None:
-    SQLCommandManager.clone_database_schema(source_db_path, new_db_path)
+
+    @staticmethod
+    def clone_database_schema(source_db_path: str, new_db_path: str) -> None:
+        SQLCommandManager.clone_database_schema(source_db_path, new_db_path)
 
     @staticmethod
     def _adjust_results_to_schema(results: List[Tuple], result_columns: List[str], schema_columns: List[str]) -> List[Tuple]:
