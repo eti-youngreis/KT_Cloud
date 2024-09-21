@@ -194,7 +194,7 @@ class Node_SubSnapshot:
         Returns:
             dict: A dictionary mapping the new database names to their cloned paths.
         """
-        from DB.NEW_KT_DB.Service.Classes.DBInstanceService import SQLCommandHelper
+        from DB.NEW_KT_DB.Service.Classes.SDBInstanceService import SQLCommandHelper
 
         dbs_paths_new_dic = {}  # Dictionary to store the new database paths.
         for db, db_path in dbs_paths_dic.items():

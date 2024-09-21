@@ -7,19 +7,20 @@ class TestDBSnapshotController:
         instance = db_instance_controller.create_db_instance(db_instance_identifier="test-instance", allocated_storage=10)
         db_snapshot_controller.create_snapshot("test-instance", "test-snapshot")
         yield instance
-        try:
-            if db_instance_controller.get_db_instance("test-instance"):
-                try:
-                    db_snapshot_controller.delete_snapshot("test-instance", "test-snapshot")
-                except DbSnapshotIdentifierNotFoundError:
-                    pass  # Snapshot already deleted, no need to delete again
-        except ValueError:
-            pass  # Instance already deleted, no need to clean up
-        finally:
-            try:
-                db_instance_controller.delete_db_instance("test-instance")
-            except ValueError:
-                pass  # Instance already deleted
+        db_instance_controller.delete_db_instance("test-instance")
+        # try:
+        #     if db_instance_controller.get_db_instance("test-instance"):
+        #         try:
+        #             db_snapshot_controller.delete_snapshot("test-instance", "test-snapshot")
+        #         except DbSnapshotIdentifierNotFoundError:
+        #             pass  # Snapshot already deleted, no need to delete again
+        # except ValueError:
+        #     pass  # Instance already deleted, no need to clean up
+        # finally:
+        #     try:
+        #         db_instance_controller.delete_db_instance("test-instance")
+        #     except ValueError:
+        #         pass  # Instance already deleted
 
     def test_create_snapshot(self, db_snapshot_controller):
         snapshots = db_snapshot_controller.list_snapshots("test-instance")

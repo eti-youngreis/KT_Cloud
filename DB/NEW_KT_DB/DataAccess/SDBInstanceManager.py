@@ -59,10 +59,6 @@ class DBInstanceManager:
         self.object_manager.create_management_table(
             self.object_name, DBInstanceModel.table_structure, pk_column_data_type='TEXT')
 
-    def close_connections(self):
-        if hasattr(self.object_manager.db_manager, 'connection'):
-            self.object_manager.db_manager.connection.close()
-            self.object_manager.db_manager.connection = None
 
     def createInMemoryDBInstance(self, db_instance):
         metadata = json.dumps(db_instance.to_dict())

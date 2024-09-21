@@ -49,12 +49,6 @@ class DBInstanceService(DBO):
         self.dal = dal
         self.storageManager = StorageManager(DBInstanceModel.BASE_PATH)
 
-
-    def close_connections(self):
-        time.sleep(0.1) 
-        if hasattr(self.dal, 'close_connections'):
-            self.dal.close_connections()
-
     def create(self, **kwargs):
         # Perform validations
         # Validation.validate_db_instance_params(kwargs)
