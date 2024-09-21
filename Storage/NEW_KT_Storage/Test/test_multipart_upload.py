@@ -178,3 +178,103 @@ def test_convert_to_object_invalid_format(setup_service):
         service.convert_to_object(invalid_obj)  # Invalid format for parts data
 
 
+def test_abort_multipart_upload_success(setup_service):
+    service, _, storage_path = setup_service
+    upload_id = str(uuid.uuid4())
+    
+    # Mock data for the upload process
+    mock_multipart_upload = MagicMock()
+    mock_multipart_upload.parts = [{'FilePath': 'part1'}, {'FilePath': 'part2'}]
+    
+    with patch.object(service.multipart_manager.object_manager, 'get_from_memory', return_value='mocked_object'), \
+         patch.object(service, 'convert_to_object', return_value=mock_multipart_upload), \
+         patch.object(service.storage_manager, 'is_file_exist', return_value=True), \
+         patch.object(service.storage_manager, 'delete_file') as mock_delete, \
+         patch.object(service.multipart_manager, 'delete_multipart_upload') as mock_delete_multipart:
+        
+        # Execute the abort function
+        result = service.abort_multipart_upload(upload_id)
+        
+        # Assert the result message is correct
+        assert result == f"Upload with ID {upload_id} has been aborted successfully."
+        
+        # Ensure all files were deleted
+        assert mock_delete.call_count == 2
+        mock_delete.assert_any_call(os.path.join(storage_path, 'part1'))
+        mock_delete.assert_any_call(os.path.join(storage_path, 'part2'))
+        
+        # Ensure the multipart upload was removed from the database
+        mock_delete_multipart.assert_called_once_with(mock_multipart_upload)
+
+
+def test_abort_multipart_upload_invalid_upload_id(setup_service):
+    service, _, _ = setup_service
+    
+    # Simulate invalid upload_id by raising ValueError in validation
+    with patch('Service.Classes.MultiPartUploadService.validate_upload_id', side_effect=ValueError):
+        with pytest.raises(ValueError):
+            service.abort_multipart_upload('invalid_upload_id')
+
+
+def test_abort_multipart_upload_no_parts_found(setup_service):
+    service, _, _ = setup_service
+    upload_id = str(uuid.uuid4())
+    
+    # Mock the upload process with no parts
+    mock_multipart_upload = MagicMock()
+    mock_multipart_upload.parts = []
+    
+    with patch.object(service.multipart_manager.object_manager, 'get_from_memory', return_value='mocked_object'), \
+         patch.object(service, 'convert_to_object', return_value=mock_multipart_upload):
+        
+        # Expect ValueError when no parts are found
+        with pytest.raises(ValueError, match="No parts found for this upload."):
+            service.abort_multipart_upload(upload_id)
+
+
+def test_abort_multipart_upload_file_not_exist(setup_service):
+    service, _, storage_path = setup_service
+    upload_id = str(uuid.uuid4())
+    
+    # Mock data for the upload process
+    mock_multipart_upload = MagicMock()
+    mock_multipart_upload.parts = [{'FilePath': 'part1'}, {'FilePath': 'part2'}]
+    
+    with patch.object(service.multipart_manager.object_manager, 'get_from_memory', return_value='mocked_object'), \
+         patch.object(service, 'convert_to_object', return_value=mock_multipart_upload), \
+         patch.object(service.storage_manager, 'is_file_exist', return_value=False), \
+         patch.object(service.multipart_manager, 'delete_multipart_upload') as mock_delete_multipart:
+        
+        # Execute the abort function (file doesn't exist)
+        result = service.abort_multipart_upload(upload_id)
+        
+        # Assert the result message is correct
+        assert result == f"Upload with ID {upload_id} has been aborted successfully."
+        
+        # Ensure the multipart upload was removed from the database
+        mock_delete_multipart.assert_called_once_with(mock_multipart_upload)
+
+
+def test_abort_multipart_upload_file_deletion_failure(setup_service):
+    service, _, storage_path = setup_service
+    upload_id = str(uuid.uuid4())
+    
+    # Mock data for the upload process
+    mock_multipart_upload = MagicMock()
+    mock_multipart_upload.parts = [{'FilePath': 'part1'}, {'FilePath': 'part2'}]
+    
+    with patch.object(service.multipart_manager.object_manager, 'get_from_memory', return_value='mocked_object'), \
+         patch.object(service, 'convert_to_object', return_value=mock_multipart_upload), \
+         patch.object(service.storage_manager, 'is_file_exist', return_value=True), \
+         patch.object(service.storage_manager, 'delete_file', side_effect=OSError), \
+         patch.object(service.multipart_manager, 'delete_multipart_upload') as mock_delete_multipart:
+        
+        # Expect OSError to be raised when file deletion fails
+        with pytest.raises(OSError):
+            service.abort_multipart_upload(upload_id)
+        
+        # Ensure the multipart upload wasn't removed from the database due to file deletion failure
+        mock_delete_multipart.assert_not_called()
+
+
+

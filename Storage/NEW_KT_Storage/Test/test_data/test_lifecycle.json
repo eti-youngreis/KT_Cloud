@@ -18,7 +18,7 @@
         ],
         "expiration_days": 45,
         "transitions_days_GLACIER": 90,
-        "creation_date": "2024-09-20",
+        "creation_date": "2024-09-21",
         "lifecycle_policy_id": null
     }
 }
