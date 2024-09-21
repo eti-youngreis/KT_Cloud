@@ -2,7 +2,6 @@ from typing import Dict, Any, Optional
 import json
 import sqlite3
 
-
 from DB.NEW_KT_DB.DataAccess.DBManager import DBManager
  
 class ObjectManager:
