@@ -50,4 +50,3 @@ class ObjectManager:
     def get_all_objects_from_memory(self, object_name):
 
         return self.object_manager.get_all_objects_from_memory(object_name)
-

@@ -95,7 +95,6 @@ class StorageManager:
         :param dir_path: Path of the directory to create.
         """
         full_path = os.path.join(self.base_directory, dir_path)
-        print(full_path, "kkkkkkkkk")
         os.makedirs(full_path, exist_ok=True)
 
 

@@ -1,9 +1,8 @@
 import pytest
 import datetime
-import os
 from Storage.NEW_KT_Storage.DataAccess.VersionManager import VersionManager
 from Storage.NEW_KT_Storage.Service.Classes.VersionService import VersionService
-from Storage.NEW_KT_Storage.Models.VersionModel import Version
+
 @pytest.fixture
 def version_service():
     manager = VersionManager()
@@ -25,8 +24,6 @@ def valid_version_params():
 def version_id():
     return "v20230919120000"
 
-
-# Tests for the create method
 def test_create_valid(version_service, valid_version_params):
     '''
     Test valid creation of a version object.
@@ -34,7 +31,6 @@ def test_create_valid(version_service, valid_version_params):
     result = version_service.create(**valid_version_params)
     assert result["status"] == "success"
     assert result["message"] == "Version object created successfully"
-
 
 def test_create_missing_required_params(version_service):
     '''
@@ -51,7 +47,6 @@ def test_create_missing_required_params(version_service):
             size=1024
         )
 
-
 def test_create_invalid_size(version_service):
     '''
     Test that creating an object with a negative size raises a ValueError.
@@ -67,8 +62,6 @@ def test_create_invalid_size(version_service):
             size=-10
         )
 
-
-# Additional tests for the create method
 def test_create_with_default_values(version_service):
     '''
     Test that creating a version with some default values works.
@@ -85,33 +78,6 @@ def test_create_with_default_values(version_service):
         owner=None
     )
     assert result["status"] == "success"
-
-
-# def test_create_duplicate_version_id(version_service, valid_version_params):
-#     '''
-#     Test that creating a version with an existing version ID raises a ValueError.
-#     '''
-#     version_id = "v1"  # Define a specific version ID for testing
-#     valid_version_params["version_id"] = version_id  # Use the defined version ID
-#     version_service.create(**valid_version_params)  # Create first version
-
-# Tests for the get method
-
-
-
-# def test_get_version_not_found(version_service, version_id):
-#     '''
-#     Test retrieving a version that does not exist.
-#     '''
-#     with pytest.raises(ValueError):
-#         version_service.get("non-existent-bucket", "non-existent-object", version_id)
-#
-#
-#
-#     # Now try to create another version with the same version ID
-#     with pytest.raises(ValueError):
-#         version_service.create(**valid_version_params)  # Attempt to create duplicate
-
 
 def test_get_invalid_version_id_format(version_service):
     '''
@@ -150,7 +116,3 @@ def test_delete_missing_required_params(version_service):
     '''
     with pytest.raises(ValueError):
         version_service.delete(bucket_name="test-bucket", key=None, version_id="v20230919120000")
-
-
-
-#
