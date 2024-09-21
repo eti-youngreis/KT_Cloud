@@ -6,6 +6,7 @@ class BucketObjectManager:
 
     def __init__(self, db_file: str):
         '''Initialize ObjectManager with the database connection.'''
+        # create the path of db
         db_file += "\\" + "object.db"
         self.object_manager = ObjectManager(db_file)
         self.object_name = "Object"
