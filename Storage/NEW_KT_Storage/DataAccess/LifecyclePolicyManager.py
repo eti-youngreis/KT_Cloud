@@ -32,7 +32,7 @@ class LifecyclePolicyManager:
             print(f"Policy with name '{lifecycle_policy.policy_name}' already exists")
             raise ValueError(f"Policy with name '{lifecycle_policy.policy_name}' already exists")
         if self.storage_manager.is_file_exist(self.json_name):
-            data = self.read_to_json_file()
+            data = self.read_json_file()
             data[lifecycle_policy.policy_name] = lifecycle_policy.__dict__
             self.write_to_json_file(data)
         else:
@@ -42,14 +42,14 @@ class LifecyclePolicyManager:
         self.object_manager.save_in_memory(self.object_name, lifecycle_policy.to_sql())
 
     def get(self, policy_name):
-        data = self.read_to_json_file()
+        data = self.read_json_file()
         if policy_name in data:
             policy_data = data[policy_name]
             return LifecyclePolicy(**policy_data)
         return None
 
     def delete(self, policy_name):
-        data = self.read_to_json_file()
+        data = self.read_json_file()
         if policy_name in data:
             del data[policy_name]
             self.write_to_json_file(data)
@@ -61,7 +61,7 @@ class LifecyclePolicyManager:
             raise ValueError(f"Policy with name '{policy_name}' does not exist")
 
         # Proceed with update if policy exists
-        data = self.read_to_json_file()
+        data = self.read_json_file()
         data[policy_name] = lifecycle_update.__dict__
         self.write_to_json_file(data)
 
@@ -76,12 +76,12 @@ class LifecyclePolicyManager:
         self.object_manager.update_in_memory(self.object_name, update_statement, criteria)
 
     def describe(self, policy_id):
-        data = self.read_to_json_file()
+        data = self.read_json_file()
         return data[policy_id]
 
-    def read_to_json_file(self):
+    def read_json_file(self):
         if self.storage_manager.is_file_exist(self.json_name):
-            return self.storage_manager.read_to_json_file(self.json_name)
+            return self.storage_manager.read_json_file(self.json_name)
         return {}
 
     def write_to_json_file(self, data):

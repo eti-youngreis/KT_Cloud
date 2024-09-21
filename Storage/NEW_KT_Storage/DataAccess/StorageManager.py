@@ -69,7 +69,7 @@ class StorageManager:
         if os.path.exists(full_path):
             os.remove(full_path)
 
-    def read_to_json_file(self,file_path:str):
+    def read_json_file(self,file_path:str):
         full_path = os.path.join(self.base_directory, file_path)
         with open(full_path, 'r') as file:
             return json.load(file)
