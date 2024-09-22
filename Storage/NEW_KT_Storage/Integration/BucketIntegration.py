@@ -1,7 +1,7 @@
 
 # demonstrate all object functionallity
 
-print'''---------------------Start Of session----------------------'''
+print('''---------------------Start Of session----------------------''')
 print(current_date_time)
 
 print('''{current_date_time} deonstration of object XXX start''')
@@ -22,5 +22,5 @@ print(total_duration)
 
 print('''{current_date_time} deonstration of object XXX ended successfully''')
 print(current_date_time)
-print'''---------------------End Of session----------------------'''
+print('''---------------------End Of session----------------------''')
 print(total_duration)
