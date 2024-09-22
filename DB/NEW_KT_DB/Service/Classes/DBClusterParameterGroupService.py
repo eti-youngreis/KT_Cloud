@@ -45,7 +45,7 @@ class DBClusterParameterGroupService(DBO):
         """
         if not is_valid_user_group_name(group_name):
             raise ValueError(f"group_name {group_name} is not valid")
-        if self.dal.is_identifier_exist(group_name):
+        if self.dal.is_object_exist(group_name):
             raise ValueError(f"ParameterGroup with NAME '{group_name}' already exists.")
         group = DBClusterParameterGroup(group_name, group_family, description)
         parameter_group_dict=group.to_dict()
@@ -72,7 +72,7 @@ class DBClusterParameterGroupService(DBO):
         """
         if group_name == "default":
             raise ValueError("You can't delete a default parameter group")
-        if not self.dal.is_identifier_exist(group_name):
+        if not self.dal.is_object_exist(group_name):
             raise ValueError(f"Parameter Group '{group_name}' does not exist.")
         clusters = self.dal_cluster.get_all_clusters()
         for c in clusters:
@@ -160,7 +160,7 @@ class DBClusterParameterGroupService(DBO):
         parameter_group_dict=group.to_dict()
         parameter_group_dict['parameters']=parameters_in_parameter_group
         self.storage_manager.write_to_file(file_name, json.dumps(parameter_group_dict))
-        return {title: group_name}
+        return {title: group_name, 'parameters':json.dumps(parameters_in_parameter_group)}
 
     def describe(self, data: tuple) -> Dict:
         """

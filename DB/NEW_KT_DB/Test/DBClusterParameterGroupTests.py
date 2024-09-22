@@ -76,14 +76,14 @@ def test_create_parameter_group(parameter_group_controller, storage_manager):
     full_path = os.path.abspath(file_name)
     print(f"Full path of the file: {full_path}")
     # Check if the correct file was created
-    assert_file_exists(storage_manager, file_name)
+    assert_file_exist(storage_manager, file_name)
     
     # Check if the file content matches the expected result
     expected_data = {'group_name': group_name, 'group_family': group_family, 'description': description}
     assert_json_content(storage_manager, file_name, expected_data)
 
     # Cleanup
-    delete_file_if_exists(storage_manager, file_name)
+    storage_manager.delete_file(file_name)
 
 def test_create_existing_parameter_group(parameter_group_controller):
     group_name0=group_name+'0'
@@ -109,7 +109,7 @@ def test_delete_parameter_group(parameter_group_controller, storage_manager):
     create_parameter_group(parameter_group_controller, group_name1, "TestFamily", "Test Description")
 
     # Ensure the file exists before deletion
-    assert_file_exists(storage_manager, file_name)
+    assert_file_exist(storage_manager, file_name)
 
     # Delete the parameter group
     parameter_group_controller.delete_db_cluste_parameter_group(group_name1)
@@ -132,7 +132,7 @@ def test_delete_parameter_group_with_associated_cluster(parameter_group_controll
         parameter_group_controller.delete_db_cluste_parameter_group(group_name2)
 
     # Cleanup
-    delete_file_if_exists(storage_manager, file_name)
+    storage_manager.delete_file(file_name)
 
 def test_delete_nonexistent_parameter_group(parameter_group_controller):
     group_name = "NonExistentGroup"
@@ -152,7 +152,7 @@ def test_delete_default_parameter_group(parameter_group_controller, storage_mana
         parameter_group_controller.delete_db_cluste_parameter_group(group_name)
 
     # Cleanup
-    delete_file_if_exists(storage_manager, file_name)
+    storage_manager.delete_file(file_name)
 
 def test_modify_parameter_group(parameter_group_controller, storage_manager):
     group_name3=group_name+'3'
@@ -176,7 +176,7 @@ def test_modify_parameter_group(parameter_group_controller, storage_manager):
     assert_json_content(storage_manager, file_name, expected_parameters)
 
     # Cleanup
-    delete_file_if_exists(storage_manager, file_name)
+    storage_manager.delete_file(file_name)
 
 def test_modify_nonexistent_parameter_group(parameter_group_controller):
     group_name = "NonExistentGroup"
@@ -207,7 +207,7 @@ def test_modify_non_modifiable_parameter(parameter_group_controller, storage_man
         parameter_group_controller.modify_db_cluste_parameter_group(group_name4, new_parameters)
 
     # Cleanup
-    delete_file_if_exists(storage_manager, file_name)
+    storage_manager.delete_file(file_name)
 
 def test_modify_with_invalid_is_modifiable(parameter_group_controller, storage_manager):
     group_name5=group_name+'5'
@@ -226,7 +226,7 @@ def test_modify_with_invalid_is_modifiable(parameter_group_controller, storage_m
         parameter_group_controller.modify_db_cluste_parameter_group(group_name5, invalid_parameters)
 
     # Cleanup    
-    delete_file_if_exists(storage_manager, file_name)    
+    storage_manager.delete_file(file_name)
 
 def test_modify_with_invalid_apply_method(parameter_group_controller, storage_manager):
     group_name6=group_name+'6'
@@ -244,7 +244,7 @@ def test_modify_with_invalid_apply_method(parameter_group_controller, storage_ma
         parameter_group_controller.modify_db_cluste_parameter_group(group_name6, invalid_parameters)
 
     # Cleanup    
-    delete_file_if_exists(storage_manager, file_name) 
+    storage_manager.delete_file(file_name)
 
 def test_describe_parameter_group(parameter_group_controller, storage_manager):
     group_name7=group_name+'7'
@@ -263,7 +263,7 @@ def test_describe_parameter_group(parameter_group_controller, storage_manager):
 
 
     # Cleanup
-    delete_file_if_exists(storage_manager, file_name)
+    storage_manager.delete_file(file_name)
 
 def test_describe_nonexistent_parameter_group(parameter_group_controller):
     group_name = "NonExistentGroup"
@@ -285,25 +285,10 @@ def test_describe_group_without_parameter_group_name(parameter_group_controller,
     }
     for p in mock_parameter_groups.values():
         create_parameter_group(parameter_group_controller, p['group_name'], p['family'], p['description'])
-    # with patch.object(parameter_group_controller.service.dal, 'get_all_groups', return_value=mock_parameter_groups):
-    #     result = parameter_group_controller.describe_db_cluste_parameter_group()
-    # parameter_group_controller.dal.get_all_groups = lambda: mock_parameter_groups
-
     # Call the describe_group without a parameter_group_name
     result = parameter_group_controller.describe_db_cluste_parameter_group(max_records=max_records, marker=marker)
 
     # Check that the correct number of parameter groups are returned based on max_records
     assert len(result["DBClusterParameterGroup"]) == max_records
-    # for idx, p in enumerate(mock_parameter_groups.values()):
-    #     if idx >= max_records:
-    #         break
-    #     assert_parameter_group_details(result, idx, p['group_name'], p['family'], p['description'])
-        
-
-
     # Check if pagination marker is returned
     assert 'Marker' in result
-    # assert result['Marker'] == "Group3"
-    # for p in mock_parameter_groups.values():
-    #     file_name=generate_file_name_for_group(p['group_name'])
-    #     delete_file_if_exists(storage_manager, file_name)

@@ -28,7 +28,7 @@ class DBClusterParameterGroupManager:
     def get_all_groups(self):
         return self.object_manager.get_all_objects_from_memory(self.__class__.__name__[:-len("Manager")])
 
-    def is_identifier_exist(self, group_name):
+    def is_object_exist(self, group_name):
         result= self.object_manager.get_from_memory(self.__class__.__name__[:-len("Manager")], columns='*', criteria=f'{DBClusterParameterGroup.pk_column} = "{group_name}"')  
         if result !=[]:
             return True
