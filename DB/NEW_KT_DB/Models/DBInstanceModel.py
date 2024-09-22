@@ -43,7 +43,7 @@ class DBInstanceModel:
     def __init__(self, **kwargs):
 
         # Validate and set db_instance_identifier
-        if is_valid_db_instance_identifier(kwargs.get('db_instance_identifier'), 30):
+        if is_valid_db_instance_identifier(kwargs.get('db_instance_identifier'), 50):
             self.db_instance_identifier = kwargs['db_instance_identifier']
         else:
             raise ValueError("Invalid DB Instance Identifier")
