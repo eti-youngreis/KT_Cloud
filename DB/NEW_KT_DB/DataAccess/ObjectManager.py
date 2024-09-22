@@ -1,7 +1,8 @@
 from typing import Dict, Any, Optional
 import json
 import sqlite3
-from DBManager import DBManager
+
+from DB.NEW_KT_DB.DataAccess.DBManager import DBManager
  
 class ObjectManager:
     def __init__(self, db_file: str):
@@ -100,11 +101,10 @@ class ObjectManager:
         table_name = self._convert_object_name_to_management_table_name(object_name)
         return self.db_manager.get_all_data_from_table(table_name)
 
+
     @staticmethod
     def convert_object_attributes_to_dictionary(**kwargs):
-
         dict = {}
         for key, value in kwargs.items():
             dict[key] = value
-
         return dict
