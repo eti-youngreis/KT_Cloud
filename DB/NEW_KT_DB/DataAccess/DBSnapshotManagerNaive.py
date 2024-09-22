@@ -1,7 +1,7 @@
- from typing import Dict, Any
+from typing import Dict, Any
 import json
 import sqlite3
-from DB.NEW_KT_DB.Validation.DBSnapshotValidations import is_valid_db_instance_id
+from DB.NEW_KT_DB.Validation.DBSnapshotValidationsNaive import is_valid_db_instance_id
 
 class DBSnapshotManager:
     def __init__(self, db_file: str):

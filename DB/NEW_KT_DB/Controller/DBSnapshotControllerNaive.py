@@ -1,5 +1,5 @@
 from Service import DBSnapshotService
-from DB.NEW_KT_DB.Validation.DBSnapshotValidations import (
+from DB.NEW_KT_DB.Validation.DBSnapshotValidationsNaive import (
     is_valid_db_instance_id, 
     is_valid_db_snapshot_description, 
     is_valid_progress

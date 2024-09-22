@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Dict, Optional
 from DataAccess import ObjectManager
-from DB.NEW_KT_DB.Validation.DBSnapshotValidations import is_valid_db_instance_id, is_valid_db_snapshot_description, is_valid_progress, is_valid_date, is_valid_url_parameter
+from DB.NEW_KT_DB.Validation.DBSnapshotValidationsNaive import is_valid_db_instance_id, is_valid_db_snapshot_description, is_valid_progress, is_valid_date, is_valid_url_parameter
 
 class Snapshot:
 

@@ -65,7 +65,7 @@ import shutil
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..","..")))
 
-from DB.NEW_KT_DB.DataAccess.DBSnapshotManager import DBSnapshotManager
+from DB.NEW_KT_DB.DataAccess.DBSnapshotManagerNaive import DBSnapshotManager
 from Models import Snapshot
 from Service import DBClusterService
 from Validation import is_valid_db_instance_identifier, is_valid_db_snapshot_description, is_valid_progress

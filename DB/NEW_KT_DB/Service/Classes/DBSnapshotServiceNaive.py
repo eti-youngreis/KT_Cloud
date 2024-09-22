@@ -3,13 +3,13 @@ import shutil
 import os
 from typing import Dict, Optional
 from datetime import datetime
-from DB.NEW_KT_DB.DataAccess import DBSnapshotManager
+from DB.NEW_KT_DB.DataAccess import DBSnapshotManagerNaive
 from Models import Snapshot  # Changed to match your model class name
 from Abc import DBO
-from DB.NEW_KT_DB.Validation.DBSnapshotValidations import is_valid_db_instance_id, is_valid_db_snapshot_description, is_valid_progress
+from DB.NEW_KT_DB.Validation.DBSnapshotValidationsNaive import is_valid_db_instance_id, is_valid_db_snapshot_description, is_valid_progress
 
 class DBClusterService(DBO):
-    def __init__(self, dal: DBSnapshotManager):
+    def __init__(self, dal: DBSnapshotManagerNaive):
         self.dal = dal
     
     def create(self, db_instance_identifier: str, description: str, progress: str):
