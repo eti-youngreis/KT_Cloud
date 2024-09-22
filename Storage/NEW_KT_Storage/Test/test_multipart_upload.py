@@ -107,6 +107,31 @@ def test_list_parts_empty_upload_id(setup_service):
     with pytest.raises(ValueError):
         service.list_parts('invalid_upload_id')
 
+def test_list_parts_success(setup_service):
+    service, _, _ = setup_service
+    upload_id = str(uuid.uuid4())
+    
+    # Mock data for the parts of the multipart upload
+    mock_parts = [
+        {'PartNumber': 1, 'ETag': 'etag1'},
+        {'PartNumber': 2, 'ETag': 'etag2'}
+    ]
+    
+    # Mocking the object manager and the convert_to_object method
+    with patch.object(service.multipart_manager.object_manager, 'get_from_memory', return_value='mocked_object'), \
+         patch.object(service, 'convert_to_object', return_value=MagicMock(parts=mock_parts)):
+        
+        # Call the list_parts method
+        parts = service.list_parts(upload_id)
+        
+        # Assert that the parts list is returned correctly
+        assert len(parts) == 2
+        assert parts[0]['PartNumber'] == 1
+        assert parts[0]['ETag'] == 'etag1'
+        assert parts[1]['PartNumber'] == 2
+        assert parts[1]['ETag'] == 'etag2'
+
+
 
 def test_split_file_into_parts_large_file(setup_service, create_file):
     service, _, _ = setup_service

@@ -19,7 +19,7 @@ def db_setup():
     time.sleep(0.1)
 
 # Fixture for DBInstanceController
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="class")
 def db_instance_controller(db_setup):
     return DBInstanceController(db_setup)
 
