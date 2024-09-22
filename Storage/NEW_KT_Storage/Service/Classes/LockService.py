@@ -108,11 +108,11 @@ class LockService:
             # Add the expired lock's ID to the list for deletion
             expired_locks.append(expired_lock_id)  
             
-        print(f"(Background) Deleting expired locks: {expired_locks}")
         # Use delete_lock to remove 
         for lock_id in expired_locks:
             self.delete_lock(lock_id)
         
+        print(f"Background process for completed successfully with {len(expired_locks)} expired locks removed.")
         
     def start_lock_cleanup_scheduler(self):
         """Start a background thread that checks for expired locks every minute."""        

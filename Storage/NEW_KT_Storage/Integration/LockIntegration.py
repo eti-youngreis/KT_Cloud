@@ -63,9 +63,9 @@ time.sleep(20)
 # check if object is deletable
 print()
 start_time = datetime.now()
-print(f"{start_time} start checking if object '{object_key}' in bucket '{bucket_key}' is deleteable")
+print(f"{start_time} start checking if object '{object_key}' in bucket '{bucket_key}' is deletable")
 is_deletable = lock_controller.is_object_deletable(bucket_key=bucket_key, object_key=object_key)
-print(f"{datetime.now()} object '{object_key}' in bucket '{bucket_key}' is deleteable: {is_deletable}")
+print(f"{datetime.now()} object '{object_key}' in bucket '{bucket_key}' is deletable: {is_deletable}")
 end_time = datetime.now()
 total_duration = end_time - start_time
 print(f"total duration of deletable check is: '{total_duration}'")
