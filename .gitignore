@@ -8,4 +8,5 @@
 *.env
 *.csv
 */__pycache__/
+**/__pycache__/
 !mainDB.db
