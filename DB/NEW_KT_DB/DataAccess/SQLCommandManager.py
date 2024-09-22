@@ -118,7 +118,7 @@ class SQLCommandManager:
         create_table_query = """
         CREATE TABLE IF NOT EXISTS deleted_records_in_version (
             _record_id INTEGER NOT NULL,
-            snapshot_id INTEGER NOT NULL,
+            snapshot_id TEXT  NOT NULL,
             table_name TEXT NOT NULL,
             PRIMARY KEY (_record_id, snapshot_id)
         );
@@ -142,10 +142,10 @@ class SQLCommandManager:
                 conn.close()
 
     @staticmethod
-    def insert_deleted_record(db_path: str, record_id: int, snapshot_id: int, table_name: str):
+    def insert_deleted_record(db_path: str, record_id: int, snapshot_id: str, table_name: str):
         query = f"""
         INSERT INTO deleted_records_in_version (_record_id, snapshot_id, table_name)
-        VALUES ({record_id}, {snapshot_id}, '{table_name}');
+        VALUES ({record_id}, '{snapshot_id}', '{table_name}');
         """
         SQLCommandManager.execute_query(db_path, query)
 
@@ -167,6 +167,7 @@ class SQLCommandManager:
 
         try:
             conn = sqlite3.connect(db_path)
+            print(f"333333333333333Database created at path: {db_path}")
             conn.close()
         except sqlite3.Error as e:
             raise DatabaseCreationError(f"Error creating database: {e}")
