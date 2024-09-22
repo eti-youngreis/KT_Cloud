@@ -35,7 +35,7 @@ subnet_group_controller.create_db_subnet_group(
         vpc_id="vpc-12345678",
         db_subnet_group_arn="arn:aws:rds:us-west-2:123456789012:subgrp:subnet_group_1")
 
-print("Creation of \'subnet_group_1\' passed with now exceptions")
+print("Creation of \'subnet_group_1\' passed with no exceptions")
 print(datetime.now()-start_time)
 
 
@@ -46,7 +46,7 @@ print(f'''{start_time} retrieving \'subnet_group_1\'''')
 subnet_group_1 = subnet_group_controller.get_db_subnet_group('subnet_group_1')
 print(subnet_group_1.to_dict())
 
-print(f'''{datetime.now()} retrieving \'subnet_group_1\' passed with now exceptions, valid object returned''')
+print(f'''{datetime.now()} retrieving \'subnet_group_1\' passed with no exceptions, valid object returned''')
 print(datetime.now() - start_time_get)
 
 # list
