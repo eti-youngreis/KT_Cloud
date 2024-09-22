@@ -1,8 +1,8 @@
 from typing import Dict, Any
 import json
 import sqlite3
-from DataAccess import ObjectManager
-from Models.DBClusterModel import Cluster
+from NEW_KT_DB.DataAccess import ObjectManager
+from NEW_KT_DB.Models.DBClusterModel import Cluster
 from typing import Optional
 
 class DBClusterManager:
