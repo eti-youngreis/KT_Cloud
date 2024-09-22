@@ -3,9 +3,7 @@ import json
 import os
 import sys
 from typing import Optional, Dict
-# from DataAccess import ObjectManager
 from NEW_KT_DB.Service.Abc.DBO import DBO
-# from DB.KT_DB.Models.ParameterGroupModel import ParameterGroupModel
 from NEW_KT_DB.Validation.GeneralValidations import is_valid_user_group_name, is_valid
 from NEW_KT_DB.Models.DBClusterParameterGroupModel import DBClusterParameterGroup
 from NEW_KT_DB.DataAccess import DBClusterManager#, DBClusterParameterGroupManager
@@ -144,8 +142,6 @@ class DBClusterParameterGroupService(DBO):
         parameter_group = self.get(group_name)
         parameters_in_parameter_group=parameter_group[DBClusterParameterGroupService.column_index_mapping['parameters']]
         parameters_in_parameter_group=json.loads(parameters_in_parameter_group)
-        # print(f"parameter_group{parameter_group}")
-
         for new_parameter in parameters:
             is_valid(new_parameter['IsModifiable'], [True, False], 'IsModifiable')
             is_valid(new_parameter['ApplyMethod'], ['immediate', 'pending-reboot'], 'ApplyMethod')

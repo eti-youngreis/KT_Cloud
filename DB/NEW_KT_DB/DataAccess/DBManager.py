@@ -37,8 +37,8 @@ class DBManager:
             return results if results else None
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
-        finally:
-            self._close_connection(connection)
+        # finally:
+        #     self._close_connection(connection)
 
     def execute_query_with_single_result(self, query: str):
         '''Execute a given query and return a single result.'''
@@ -65,8 +65,8 @@ class DBManager:
         
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
-        finally:
-            self._close_connection(connection)
+        # finally:
+        #     self._close_connection(connection)
 
 
     def execute_query_without_results(self, query: str):
@@ -78,8 +78,8 @@ class DBManager:
             connection.commit()
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
-        finally:
-            self._close_connection(connection)
+        # finally:
+        #     self._close_connection(connection)
 
 
     def _execute_query_with_or_without_results(self, query: str):
@@ -95,8 +95,8 @@ class DBManager:
             return optional_results
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
-        finally:
-            self._close_connection(connection)
+        # finally:
+        #     self._close_connection(connection)
 
 
     def create_table(self, table_name, table_structure):
