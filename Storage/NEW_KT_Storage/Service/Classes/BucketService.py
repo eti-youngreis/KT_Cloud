@@ -44,12 +44,10 @@ class BucketService:
         if not BucketValidations.valid_type_paramters(bucket_name):
             raise BucketExceptions.InvalidBucketNameError(bucket_name)
 
-        if not BucketValidations.bucket_exists(self.buckets, bucket_name):
-            raise BucketExceptions.BucketNotFoundError(bucket_name)
-
         bucket = self.get(bucket_name)
         self.buckets.remove(bucket)
-        self.storage_manager.delete_directory(bucket_name)
+        self.storage_manager.delete_directory(f'buckets/{bucket_name}')
+        self.storage_manager.delete_directory(f'buckets/{bucket_name}/locks')
         self.bucket_manager.deleteInMemoryBucket(bucket)
 
     def get(self, bucket_name):
