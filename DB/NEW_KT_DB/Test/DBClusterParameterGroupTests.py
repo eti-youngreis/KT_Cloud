@@ -13,13 +13,18 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../.
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 from GeneralTests import *
 
+# Generic function for file name
+def generate_file_name_for_group (group_name):
+    return f'db_cluster_parameter_groups/db_cluster_parameter_group_{group_name}.json'
+
+group_name = "TestGroup"
+group_family = "TestFamily"
+description = "Test Description"
+file_name = generate_file_name_for_group(group_name)
+
 @pytest.fixture
 def parameter_group_manager():
     return DBClusterParameterGroupManager(':memory:')
-
-# @pytest.fixture
-# def cluster_manager():
-#     return DBClusterManager(':memory:')
 
 @pytest.fixture
 def cluster_manager():
@@ -40,10 +45,6 @@ def parameter_group_controller(parameter_group_service):
 # Generic function to create a parameter group
 def create_parameter_group(controller, group_name, group_family, description):
     return controller.create_db_cluster_parameter_group(group_name, group_family, description)
-
-# Generic function for file name
-def generate_file_name_for_group (group_name):
-    return f'db_cluster_parameter_groups/db_cluster_parameter_group_{group_name}.json'
 
 # Generic function to assert the parameter group's details 
 def assert_parameter_group_details(result, index, expected_group_name, expected_family, expected_description):
@@ -66,11 +67,6 @@ def assert_parameter_group_details(result, index, expected_group_name, expected_
         f"Expected Description to be '{expected_description}' but got '{parameter_group['Description']}'"
 
 def test_create_parameter_group(parameter_group_controller, storage_manager):
-    group_name = "TestGroup"
-    group_family = "TestFamily"
-    description = "Test Description"
-    file_name = generate_file_name_for_group(group_name)
-
     # Create the parameter group
     result = create_parameter_group(parameter_group_controller, group_name, group_family, description)
     assert result['DBClusterParameterGroupName'] == group_name
@@ -89,10 +85,7 @@ def test_create_parameter_group(parameter_group_controller, storage_manager):
     delete_file_if_exists(storage_manager, file_name)
 
 def test_create_existing_parameter_group(parameter_group_controller):
-    group_name = "TestGroup"
-    group_family = "TestFamily"
-    
-    # Ensure the group exists
+       # Ensure the group exists
     create_parameter_group(parameter_group_controller, group_name, group_family, "Test Description")
     
     # Test if exception is raised when trying to create an existing group
@@ -106,26 +99,7 @@ def test_create_parameter_group_with_invalid_name(parameter_group_controller):
     with pytest.raises(ValueError, match=f"group_name {invalid_group_name} is not valid"):
         create_parameter_group(parameter_group_controller, invalid_group_name, "ValidFamily", "Valid Description")
 
-# def test_delete_parameter_group(parameter_group_controller):
-#     group_name = "TestGroup"
-#     file_name = generate_file_name_for_group(group_name)
-
-#     # Create the parameter group
-#     create_parameter_group(parameter_group_controller, group_name, "TestFamily", "Test Description")
-
-#     # Ensure the file exists before deletion
-#     assert_file_exists(file_name)
-
-#     # Delete the parameter group
-#     parameter_group_controller.delete_db_cluste_parameter_group(group_name)
-
-#     # Check if the file was deleted
-#     assert not os.path.exists(file_name), f"Expected file {file_name} was not deleted."
-
 def test_delete_parameter_group(parameter_group_controller, storage_manager):
-    group_name = "TestGroup"
-    file_name = generate_file_name_for_group(group_name)
-
     # Create the parameter group
     create_parameter_group(parameter_group_controller, group_name, "TestFamily", "Test Description")
 
@@ -139,10 +113,7 @@ def test_delete_parameter_group(parameter_group_controller, storage_manager):
     assert not os.path.exists(file_name), f"Expected file {file_name} was not deleted."
 
 def test_delete_parameter_group_with_associated_cluster(parameter_group_controller, storage_manager):
-    group_name = "TestGroup"
-    file_name = generate_file_name_for_group(group_name)
-
-    # Create the parameter group
+     # Create the parameter group
     create_parameter_group(parameter_group_controller, group_name, "TestFamily", "Test Description")
 
     # Mock get_all_clusters to return a cluster associated with the parameter group
@@ -162,27 +133,9 @@ def test_delete_nonexistent_parameter_group(parameter_group_controller):
     with pytest.raises(ValueError, match=f"Parameter Group '{group_name}' does not exist."):
         parameter_group_controller.delete_db_cluste_parameter_group(group_name)
 
-# def test_delete_parameter_group_with_associated_cluster(parameter_group_controller, cluster_manager):
-#     group_name = "TestGroup"
-#     file_name = generate_file_name_for_group(group_name)
-
-#     # Create the parameter group
-#     create_parameter_group(parameter_group_controller, group_name, "TestFamily", "Test Description")
-
-#     # Associate the parameter group with a cluster
-#     cluster_manager.create_cluster({"cluster_id": "TestCluster", "group_name": group_name})
-
-#     # Attempt to delete the parameter group, expect an exception due to association with cluster
-#     with pytest.raises(ValueError, match="Can't delete parameter group associated with any DB clusters"):
-#         parameter_group_controller.delete_db_cluste_parameter_group(group_name)
-
-#     # Cleanup
-#     delete_file_if_exists(file_name)
-
 def test_delete_default_parameter_group(parameter_group_controller, storage_manager):
     group_name = "default"
-    file_name = generate_file_name_for_group(group_name)
-
+   
     # Create the default parameter group
     create_parameter_group(parameter_group_controller, group_name, "DefaultFamily", "Default group description")
     
@@ -194,11 +147,8 @@ def test_delete_default_parameter_group(parameter_group_controller, storage_mana
     delete_file_if_exists(storage_manager, file_name)
 
 def test_modify_parameter_group(parameter_group_controller, storage_manager):
-    group_name = "TestGroup"
-    file_name = generate_file_name_for_group(group_name)
-
     # Create a parameter group
-    create_parameter_group(parameter_group_controller, group_name, "TestFamily", "Test Description")
+    create_parameter_group(parameter_group_controller, group_name, group_family, description)
     
     # Modify the parameter group with new parameters
     parameters = [
@@ -226,11 +176,8 @@ def test_modify_nonexistent_parameter_group(parameter_group_controller):
         parameter_group_controller.modify_db_cluste_parameter_group(group_name, parameters)
 
 def test_modify_non_modifiable_parameter(parameter_group_controller, storage_manager):
-    group_name = "TestGroup"
-    file_name = generate_file_name_for_group(group_name)
-
-    # Create the parameter group
-    create_parameter_group(parameter_group_controller, group_name, "TestFamily", "Test Description")
+       # Create the parameter group
+    create_parameter_group(parameter_group_controller, group_name, group_family, description)
 
     # Define a non-modifiable parameter
     parameters = [
@@ -249,11 +196,8 @@ def test_modify_non_modifiable_parameter(parameter_group_controller, storage_man
     delete_file_if_exists(storage_manager, file_name)
 
 def test_modify_with_invalid_is_modifiable(parameter_group_controller, storage_manager):
-    group_name = "TestGroup"
-    file_name = generate_file_name_for_group(group_name)
-
     # Create the parameter group
-    create_parameter_group(parameter_group_controller, group_name, "TestFamily", "Test Description")
+    create_parameter_group(parameter_group_controller, group_name, group_family, description)
 
 
     
@@ -285,21 +229,16 @@ def test_modify_with_invalid_apply_method(parameter_group_controller, storage_ma
     delete_file_if_exists(storage_manager, file_name) 
 
 def test_describe_parameter_group(parameter_group_controller, storage_manager):
-    group_name = "TestGroup"
-    family="TestFamily"
-    description="Test Description"
-    file_name = generate_file_name_for_group(group_name)
-
     # Create a parameter group
-    create_parameter_group(parameter_group_controller, group_name, family, description)
+    create_parameter_group(parameter_group_controller, group_name, group_family, description)
  
     # Describe the parameter group
     result = parameter_group_controller.describe_db_cluste_parameter_group(group_name)
     # Check the result contains the correct description
-    assert_parameter_group_details(result, 0, group_name, family, description)
+    assert_parameter_group_details(result, 0, group_name, group_family, description)
     result = parameter_group_controller.describe_db_cluste_parameter_group()
     # Check the result contains the correct description
-    assert_parameter_group_details(result, 0, group_name, family, description)
+    assert_parameter_group_details(result, 0, group_name, group_family, description)
 
 
     # Cleanup
@@ -347,28 +286,3 @@ def test_describe_group_without_parameter_group_name(parameter_group_controller,
     for p in mock_parameter_groups.values():
         file_name=generate_file_name_for_group(p['group_name'])
         delete_file_if_exists(storage_manager, file_name)
-
-
-# def test_describe_group_without_any_parameters(parameter_group_controller):
-#     # title = "Default Title"
-
-#     # Mock the return of get_all_groups method to simulate multiple parameter groups
-#     mock_parameter_groups = {
-#         "Group1": {"group_name": "Group1", "family": "TestFamily1", "description": "Description 1"},
-#         "Group2": {"group_name": "Group2", "family": "TestFamily2", "description": "Description 2"},
-#     }
-#     # for p in mock_parameter_groups.values():
-#     #     create_parameter_group(parameter_group_controller, p['group_name'], p['family'], p['description'])
-
-#     parameter_group_controller.get_all_groups = lambda: mock_parameter_groups
-
-#     # Call describe_group without any parameters (using default values)
-#     result = parameter_group_controller.describe_db_cluste_parameter_group()
-
-#     # Verify that all parameter groups are returned (up to max_records default which is 100)
-#     assert len(result["DBClusterParameterGroup"]) == len(mock_parameter_groups)
-#     assert result["DBClusterParameterGroup"][0]['DBClusterParameterGroupName'] == "Group1"
-#     assert result["DBClusterParameterGroup"][1]['DBClusterParameterGroupName'] == "Group2"
-
-#     # Check that marker is not returned since there are less than 100 records
-#     assert 'Marker' not in result
