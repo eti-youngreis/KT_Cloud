@@ -17,7 +17,6 @@ class ObjectManager:
         if table_structure == 'default':
             table_structure = f'object_id {pk_column_data_type} PRIMARY KEY {pk_constraint},type_object TEXT NOT NULL,metadata TEXT NOT NULL'
         self.db_manager.create_table(table_name, table_structure)
-        print("creating")
 
     def _insert_object_to_management_table(self, table_name, object_info, columns_to_populate=None):
 

@@ -8,10 +8,8 @@ class DBClusterParameterGroupManager:
     def __init__(self, db_file: str):
         '''Initialize ObjectManager with the database connection.'''
         self.object_manager = ObjectManager(db_file)
-        print("hashem!")
         self.object_manager.create_management_table(
         DBClusterParameterGroup.get_object_name(), DBClusterParameterGroup.table_structure, pk_column_data_type='TEXT')
-        print("hashem!1")
 
 
     def createInMemoryDBCluster(self, data):
