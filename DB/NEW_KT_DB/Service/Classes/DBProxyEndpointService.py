@@ -119,7 +119,7 @@ class DBProxyEndpointService(DBO):
             raise DBProxyEndpointNotFoundException(DBProxyEndpointName)
         
         # Check if state is valid
-        endpoint_state = self.dal.select_objects_attributes_in_col_value_dict(DBProxyEndpointName, ['Status'])[0]['Status']
+        endpoint_state = self.dal.get_object_attributes_dict(DBProxyEndpointName, ['Status'])[0]['Status']
         if endpoint_state != 'available':
             raise InvalidDBProxyEndpointStateException(DBProxyEndpointName, endpoint_state)
         
@@ -142,7 +142,7 @@ class DBProxyEndpointService(DBO):
             self.storage.rename_file(old_file_name, new_file_name)
             
             # Change in memorys
-            db_proxy_endpoint_data = self.dal.select_objects_attributes_in_col_value_dict(DBProxyEndpointName)[0]
+            db_proxy_endpoint_data = self.dal.get_object_attributes_dict(DBProxyEndpointName)[0]
             db_proxy_endpoint_data = {**db_proxy_endpoint_data, 'DBProxyEndpointName':NewDBProxyEndpointName}
             self.dal.delete(DBProxyEndpointName)
             self.dal.create(db_proxy_endpoint_data)
