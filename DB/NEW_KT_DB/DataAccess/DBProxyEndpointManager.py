@@ -71,7 +71,7 @@ class DBProxyEndpointManager:
         # Select one object by its unique name
         if name:
             error = f"db proxy endpoint with name '{name}' not found"
-            data = self.object_manager.get_from_memory(DBProxyEndpoint.object_name, columns, criteria=f'{DBProxyEndpoint.pk_column} = "{name}"')
+            data = self.object_manager.get_from_memory(DBProxyEndpoint.object_name, columns, criteria=f"{DBProxyEndpoint.pk_column} = '{name}'")
         # Select all objects
         else:
             error = f"there is no objects in table of {DBProxyEndpoint.object_name}"
