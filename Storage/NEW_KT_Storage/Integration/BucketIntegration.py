@@ -26,6 +26,14 @@ end_time = datetime.now()
 total_duration = end_time - start_time
 print(f"the total duration of create bucket is: '{total_duration}'")
 
+# test create bucket
+print()
+start_time = datetime.now()
+pytest.main(['-v', 'Storage/NEW_KT_Storage/Test/BucketTest.py::test_create_bucket_valid'])
+print(f"{datetime.now()} test create bucket successfully")
+end_time = datetime.now()
+total_duration = end_time - start_time
+print(f"the total duration of test bucket is: '{total_duration}'")
 
 # get
 print()
@@ -37,6 +45,15 @@ region: {bucket_example.region}, created_at: {bucket_example.create_at}'")
 end_time = datetime.now()
 total_duration = end_time - start_time
 print(f"the total duration of get bucket is: '{total_duration}'")
+
+# test get bucket
+print()
+start_time = datetime.now()
+pytest.main(['-v', 'Storage/NEW_KT_Storage/Test/BucketTest.py::test_get_with_valid_bucket'])
+print(f"{datetime.now()} test get bucket successfully")
+end_time = datetime.now()
+total_duration = end_time - start_time
+print(f"the total duration of test bucket is: '{total_duration}'")
 
 
 # delete
@@ -54,15 +71,6 @@ print()
 start_time = datetime.now()
 pytest.main(['-v', 'Storage/NEW_KT_Storage/Test/BucketTest.py::test_delete_bucket_existing'])
 print(f"{datetime.now()} test delete bucket successfully")
-end_time = datetime.now()
-total_duration = end_time - start_time
-print(f"the total duration of test bucket is: '{total_duration}'")
-
-# test create bucket
-print()
-start_time = datetime.now()
-pytest.main(['-v', 'Storage/NEW_KT_Storage/Test/BucketTest.py::test_create_bucket_valid'])
-print(f"{datetime.now()} test create bucket successfully")
 end_time = datetime.now()
 total_duration = end_time - start_time
 print(f"the total duration of test bucket is: '{total_duration}'")
