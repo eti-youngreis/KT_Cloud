@@ -6,6 +6,8 @@ from DB.NEW_KT_DB.Controller.DBInstanceController import DBInstanceController
 from DB.NEW_KT_DB.Controller.DBSnapshotController import DBSnapshotController
 from DB.NEW_KT_DB.DataAccess.DBInstanceManager import DBInstanceManager
 from DB.NEW_KT_DB.Service.Classes.DBInstanceService import DBInstanceService
+import time
+
 
 print("---------------------Start Of session----------------------")
 start_integration_date_time = datetime.now()
@@ -26,15 +28,17 @@ db_instance_controller.create_db_instance(db_instance_identifier='exampleDbInsta
 end_creation_date_time = datetime.now()
 print(f"{end_creation_date_time} DBInstance 'exampleDbInstance' created successfully")
 print(f"Total creation time: {end_creation_date_time - start_creation_date_time}")
+time.sleep(2)
 
 print("\n---------------------Describe DBInstance----------------------")
 start_description_date_time = datetime.now()
 print(f"{start_description_date_time} going to describe db DBInstance 'exampleDbInstance'")
 description = db_instance_controller.describe_db_instance(db_instance_identifier='exampleDbInstance')
-print(f"DB instance 'exampleDbInstance' description: {description}")
+print(f"\nDB instance 'exampleDbInstance' description: {description}\n")
 end_description_date_time = datetime.now()
 print(f"{end_description_date_time} DBInstance 'exampleDbInstance' described successfully")
 print(f"Total description time: {end_description_date_time - start_description_date_time}")
+time.sleep(2)
 
 print("\n---------------------Modify DBInstance----------------------")
 start_modification_date_time = datetime.now()
@@ -43,15 +47,17 @@ db_instance_controller.modify_db_instance(db_instance_identifier='exampleDbInsta
 end_modification_date_time = datetime.now()
 print(f"{end_modification_date_time} DBInstance 'exampleDbInstance' modified successfully")
 print(f"Total modification time: {end_modification_date_time - start_modification_date_time}")
+time.sleep(2)
 
 print("\n---------------------Describe Modified DBInstance----------------------")
 start_description_date_time = datetime.now()
 print(f"{start_description_date_time} going to describe db DBInstance 'exampleDbInstance' after modification")
 description = db_instance_controller.describe_db_instance(db_instance_identifier='exampleDbInstance')
-print(f"DB instance 'exampleDbInstance' description after modification: {description}")
+print(f"\nDB instance 'exampleDbInstance' description after modification: {description}\n")
 end_description_date_time = datetime.now()
 print(f"{end_description_date_time} DBInstance 'exampleDbInstance' described successfully")
 print(f"Total description time: {end_description_date_time - start_description_date_time}")
+time.sleep(2)
 
 print("\n---------------------Create Database----------------------")
 start_creation_database_date_time = datetime.now()
@@ -60,6 +66,7 @@ db_instance_controller.execute_query(db_instance_identifier='exampleDbInstance',
 end_creation_database_date_time = datetime.now()
 print(f"{end_creation_database_date_time} DBInstance 'exampleDbInstance' database 'exampledb' created successfully")
 print(f"Total creation database time: {end_creation_database_date_time - start_creation_database_date_time}")
+time.sleep(2)
 
 print("\n---------------------Create Table----------------------")
 start_creation_table_date_time = datetime.now()
@@ -69,6 +76,7 @@ db_instance_controller.execute_query(db_instance_identifier='exampleDbInstance',
 end_creation_table_date_time = datetime.now()
 print(f"{end_creation_table_date_time} DBInstance 'exampleDbInstance' table 'exampleTable' created successfully")
 print(f"Total creation table time: {end_creation_table_date_time - start_creation_table_date_time}")
+time.sleep(2)
 
 print("\n---------------------Insert Data----------------------")
 start_insert_data_date_time = datetime.now()
@@ -78,15 +86,17 @@ db_instance_controller.execute_query(db_instance_identifier='exampleDbInstance',
 end_insert_data_date_time = datetime.now()
 print(f"{end_insert_data_date_time} DBInstance 'exampleDbInstance' data inserted successfully")
 print(f"Total insert data time: {end_insert_data_date_time - start_insert_data_date_time}")
+time.sleep(2)
 
 print("\n---------------------Select Data----------------------")
 start_select_data_date_time = datetime.now()
 print(f"{start_select_data_date_time} going to select data in DBInstance 'exampleDbInstance' in database 'exampledb'")
 results = db_instance_controller.execute_query(db_instance_identifier='exampleDbInstance', query='SELECT * FROM exampleTable', db_name="exampledb")
 end_select_data_date_time = datetime.now()
-print(f"results of the select query: {results}")
+print(f"\nresults of the select query: {results}\n")
 print(f"{end_select_data_date_time} DBInstance 'exampleDbInstance' data selected successfully")
 print(f"Total select data time: {end_select_data_date_time - start_select_data_date_time}")
+time.sleep(2)
 
 print("\n---------------------Create Snapshot----------------------")
 start_creation_snapshot_date_time = datetime.now()
@@ -95,6 +105,7 @@ db_snapshot_controller.create_snapshot('exampleDbInstance', 'example_snapshot_1'
 end_creation_snapshot_date_time = datetime.now()
 print(f"{end_creation_snapshot_date_time} DBInstance 'exampleDbInstance' snapshot created successfully")
 print(f"Total creation snapshot time: {end_creation_snapshot_date_time - start_creation_snapshot_date_time}")
+time.sleep(2)
 
 print("\n---------------------Delete Record----------------------")
 start_delete_record_date_time = datetime.now()
@@ -104,15 +115,17 @@ db_instance_controller.execute_query(db_instance_identifier='exampleDbInstance',
 end_delete_record_date_time = datetime.now()
 print(f"{end_delete_record_date_time} in DBInstance 'exampleDbInstance' record deleted successfully")
 print(f"Total delete record time: {end_delete_record_date_time - start_delete_record_date_time}")
+time.sleep(2)
 
 print("\n---------------------Select After Delete----------------------")
 start_select_data_date_time = datetime.now()
 print(f"{start_select_data_date_time} Check that the data has been successfully deleted in table exampleTable in Snapshot example_snapshot_1")
 results = db_instance_controller.execute_query(db_instance_identifier='exampleDbInstance', query='SELECT * FROM exampleTable', db_name="exampledb")
 end_select_data_date_time = datetime.now()
-print(f"results of the select query: {results}")
+print(f"\nresults of the select query: {results}\n")
 print(f"{end_select_data_date_time} DBInstance 'exampleDbInstance' data selected successfully")
 print(f"Total select data time: {end_select_data_date_time - start_select_data_date_time}")
+time.sleep(2)
 
 print("\n---------------------Create Another Snapshot----------------------")
 start_creation_snapshot_date_time = datetime.now()
@@ -121,15 +134,17 @@ db_snapshot_controller.create_snapshot('exampleDbInstance', 'example_snapshot_2'
 end_creation_snapshot_date_time = datetime.now()
 print(f"{end_creation_snapshot_date_time} DBInstance 'exampleDbInstance' snapshot created successfully")
 print(f"Total creation snapshot time: {end_creation_snapshot_date_time - start_creation_snapshot_date_time}")
+time.sleep(2)
 
 print("\n---------------------Select Data Again----------------------")
 start_select_data_date_time = datetime.now()
 print(f"{start_select_data_date_time} going to select data in DBInstance 'exampleDbInstance' in database 'exampledb'")
 results = db_instance_controller.execute_query(db_instance_identifier='exampleDbInstance', query='SELECT * FROM exampleTable', db_name="exampledb")
 end_select_data_date_time = datetime.now()
-print(f"results of the select query: {results}")
+print(f"\nresults of the select query: {results}\n")
 print(f"{end_select_data_date_time} DBInstance 'exampleDbInstance' data selected successfully")
 print(f"Total select data time: {end_select_data_date_time - start_select_data_date_time}")
+time.sleep(2)
 
 print("\n---------------------Restore Snapshot----------------------")
 start_restore_snapshot_date_time = datetime.now()
@@ -138,15 +153,17 @@ db_snapshot_controller.restore_snapshot('exampleDbInstance', 'example_snapshot_1
 end_restore_snapshot_date_time = datetime.now()
 print(f"{end_restore_snapshot_date_time} DBInstance 'exampleDbInstance' restored from snapshot 'example_snapshot_1' successfully")
 print(f"Total restore snapshot time: {end_restore_snapshot_date_time - start_restore_snapshot_date_time}")
+time.sleep(2)
 
 print("\n---------------------Select After Restore----------------------")
 start_select_data_date_time = datetime.now()
 print(f"{start_select_data_date_time} Checking that the data exists in the Snapshot to which we restored, Snapshot example_snapshot_1")
 results = db_instance_controller.execute_query(db_instance_identifier='exampleDbInstance', query='SELECT * FROM exampleTable', db_name="exampledb")
 end_select_data_date_time = datetime.now()
-print(f"results of the select query: {results}")
+print(f"\nresults of the select query: {results}\n")
 print(f"{end_select_data_date_time} DBInstance 'exampleDbInstance' data selected successfully")
 print(f"Total select data time: {end_select_data_date_time - start_select_data_date_time}")
+time.sleep(2)
 
 print("\n---------------------Delete Snapshot----------------------")
 start_deletion_snapshot_date_time = datetime.now()
@@ -155,15 +172,17 @@ db_snapshot_controller.delete_snapshot('exampleDbInstance', 'example_snapshot_2'
 end_creation_snapshot_date_time = datetime.now()
 print(f"{end_creation_snapshot_date_time} DBInstance 'exampleDbInstance' snapshot deleted successfully")
 print(f"Total deletion snapshot time: {end_creation_snapshot_date_time - start_deletion_snapshot_date_time}")
+time.sleep(2)
 
 print("\n---------------------List Snapshots----------------------")
 start_list_snapshots_date_time = datetime.now()
 print(f"{start_list_snapshots_date_time} going to list db DBInstance 'exampleDbInstance' snapshots")
 snapshots = db_snapshot_controller.list_snapshots('exampleDbInstance')
-print(f"DB instance 'exampleDbInstance' snapshots: {snapshots}")
+print(f"\nDB instance 'exampleDbInstance' snapshots: {snapshots}\n")
 end_list_snapshots_date_time = datetime.now()
 print(f"{end_list_snapshots_date_time} DBInstance 'exampleDbInstance' snapshots listed successfully")
 print(f"Total list snapshots time: {end_list_snapshots_date_time - start_list_snapshots_date_time}")
+time.sleep(2)
 
 print("\n---------------------Delete Another Snapshot----------------------")
 start_deletion_snapshot_date_time = datetime.now()
@@ -172,6 +191,7 @@ db_snapshot_controller.delete_snapshot('exampleDbInstance', 'example_snapshot_1'
 end_deletion_snapshot_date_time = datetime.now()
 print(f"{end_deletion_snapshot_date_time} DBInstance 'exampleDbInstance' snapshot 'example_snapshot_1' deleted successfully")
 print(f"Total deletion snapshot time: {end_deletion_snapshot_date_time - start_deletion_snapshot_date_time}")
+time.sleep(2)
 
 print("\n---------------------Delete DBInstance----------------------")
 start_deletion_date_time = datetime.now()
@@ -180,19 +200,22 @@ db_instance_controller.delete_db_instance(db_instance_identifier='exampleDbInsta
 end_deletion_date_time = datetime.now()
 print(f"{end_deletion_date_time} DBInstance 'exampleDbInstance' deleted successfully")
 print(f"Total deletion time: {end_deletion_date_time - start_deletion_date_time}")
+time.sleep(2)
 
 print("\n---------------------Attempt to Get Deleted DBInstance----------------------")
 start_get_deleted_instance_time = datetime.now()
-print(f"{start_get_deleted_instance_time} Attempting to get deleted DBInstance 'exampleDbInstance'")
+print(f"{start_get_deleted_instance_time} Attempting to get deleted DBInstance 'exampleDbInstance'\n")
 try:
     deleted_instance = db_instance_controller.get_db_instance(db_instance_identifier='exampleDbInstance')
     print("Error: DBInstance 'exampleDbInstance' still exists after deletion")
 except Exception as e:
     print(f"Success: Unable to get deleted DBInstance 'exampleDbInstance'. Error: {str(e)}")
 end_get_deleted_instance_time = datetime.now()
-print(f"Total attempt time: {end_get_deleted_instance_time - start_get_deleted_instance_time}")
+print(f"\nTotal attempt time: {end_get_deleted_instance_time - start_get_deleted_instance_time}")
+time.sleep(2)
 
 print("\n---------------------End Of session----------------------")
 end_integration_date_time = datetime.now()
 print(f"{end_integration_date_time} demonstration of object DBInstance ended successfully")
 print(f"Total integration time: {end_integration_date_time - start_integration_date_time}")
+time.sleep(2)
