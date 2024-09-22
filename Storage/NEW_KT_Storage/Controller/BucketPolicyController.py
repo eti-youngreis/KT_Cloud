@@ -8,8 +8,8 @@ class BucketPolicyController:
         self.service = service
 
 
-    def create_bucket_policy(self, bucket_name = None, permissions = [], allow_versions = True):
-        return self.service.create(bucket_name, permissions, allow_versions)
+    def create_bucket_policy(self, bucket_name = None, actions = [], allow_versions = True):
+        return self.service.create(bucket_name, actions, allow_versions)
 
 
     def delete_bucket_policy(self, bucket_name):
@@ -20,8 +20,8 @@ class BucketPolicyController:
     #     self.service.put(updates)
     
 
-    def modify_bucket_policy(self, bucket_name, update_permmisions=[],allow_versions=None, action=None):
-        self.service.modify(bucket_name, update_permmisions, allow_versions, action)
+    def modify_bucket_policy(self, bucket_name, update_actions=[],allow_versions=None, action=None):
+        self.service.modify(bucket_name = bucket_name, update_actions = update_actions, allow_versions = allow_versions, action = action)
 
 
     def get_bucket_policy(self, bucket_name):

@@ -5,7 +5,7 @@
 *.db
 ".idea/workspace.xml" 
 *.pyc
-*.db
-DB/csvs/
-abseil-cpp
 *.env
+*.csv
+*/__pycache__/
+!mainDB.db

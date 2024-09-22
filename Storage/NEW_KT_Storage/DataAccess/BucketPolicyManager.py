@@ -11,7 +11,7 @@ from Models.BucketPolicyModel import BucketPolicy
 
 class BucketPolicyManager:
 
-    def __init__(self, policy_path: str = "Bucket_policy.json", db_path:str = "BucketPolicy.db", base_directory: str = "D:/New folder/server"):
+    def __init__(self, policy_path: str = "Bucket_policy.json", db_path:str = "BucketPolicyDB.db", base_directory: str = "D:/New folder/server"):
         """
         Initializes the BucketPolicyManager with paths for the policy JSON file and the in-memory database.
 
@@ -165,7 +165,7 @@ class BucketPolicyManager:
                 json.dump(data, file, indent=4, ensure_ascii=False)
         
         # Update the in-memory database
-        permissions = json.dumps(bucket_policy['permissions'])
-        updates = f"permissions = '{permissions}'"
+        actions = json.dumps(bucket_policy['actions'])
+        updates = f"actions = '{actions}'"
         criteria = f"bucket_name = '{bucket_policy['bucket_name']}'"
         self.object_manager.update_in_memory("BucketPolicy", updates=updates, criteria=criteria)
