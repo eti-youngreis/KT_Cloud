@@ -3,13 +3,11 @@ from sortedcontainers import SortedList
 import sys
 import threading
 import time
-
 sys.path.append('../KT_Cloud')
 from Storage.NEW_KT_Storage.Models.LockModel import LockModel
 from Storage.NEW_KT_Storage.DataAccess.LockManager import LockManager
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 import Storage.NEW_KT_Storage.Validation.LockValidations as LockValidations
-
 
 
 class LockService:
@@ -31,7 +29,7 @@ class LockService:
         lock_id = f"{bucket_key}.{object_key}"
         
         # Check validations
-        LockValidations.validate_lock_does_not_exists(lock_id, self.lock_map)
+        LockValidations.validate_lock_does_not_exist(lock_id, self.lock_map)
         LockValidations.validate_lock_mode(lock_mode)
         LockValidations.validate_time_amount(amount, unit)
 
