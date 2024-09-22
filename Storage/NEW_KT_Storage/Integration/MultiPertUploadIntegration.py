@@ -19,7 +19,7 @@ print(f'{start_time_session} deonstration of object multipart start')
 # create
 start_time= datetime.now()
 print(f"{start_time} going to create multipart for object name example")
-upload_id=multipartUploadController.initiate_upload('my_bucket','new-example-integration.txt')
+upload_id=multipartUploadController.initiate_upload('my_bucket','new-example.txt')
 end_time=datetime.now()
 print(f"{end_time} multipart for object name example created successfully with upload_id {upload_id}")
 total_duration = end_time - start_time
@@ -52,16 +52,16 @@ print(f"{end_time} file parts for object name example aborted successfully")
 total_duration = end_time - start_time
 print(total_duration)
 
-#test for abort_file_parts
+# #test for abort_file_parts
 print("running test for function")
-pytest.main(['-v', 'Storage/NEW_KT_Storage/Test/test_multipart_upload.py::test_abort_multipart_upload_invalid_upload_id'])
+pytest.main(['-q', 'Storage/NEW_KT_Storage/Test/test_multipart_upload.py::test_abort_multipart_upload_invalid_upload_id'])
 
 
 
 # create
 start_time= datetime.now()
 print(f"{start_time} going to create multipart for object name example")
-upload_id=multipartUploadController.initiate_upload('my_bucket','new-example-integration.txt')
+upload_id=multipartUploadController.initiate_upload('my_bucket','new-example.txt')
 end_time=datetime.now()
 print(f"{end_time} multipart for object name example created successfully with upload_id {upload_id}")
 total_duration = end_time - start_time
@@ -69,7 +69,7 @@ print(total_duration)
 
 #test for create
 print("running test for function")
-pytest.main(['-v', 'Storage/NEW_KT_Storage/Test/test_multipart_upload.py::test_initiate_multipart_upload'])
+pytest.main(['-q', 'Storage/NEW_KT_Storage/Test/test_multipart_upload.py::test_initiate_multipart_upload'])
 
 #upload_file_parts
 start_time= datetime.now()
@@ -82,7 +82,7 @@ print(total_duration)
 
 #test for upload_file_parts
 print("running test for function")
-pytest.main(['-v', 'Storage/NEW_KT_Storage/Test/test_multipart_upload.py::test_upload_file_parts'])
+pytest.main(['-q', 'Storage/NEW_KT_Storage/Test/test_multipart_upload.py::test_upload_file_parts'])
 
 #list_parts
 start_time= datetime.now()
@@ -95,7 +95,7 @@ print(total_duration)
 
 #test for list_parts
 print("running test for function")
-pytest.main(['-v', 'Storage/NEW_KT_Storage/Test/test_multipart_upload.py::test_list_parts_success'])
+pytest.main(['-q', 'Storage/NEW_KT_Storage/Test/test_multipart_upload.py::test_list_parts_success'])
 
 # comlete_file_parts
 start_time= datetime.now()
@@ -108,7 +108,7 @@ print(total_duration)
 
 #test for comlete_file_parts
 print("running test for function")
-pytest.main(['-v', 'Storage/NEW_KT_Storage/Test/test_multipart_upload.py::test_complete_upload_missing_parts'])
+pytest.main(['-q', 'Storage/NEW_KT_Storage/Test/test_multipart_upload.py::test_complete_upload_missing_parts'])
 
 
 end_time_session=datetime.now()
