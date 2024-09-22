@@ -20,7 +20,7 @@ class LockService:
         self.locks_IDs_list = SortedList([(lock.lock_id, lock.retain_until) for lock in existing_locks], key=lambda x: x[1])
         # Initialize lock_map with existing locks-> lock_id : LockModel
         self.lock_map = {lock.lock_id: lock for lock in existing_locks}
-        print('(Background) start_lock_cleanup_scheduler')
+        print("Background process: starting lock cleanup scheduler")
         self.start_lock_cleanup_scheduler()
 
 
