@@ -11,16 +11,18 @@ from DB.NEW_KT_DB.Exceptions.DBProxyEndpointExceptions import *
 from DB.NEW_KT_DB.Exceptions.GeneralExeptions import InvalidParamException
 
 
-
-
 class DBProxyEndpointService(DBO):
+    
+    
     def __init__(self, dal: DBProxyEndpointManager, storage:StorageManager, db_proxy_service):
         self.dal:DBProxyEndpointManager = dal
         self.storage:StorageManager = storage
         self.db_proxy_service = db_proxy_service
    
+    
     def _convert_endpoint_name_to_endpoint_file_name(self, DBProxyEndpointName:str):
         return "endpoint_"+DBProxyEndpointName
+    
     
     def _get_json(self, object_dict):
         def custom_serializer(obj):
@@ -37,13 +39,13 @@ class DBProxyEndpointService(DBO):
         '''Create a new DBProxy endpoint.'''
         # Validations
         if not validate_name(DBProxyName):
-            raise InvalidParamException("DBProxyName is not valid")
+            raise InvalidParamException('DBProxyName', DBProxyName, "in pattern: [a-zA-Z][a-zA-Z0-9]*(-[a-zA-Z0-9]+)*")
         if not validate_name(DBProxyEndpointName):
-            raise InvalidParamException("DBProxyEndpointName is not valid") 
+            raise InvalidParamException('DBProxyEndpointName', DBProxyEndpointName, "in pattern: [a-zA-Z][a-zA-Z0-9]*(-[a-zA-Z0-9]+)*") 
         if not validate_target_role(TargetRole):
-            raise InvalidParamException(f"TargetRole {TargetRole} is not valid, must be 'READ_WRITE'|'READ_ONLY'")
+            raise InvalidParamException("TargetRole", TargetRole, "'READ_WRITE'|'READ_ONLY'")
         if Tags and not validate_tags_structure(Tags):
-            raise InvalidParamException(f"Tags {Tags} are not valid, must be List of dicts [{{'Key': 'string','Value': 'string'}}]")
+            raise InvalidParamException("Tags",Tags, "List of dicts [{{'Key': 'string','Value': 'string'}}]")
         if not self.db_proxy_service.is_exists(DBProxyName):
             raise DBProxyNotFoundException(DBProxyName)
         if self.dal.is_exists(DBProxyEndpointName):
@@ -67,7 +69,7 @@ class DBProxyEndpointService(DBO):
         
         # Validations
         if not validate_name(DBProxyEndpointName):
-            raise InvalidParamException("DBProxyEndpointName is not valid") 
+            raise InvalidParamException('DBProxyEndpointName', DBProxyEndpointName, "in pattern: [a-zA-Z][a-zA-Z0-9]*(-[a-zA-Z0-9]+)*") 
         db_proxy_endpoint_description = self.describe(DBProxyEndpointName)
         if not self.dal.is_exists(DBProxyEndpointName):
             raise DBProxyEndpointNotFoundException(DBProxyEndpointName)
@@ -95,7 +97,7 @@ class DBProxyEndpointService(DBO):
         
         # Validations
         if Filters and not check_filters_validation(Filters):
-            raise InvalidParamException("filters are not valid, filters must be list of dicts [{'Name': 'string','Values': ['string',]},]")
+            raise InvalidParamException("Filters", Filters, "list of dicts [{'Name': 'string','Values': ['string',]},]")
         if DBProxyEndpointName and not self.dal.is_exists(DBProxyEndpointName):
             raise DBProxyEndpointNotFoundException(DBProxyEndpointName)
         
@@ -104,8 +106,6 @@ class DBProxyEndpointService(DBO):
                 DBProxyEndpointName,
                 Filters)
 
-    
-
 
     def modify(self, DBProxyEndpointName:str, NewDBProxyEndpointName:Optional[str] = None,
                TargetRole:Optional[str] = None, Tags:Optional[str] = None, Status:Optional[str] = None):
@@ -113,7 +113,7 @@ class DBProxyEndpointService(DBO):
         
         # Validations
         if not validate_name(DBProxyEndpointName):
-            raise InvalidParamException("DBProxyEndpointName is not valid") 
+            raise InvalidParamException('DBProxyEndpointName', DBProxyEndpointName, "in pattern: [a-zA-Z][a-zA-Z0-9]*(-[a-zA-Z0-9]+)*") 
         
         if not self.dal.is_exists(DBProxyEndpointName):
             raise DBProxyEndpointNotFoundException(DBProxyEndpointName)
@@ -130,7 +130,7 @@ class DBProxyEndpointService(DBO):
             # Validations
             
             if not validate_name(NewDBProxyEndpointName):
-                raise InvalidParamException("newDBProxyEndpointName is not valid") 
+                raise InvalidParamException('NewDBProxyEndpointName', NewDBProxyEndpointName, "in pattern: [a-zA-Z][a-zA-Z0-9]*(-[a-zA-Z0-9]+)*") 
             
             if self.dal.is_exists(NewDBProxyEndpointName):
                 raise DBProxyEndpointAlreadyExistsException(NewDBProxyEndpointName) 

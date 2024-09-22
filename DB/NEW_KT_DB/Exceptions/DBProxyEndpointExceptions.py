@@ -1,6 +1,7 @@
 from DB.NEW_KT_DB.Exceptions.GeneralExeptions import *
 from DB.NEW_KT_DB.Models.DBProxyEndpointModel import DBProxyEndpoint
 
+
 class DBProxyNotFoundException(ObjectNotFoundException):
     def __init__(self, endpoint_name: str):
         super().__init__(DBProxyEndpoint.object_name, endpoint_name)
@@ -16,9 +17,6 @@ class DBProxyNotFoundException(ObjectNotFoundException):
 class DBProxyEndpointAlreadyExistsException(ObjectAlreadyExistsException):
     def __init__(self, endpoint_name: str):
         super().__init__(DBProxyEndpoint.object_name, endpoint_name)
-
-class DBProxyEndpointQuotaExceededException(Exception):
-    pass
 
 class InvalidDBProxyStateException(InvalidObjectStateException):
     def __init__(self, endpoint_name: str, object_state:str):

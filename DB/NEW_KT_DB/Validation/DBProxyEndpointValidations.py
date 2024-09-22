@@ -1,6 +1,6 @@
-
-
 import re
+
+
 def validate_target_role(TargetRole:str) -> bool:
     '''Check if target role is valid target role must be 'READ_WRITE'|'READ_ONLY'.'''
     return TargetRole in ['READ_WRITE','READ_ONLY']

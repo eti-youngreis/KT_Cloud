@@ -4,6 +4,8 @@ from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 import json
 
 class DBProxyEndpoint:
+    
+    
     pk_column = 'DBProxyEndpointName'
     object_name = 'DBProxyEndpoint'
     foreign_table_name = 'db_proxies' # will change by DBProxy.object_name
@@ -18,6 +20,7 @@ class DBProxyEndpoint:
     IsDefault BOOLEAN NOT NULL,
     FOREIGN KEY (DBProxyName) REFERENCES {foreign_table_name}(DBProxyName)"""
 
+    
     def __init__(self,  
                  DBProxyEndpointName:str,
                  DBProxyName:str, 
@@ -37,9 +40,7 @@ class DBProxyEndpoint:
         self.IsDefault = IsDefault
         self.Status = 'available'
 
-       
-
-
+    
     def to_dict(self) -> Dict:
         '''Retrieve the data of the DB cluster as a dictionary.'''
 

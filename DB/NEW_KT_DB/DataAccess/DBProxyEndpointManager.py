@@ -2,6 +2,8 @@ from typing import Dict, Any, Optional, List
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 from DB.NEW_KT_DB.Models.DBProxyEndpointModel import DBProxyEndpoint
 import json
+
+
 class DBProxyEndpointManager:
     
     # Static functions
@@ -11,6 +13,7 @@ class DBProxyEndpointManager:
         columns_arr = [line.split()[0] for line in table_structure.split('\n') if line.strip() and line.split()[0] != 'FOREIGN']
         return columns_arr
     
+    
     @staticmethod
     def _to_sql(data_dict):
         "convert a dict to values tuple for inserting to sql db"
@@ -18,7 +21,7 @@ class DBProxyEndpointManager:
                            for v in data_dict.values()) + ')'
         return values
     
-
+    
     def __init__(self, object_manager:ObjectManager):
         self.object_manager:ObjectManager = object_manager
         self.object_manager.create_management_table(DBProxyEndpoint.object_name, DBProxyEndpoint.table_structure)
@@ -28,7 +31,8 @@ class DBProxyEndpointManager:
         """insert object to table"""
         values = DBProxyEndpointManager._to_sql(db_proxy_endpoint_description)
         self.object_manager.save_in_memory(DBProxyEndpoint.object_name, values)
-
+    
+    
     def get(self, name: str):
         """convert data to object"""
         data_mapping = self.get_object_attributes_dict(name)[0]
@@ -48,6 +52,7 @@ class DBProxyEndpointManager:
             Raises:
                 ValueError: If no data is found based on the criteria
             """
+        
         def map_query_data_to_col_value_dict(data, cols: Optional[List[str]] = None):
             """
             Help function. Maps the given data to a dictionary where keys are column names and values are data values.
@@ -87,7 +92,7 @@ class DBProxyEndpointManager:
         else:
             raise ValueError(error)
 
-    
+
     def is_exists(self, name):
         """check if object exists in table"""
         try:
