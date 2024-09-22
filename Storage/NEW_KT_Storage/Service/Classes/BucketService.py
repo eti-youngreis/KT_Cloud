@@ -1,6 +1,7 @@
 from Storage.NEW_KT_Storage.Models.BucketModel import Bucket
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 from Storage.NEW_KT_Storage.DataAccess.BucketManager import BucketManager
+from Storage.NEW_KT_Storage.Controller.BucketPolicyController import BucketPolicyController
 import Storage.NEW_KT_Storage.Validation.BucketValidations as BucketValidations
 import Storage.NEW_KT_Storage.Exceptions.BucketExceptions as BucketExceptions
 
@@ -37,6 +38,7 @@ class BucketService:
             self.buckets.append(new_bucket)
             self.storage_manager.create_directory(f'buckets/{bucket_name}')
             self.storage_manager.create_directory(f'buckets/{bucket_name}/locks')
+            BucketPolicyController().create_bucket_policy(bucket_name)
             self.bucket_manager.createInMemoryBucket(new_bucket)
 
     def delete(self, bucket_name):
@@ -48,6 +50,7 @@ class BucketService:
         self.buckets.remove(bucket)
         self.storage_manager.delete_directory(f'buckets/{bucket_name}')
         self.storage_manager.delete_directory(f'buckets/{bucket_name}/locks')
+        BucketPolicyController().delete_bucket_policy(bucket_name)
         self.bucket_manager.deleteInMemoryBucket(bucket)
 
     def get(self, bucket_name):
