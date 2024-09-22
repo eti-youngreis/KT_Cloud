@@ -4,10 +4,10 @@ import json
 import sys
 import os
 
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from DataAccess.ObjectManager import ObjectManager
 import Exceptions.DBSubnetGroupExceptions as DBSubnetGroupExceptions
 
 class DBSubnetGroup:
@@ -34,7 +34,6 @@ class DBSubnetGroup:
                 self.db_subnet_group_arn = kwargs.get("db_subnet_group_arn", None)
             else:
                 if args:
-                    print("\033[1;31mWarning: args received in DBSubnetGroup constructor, validations can't be easily performed\033[0m")
                     try:
                         self.db_subnet_group_name = args[0]
                         self.db_subnet_group_description = args[1]
@@ -47,7 +46,8 @@ class DBSubnetGroup:
                         raise DBSubnetGroupExceptions.MissingRequiredArgument()
                 else:
                     raise DBSubnetGroupExceptions.MissingRequiredArgument()
-
+            if not hasattr(self, "status"):
+                self.status = None
             # if subnets weren't provided
             if not self.subnets:
                 self.subnets = []

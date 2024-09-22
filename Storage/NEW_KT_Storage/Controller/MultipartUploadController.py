@@ -22,13 +22,19 @@ class MultipartUploadController:
         self.service.upload_file_parts(upload_id, file_path, part_size)
 
     def list_parts(self, upload_id: str):
-        # Retrieves the list of parts associated with the given upload_id.
+        """
+        Retrieves the list of parts associated with the given upload_id.
+        """
         return self.service.list_parts(upload_id)
+    
+    def abort_multipart_upload(self, upload_id: str):
+        """
+        Retrieves the list of parts associated with the given upload_id.
+        """
+        return self.service.abort_multipart_upload(upload_id)
     
     def complete_upload(self, upload_id: str, bucket_name: str = None, object_key: str = None) -> str:
         """
         Completes the upload process and merges all parts into a single file.
         """
         return self.service.complete_upload(upload_id, bucket_name, object_key)
-    
-

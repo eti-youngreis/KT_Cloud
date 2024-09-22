@@ -52,8 +52,6 @@ class DBInstanceService(DBO):
         # Perform validations
         # Validation.validate_db_instance_params(kwargs)
         
-        # Create DBInstance model
-
         db_instance = DBInstanceModel(**kwargs)
         
         self.storageManager.create_directory(db_instance.db_instance_identifier)
@@ -65,9 +63,6 @@ class DBInstanceService(DBO):
       
         # Save to management table
         self.dal.createInMemoryDBInstance(db_instance)
-
-        
-        
 
         return db_instance
 
@@ -319,11 +314,11 @@ class DBInstanceService(DBO):
                 return SQLCommandHelper.insert(db_instance._last_node_of_current_version, query, db_instance._last_node_of_current_version.dbs_paths_dic[db_name])
             elif query_type == 'CREATE':
                 if 'TABLE' in query.upper():
-                    print(db_instance._last_node_of_current_version.dbs_paths_dic)
-                    print(db_name)
                     return SQLCommandHelper.create_table(query, db_instance._last_node_of_current_version.dbs_paths_dic[db_name])
                 elif 'DATABASE' in query.upper():
-                    return SQLCommandHelper.create_database(db_name, db_instance._last_node_of_current_version, db_instance.endpoint)
+                    result = SQLCommandHelper.create_database(db_name, db_instance._last_node_of_current_version, db_instance.endpoint)
+                    self.dal.modifyDBInstance(db_instance)
+                    return result
             elif query_type == 'DELETE':
                 node_queue = [db_instance._node_subSnapshot_dic[id] for id in db_instance._current_version_ids_queue]
                 return SQLCommandHelper.delete_record(node_queue, query, db_name)
@@ -356,7 +351,11 @@ class SQLCommandHelper:
             match = re.search(r'DELETE\s+FROM\s+(\w+)', query, re.IGNORECASE)
         elif query_type == 'INSERT':
             match = re.search(r"INSERT\s+INTO\s+(\w+)", query, re.IGNORECASE)
-
+        elif query_type == 'SELECT':
+            match = re.search(r"SELECT\s+.*?\s+FROM\s+(\w+)", query, re.IGNORECASE)
+        else:
+            raise ValueError(f"Unsupported query type: {query_type}")
+    
         if match:
             return match.group(1)
         else:
@@ -376,17 +375,17 @@ class SQLCommandHelper:
         table_name = SQLCommandHelper._extract_table_name_from_query('SELECT', query)
 
         deleted_records = SQLCommandHelper._union_deleted_records(queue, table_name)
+
         deleted_records_map = {}
         for _record_id, snapshot_id, _ in deleted_records:
             if _record_id not in deleted_records_map:
                 deleted_records_map[_record_id] = set()
-            deleted_records_map[_record_id].add(snapshot_id)
+            deleted_records_map[_record_id].add(uuid.UUID(snapshot_id))
 
         for node in queue:
             db_path = node.dbs_paths_dic.get(db_id)
             if db_path:
                 results, result_columns = SQLCommandManager.execute_select(db_path, query, table_name)
-                
                 filtered_results = []
                 for row in results:
                     record_id = row[0]
