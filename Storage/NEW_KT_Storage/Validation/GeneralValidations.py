@@ -6,6 +6,10 @@ def string_in_dict(string: str, values: dict) -> bool:
     '''Check if the string is in dict.'''
     return string in values
 
+def string_not_in_dict(string: str, values: dict) -> bool:
+    '''Check if the string is in dict.'''
+    return string not in values
+
 def is_length_in_range(string: str, min_length: int, max_length: int) -> bool:
     '''Check if the string is valid based on the length.'''
     return min_length <= len(string) <= max_length
