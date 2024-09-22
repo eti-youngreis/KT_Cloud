@@ -1,5 +1,7 @@
+import json
 import os
 import shutil
+from typing import Dict, Callable
 
 
 class StorageManager:
@@ -23,6 +25,22 @@ class StorageManager:
         full_path = os.path.join(self.base_directory, file_path)
         with open(full_path, 'w') as file:
             file.write(content)
+
+
+    def get_file_content(self, file_path: str, part_size: int = None, offset: int = 0) -> str:
+        """
+        Retrieve content from a file, with optional part size and offset.
+        :param file_path: Path of the file to read from.
+        :param part_size: Number of bytes to read from the file (default is None, meaning read the entire file).
+        :param offset: Position in the file to start reading from (default is 0).
+        :return: The content read from the file.
+        """
+        full_path = os.path.join(self.base_directory, file_path)
+        with open(full_path, 'r') as part_file:
+            part_file.seek(offset)
+            if part_size:
+                return part_file.read(part_size)
+            return part_file.read()
 
 
     def rename_file(self, old_file_path: str, new_file_path: str) -> None:
@@ -66,6 +84,47 @@ class StorageManager:
         full_path = os.path.join(self.base_directory, file_path)
         if os.path.exists(full_path):
             os.remove(full_path)
+
+    def read_json_file(self,file_path:str):
+        full_path = os.path.join(self.base_directory, file_path)
+        with open(full_path, 'r') as file:
+            return json.load(file)
+
+    def write_to_json_file(self, file_path: str, data: Dict, default_converter: Callable = None):
+        """
+        Write JSON data to a file with optional custom converter.
+
+        :param file_path: Path to the file where JSON will be written
+        :param data: Dictionary to be written as JSON
+        :param default_converter: Optional function to convert non-serializable objects
+        """
+        full_path = os.path.join(self.base_directory, file_path)
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+
+        with open(full_path, 'w', encoding='utf-8') as file:
+            if default_converter:
+                json.dump(data, file, indent=4, ensure_ascii=False, default=default_converter)
+            else:
+                json.dump(data, file, indent=4, ensure_ascii=False)
+
+    def write_to_file(self, file_path: str, content: str = '', mode: str = 'w'):
+        """
+        Writes content to a file. If mode is 'w', it will overwrite the file.
+        If mode is 'a', it will append to the file.
+        """
+        if mode not in ['w', 'a']:
+            raise ValueError("Invalid mode. Use 'w' for overwrite and 'a' for append.")
+        
+        full_path = os.path.join(self.base_directory, file_path)
+        if os.path.exists(full_path):
+            try:
+                with open(full_path, mode) as file:
+                    file.write(content)
+            except IOError as e:
+                raise Exception(f"Error writing to file: {e}")
+        else:
+            raise FileNotFoundError(f"The file '{file_path}' does not exist.")
+        
 
     # ---- DIRECTORY OPERATIONS ---- #
 

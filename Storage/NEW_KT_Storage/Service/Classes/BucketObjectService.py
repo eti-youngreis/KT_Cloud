@@ -1,72 +1,134 @@
-from typing import Dict, Optional
-from KT_Cloud.Storage.NEW_KT_Storage.Models import AclModel
-from Abc import STO
-from Validation import Validation
-from DataAccess import BucketObjectManager
+from Storage.NEW_KT_Storage.DataAccess.BucketObjectManager import BucketObjectManager
+from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
+from Storage.NEW_KT_Storage.Models.BucketObjectModel import BucketObject
+from Storage.NEW_KT_Storage.Service.Abc.STO import STO
+import Storage.NEW_KT_Storage.Validation.BucketObjectValiditions as validation
+# from Storage.NEW_KT_Storage.DataAccess.VersionManager import VersionManager
+# from Storage.NEW_KT_Storage.Service.Classes.ObjectVersioningService import ObjectVersioningService
+# from Storage.NEW_KT_Storage.Controller.ObjectVersioningController import ObjectVersioningController
+
+
 
 class BucketObjectService(STO):
-    def __init__(self, dal: BucketObjectManager):
-        self.dal = dal
-    
-    
-    # validations here
-    
+    def __init__(self, path):
+        self.dal = BucketObjectManager(path)
+        self.storage_manager = StorageManager(path)
+        # versions:
+        # manager = VersionManager(path+"\\version.db",path)
+        # service = ObjectVersioningService(manager)
+        # self.versions_controller = ObjectVersioningController(service)
 
-    def create(self, **attributes):
+
+    def validation_for_object(self, bucket_name, object_key):
+        if bucket_name is None:
+            raise ValueError("bucket_name is required, cant be None")
+        if object_key is None:
+            raise ValueError("object_key is required, cant be None")
+        if not validation.is_bucket_name_valid(bucket_name):
+            raise ValueError("Incorrect bucket name")
+        if not validation.is_bucket_object_name_valid(object_key):
+            raise ValueError("Incorrect object key")
+        if not self.storage_manager.is_directory_exist(bucket_name):
+            raise ValueError("Bucket not found")
+
+
+    def create(self, bucket_name, object_key,content=''):
         '''Create a new BucketObject.'''
-        # create object in code using BucketObjectModel.init()- assign all **attributes
-        # create physical object as described in task
-        # save in memory using BucketObjectManager.createInMemoryBucketObject() function
-        pass
+
+        #  validation
+        self.validation_for_object(bucket_name, object_key)
+        
+        full_path = bucket_name + "\\" + object_key
+        if self.storage_manager.is_file_exist(full_path):
+            raise ValueError("Object already exist")
+
+        # create physical object
+        self.storage_manager.create_file(full_path, content)
+
+        # save object in memory
+        bucket_object = BucketObject(bucket_name, object_key)
+        self.dal.createInMemoryBucketObject(bucket_object)
 
 
-    def delete(self):
+    def delete(self, bucket_name, object_key, version_id=None):
         '''Delete an existing BucketObject.'''
-        # assign None to code object
-        # delete physical object
-        # delete from memory using BucketObjectManager.deleteInMemoryBucketObject() function- send criteria using self attributes
-        pass
+
+        #  validation
+        self.validation_for_object(bucket_name=bucket_name, object_key=object_key)
+        if not self.storage_manager.is_file_exist(bucket_name + "\\" + object_key):
+            raise ValueError("Object not found")
+
+        if version_id is None:
+            # delete from memory using BucketObjectManager
+            self.dal.deleteInMemoryBucketObject(bucket_name, object_key)
+
+            # delete physical object
+            path = bucket_name + '\\' + object_key
+            self.storage_manager.delete_file(path)
+
+        else:
+            pass
+            # call the delete function of version
+            # self.versions_controller.delete_version_object(bucket_name,object_key,version_id)
 
 
-    def describe(self):
-        '''Describe the details of BucketObject.'''
-        # use BucketObjectManager.describeBucketObject() function
-        pass
-
-
-    def put(self, **updates):
+    def put(self,bucket_name, object_key,content='',version_id=None):
         '''Modify an existing BucketObject.'''
-        # update object in code
-        # modify physical object
-        # update object in memory using BucketObjectManager.modifyInMemoryBucketObject() function- send criteria using self attributes
-        pass
+        '''Add an object to the bucket and if the object exists then delete the old object and add the new one'''
+
+        #  validation
+        self.validation_for_object(bucket_name, object_key)
+
+        if version_id is None:
+            # Deletes the old object if it exists
+            full_path = bucket_name + "\\" + object_key
+            if self.storage_manager.is_file_exist(full_path):
+                self.delete(bucket_name, object_key)
+
+            # Add the object
+            self.storage_manager.create_file(full_path, content)
+            bucket_object = BucketObject(bucket_name, object_key)
+            self.dal.createInMemoryBucketObject(bucket_object)
+        else:
+            # call the create functions of version
+            # self.versions_controller.create_version_object(bucket_name, object_key,content)
+            pass
 
 
-    def get(self):
-        '''get code object.'''
-        # return real time object
-        pass
+    def get(self, bucket_name, object_key, version_id=None):
+        '''get object.'''
+
+        #  validation
+        self.validation_for_object(bucket_name=bucket_name, object_key=object_key)
+        if not self.storage_manager.is_file_exist(bucket_name + "\\" + object_key):
+            raise ValueError("Object not found")
+
+        if version_id is None:
+            object= self.dal.describeBucketObject(bucket_name + object_key)
+            object_id, bucket_id, object_key, encryption_id, lock_id,created_at = object[0]
+            return BucketObject(bucket_name=bucket_id, object_key=object_key,
+                                          encryption_id=encryption_id, lock_id=lock_id)
 
 
+        else:
+            pass
+            # call the function of get_version from version_controller
+            # self.versions_controller.get_version_object(bucket_name,object_key,version_id)
 
 
-class ACLService:
-    def create(self, acl_object):
-        # קריאה לניהול אובייקט ושימוש בפונקציה של insert_proxy
-        KT_Storage.ObjectManager.insert_proxy(acl_object)
+    def get_all(self, bucket_name):
+        '''get all objects'''
 
-    def get(self, acl_object_id):
-        # קריאה לפונקציה שמביאה אובייקט
-        return KT_Storage.ObjectManager.get_proxy(acl_object_id)
+        #  validation
+        if bucket_name is None or not validation.is_bucket_name_valid(bucket_name):
+            raise ValueError("Incorrect bucket name")
+        if not self.storage_manager.is_directory_exist(bucket_name):
+            raise ValueError("Bucket not found")
+        if self.storage_manager.list_files_in_directory(bucket_name)==[]:
+            raise ValueError("There are no objects in the bucket")
 
-    def delete(self, acl_object_id):
-        # מחיקה של אובייקט
-        KT_Storage.ObjectManager.delete_proxy(acl_object_id)
-
-    def modify(self, acl_object):
-        # עדכון אובייקט קיים
-        KT_Storage.ObjectManager.update_proxy(acl_object)
-
-    def describe(self, acl_object_id):
-        # מתארים את האובייקט
-        return KT_Storage.ObjectManager.describe_proxy(acl_object_id)
+        objects=self.dal.getAllObjects(bucket_name)
+        for index in range(len(objects)):
+            object_id,bucket_id,object_key,encryption_id,lock_id,created_at=objects[index]
+            objects[index]=BucketObject(bucket_name=bucket_id,object_key=object_key,encryption_id=encryption_id,lock_id=lock_id)
+        return objects
