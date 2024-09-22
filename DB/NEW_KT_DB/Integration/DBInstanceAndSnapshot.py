@@ -104,7 +104,7 @@ print(f'Total select data time: {
 # create snapshot
 start_creation_snapshot_date_time = datetime.now()
 print('''{start_creation_snapshot_date_time} going to create db DBInstance snapshot "example"''')
-db_snapshot_controller.create_snapshot('example', 'example_snapshot')
+db_snapshot_controller.create_snapshot('example', 'example_snapshot_2')
 end_creation_snapshot_date_time = datetime.now()
 print('''{end_
       creation_snapshot_date_time} DBInstance "example" snapshot created successfully''')
@@ -121,6 +121,26 @@ print('''{end_delete_record_date_time} DBInstance "example" record deleted succe
 print(f'Total delete record time: {
       end_delete_record_date_time - start_delete_record_date_time}')
 
+#select 
+start_select_data_date_time = datetime.now()
+print('''{start_select_data_date_time} Check that the data has been successfully deleted in table example in Snapshot example_snapshot_1''')
+results = db_instance_controller.execute_query(
+    db_instance_identifier='example', query='SELECT * FROM example', db_name="exampledb")
+end_select_data_date_time = datetime.now()
+print('''results of the select query: {results}''')
+print('''{end_select_data_date_time} DBInstance "example" data selected successfully''')
+print(f'Total select data time: {
+      end_select_data_date_time - start_select_data_date_time}')
+
+#create snapshot
+start_creation_snapshot_date_time = datetime.now()
+print('''{start_creation_snapshot_date_time} going to create db DBInstance snapshot "example_snapshot_2"''')
+db_snapshot_controller.create_snapshot('example', 'example_snapshot_2')
+end_creation_snapshot_date_time = datetime.now()
+print('''{end_
+      creation_snapshot_date_time} DBInstance "example" snapshot created successfully''')
+print(f'Total creation snapshot time: {
+      end_creation_snapshot_date_time - start_creation_snapshot_date_time}')
 
 # restore snapshot
 start_restore_snapshot_date_time = datetime.now()
@@ -132,6 +152,27 @@ print('''{end_restore_snapshot_date_
       time} DBInstance "example" restored from snapshot "example_snapshot_1" successfully''')
 print(f'Total restore snapshot time: {
       end_restore_snapshot_date_time - start_restore_snapshot_date_time}')
+
+# select data -לא מחוק 
+start_select_data_date_time = datetime.now()
+print('''{start_select_data_date_time} Checking that the data exists in the Snapshot to which we restored, Snapshot example_snapshot_1''')
+results = db_instance_controller.execute_query(
+    db_instance_identifier='example', query='SELECT * FROM example', db_name="exampledb")
+end_select_data_date_time = datetime.now()
+print('''results of the select query: {results}''')
+print('''{end_select_data_date_time} DBInstance "example" data selected successfully''')
+print(f'Total select data time: {
+      end_select_data_date_time - start_select_data_date_time}')
+
+# delete snapshot
+start_deletion_snapshot_date_time = datetime.now()
+print('''{start_deletion_snapshot_date_time} going to delete db DBInstance snapshot "example_snapshot_2"''')
+db_snapshot_controller.delete_snapshot('example', 'example_snapshot_2')
+end_creation_snapshot_date_time = datetime.now()
+print('''{end_
+      deletion_snapshot_date_time} DBInstance "example" snapshot deleted successfully''')
+print(f'Total deletion snapshot time: {
+      end_creation_snapshot_date_time - start_creation_snapshot_date_time}')
 
 # list snapshots
 start_list_snapshots_date_time = datetime.now()
