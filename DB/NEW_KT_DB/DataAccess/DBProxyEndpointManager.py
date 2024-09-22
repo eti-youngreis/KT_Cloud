@@ -18,21 +18,6 @@ class DBProxyEndpointManager:
                            for v in data_dict.values()) + ')'
         return values
     
-    def _map_query_data_to_col_value_dict(data, cols: Optional[List[str]] = None):
-            """
-            Maps the given data to a dictionary where keys are column names and values are data values.
-
-            Args:
-                data: The data values to be mapped in tuple as they ware returned from query.
-                cols: Optional. The list of column names. If not provided, all columns from the default table structure will be used.
-
-            Returns:
-                A dictionary mapping column names to data values.
-            """
-            if not cols:
-                cols = DBProxyEndpointManager.convert_table_structure_to_columns_arr(DBProxyEndpoint.table_structure)
-            data_mapping = {col: val for col, val in zip(cols, data)}
-            return data_mapping
 
     def __init__(self, object_manager:ObjectManager):
         self.object_manager:ObjectManager = object_manager
@@ -46,11 +31,11 @@ class DBProxyEndpointManager:
 
     def get(self, name: str):
         """convert data to object"""
-        data_mapping = self.select_objects_attributes_in_col_value_dict(name)[0]
+        data_mapping = self.get_object_attributes_dict(name)[0]
         return DBProxyEndpoint(**data_mapping)
     
     
-    def select_objects_attributes_in_col_value_dict(self, name:Optional[str] = None, columns:Optional[List[str]] =None):
+    def get_object_attributes_dict(self, name:Optional[str] = None, columns:Optional[List[str]] =None):
         """Selects data attributes of DBProxyEndpoint objects.
 
             Args:
@@ -63,6 +48,21 @@ class DBProxyEndpointManager:
             Raises:
                 ValueError: If no data is found based on the criteria
             """
+        def map_query_data_to_col_value_dict(data, cols: Optional[List[str]] = None):
+            """
+            Help function. Maps the given data to a dictionary where keys are column names and values are data values.
+
+            Args:
+                data: The data values to be mapped in tuple as they ware returned from query.
+                cols: Optional. The list of column names. If not provided, all columns from the default table structure will be used.
+
+            Returns:
+                A dictionary mapping column names to data values.
+            """
+            if not cols:
+                cols = DBProxyEndpointManager.convert_table_structure_to_columns_arr(DBProxyEndpoint.table_structure)
+            data_mapping = {col: val for col, val in zip(cols, data)}
+            return data_mapping
         
         # cast columns arr to str for query
         if columns:
@@ -81,7 +81,7 @@ class DBProxyEndpointManager:
             # convert columns str to arr in back for function map_data_to_col_value_dict
             if columns:
                 columns = columns.split(",")
-            data = [self._map_query_data_to_col_value_dict(row, columns) for row in data]
+            data = [map_query_data_to_col_value_dict(row, columns) for row in data]
             return data
             
         else:
@@ -91,7 +91,7 @@ class DBProxyEndpointManager:
     def is_exists(self, name):
         """check if object exists in table"""
         try:
-            self.select_objects_attributes_in_col_value_dict(name)
+            self.get_object_attributes_dict(name)
             return True
         except:
             return False
@@ -105,9 +105,9 @@ class DBProxyEndpointManager:
     def describe(self, name: Optional[str] = None, Filters:Optional[List[Dict[str, Any]]] = None):
         """describe db proxy endpoint""" 
         if name:
-            description = self.select_objects_attributes_in_col_value_dict(name)
+            description = self.get_object_attributes_dict(name)
         else:
-            description = self.select_objects_attributes_in_col_value_dict()
+            description = self.get_object_attributes_dict()
         # If there are filters return only objects that in conditions of all filters
         if Filters:
             description = [obj for obj in description if [col for col in obj.keys() if col not in Filters or obj[col] in Filters[col]] != []]

@@ -42,7 +42,7 @@ class DBProxyEndpointService(DBO):
             raise InvalidParamException("DBProxyEndpointName is not valid") 
         if not validate_target_role(TargetRole):
             raise InvalidParamException(f"TargetRole {TargetRole} is not valid, must be 'READ_WRITE'|'READ_ONLY'")
-        if Tags and not validate_tags(Tags):
+        if Tags and not validate_tags_structure(Tags):
             raise InvalidParamException(f"Tags {Tags} are not valid, must be List of dicts [{{'Key': 'string','Value': 'string'}}]")
         if not self.db_proxy_service.is_exists(DBProxyName):
             raise DBProxyNotFoundException(DBProxyName)
@@ -72,7 +72,7 @@ class DBProxyEndpointService(DBO):
         if not self.dal.is_exists(DBProxyEndpointName):
             raise DBProxyEndpointNotFoundException(DBProxyEndpointName)
         # Check if state is valid
-        endpoint_state = self.dal.select_objects_attributes_in_col_value_dict(DBProxyEndpointName, ['Status'])[0]['Status']
+        endpoint_state = self.dal.get_object_attributes_dict(DBProxyEndpointName, ['Status'])[0]['Status']
         if endpoint_state != 'available':
             raise InvalidDBProxyEndpointStateException(DBProxyEndpointName, endpoint_state)
         

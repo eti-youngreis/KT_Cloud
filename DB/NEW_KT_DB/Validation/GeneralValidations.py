@@ -32,7 +32,7 @@ def is_valid_optionGroupName(option_group_name: str) -> bool:
     pattern = r'^[\w-]{1,255}$'
     return bool(re.match(pattern, option_group_name))
 
-def validate_tags(tags):
+def validate_tags_structure(tags):
     if not isinstance(tags, list):
         return False
     for tag in tags:
