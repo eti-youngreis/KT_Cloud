@@ -45,10 +45,8 @@ class DBInstanceController:
     def start_db_instance(self, db_instance_identifier):
         return self.service.start(db_instance_identifier)    
     
-
     def execute_query(self, db_instance_identifier, query, db_name):
         return self.service.execute_query(db_instance_identifier, query, db_name)
-
 
     def create_snapshot(self, db_instance_identifier, db_snapshot_identifier):
         return self.service.create_snapshot(db_instance_identifier, db_snapshot_identifier)

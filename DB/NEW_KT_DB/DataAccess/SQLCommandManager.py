@@ -167,7 +167,6 @@ class SQLCommandManager:
 
         try:
             conn = sqlite3.connect(db_path)
-            print(f"333333333333333Database created at path: {db_path}")
             conn.close()
         except sqlite3.Error as e:
             raise DatabaseCreationError(f"Error creating database: {e}")

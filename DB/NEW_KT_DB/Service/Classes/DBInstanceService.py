@@ -64,9 +64,6 @@ class DBInstanceService(DBO):
         # Save to management table
         self.dal.createInMemoryDBInstance(db_instance)
 
-        
-        
-
         return db_instance
 
     def delete(self, db_instance_identifier):
@@ -347,18 +344,6 @@ class SQLCommandHelper:
                     adjusted_row.append(None)
             adjusted_results.append(tuple(adjusted_row))
         return adjusted_results
-
-    # @staticmethod
-    # def _extract_table_name_from_query(query_type, query: str):
-    #     if query_type == 'DELETE':
-    #         match = re.search(r'DELETE\s+FROM\s+(\w+)', query, re.IGNORECASE)
-    #     elif query_type == 'INSERT':
-    #         match = re.search(r"INSERT\s+INTO\s+(\w+)", query, re.IGNORECASE)
-
-    #     if match:
-    #         return match.group(1)
-    #     else:
-    #         raise InvalidQueryError(f"Failed to extract table name from the '{query_type}' query.")
 
     @staticmethod
     def _extract_table_name_from_query(query_type, query: str):

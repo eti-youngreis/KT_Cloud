@@ -10,8 +10,7 @@ class TestSqlCommands:
             allocated_storage=20,
             master_username="admin",
             master_user_password="password123",
-            port=3306,
-            # db_name="test_db"
+            port=3306
         )
         
         yield instance
@@ -45,7 +44,6 @@ class TestSqlCommands:
         result = db_instance_controller.execute_query(setup_db_instance.db_instance_identifier, delete_query, "test_db")
         assert result is None
 
-        # Verify deletion
         select_query = "SELECT * FROM test_table"
         result = db_instance_controller.execute_query(setup_db_instance.db_instance_identifier, select_query, "test_db")
         assert len(result) == 0
