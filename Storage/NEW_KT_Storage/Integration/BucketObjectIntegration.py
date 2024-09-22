@@ -116,3 +116,4 @@ print('---------------------End Of Session----------------------')
 end_time_session = datetime.now()
 total_session_duration = end_time_session - start_time_session
 print("Total session duration: ", total_session_duration)
+

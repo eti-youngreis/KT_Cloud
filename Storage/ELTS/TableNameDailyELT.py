@@ -1,10 +1,8 @@
-import KT_DB  # Assuming KT_DB is the library for SQLite operations
-import pandas as pd
 
 
 def incremental_elt():
     # Step 1: Establish SQLite connection using KT_DB
-    conn = KT_DB.connect("/path_to_sqlite.db")  # Assuming KT_DB has a connect() method
+    conn = sqlite3.connect('./Chinook.db')  # Connect to SQLite database
 
     try:
         # Step 2: Get the latest processed timestamp from the target table
