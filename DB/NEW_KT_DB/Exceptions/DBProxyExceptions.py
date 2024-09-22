@@ -1,9 +1,11 @@
 
 
 class DBProxyAlreadyExistsFault(Exception):
-    pass
+    def __init__(self):
+        super().__init__('DB Proxy already exist!')
 
 
 class DBProxyNotFoundFault(Exception):
-    pass
+    def __init__(self):
+        super().__init__('DB Proxy not found!')
 

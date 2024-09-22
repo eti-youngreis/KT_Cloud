@@ -72,7 +72,7 @@ def _assert_proxy_does_not_exist(proxy_name):
     proxy_name (str): The name of the proxy to check.
     """
     assert not storage_manager.is_file_exist(proxy_name)  # Check if the file does not exist
-    assert not proxy_manager.is_exist(proxy_name)  # Check if the proxy does not exist
+    assert not proxy_manager.is_db_proxy_exist(proxy_name)  # Check if the proxy does not exist
 
 
 def test_create_db_proxy(cleanup_db_and_files):
@@ -93,7 +93,7 @@ def test_create_db_proxy(cleanup_db_and_files):
         vpc_subnet_ids=['subnet-12345678', 'subnet-87654321'],
     )
     assert storage_manager.is_file_exist(db_proxy_name + '.json')  # Check if the file exists
-    assert proxy_manager.is_exist(db_proxy_name)  # Check if the proxy exists
+    assert proxy_manager.is_db_proxy_exist(db_proxy_name)  # Check if the proxy exists
 
 
 def test_create_db_proxy_when_db_proxy_name_already_exists(create_db_proxy, cleanup_db_and_files):
@@ -181,7 +181,7 @@ def test_create_db_proxy_when_an_invalid_parameter_exists_there(cleanup_db_and_f
     _assert_proxy_does_not_exist(db_proxy_name)  # Check that the proxy does not exist
 
 
-def test_delete_db_proxy(create_db_proxy):
+def test_delete_db_proxy(create_db_proxy, cleanup_db_and_files):
     """
     Test for deleting an existing proxy.
 
@@ -191,7 +191,7 @@ def test_delete_db_proxy(create_db_proxy):
     _assert_proxy_does_not_exist(db_proxy_name)  # Check that the proxy does not exist
 
 
-def test_delete_db_proxy_when_db_proxy_not_exist():
+def test_delete_db_proxy_when_db_proxy_not_exist(cleanup_db_and_files):
     """
     Test for deleting a proxy that does not exist.
 
@@ -215,7 +215,7 @@ def test_modify_db_proxy(create_db_proxy, cleanup_db_and_files):
     assert dict_content['create_date'] != dict_content['update_date']  # Check if the date has changed
 
 
-def test_modify_db_proxy_when_db_proxy_not_exist():
+def test_modify_db_proxy_when_db_proxy_not_exist(cleanup_db_and_files):
     """
     Test for modifying a proxy that does not exist.
 
@@ -240,7 +240,7 @@ def test_describe_db_proxy(create_db_proxy, cleanup_db_and_files):
     assert proxy[0] == db_proxy_name  # Check if the proxy name matches
 
 
-def test_describe_db_proxy_when_db_proxy_not_exist():
+def test_describe_db_proxy_when_db_proxy_not_exist(cleanup_db_and_files):
     """
     Test for retrieving the description of a proxy that does not exist.
 

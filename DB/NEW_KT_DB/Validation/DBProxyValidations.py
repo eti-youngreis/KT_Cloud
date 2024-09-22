@@ -21,7 +21,7 @@ def validate_db_proxy_name(db_proxy_name):
         raise ValueError("Invalid DB Proxy name. Must start with a letter, contain only ASCII letters, digits, and hyphens, and cannot end with a hyphen")
 
 
-def validate_params(attributes, required_params, all_params):
+def validate_init_db_proxy_params(attributes, required_params, all_params):
     """
     Validate the parameters provided against the required and allowed parameters.
 

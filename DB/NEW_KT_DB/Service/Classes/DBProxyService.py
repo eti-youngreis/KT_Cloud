@@ -2,7 +2,7 @@ from DB.NEW_KT_DB.Service.Abc.DBO import DBO
 from ...DataAccess.DBProxyManager import DBProxyManager
 from DB.NEW_KT_DB.Models.DBProxyModel import DBProxy
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
-from ...Validation.DBProxyValiditions import *
+from ...Validation.DBProxyValidations import *
 from ...Exceptions.DBProxyExceptions import *
 from datetime import datetime
 import json
@@ -42,7 +42,7 @@ class DBProxyService(DBO):
         all_params.extend(required_params)
 
         # Validate the input parameters
-        validate_params(attributes, required_params, all_params)
+        validate_init_db_proxy_params(attributes, required_params, all_params)
         validate_db_proxy_name(attributes.get('db_proxy_name'))
 
         # Validate tags if provided
@@ -50,7 +50,7 @@ class DBProxyService(DBO):
             raise ValueError("Tags not valid!")
 
         # Check if the proxy already exists
-        if self.dal.is_exist(attributes.get('db_proxy_name')):
+        if self.dal.is_db_proxy_exist(attributes.get('db_proxy_name')):
             raise DBProxyAlreadyExistsFault()
 
         # Create DBProxy and save it to storage
@@ -76,7 +76,7 @@ class DBProxyService(DBO):
         validate_db_proxy_name(db_proxy_name)
 
         # Check if the proxy exists
-        if not self.dal.is_exist(db_proxy_name):
+        if not self.dal.is_db_proxy_exist(db_proxy_name):
             raise DBProxyNotFoundFault()
 
         # Delete the proxy data from storage and memory
@@ -100,7 +100,7 @@ class DBProxyService(DBO):
         validate_db_proxy_name(db_proxy_name)
 
         # Check if the proxy exists
-        if not self.dal.is_exist(db_proxy_name):
+        if not self.dal.is_db_proxy_exist(db_proxy_name):
             raise DBProxyNotFoundFault()
 
         # Return the DBProxy details
@@ -124,11 +124,11 @@ class DBProxyService(DBO):
         all_params.extend(required_params)
 
         # Validate the input parameters
-        validate_params(updates, required_params, all_params)
+        validate_init_db_proxy_params(updates, required_params, all_params)
         validate_db_proxy_name(updates.get('db_proxy_name'))
 
         # Check if the proxy exists
-        if not self.dal.is_exist(updates.get('db_proxy_name')):
+        if not self.dal.is_db_proxy_exist(updates.get('db_proxy_name')):
             raise DBProxyNotFoundFault()
 
         # Update the proxy's update_date

@@ -13,7 +13,7 @@ class DBProxyManager:
         """
         self.object_manager = object_manager
         # Create the management table for DBProxy
-        self.object_manager.create_management_table(DBProxy.object_name, DBProxy.table_structure, 'TEXT')
+        self.object_manager.create_management_table(DBProxy.object_name, DBProxy.table_structure, pk_column_data_type='TEXT')
 
     def create_in_memory_DBProxy(self, metadata):
         """
@@ -57,7 +57,7 @@ class DBProxyManager:
         criteria = f"{DBProxy.pk_column} = '{object_id}'"
         self.object_manager.update_in_memory(DBProxy.object_name, updates, criteria)
 
-    def is_exist(self, object_id):
+    def is_db_proxy_exist(self, object_id):
         """
         Check if a DBProxy object exists in memory.
 
