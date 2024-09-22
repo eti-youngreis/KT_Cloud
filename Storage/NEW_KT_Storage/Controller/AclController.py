@@ -20,8 +20,6 @@ class AclController:
     def delete_acl(self):
         self.service.delete()
 
-
-
     def get_all_acl_objects(self):
            self.service.load_acl_objects()
 

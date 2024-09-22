@@ -34,8 +34,6 @@ class AclService():
         delete_result = self.dal.deleteInMemoryAclObject(acl.acl_id)
         return delete_result
         
- 
-
     def get(self,acl_name:str):
         '''get code object.'''
         # return real time object

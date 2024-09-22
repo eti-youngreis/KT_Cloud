@@ -8,8 +8,6 @@ class AclManager:
         self.object_name = "Acl"
         self.object_manager.object_manager.create_management_table('mng_Acl', AclModel.TABLE_STRUCTURE)
 
-   
-
 
     def get_acl_object_from_memory(self, acl_id: str):
         return self.object_manager.get_from_memory(
