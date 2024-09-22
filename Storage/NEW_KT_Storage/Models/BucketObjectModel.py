@@ -12,7 +12,7 @@ class BucketObject:
 
 
 
-    def __init__(self, bucket_name, object_key, encryption_id=None, lock_id=None):
+    def __init__(self, bucket_name, object_key, encryption_id=None, lock_id=None, content=None):
         # attributes related to S3
         self.bucket_name = bucket_name
         self.object_key = object_key
@@ -20,6 +20,7 @@ class BucketObject:
         # attributes for memory management in database
         self.pk_value = self.bucket_name+self.object_key
         self.created_at = datetime.now()
+        self.content = content
 
         self.encryption_id = encryption_id
         self.lock_id = lock_id
