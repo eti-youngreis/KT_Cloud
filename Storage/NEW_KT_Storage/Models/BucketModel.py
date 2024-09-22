@@ -21,8 +21,8 @@ class Bucket:
         return ObjectManager.convert_object_attributes_to_dictionary(
             bucket_name=self.bucket_name,
             owner=self.owner,
-            create_at=self.create_at,
-            region=self.region
+            region=self.region,
+            create_at=self.create_at
         )
 
     def to_sql(self):
