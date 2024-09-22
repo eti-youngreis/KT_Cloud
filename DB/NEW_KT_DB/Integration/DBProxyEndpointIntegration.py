@@ -3,9 +3,7 @@ import os
 import sys
 import pytest
 from unittest.mock import MagicMock
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
-
 from DB.NEW_KT_DB.Controller.DBProxyEndpointController import DBProxyEndpointController
 from DB.NEW_KT_DB.Service.Classes.DBProxyEndpointService import DBProxyEndpointService
 from DB.NEW_KT_DB.DataAccess.DBProxyEndpointManager import DBProxyEndpointManager
@@ -18,7 +16,7 @@ def db_proxy_service_mock():
     mock.is_exists.side_effect = lambda db_proxy_name: db_proxy_name == 'my-proxy'
     return mock   
 
-#dependencies injection
+# Dependencies injection
 object_manager = ObjectManager('DB/NEW_KT_DB/DBs/mainDB.db')
 storage_manager = StorageManager("dbProxyEndpoints")
 endpoint_manager = DBProxyEndpointManager(object_manager)
@@ -28,7 +26,8 @@ endpoint_controller = DBProxyEndpointController(endpoint_service)
 DB_PROXY_ENDPOINT_NAME = "endpoint"
 DB_PROXY_NAME = "my-proxy"
 TARGET_ROLE = "READ_WRITE"
-# demonstrate all dbproxy endpoint functionallity
+
+# Demonstrate all dbproxy endpoint functionallity
 
 print('''---------------------Start Of session----------------------''')
 print()
@@ -57,7 +56,7 @@ pytest.main(['-q', 'DB/NEW_KT_DB/Test/test_DBProxyEndpointTests.py::test_create_
 pytest.main(['-q', 'DB/NEW_KT_DB/Test/test_DBProxyEndpointTests.py::test_create_db_proxy_endpoint_with_existing_name'])
 print("----------------------------------------------------------------")
 
-# delete
+# Delete
 start_time = datetime.now()
 print(f'''{start_time} going to delete db db proxy endpoint "endpoint"''')
 res = endpoint_controller.delete_db_proxy_endpoint(DB_PROXY_ENDPOINT_NAME)
@@ -78,7 +77,7 @@ pytest.main(['-q', 'DB/NEW_KT_DB/Test/test_DBProxyEndpointTests.py::test_delete_
 print("----------------------------------------------------------------")
 
 
-# modify
+# Modify
 endpoint_before_modify = endpoint_controller.create_db_proxy_endpoint(DB_PROXY_NAME, DB_PROXY_ENDPOINT_NAME, TARGET_ROLE)
 start_time = datetime.now()
 print(f'''{start_time} going to modify db proxy endpoint "endpoint" to name "our-endpoint"''')
@@ -98,7 +97,7 @@ print(endpoint_after_modify)
 pytest.main(['-q', 'DB/NEW_KT_DB/Test/test_DBProxyEndpointTests.py::test_modify_name_to_db_proxy_endpoint'])
 pytest.main(['-q', 'DB/NEW_KT_DB/Test/test_DBProxyEndpointTests.py::test_modify_non_exist_db_proxy_endpoint'])
 
-# describe
+# Describe
 start_time = datetime.now()
 print(f'''{start_time} going to describe db proxy endpoint "our-endpoint"''')
 print(endpoint_controller.describe_db_proxy_endpoint("our-endpoint"))
