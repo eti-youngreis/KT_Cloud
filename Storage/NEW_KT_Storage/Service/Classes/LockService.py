@@ -29,7 +29,7 @@ class LockService:
         lock_id = f"{bucket_key}.{object_key}"
         
         # Check validations
-        LockValidations.validate_lock_does_not_exist(lock_id, self.lock_map)
+        LockValidations.validate_lock_not_exist(lock_id, self.lock_map)
         LockValidations.validate_lock_mode(lock_mode)
         LockValidations.validate_time_amount(amount, unit)
 

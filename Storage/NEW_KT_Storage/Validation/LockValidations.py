@@ -18,7 +18,7 @@ def validate_lock_exists(lock_id: str, locks_dict: dict):
     if not GeneralValidations.string_in_dict(lock_id, locks_dict):
         raise ValueError(f"The lock with ID '{lock_id}' does not exists.")
     
-def validate_lock_does_not_exist(lock_id: str, locks_dict: dict):
+def validate_lock_not_exist(lock_id: str, locks_dict: dict):
     '''Check if the lock already exists in the given dictionary.'''
     if GeneralValidations.string_in_dict(lock_id, locks_dict):
         raise ValueError(f"The lock with ID '{lock_id}' already exists.")
