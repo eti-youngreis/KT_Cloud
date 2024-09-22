@@ -4,13 +4,14 @@ from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 from Storage.NEW_KT_Storage.Models.BucketObjectModel import BucketObject
 from Storage.NEW_KT_Storage.Service.Abc.STO import STO
 import Storage.NEW_KT_Storage.Validation.BucketObjectValiditions as validation
-# from Storage.NEW_KT_Storage.Controller.VersionController import VersionController
+from Storage.NEW_KT_Storage.Controller.VersionController import VersionController
 
 class BucketObjectService(STO):
     def __init__(self, path="C:\\Users\\user1\\Desktop\\server"):
         self.dal = BucketObjectManager(path)
         self.storage_manager = StorageManager(path)
-        # self.versions = VersionController(service)
+        self.versions = VersionController(path)
+
     def validation_for_object(self, bucket_name, object_key):
         if bucket_name is None:
             raise ValueError("bucket_name is required, cant be None")
@@ -22,6 +23,7 @@ class BucketObjectService(STO):
             raise ValueError("Incorrect object key")
         if not self.storage_manager.is_directory_exist(bucket_name):
             raise ValueError("Bucket not found")
+        
     def create(self, bucket_name, object_key, content=''):
         '''Create a new Object.'''
         self.validation_for_object(bucket_name, object_key)
@@ -33,6 +35,7 @@ class BucketObjectService(STO):
         # save object in memory
         bucket_object = BucketObject(bucket_name, object_key)
         self.dal.createInMemoryBucketObject(bucket_object)
+
     def delete(self, bucket_name, object_key, version_id=None):
         '''Delete an existing Object.'''
         self.validation_for_object(bucket_name=bucket_name, object_key=object_key)
@@ -45,8 +48,8 @@ class BucketObjectService(STO):
             # delete physical object
             self.storage_manager.delete_file(path)
         else:
-            pass
-            # self.versions.delete_version_object(bucket_name,object_key,version_id)
+            self.versions.delete_version_object(bucket_name,object_key,version_id)
+
     def put(self, bucket_name, object_key, content='', version_id=None):
         '''Modify an existing Object.'''
         self.validation_for_object(bucket_name, object_key)
@@ -61,8 +64,9 @@ class BucketObjectService(STO):
             self.dal.createInMemoryBucketObject(bucket_object)
         else:
             # call the create functions of version
-            # self.versions.create_version_object(bucket_name, object_key,content)
-            pass
+            self.versions.create_version_object(bucket_name, object_key,content)
+            
+
     def get(self, bucket_name, object_key, version_id=None):
         '''get object.'''
         self.validation_for_object(bucket_name=bucket_name, object_key=object_key)
@@ -77,9 +81,9 @@ class BucketObjectService(STO):
             return BucketObject(bucket_name=bucket_id, object_key=object_key,
                                 encryption_id=encryption_id, lock_id=lock_id, content=object_body)
         else:
-            pass
-            # call the function of get_version from version_controller
-            # self.versions.get_version_object(bucket_name,object_key,version_id)
+            # call the function of get version 
+            self.versions.get_version_object(bucket_name,object_key,version_id)
+
     def get_all(self, bucket_name):
         '''get all objects'''
         if bucket_name is None or not validation.is_bucket_name_valid(bucket_name):
