@@ -6,7 +6,7 @@ from datetime import datetime
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Import the tag management class
-from Controller.TagObjectController import TagObjectController
+from Controller.TagController import TagController
 
 
 def log_message(message):
@@ -22,7 +22,7 @@ def calculate_duration_time(start, end):
 
 
 def main():
-    tag_controller = TagObjectController()
+    tag_controller = TagController()
 
     # Log the start of the session
     log_message("--------------------- Start Of Session ----------------------")
@@ -49,7 +49,9 @@ def main():
     tag_controller.modify_tag("example_key", "modify_key", "example_value")
 
     # Verify that the old tag no longer exists and the new tag exists
-    log_message('Verifying that tag "example_key" no longer exists and "modify_key" exists')
+    log_message(
+        'Verifying that tag "example_key" no longer exists and "modify_key" exists'
+    )
     try:
         log_message(f'The tag: {tag_controller.get_tag("example_key")}')
     except KeyError as e:
@@ -88,4 +90,3 @@ def main():
     # Log the end of the session
     log_message("Demonstration of Tag ended successfully")
     log_message("--------------------- End Of Session ----------------------")
-
