@@ -122,6 +122,17 @@ print(f'Total delete record time: {
       end_delete_record_date_time - start_delete_record_date_time}')
 
 
+# select data in DBInstance "example in exampledb"
+start_select_data_date_time = datetime.now()
+print('''{start_select_data_date_time} going to select data in DBInstance "example" in database "exampledb"''')
+results = db_instance_controller.execute_query(
+    db_instance_identifier='example', query='SELECT * FROM example', db_name="exampledb")
+end_select_data_date_time = datetime.now()
+print('''results of the select query: {results}''')
+print('''{end_select_data_date_time} DBInstance "example" data selected successfully''')
+print(f'Total select data time: {
+      end_select_data_date_time - start_select_data_date_time}')
+
 # restore snapshot
 start_restore_snapshot_date_time = datetime.now()
 print('''{start_restore_snapshot_date_time} going to restore db DBInstance "example" from snapshot "example_snapshot_1"''')

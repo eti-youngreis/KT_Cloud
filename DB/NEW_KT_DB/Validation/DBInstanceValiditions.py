@@ -1,4 +1,4 @@
-from DB.NEW_KT_DB.Validation.GeneralValidations import is_valid_number, is_valid_length
+from DB.NEW_KT_DB.Validation.GeneralValidations import is_valid_number, is_length_in_range
 
 def validate_allocated_storage(allocated_storage):
     """Validate the allocated_storage value."""
@@ -7,12 +7,12 @@ def validate_allocated_storage(allocated_storage):
 
 def validate_master_user_name(name):
     """Validate the master_user_name value."""
-    if not is_valid_length(name, 5):
+    if not is_length_in_range(name, 5,  16):
         raise ValueError("master_user_name must be at least 5 characters long.")
 
 def validate_master_user_password(password):
     """Validate the master_user_password value."""
-    if not is_valid_length(password, 8):
+    if not is_length_in_range(password, 8,  20):
         raise ValueError("master_user_password must be at least 8 characters long.")
 
 def validate_port(port):
