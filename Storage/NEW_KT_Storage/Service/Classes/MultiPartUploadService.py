@@ -16,7 +16,7 @@ from Service.Classes.BucketObjectService import BucketObjectService
 from Validation.MultiPartValidations import validate_part_size, validate_upload_id
 
 class MultipartUploadService:
-    def __init__(self,db_file:str="my_db.db", storage_path: str=""):
+    def __init__(self,db_file:str="my_db.db", storage_path: str="C:/Users/shana/Desktop/a"):
         # Initializes the service with database and storage paths for managing multipart uploads
         self.multipart_manager = MultipartUploadManager(db_file)
         self.storage_manager = StorageManager(storage_path)
