@@ -3,8 +3,8 @@ from DataAccess import ObjectManager
 import uuid
 class Acl:
 
-    TABLE_STRUCTURE =table_columns = "acl_id TEXT PRIMARY KEY ", "name TEXT  NOT NULL", "permissions TEXT  NOT NULL","bucket_id TEXT  NOT NULL","user_id TEXT  NOT NULL",
-
+    TABLE_STRUCTURE =table_columns = "acl_id TEXT PRIMARY KEY ", "name TEXT  NOT NULL", "permissions TEXT  NOT NULL","bucket_id TEXT  NOT NULL","user_id TEXT  NOT NULL"
+    
     def __init__(self, name,bucket_id ,user_id,permissions=[]): 
 
         # add relevant attributes in this syntax:
