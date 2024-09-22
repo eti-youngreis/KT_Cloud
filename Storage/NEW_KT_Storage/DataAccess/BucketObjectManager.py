@@ -1,6 +1,8 @@
 from Storage.NEW_KT_Storage.DataAccess.ObjectManager import ObjectManager
 from Storage.NEW_KT_Storage.Models.BucketObjectModel import BucketObject
-
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..','..','..')))
 
 class BucketObjectManager:
 
