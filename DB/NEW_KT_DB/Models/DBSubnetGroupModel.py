@@ -34,7 +34,6 @@ class DBSubnetGroup:
                 self.db_subnet_group_arn = kwargs.get("db_subnet_group_arn", None)
             else:
                 if args:
-                    print("\033[1;31mWarning: args received in DBSubnetGroup constructor, validations can't be easily performed\033[0m")
                     try:
                         self.db_subnet_group_name = args[0]
                         self.db_subnet_group_description = args[1]
