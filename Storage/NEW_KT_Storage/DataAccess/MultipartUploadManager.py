@@ -15,7 +15,7 @@ The ObjectManager class is responsible for managing the storage and retrieval of
 from DataAccess.ObjectManager import ObjectManager
 
 class MultipartUploadManager:
-    def __init__(self, db_file: str):
+    def __init__(self, db_file: str="my_db.db",):
         # Initializes the manager with the database file and creates the necessary table.
         self.object_manager = ObjectManager(db_file=db_file)
         self.object_name = "MultipartUpload"
