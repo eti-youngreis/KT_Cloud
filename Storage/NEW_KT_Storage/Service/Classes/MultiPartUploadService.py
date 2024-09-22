@@ -110,8 +110,7 @@ class MultipartUploadService:
     def _get_multipart_upload(self, upload_id: str):
         # Retrieves the multipart upload object from the database using the upload ID
         validate_upload_id(upload_id)
-        criteria = f'object_id ="{upload_id}"'
-        obj = self.multipart_manager.object_manager.get_from_memory(self.multipart_manager.object_name, criteria=criteria)
+        obj=self.multipart_manager.get(upload_id)
         multipart_upload = self.convert_to_object(obj)
         
         # Convert the parts to a list if needed

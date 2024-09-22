@@ -57,6 +57,13 @@ class MultipartUploadManager:
         # Removes the record identified by its primary key (pk) from the database.
         self.object_manager.delete_from_memory_by_pk(self.object_name, multipart_upload.pk_column, multipart_upload.pk_value)
 
+    def get(self,upload_id: str):
+        criteria = f'object_id ="{upload_id}"'
+        return self.object_manager.get_from_memory(self.object_name, criteria=criteria)
+
+     
+
+
 
 
 
