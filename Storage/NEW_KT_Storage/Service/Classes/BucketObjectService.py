@@ -1,5 +1,5 @@
 from typing import Dict, Optional
-from KT_Cloud.Storage.NEW_KT_Storage.Models import AclObjectModel
+from KT_Cloud.Storage.NEW_KT_Storage.Models import AclModel
 from Abc import STO
 from Validation import Validation
 from DataAccess import BucketObjectManager

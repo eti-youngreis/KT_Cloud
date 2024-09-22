@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Dict
 from DataAccess import ObjectManager
 import uuid
-class BucketObject:
+class GrantObject:
 
     def __init__(self, **kwargs): 
 
@@ -10,12 +10,12 @@ class BucketObject:
         # self.bucket_object_identifier = kwargs['bucket_object_identifier']
         # self.engine = kwargs['engine']
 
-        self.acl_id = str(uuid.uuid1())
+        self.grant_id = str(uuid.uuid1())
         self.name=kwargs['name'] 
-        self.owner = kwargs['owner']
-        self.grants = kwargs['grants'] if kwargs['grants'] else []  # רשימה של Grants
-        self.pk_column = "acl_id"
+        self.user=kwargs['user'] 
+        self.pk_column = "grant_id"
         self.pk_value =kwargs['name'] 
+        self.permission=kwargs['permission'] 
         self.objectManager = ObjectManager(db_file="D:\\s3_project\\tables\\Buckets.db")
 
         # self.permissions =kwargs['permissions'] or []

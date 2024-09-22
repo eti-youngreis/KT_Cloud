@@ -34,14 +34,6 @@ class AclService():
         delete_result = self.dal.deleteInMemoryAclObject(acl.acl_id)
         return delete_result
         
-
-    def describe(self):
-        '''Describe the details of BucketObject.'''
-        # use BucketObjectManager.describeBucketObject() function
-        return self.dal.describeTagObject()
-        
-
-
  
 
     def get(self,acl_name:str):
