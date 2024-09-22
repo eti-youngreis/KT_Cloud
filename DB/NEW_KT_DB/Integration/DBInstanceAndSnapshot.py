@@ -185,14 +185,14 @@ print("\n---------------------Attempt to Get Deleted DBInstance-----------------
 start_get_deleted_instance_time = datetime.now()
 print(f"{start_get_deleted_instance_time} Attempting to get deleted DBInstance 'example'")
 try:
-    deleted_instance = db_instance_controller.describe_db_instance(db_instance_identifier='example')
+    deleted_instance = db_instance_controller.get_db_instance(db_instance_identifier='example')
     print("Error: DBInstance 'example' still exists after deletion")
 except Exception as e:
     print(f"Success: Unable to get deleted DBInstance 'example'. Error: {str(e)}")
 end_get_deleted_instance_time = datetime.now()
 print(f"Total attempt time: {end_get_deleted_instance_time - start_get_deleted_instance_time}")
 
-print("---------------------End Of session----------------------")
+print("\n---------------------End Of session----------------------")
 end_integration_date_time = datetime.now()
 print(f"{end_integration_date_time} demonstration of object DBInstance ended successfully")
 print(f"Total integration time: {end_integration_date_time - start_integration_date_time}")
