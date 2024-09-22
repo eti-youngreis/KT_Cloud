@@ -26,7 +26,7 @@ def main():
 
     # Log the start of the session
     log_message("--------------------- Start Of Session ----------------------")
-    log_message("Demonstration of object tag start")
+    log_message("Demonstration of tag start")
 
     # Create a new tag
     log_message('Going to create tag with key "example_key"')
@@ -37,7 +37,7 @@ def main():
     # Verify the tag has been created
     log_message('Verifying tag "example_key" creation')
     try:
-        log_message(f'The tag object: {tag_controller.get_tag("example_key")}')
+        log_message(f'The tag: {tag_controller.get_tag("example_key")}')
     except KeyError as e:
         log_message(f"Error: {e}")
 
@@ -51,12 +51,12 @@ def main():
     # Verify that the old tag no longer exists and the new tag exists
     log_message('Verifying that tag "example_key" no longer exists and "modify_key" exists')
     try:
-        log_message(f'The tag object: {tag_controller.get_tag("example_key")}')
+        log_message(f'The tag: {tag_controller.get_tag("example_key")}')
     except KeyError as e:
         log_message(f"Error: {e}")
 
     log_message('Tag "modify_key" created successfully')
-    end = log_message(f'The tag object: {tag_controller.get_tag("modify_key")}')
+    end = log_message(f'The tag: {tag_controller.get_tag("modify_key")}')
     print(f"Duration time: {calculate_duration_time(start, end)}")
 
     # Delete the tag
@@ -86,6 +86,6 @@ def main():
     print(f"Duration time: {calculate_duration_time(start, end)}")
 
     # Log the end of the session
-    log_message("Demonstration of object Tag ended successfully")
+    log_message("Demonstration of Tag ended successfully")
     log_message("--------------------- End Of Session ----------------------")
 
