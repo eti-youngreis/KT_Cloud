@@ -12,7 +12,7 @@ class DBSubnetGroupController:
         self.service.delete_db_subnet_group(name)
 
     def modify_db_subnet_group(self, name, **updates):
-        self.service.modify_db_subnet_group(name, **updates)
+        return self.service.modify_db_subnet_group(name, **updates)
 
     def get_db_subnet_group(self, name):
         return self.service.get_db_subnet_group(name)

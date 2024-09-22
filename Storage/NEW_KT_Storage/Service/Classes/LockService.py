@@ -3,11 +3,12 @@ from sortedcontainers import SortedList
 import sys
 import threading
 import time
-
 sys.path.append('../KT_Cloud')
 from Storage.NEW_KT_Storage.Models.LockModel import LockModel
 from Storage.NEW_KT_Storage.DataAccess.LockManager import LockManager
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
+import Storage.NEW_KT_Storage.Validation.LockValidations as LockValidations
+
 
 class LockService:
     def __init__(self):
@@ -25,13 +26,14 @@ class LockService:
 
     def create_lock(self, bucket_key: str, object_key: str, lock_mode: str, amount: int, unit: str):
         """Create a new lock for an object."""
-        retain_until = self.calculate_retention_duration(amount, unit)
         lock_id = f"{bucket_key}.{object_key}"
         
-        # Check if lock_id already exists
-        if lock_id in self.lock_map:
-            raise ValueError(f"{bucket_key}.{object_key} is already locked")
+        # Check validations
+        LockValidations.validate_lock_not_exist(lock_id, self.lock_map)
+        LockValidations.validate_lock_mode(lock_mode)
+        LockValidations.validate_time_amount(amount, unit)
 
+        retain_until = self.calculate_retention_duration(amount, unit)
         lock = LockModel(bucket_key, object_key, retain_until, lock_mode)
         
         # Add lockId : retainUntil to sorted list 
@@ -50,8 +52,7 @@ class LockService:
 
     def delete_lock(self, lock_id: str):
         """Delete a lock."""
-        if lock_id not in self.lock_map:
-            raise ValueError("Lock does not exist")
+        LockValidations.validate_lock_exists(lock_id, self.lock_map)
         
         # Retrieve the lock object from dictionary
         lock = self.get_lock(lock_id)
@@ -71,8 +72,7 @@ class LockService:
 
     def get_lock(self, lock_id: str):
         """Get a lock by lock_id."""        
-        if lock_id not in self.lock_map:
-            raise ValueError("Lock does not exist")
+        LockValidations.validate_lock_exists(lock_id, self.lock_map)
         return self.lock_map[lock_id]
     
 
@@ -102,7 +102,6 @@ class LockService:
         
         expired_locks = []
         
-        # Collect expired locks
         while self.locks_IDs_list and self.locks_IDs_list[0][1] < now:
             # Remove the expired lock from the list
             expired_lock_id, _ = self.locks_IDs_list.pop(0) 
@@ -123,7 +122,7 @@ class LockService:
                 time.sleep(10)  # Check every minute
 
         cleanup_thread = threading.Thread(target=run_cleanup)
-        cleanup_thread.daemon = True
+        cleanup_thread.daemon = True # Set the tread to run in the background
         cleanup_thread.start()
 
 
