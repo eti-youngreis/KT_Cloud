@@ -12,7 +12,7 @@ from DataAccess.ObjectManager import ObjectManager
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 from datetime import datetime
 
-object_manager = ObjectManager('../../object_management_db.db')
+object_manager = ObjectManager('../DBs/mainDB.db')
 storage_manager = StorageManager('../../s3')
 subnet_group_manager = DBSubnetGroupManager(object_manager)
 subnet_group_service = DBSubnetGroupService(subnet_group_manager, storage_manager)
@@ -37,7 +37,6 @@ subnet_group_controller.create_db_subnet_group(
 
 print("Creation of \'subnet_group_1\' passed with now exceptions")
 print(datetime.now()-start_time)
-print('''___________________________________________________________''')
 
 
 # get
@@ -49,7 +48,6 @@ print(subnet_group_1.to_dict())
 
 print(f'''{datetime.now()} retrieving \'subnet_group_1\' passed with now exceptions, valid object returned''')
 print(datetime.now() - start_time_get)
-print('''___________________________________________________________''')
 
 # list
 start_time_list = datetime.now()
@@ -61,7 +59,6 @@ for subnet_group in subnet_groups:
 
 print(f'''{datetime.now()} listing all DBSubnetGroups passed with no exceptions''')
 print(datetime.now() - start_time_list)
-print('''___________________________________________________________''')
 
 # update
 start_time_update = datetime.now()
@@ -77,7 +74,6 @@ print(updated_subnet_group.to_dict())
 
 print(f'''{datetime.now()} updating \'subnet_group_1\' passed with no exceptions''')
 print(datetime.now() - start_time_update)
-print('''___________________________________________________________''')
 
 # delete
 start_time_delete = datetime.now()
