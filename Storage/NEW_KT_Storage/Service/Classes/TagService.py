@@ -4,23 +4,23 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
-from DataAccess.TagObjectManager import TagObjectManager
+from DataAccess.TagManager import TagManager
 from DataAccess.StorageManager import StorageManager
-from Models.TagObjectModel import TagObject
+from Models.TagModel import Tag
 from Validation import TagValidation as validation
 
 
-class TagObjectService:
+class TagService:
     def __init__(
         self, db_file: str = "Tags.db", storage_file: str = "local_storage"
     ) -> None:
-        """Initialize the TagObjectService with a TagObjectManager instance."""
-        self.tag_dal = TagObjectManager(db_file)
+        """Initialize the TagService with a TagManager instance."""
+        self.tag_dal = TagManager(db_file)
         self.tags = []
         self.load_tags()
 
     def load_tags(self):
-        self.tags = self.tag_dal.describeTagObject()
+        self.tags = self.tag_dal.describeTag()
 
     def validation_for_key(self, key):
         if not validation.check_required_params(key):
@@ -29,33 +29,33 @@ class TagObjectService:
             raise ValueError("Incorrect key name")
 
     def validation_for_value(self, value):
-            if not validation.is_valid_key_name(value):
-                raise ValueError("Incorrect key name")
-            
+        if not validation.is_valid_key_name(value):
+            raise ValueError("Incorrect key name")
+
     def create(self, key, value) -> None:
-        """Create a new TagObject and save it in memory.
+        """Create a new Tag and save it in memory.
 
         Args:
-            key (str): The key for the TagObject.
-            value (str): The value for the TagObject.
+            key (str): The key for the Tag.
+            value (str): The value for the Tag.
         """
         self.validation_for_key(key=key)
 
         self.validation_for_value(value=value)
-        
+
         if validation.key_exists(tags=self.tags, key=key):
             raise KeyError("Duplicate key")
-        
-        tag = TagObject(key, value)
-        create_result = self.tag_dal.createInMemoryTagObject(tag)
+
+        tag = Tag(key, value)
+        create_result = self.tag_dal.createInMemoryTag(tag)
         self.load_tags()
         return create_result
 
-    def get(self, key: str) -> TagObject:
-        """Retrieve a TagObject from memory by its key.
+    def get(self, key: str) -> Tag:
+        """Retrieve a Tag from memory by its key.
 
         Args:
-            key (str): The key of the TagObject to retrieve.
+            key (str): The key of the Tag to retrieve.
         """
         self.validation_for_key(key=key)
 
@@ -65,25 +65,25 @@ class TagObjectService:
         return self.tag_dal.get_tag_object_from_memory(key)
 
     def delete(self, key: str):
-        """Delete a TagObject from memory by its key.
+        """Delete a Tag from memory by its key.
 
         Args:
-            key (str): The key of the TagObject to delete.
+            key (str): The key of the Tag to delete.
         """
         self.validation_for_key(key=key)
 
         if not validation.key_exists(tags=self.tags, key=key):
             raise KeyError("no such key")
 
-        delete_result = self.tag_dal.deleteInMemoryTagObject(key)
+        delete_result = self.tag_dal.deleteInMemoryTag(key)
         self.load_tags()
         return delete_result
 
     def modify(self, old_key: str, key: str = None, value: str = None):
-        """Modify an existing TagObject's key and/or value.
+        """Modify an existing Tag's key and/or value.
 
         Args:
-            old_key (str): The original key of the TagObject to modify.
+            old_key (str): The original key of the Tag to modify.
             key (str, optional): The new key to set. Defaults to None.
             value (str, optional): The new value to set. Defaults to None.
         """
@@ -107,14 +107,10 @@ class TagObjectService:
                 update_fields += ", "
             update_fields += f"""Value = '{value}' """
 
-        put_tag_result = self.tag_dal.putTagObject(
-            old_key=old_key, updates=update_fields
-        )
+        put_tag_result = self.tag_dal.putTag(old_key=old_key, updates=update_fields)
         self.load_tags()
         return put_tag_result
 
     def describe(self):
-        """Retrieve a list of all TagObjects from memory."""
-        return self.tag_dal.describeTagObject()
-
-
+        """Retrieve a list of all Tags from memory."""
+        return self.tag_dal.describeTag()
