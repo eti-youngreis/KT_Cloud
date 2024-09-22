@@ -8,7 +8,6 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from DataAccess.ObjectManager import ObjectManager
 import Exceptions.DBSubnetGroupExceptions as DBSubnetGroupExceptions
 
 class DBSubnetGroup:
