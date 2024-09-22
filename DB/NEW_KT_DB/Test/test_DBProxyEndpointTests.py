@@ -10,7 +10,7 @@ from DB.NEW_KT_DB.Exceptions.DBProxyEndpointExceptions import *
 from DB.NEW_KT_DB.Exceptions.GeneralExeptions import InvalidParamException
 from DB.NEW_KT_DB.Controller.DBProxyEndpointController import DBProxyEndpointController
 from DB.NEW_KT_DB.Models.DBProxyEndpointModel import DBProxyEndpoint
-from DB.NEW_KT_DB.Test.GeneralTests import check_file_exists
+from DB.NEW_KT_DB.Test.GeneralTests import is_file_exist
 
 # Infrastructure to tests
 @pytest.fixture
@@ -104,7 +104,7 @@ def test_create_db_proxy_endpoint(endpoint_service:DBProxyEndpointService, setup
     
     # Check if phisical file exists
     endpoint_file_name = endpoint_service._convert_endpoint_name_to_endpoint_file_name(endpoint_name)
-    assert check_file_exists(storage_manager, endpoint_file_name)
+    assert is_file_exist(storage_manager, endpoint_file_name)
     
     # Check if data in table
     _test_exists_in_db(endpoint_manager, endpoint_name)
@@ -158,7 +158,7 @@ def test_delete_db_proxy_endpoint(setup_db_proxy_endpoint: tuple[Literal['my-pro
     
     # Check if phisical file not exists
     endpoint_file_name = endpoint_service._convert_endpoint_name_to_endpoint_file_name(endpoint_name)
-    assert not check_file_exists(storage_manager, endpoint_file_name)
+    assert not is_file_exist(storage_manager, endpoint_file_name)
     
     # Check if data not in table
     assert not _test_exists_in_db(endpoint_manager, endpoint_name)
@@ -201,8 +201,8 @@ def test_modify_name_to_db_proxy_endpoint(setup_db_proxy_endpoint: tuple[Literal
     # Check if phisical file is up-to-date
     old_endpoint_file_name = endpoint_service._convert_endpoint_name_to_endpoint_file_name(endpoint_name)
     new_endpoint_file_name = endpoint_service._convert_endpoint_name_to_endpoint_file_name(new_name)
-    assert not check_file_exists(storage_manager, old_endpoint_file_name)
-    assert check_file_exists(storage_manager, new_endpoint_file_name)
+    assert not is_file_exist(storage_manager, old_endpoint_file_name)
+    assert is_file_exist(storage_manager, new_endpoint_file_name)
     
     # Check if data in table in updated
     assert _test_exists_in_db(endpoint_manager, new_name)

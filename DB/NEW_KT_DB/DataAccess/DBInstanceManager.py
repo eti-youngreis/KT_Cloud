@@ -1,76 +1,107 @@
-import os
-import sys
-from typing import Dict, Any, List
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from DataAccess.ObjectManager import ObjectManager
-from Models.DBInstanceModel import DBInstance
+"""
+DBInstanceManager Module
+------------------------
+
+This module provides the `DBInstanceManager` class, which manages `DBInstanceModel` objects in memory using an `ObjectManager`.
+The manager handles operations such as creating, modifying, describing, and deleting DBInstance records stored in memory.
+
+### Classes:
+    - DBInstanceManager: A class for managing in-memory database instances (`DBInstanceModel`), using JSON serialization for object data storage.
+
+### Methods:
+    - `__init__(db_file: str)`: Initializes the `DBInstanceManager` with a database file and creates the management table.
+    - `close_connections()`: Closes any open database connections.
+    - `createInMemoryDBInstance(db_instance)`: Stores a `DBInstanceModel` object in memory by serializing it as JSON.
+    - `modifyDBInstance(db_instance)`: Modifies an existing `DBInstanceModel` in memory by updating its metadata.
+    - `describeDBInstance(db_instance_identifier) -> Dict[str, Any]`: Retrieves a `DBInstanceModel` object by its identifier and returns its metadata.
+    - `deleteInMemoryDBInstance(db_instance_identifier)`: Deletes a `DBInstanceModel` from memory using its identifier.
+    - `getDBInstance(db_instance_identifier)`: Fetches a `DBInstanceModel` object by its identifier.
+    - `is_db_instance_exists(db_instance_identifier) -> bool`: Checks if a `DBInstanceModel` exists in memory by its identifier.
+
+### Example Usage:
+    db_instance_manager = DBInstanceManager('db_file.db')
+
+    # Create a DBInstance in memory
+    db_instance = DBInstanceModel(db_instance_identifier="db1", status="available")
+    db_instance_manager.createInMemoryDBInstance(db_instance)
+
+    # Modify a DBInstance
+    db_instance.status = "stopped"
+    db_instance_manager.modifyDBInstance(db_instance)
+
+    # Describe a DBInstance
+    metadata = db_instance_manager.describeDBInstance("db1")
+
+    # Check if a DBInstance exists
+    exists = db_instance_manager.is_db_instance_exists("db1")
+
+    # Delete a DBInstance
+    db_instance_manager.deleteInMemoryDBInstance("db1")
+
+### Dependencies:
+    - ObjectManager: A class responsible for low-level management of data in memory.
+    - DBInstanceModel: A model class representing a database instance, serialized as JSON for storage.
+
+"""
+
+
+from typing import Dict, Any
+import json
+from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
+from DB.NEW_KT_DB.Models.DBInstanceModel import DBInstanceModel
+
 
 class DBInstanceManager:
-    def __init__(self, object_manager: ObjectManager):
-        self.object_manager = object_manager
-        # Create the management table for DBInstance using its object name and table structure
-        self.object_manager.create_management_table(DBInstance.object_name, DBInstance.table_structure)
+    object_name = __name__.split('.')[-1].replace('Manager', '').lower()
 
-    def createInMemoryDBInstance(self, db_instance: DBInstance):
-        """
-        Create a new DBInstance in memory.
+    def __init__(self, db_file: str):
+        self.object_manager = ObjectManager(db_file)
+        self.object_manager.create_management_table(
+            self.object_name, DBInstanceModel.table_structure, pk_column_data_type='TEXT')
 
-        Params db_instance: DBInstance object to be saved in memory.
-        """
-        self.object_manager.save_in_memory(DBInstance.object_name, db_instance.to_sql())
 
-    def deleteInMemoryDBInstance(self, db_instance_identifier: str):
-        """
-        Delete a DBInstance from memory by its identifier.
+    def createInMemoryDBInstance(self, db_instance):
+        metadata = json.dumps(db_instance.to_dict())
+        data = (db_instance.db_instance_identifier, metadata)
+        self.object_manager.save_in_memory(self.object_name, data)
 
-        Params: db_instance_identifier: The primary key (ID) of the DBInstance to delete.
-        """
-        self.object_manager.delete_from_memory_by_pk(
-            pk_column=DBInstance.pk_column, 
-            pk_value=db_instance_identifier, 
-            object_name=DBInstance.object_name
-        )
-
-    def describeDBInstance(self, db_instance_identifier: str):
-        """
-        Retrieve the details of a DBInstance based on its identifier.
-
-        Params: db_instance_identifier: The primary key (ID) of the DBInstance to describe.
-        
-        Return: List of DBInstance attributes matching the criteria.
-        """
-        # Fetch DBInstance from memory using its primary key
-        return self.object_manager.get_from_memory(
-            criteria=f"{DBInstance.pk_column} = '{db_instance_identifier}'", 
-            object_name=DBInstance.object_name, 
-            columns='*'
-        )
-
-    def modifyDBInstance(self, db_instance_identifier: str, updates: str):
-        """
-        Modify the attributes of an existing DBInstance in memory.
-
-        Params: db_instance_identifier: The primary key (ID) of the DBInstance to modify.
-                updates: SQL-like string containing the updates to be applied (e.g., "port = '3306'").
-        """
-        # Update the instance's attributes based on the provided update string
+    def modifyDBInstance(self, db_instance):
+        metadata = json.dumps(db_instance.to_dict())
+        updates = f"metadata = '{metadata}'"
+        criteria = f"db_instance_identifier = '{
+            db_instance.db_instance_identifier}'"
         self.object_manager.update_in_memory(
-            criteria=f"{DBInstance.pk_column} = '{db_instance_identifier}'", 
-            object_name=DBInstance.object_name, 
-            updates=updates
-        )
-    
-    def is_db_instance_exist(self, db_instance_identifier: int) -> bool:
-        """
-        Check if a DBInstance with the given identifier exists in memory.
+            self.object_name, updates, criteria)
 
-        Params: db_instance_identifier: The primary key (ID) of the DBInstance to check.
-        
-        Return: True if the DBInstance exists, otherwise False.
-        """
-        # Check if the object exists by its primary key in the management table
-        return bool(self.object_manager.db_manager.is_object_exist(
-            self.object_manager._convert_object_name_to_management_table_name(DBInstance.object_name), 
-            criteria=f"{DBInstance.pk_column} = '{db_instance_identifier}'"
-        ))
+    def describeDBInstance(self, db_instance_identifier) -> Dict[str, Any]:
+        criteria = f"db_instance_identifier = '{db_instance_identifier}'"
+        result = self.object_manager.get_from_memory(
+            self.object_name, "*", criteria)
+
+        if result:
+            metadata = json.loads(result[0][1])
+            return metadata
+        else:
+            raise ValueError(f"DB Instance with identifier {
+                             db_instance_identifier} not found.")
+
+    def deleteInMemoryDBInstance(self, db_instance_identifier):
+        criteria = f"db_instance_identifier = '{db_instance_identifier}'"
+        self.object_manager.delete_from_memory_by_criteria(
+            self.object_name, criteria)
+
+    def getDBInstance(self, db_instance_identifier):
+        criteria = f"db_instance_identifier = '{db_instance_identifier}'"
+        # result = self.object_manager.get_from_memory(self.object_name, ["*"], criteria)
+        result = self.object_manager.get_from_memory(
+            self.object_name, "*", criteria)
+
+        return result
+
+    def isDbInstanceExists(self, db_instance_identifier):
+        try:
+            self.object_manager.get_from_memory(
+                self.object_name, db_instance_identifier)
+            return True
+        except ValueError:
+            return False
