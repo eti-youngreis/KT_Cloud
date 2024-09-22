@@ -1,6 +1,7 @@
 from typing import Dict, Literal, Optional
 from unittest.mock import MagicMock
 import pytest
+import os
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 from DB.NEW_KT_DB.DataAccess.DBManager import DBManager
 from DB.NEW_KT_DB.DataAccess.DBProxyEndpointManager import DBProxyEndpointManager
@@ -20,9 +21,11 @@ def storage_manager() -> StorageManager:
 
 
 @pytest.fixture
-def object_manager() -> ObjectManager:
-    object_manager:ObjectManager = ObjectManager(':memory:')
-    return object_manager
+def object_manager(): 
+    object_manager:ObjectManager = ObjectManager('test.db')
+    yield object_manager
+    if os.path.exists('test.db'):
+        os.remove('test.db')
 
 
 @pytest.fixture
