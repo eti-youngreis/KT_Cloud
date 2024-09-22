@@ -2,11 +2,13 @@ from datetime import datetime
 import pytest
 import os
 import sys
+import time
+from Storage.NEW_KT_Storage.Exceptions import BucketExceptions
 os.chdir('D:/s3_project/KT_Cloud')
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..','..','..')))
 from Storage.NEW_KT_Storage.Controller.BucketController import BucketController
 
-# demonstrate bucket functionallity
+# demonstrate bucket functionality
 print('''---------------------Start Of session----------------------''')
 start_time_session = datetime.now()
 print(f"{start_time_session} demonstration of object: Bucket start")
@@ -25,6 +27,7 @@ print(f"{datetime.now()} bucket: '{name_bucket}' created successfully")
 end_time = datetime.now()
 total_duration = end_time - start_time
 print(f"total duration of create bucket is: '{total_duration}'")
+time.sleep(15)
 
 # test create bucket
 print()
@@ -43,6 +46,7 @@ region: {bucket_example.region}, created_at: {bucket_example.create_at}'")
 end_time = datetime.now()
 total_duration = end_time - start_time
 print(f"total duration of get bucket is: '{total_duration}'")
+time.sleep(5)
 
 # test get bucket
 print()
@@ -53,12 +57,18 @@ pytest.main(['-q', f'Storage/NEW_KT_Storage/Test/BucketTest.py::{test_name}'])
 # delete
 print()
 start_time = datetime.now()
+name_bucket="example-bucket"
 print(f"{start_time} start deleting bucket '{name_bucket}'")
 bucket_controller.delete_bucket(name_bucket)
 print(f"{datetime.now()} verify bucket '{name_bucket}' deleted by checking if it exist")
 end_time = datetime.now()
 total_duration = end_time - start_time
 print(f"total duration of delete bucket is: '{total_duration}'")
+time.sleep(10)
+try:
+    bucket_controller.get_bucket(name_bucket)
+except BucketExceptions.BucketNotFoundError as e:
+    print(e)
 
 # test delete bucket
 print()
@@ -69,7 +79,7 @@ pytest.main(['-q', f'Storage/NEW_KT_Storage/Test/BucketTest.py::{test_name}'])
 print()
 end_time_session = datetime.now()
 print(f"{end_time_session} demonstration of object Bucket ended successfully")
-total_duration_session = end_time_session - start_time_session
+total_duration_session = end_time_session - start_time_session-35
 print(f"the total duration of session bucket is: '{total_duration_session}'")
 print('''---------------------End Of session----------------------''')
 
