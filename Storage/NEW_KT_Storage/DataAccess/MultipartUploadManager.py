@@ -15,7 +15,7 @@ The ObjectManager class is responsible for managing the storage and retrieval of
 from DataAccess.ObjectManager import ObjectManager
 
 class MultipartUploadManager:
-    def __init__(self, db_file: str):
+    def __init__(self, db_file: str="my_db.db",):
         # Initializes the manager with the database file and creates the necessary table.
         self.object_manager = ObjectManager(db_file=db_file)
         self.object_name = "MultipartUpload"
@@ -56,6 +56,13 @@ class MultipartUploadManager:
         # Deletes the multipart upload record from the database after the process is completed.
         # Removes the record identified by its primary key (pk) from the database.
         self.object_manager.delete_from_memory_by_pk(self.object_name, multipart_upload.pk_column, multipart_upload.pk_value)
+
+    def get(self,upload_id: str):
+        criteria = f'object_id ="{upload_id}"'
+        return self.object_manager.get_from_memory(self.object_name, criteria=criteria)
+
+     
+
 
 
 

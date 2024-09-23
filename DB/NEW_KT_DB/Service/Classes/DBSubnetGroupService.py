@@ -95,6 +95,8 @@ class DBSubnetGroupService:
         self.storage_manager.write_to_file(
             self.bucket + '/' + db_subnet_group_name, subnet_group.to_str()
         )
+        
+        return subnet_group
 
     def delete_db_subnet_group(self, db_subnet_group_name: str) -> None:
         if not db_subnet_group_name:
