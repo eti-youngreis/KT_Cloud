@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 
 
-class TagObject:
+class Tag:
     PK_COULMN = "Key"
     OBJECT_NAME = "Tag"
     TABLE_STRUCTURE = ", ".join(["Key TEXT PRIMARY KEY", "Value TEXT"])
@@ -22,7 +22,7 @@ class TagObject:
         )
 
     def to_sql(self) -> str:
-        """Convert the TagObject instance to a SQL-friendly format."""
+        """Convert the Tag instance to a SQL-friendly format."""
         data_dict = self.to_dict()
         try:
             values = (
@@ -43,7 +43,7 @@ class TagObject:
             return None
 
     def __str__(self) -> str:
-        """Convert the TagObject instance to a JSON string."""
+        """Convert the Tag instance to a JSON string."""
         try:
             return json.dumps(self.to_dict(), indent=4)
         except Exception as e:

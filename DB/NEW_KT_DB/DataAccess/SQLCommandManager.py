@@ -151,9 +151,12 @@ class SQLCommandManager:
 
     @staticmethod
     def get_deleted_records(db_path: str, table_name: str) -> List[Tuple]:
-        query = f"SELECT * FROM deleted_records_in_version WHERE table_name='{
-            table_name}'"
-        return SQLCommandManager.execute_query(db_path, query)
+        if SQLCommandManager.table_exists(db_path, 'deleted_records_in_version'):
+            query = f"SELECT * FROM deleted_records_in_version WHERE table_name='{table_name}'"
+            return SQLCommandManager.execute_query(db_path, query)
+        else:
+            return []
+
 
     @staticmethod
     def execute_create_table(db_path: str, query: str):

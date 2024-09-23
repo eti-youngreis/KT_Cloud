@@ -1,5 +1,7 @@
 from DB.NEW_KT_DB.Service.Classes.DBProxyEndpointService import DBProxyEndpointService
 from typing import Dict, List, Optional, Any
+
+
 class DBProxyEndpointController:
     def __init__(self, service: DBProxyEndpointService):
         self.service = service

@@ -19,6 +19,7 @@ def storage_manager() -> StorageManager:
     storage_manager:StorageManager = StorageManager('DBProxyEndpoints')
     return storage_manager
 
+
 @pytest.fixture
 def object_manager(): 
     object_manager:ObjectManager = ObjectManager('test.db')
@@ -26,6 +27,7 @@ def object_manager():
     if os.path.exists('test.db'):
         os.remove('test.db')
     
+
 
 @pytest.fixture
 def endpoint_manager(object_manager:ObjectManager) -> DBProxyEndpointManager:
@@ -38,16 +40,19 @@ def endpoint_service(endpoint_manager:DBProxyEndpointManager, storage_manager:St
     endpoint_service:DBProxyEndpointService = DBProxyEndpointService(endpoint_manager, storage_manager, db_proxy_service_mock)
     return endpoint_service
 
+
 @pytest.fixture
 def db_proxy_service_mock():
     mock = MagicMock()
     mock.is_exists.side_effect = lambda db_proxy_name: db_proxy_name == 'my-proxy'
     return mock   
 
+
 @pytest.fixture
 def endpoint_controller(endpoint_service:DBProxyEndpointService) -> DBProxyEndpointController:
     controller:DBProxyEndpointController = DBProxyEndpointController(endpoint_service)
     return controller
+
 
 @pytest.fixture
 def setup_db_proxy_endpoint(endpoint_controller: DBProxyEndpointController):
@@ -67,6 +72,7 @@ def setup_db_proxy_endpoint(endpoint_controller: DBProxyEndpointController):
     except:
         print("alraedy deleted")
 
+
 @pytest.fixture
 def cleanup_endpoint(endpoint_controller: DBProxyEndpointController):
     """Delete an endpoint that get as parameter from test"""
@@ -82,9 +88,10 @@ def cleanup_endpoint(endpoint_controller: DBProxyEndpointController):
         except:
             print("alraedy deleted")
     
-    
-    
 
+# Tests    
+    
+    
 def _test_exists_in_db(endpoint_manager:DBProxyEndpointManager, endpoint_name):
     """Cecking if endpoint endpoint_name exists in dd"""
     return endpoint_manager.is_exists(endpoint_name)
@@ -115,6 +122,7 @@ def test_create_db_proxy_endpoint(endpoint_service:DBProxyEndpointService, setup
     # Check if data in table
     _test_exists_in_db(endpoint_manager, endpoint_name)
     
+
 def test_create_with_non_valid_parameters(endpoint_controller:DBProxyEndpointController) :
     valid_params = ["my-proxy","my-endpoint",['subnet-12345678', 'subnet-87654321'],'READ_WRITE',[{ 'Key': 'string','Value': 'string'}]]
     non_valid_params = ["my_proxy","my_en455", ['subnet-12345678', 'subnet-87654321'], "ff",{'Key': 1,'Value': 'string'}] 
@@ -148,7 +156,6 @@ def test_create_db_proxy_endpoint_with_existing_name(setup_db_proxy_endpoint: tu
     # Create sec
     with pytest.raises(DBProxyEndpointAlreadyExistsException):
         endpoint_controller.create_db_proxy_endpoint(db_proxy_name, endpoint_name, vpc_subnet_ids, target_role)
-
 
 
 def test_delete_db_proxy_endpoint(setup_db_proxy_endpoint: tuple[Literal['my-proxy'], Literal['my-endpoint'], Literal['READ_WRITE'], dict[str, list[dict]]], endpoint_controller:DBProxyEndpointController,
@@ -233,13 +240,13 @@ def test_describe_db_proxy_endpoint(setup_db_proxy_endpoint: tuple[Literal['my-p
     
     _test_description_is_correct(description, db_proxy_name, endpoint_name, vpc_subnet_ids, target_role)
 
+
 def test_describe_non_exist_db_proxy_endpoint(endpoint_controller:DBProxyEndpointController):
     endpoint_name = "non-exist-endpoint"
     with pytest.raises(DBProxyEndpointNotFoundException):
         endpoint_controller.describe_db_proxy_endpoint(DBProxyEndpointName=endpoint_name)
 
 
-    
 def test_describe_with_filters(setup_db_proxy_endpoint: tuple[Literal['my-proxy'], Literal['my-endpoint'], Literal['READ_WRITE'], dict[str, list[dict]]],endpoint_controller:DBProxyEndpointController,
                                cleanup_endpoint:Optional[str]):
     
@@ -281,6 +288,7 @@ def test_describe_with_filters_does_nothing(setup_db_proxy_endpoint: tuple[Liter
                {'Name': 'TargetRol','Values':['hh','jj']}]
     description = endpoint_controller.describe_db_proxy_endpoint(DBProxyEndpointName=endpoint_name, Filters=filters)
     _test_description_is_correct(description, db_proxy_name, endpoint_name, vpc_subnet_ids, target_role)
+
 
 def test_describe_with_non_correct_filters(setup_db_proxy_endpoint: tuple[Literal['my-proxy'], Literal['my-endpoint'], Literal['READ_WRITE'], dict[str, list[dict]]],endpoint_controller:DBProxyEndpointController):
      # Create and get response

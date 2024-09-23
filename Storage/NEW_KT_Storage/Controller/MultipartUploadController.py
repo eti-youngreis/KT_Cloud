@@ -1,3 +1,4 @@
+import sqlite3
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -5,9 +6,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from Service.Classes.MultiPartUploadService import MultipartUploadService
 
 class MultipartUploadController:
-    def __init__(self, db_file: str, storage_path: str):
+    def __init__(self):
         # Initializes the controller with the database file and storage path.
-        self.service = MultipartUploadService(db_file, storage_path)
+        self.service = MultipartUploadService()
     
     def initiate_upload(self, bucket_name: str, object_key: str) -> str:
         """
@@ -38,3 +39,4 @@ class MultipartUploadController:
         Completes the upload process and merges all parts into a single file.
         """
         return self.service.complete_upload(upload_id, bucket_name, object_key)
+
