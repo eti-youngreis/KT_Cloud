@@ -8,11 +8,7 @@ from Service.Classes.DBClusterService import DBClusterService
 from DataAccess import DBClusterManager
 from Controller.DBInstanceNaiveController import DBInstanceController
 from Service.Classes.DBInstanceNaiveService import DBInstanceService
-# from DataAccess import DBInstanceManager
-# from DataAccess import ObjectManager
 
-# from Controller import DBInstanceNaiveController
-# from Service.Classes.DBInstanceNaiveService import DBInstanceService
 class DBClusterController:
     def __init__(self, service: DBClusterService, instance_controller:DBInstanceController):
         self.service = service
