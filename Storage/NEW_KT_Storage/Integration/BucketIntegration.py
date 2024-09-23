@@ -32,7 +32,7 @@ time.sleep(15)
 # test create bucket
 print()
 test_name = 'test_create_bucket_valid'
-print(f"Running test: {test_name}:")
+print(f"\033[34mRunning test: {test_name}:\033[0m")
 pytest.main(['-q', f'Storage/NEW_KT_Storage/Test/BucketTest.py::{test_name}'])
 
 
@@ -51,7 +51,7 @@ time.sleep(5)
 # test get bucket
 print()
 test_name = 'test_get_with_valid_bucket'
-print(f"Running test: {test_name}:")
+print(f"\033[34mRunning test: {test_name}:\033[0m")
 pytest.main(['-q', f'Storage/NEW_KT_Storage/Test/BucketTest.py::{test_name}'])
 
 # delete
@@ -73,7 +73,7 @@ except BucketExceptions.BucketNotFoundError as e:
 # test delete bucket
 print()
 test_name = 'test_delete_bucket_existing'
-print(f"Running test: {test_name}:")
+print(f"\033[34mRunning test: {test_name}:\033[0m")
 pytest.main(['-q', f'Storage/NEW_KT_Storage/Test/BucketTest.py::{test_name}'])
 
 print()

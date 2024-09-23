@@ -12,6 +12,6 @@ class BucketController:
         self.service.delete(bucket_name)
 
     def get_bucket(self, bucket_name):
-       return self.service.get(bucket_name)
+        return self.service.get(bucket_name)
 
 

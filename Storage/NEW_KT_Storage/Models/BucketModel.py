@@ -1,7 +1,5 @@
 import json
 from datetime import datetime
-# from Storage.NEW_KT_Storage.Models.BucketObjectModel import BucketObject
-# from typing import List,Dict
 from Storage.NEW_KT_Storage.DataAccess.ObjectManager import ObjectManager
 
 class Bucket:
