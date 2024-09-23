@@ -12,35 +12,35 @@ def generate_unique_name(prefix):
 def test_create_and_get_policy(lifecycle_service):
     policy_name = generate_unique_name("test_policy")
     try:
-        lifecycle_service.create(policy_name, 30, 20, "Enabled", ["prefix1"])
+        lifecycle_service.create(policy_name, "bucket_name", 30, 20, "Enabled", ["prefix1"])
         policy = lifecycle_service.get(policy_name)
         assert policy.policy_name == policy_name
         assert policy.expiration_days == 30
-        assert policy.transitions_days_GLACIER == 20
+        assert policy.transitions_days_glacier == 20
     finally:
         lifecycle_service.delete(policy_name)
 
 def test_create_modify_and_get_policy(lifecycle_service):
     policy_name = generate_unique_name("test_policy")
     try:
-        lifecycle_service.create(policy_name, 30, 20, "Enabled", ["prefix1"])
-        lifecycle_service.modify(policy_name, expiration_days=45, transitions_days_GLACIER=30)
+        lifecycle_service.create(policy_name,"bucket_name", 30, 20, "Enabled", ["prefix1"])
+        lifecycle_service.modify(policy_name, expiration_days=45, transitions_days_glacier=30)
         policy = lifecycle_service.get(policy_name)
         assert policy.expiration_days == 45
-        assert policy.transitions_days_GLACIER == 30
+        assert policy.transitions_days_glacier == 30
     finally:
         lifecycle_service.delete(policy_name)
 
 def test_create_delete_and_get_policy(lifecycle_service):
     policy_name = generate_unique_name("test_policy")
-    lifecycle_service.create(policy_name, 30, 20, "Enabled", ["prefix1"])
+    lifecycle_service.create(policy_name,"bucket_name", 30, 20, "Enabled", ["prefix1"])
     lifecycle_service.delete(policy_name)
     policy = lifecycle_service.get(policy_name)
     assert policy is None
 
 def test_modify_non_existing_policy(lifecycle_service):
     non_existing_policy = generate_unique_name("non_existing_policy")
-    lifecycle_service.modify(non_existing_policy, expiration_days=45, transitions_days_GLACIER=30)
+    lifecycle_service.modify(non_existing_policy, expiration_days=45, transitions_days_glacier=30)
     assert lifecycle_service.get(non_existing_policy) is None
 
 def test_delete_non_existing_policy(lifecycle_service):
@@ -51,7 +51,7 @@ def test_delete_non_existing_policy(lifecycle_service):
 def test_create_policy_with_multiple_prefixes(lifecycle_service):
     policy_name = generate_unique_name("multi_prefix_policy")
     try:
-        lifecycle_service.create(policy_name, 30, 20, "Enabled", ["prefix1", "prefix2", "prefix3"])
+        lifecycle_service.create(policy_name,"bucket_name", 30, 20, "Enabled", ["prefix1", "prefix2", "prefix3"])
         policy = lifecycle_service.get(policy_name)
         assert policy.prefix == ["prefix1", "prefix2", "prefix3"]
     finally:
@@ -61,7 +61,7 @@ def test_create_policy_with_multiple_prefixes(lifecycle_service):
 def test_modify_policy_status(lifecycle_service):
     policy_name = generate_unique_name("status_change_policy")
     try:
-        lifecycle_service.create(policy_name, 30, 20, "Enabled", ["prefix1"])
+        lifecycle_service.create(policy_name, "bucket_name", 30, 20, "Enabled", ["prefix1"])
         lifecycle_service.modify(policy_name, status="Disabled")
         policy = lifecycle_service.get(policy_name)
         assert policy.status == "Disabled"
@@ -72,10 +72,10 @@ def test_modify_policy_status(lifecycle_service):
 def test_create_policy_with_max_values(lifecycle_service):
     policy_name = generate_unique_name("max_value_policy")
     try:
-        lifecycle_service.create(policy_name, 3650, 3650, "Enabled", ["prefix1"])
+        lifecycle_service.create(policy_name, "bucket_name", 3650, 3650, "Enabled", ["prefix1"])
         policy = lifecycle_service.get(policy_name)
         assert policy.expiration_days == 3650
-        assert policy.transitions_days_GLACIER == 3650
+        assert policy.transitions_days_glacier == 3650
     finally:
         lifecycle_service.delete(policy_name)
 
@@ -83,12 +83,12 @@ def test_create_policy_with_max_values(lifecycle_service):
 def test_modify_multiple_attributes(lifecycle_service):
     policy_name = generate_unique_name("multi_modify_policy")
     try:
-        lifecycle_service.create(policy_name, 30, 20, "Enabled", ["prefix1"])
-        lifecycle_service.modify(policy_name, expiration_days=60, transitions_days_GLACIER=40, status="Disabled",
+        lifecycle_service.create(policy_name, "bucket_name", 30, 20, "Enabled", ["prefix1"])
+        lifecycle_service.modify(policy_name, expiration_days=60, transitions_days_glacier=40, status="Disabled",
                                  prefix=["new_prefix"])
         policy = lifecycle_service.get(policy_name)
         assert policy.expiration_days == 60
-        assert policy.transitions_days_GLACIER == 40
+        assert policy.transitions_days_glacier == 40
         assert policy.status == "Disabled"
         assert policy.prefix == ["new_prefix"]
     finally:
@@ -99,13 +99,13 @@ def test_create_multiple_policies(lifecycle_service):
     policy_names = [generate_unique_name("multi_policy") for _ in range(3)]
     try:
         for i, name in enumerate(policy_names):
-            lifecycle_service.create(name, 30 + i, 20 + i, "Enabled", [f"prefix{i}"])
+            lifecycle_service.create(name, "bucket_name", 30 + i, 20 + i, "Enabled", [f"prefix{i}"])
 
         for i, name in enumerate(policy_names):
             policy = lifecycle_service.get(name)
             assert policy.policy_name == name
             assert policy.expiration_days == 30 + i
-            assert policy.transitions_days_GLACIER == 20 + i
+            assert policy.transitions_days_glacier == 20 + i
             assert policy.prefix == [f"prefix{i}"]
     finally:
         for name in policy_names:

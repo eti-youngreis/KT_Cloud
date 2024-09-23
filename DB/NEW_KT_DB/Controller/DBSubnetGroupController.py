@@ -22,3 +22,6 @@ class DBSubnetGroupController:
 
     def list_db_subnet_groups(self):
         return self.service.list_db_subnet_groups()
+
+    def add_instance_to_subnet_group(self, db_subnet_group_name, instance_id):
+        return self.service.assign_instance_to_group(db_subnet_group_name, instance_id)

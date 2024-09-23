@@ -16,7 +16,11 @@ from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 
 class DBSubnetGroupService:
-    def __init__(self, db_subnet_group_manager: DBSubnetGroupManager, storage_manager: StorageManager):
+    def __init__(
+        self,
+        db_subnet_group_manager: DBSubnetGroupManager,
+        storage_manager: StorageManager,
+    ):
         self.manager = db_subnet_group_manager
         self.bucket = "db_subnet_groups"
         self.storage_manager = storage_manager
@@ -26,22 +30,28 @@ class DBSubnetGroupService:
     def create_db_subnet_group(self, **kwargs):
         # validate the arguments
         if not kwargs.get("db_subnet_group_name"):
-            raise DBSubnetGroupExceptions.MissingRequiredArgument("db_subnet_group_name")
+            raise DBSubnetGroupExceptions.MissingRequiredArgument(
+                "db_subnet_group_name"
+            )
 
         if kwargs["db_subnet_group_name"] in self.subnet_groups.keys():
             raise DBSubnetGroupExceptions.DBSubnetGroupAlreadyExists(
-                kwargs["db_subnet_group_name"] 
+                kwargs["db_subnet_group_name"]
             )
-        
+
         # validate the arguments
-        DBSubnetGroupValidations.validate_subnet_group_name(kwargs["db_subnet_group_name"])
-        DBSubnetGroupValidations.validate_subnet_group_description(kwargs["db_subnet_group_description"])
-        
+        DBSubnetGroupValidations.validate_subnet_group_name(
+            kwargs["db_subnet_group_name"]
+        )
+        DBSubnetGroupValidations.validate_subnet_group_description(
+            kwargs["db_subnet_group_description"]
+        )
+
         try:
             c = kwargs["vpc_id"]
         except KeyError:
             raise DBSubnetGroupExceptions.MissingRequiredArgument("vpc_id")
-        
+
         # create an object from the arguments received
         subnet_group = DBSubnetGroup(**kwargs)
         # save in management table
@@ -70,18 +80,22 @@ class DBSubnetGroupService:
             self.subnet_groups[db_subnet_group_name] = data
         return data
 
-    def modify_db_subnet_group(self, db_subnet_group_name: str, **updates) -> DBSubnetGroup:
+    def modify_db_subnet_group(
+        self, db_subnet_group_name: str, **updates
+    ) -> DBSubnetGroup:
         if not db_subnet_group_name:
             raise ValueError("Missing required argument db_subnet_group_name")
 
         # validate the arguments
         DBSubnetGroupValidations.validate_subnet_group_name(db_subnet_group_name)
         try:
-            DBSubnetGroupValidations.validate_subnet_group_description(updates.get("db_subnet_group_description"))
+            DBSubnetGroupValidations.validate_subnet_group_description(
+                updates.get("db_subnet_group_description")
+            )
         except KeyError:
             pass
 
-        # get the object 
+        # get the object
         subnet_group = self.get_db_subnet_group(db_subnet_group_name)
 
         # update the object based ont the arguments sent
@@ -93,21 +107,21 @@ class DBSubnetGroupService:
         # version = str(int(self.version_manager.get(self.bucket, subnet_group.db_subnet_group_name).version_id)+1)
         # for now we override the basic version, when the latest version id can be retrieved, we will make a new version as old_version_id + 1
         self.storage_manager.write_to_file(
-            self.bucket + '/' + db_subnet_group_name, subnet_group.to_str()
+            self.bucket + "/" + db_subnet_group_name, subnet_group.to_str()
         )
-        
+
         return subnet_group
 
     def delete_db_subnet_group(self, db_subnet_group_name: str) -> None:
         if not db_subnet_group_name:
-            raise DBSubnetGroupExceptions.MissingRequiredArgument("db_subnet_group_name")
+            raise DBSubnetGroupExceptions.MissingRequiredArgument(
+                "db_subnet_group_name"
+            )
         # delete from management table
         self.manager.delete(db_subnet_group_name)
         # for now version id is 0
         # delete physical object from storage
-        self.storage_manager.delete_file(
-            self.bucket + '/' + db_subnet_group_name
-        )
+        self.storage_manager.delete_file(self.bucket + "/" + db_subnet_group_name)
         # delete from local collection (hash table)
         if db_subnet_group_name in self.subnet_groups:
             del self.subnet_groups[db_subnet_group_name]
@@ -117,3 +131,11 @@ class DBSubnetGroupService:
 
     def list_db_subnet_groups(self):
         return self.manager.list_db_subnet_groups()
+    
+    def assign_instance_to_group(self, db_subnet_group_name: str, instance_id: str):
+        group = self.manager.get(db_subnet_group_name) 
+        subnet = group.add_instance(instance_id)
+        self.modify_db_subnet_group(**group.to_dict())
+        return subnet
+
+    
