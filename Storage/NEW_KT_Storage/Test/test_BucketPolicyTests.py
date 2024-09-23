@@ -57,6 +57,9 @@ def test_create_bucket_policy_success(bucketPolicy_controller, setup_bucket_poli
     
     _test_is_description_is_correct(bucketPolicy_controller.get_bucket_policy(bucket_name), bucket_name, actions, allow_versions)
     
+    bucketPolicy_controller.delete_bucket_policy(bucket_name)
+
+    
 
 def test_create_without_bucket_name(bucketPolicy_controller):
     
@@ -86,6 +89,8 @@ def test_add_action_to_bucket_policy(bucketPolicy_controller, setup_bucket_polic
     bucket_policy = bucketPolicy_controller.get_bucket_policy(bucket_name)
     _test_is_description_is_correct(bucket_policy, bucket_name, update_actions, allow_versions)
     
+    bucketPolicy_controller.delete_bucket_policy(bucket_name)
+
     
 def test_delete_action_from_bucket_policy(bucketPolicy_controller, setup_bucket_policy):
     
@@ -93,14 +98,17 @@ def test_delete_action_from_bucket_policy(bucketPolicy_controller, setup_bucket_
     update_actions=['WRITE']
     bucketPolicy_controller.modify_bucket_policy(bucket_name, update_actions = update_actions, action="add")
     bucketPolicy_controller.modify_bucket_policy(bucket_name, action="delete", update_actions=['WRITE'])
+    bucketPolicy_controller.delete_bucket_policy(bucket_name)
+
     # bucket_policy = bucketPolicy_controller.get_bucket_policy(bucket_name)
     # _test_is_description_is_correct(bucket_policy, bucket_name, update_actions, allow_versions)
     
 def test_add_exist_action(bucketPolicy_controller):
     
-    bucketPolicy_controller.create_bucket_policy("my_bucket", ['READ'])
+    bucketPolicy_controller.create_bucket_policy("bucket", ['READ'])
     with pytest.raises(IsExistactionFault):
-        bucketPolicy_controller.modify_bucket_policy("my_bucket", action="add", update_actions=['READ']) 
+        bucketPolicy_controller.modify_bucket_policy("bucket", action="add", update_actions=['READ']) 
+    bucketPolicy_controller.delete_bucket_policy("bucket")
 
 def test_delete_not_exist_action(bucketPolicy_controller):
     
@@ -113,20 +121,23 @@ def test_modify_bucket_policy(bucketPolicy_controller, setup_bucket_policy):
     bucket_name, actions, allow_versions, bucket_policy = setup_bucket_policy
     with pytest.raises(ParamValidationFault):
         bucketPolicy_controller.modify_bucket_policy(bucket_name, update_actions=['WRITE'])
+    bucketPolicy_controller.delete_bucket_policy(bucket_name)
+
 
 def test_modify_when_allow_versions_invalid(bucketPolicy_controller, setup_bucket_policy):
     
     bucket_name, actions, allow_versions, bucket_policy = setup_bucket_policy
     with pytest.raises(ParamValidationFault):
         bucketPolicy_controller.modify_bucket_policy(bucket_name, allow_versions="")
-    
+    bucketPolicy_controller.delete_bucket_policy(bucket_name)
 
-    
+        
 def test_modify_invalid_action(bucketPolicy_controller, setup_bucket_policy):
     
     bucket_name, actions, allow_versions, bucket_policy = setup_bucket_policy
     with pytest.raises(ParamValidationFault):
         bucketPolicy_controller.modify_bucket_policy(bucket_name, action="add", update_actions="READ")
+        
         
 def test_modify_not_exist_bucket(bucketPolicy_controller, setup_bucket_policy):
     

@@ -35,7 +35,7 @@ class BucketPolicy:
                 allow_versions BOOLEAN NOT NULL
             '''
 
-    def __init__(self, bucket_name: str, actions: list, allow_versions=True):
+    def __init__(self, bucket_name: str, actions: list = ['READ', 'WRITE', 'DELETE', 'CREATE', 'PUT'], allow_versions=True):
         """
         Initializes a BucketPolicy instance with the given bucket name,
         actions, and versioning option.

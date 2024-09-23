@@ -1,11 +1,12 @@
 import os
 import sys
-from Models.BucketPolicyModel import BucketPolicy
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from typing import Dict, Optional
 from Abc.STO import STO
+from Storage.NEW_KT_Storage.Models.BucketPolicyModel import BucketPolicy
 # from Validation import Validation
-from DataAccess.BucketPolicyManager import BucketPolicyManager
+from Storage.NEW_KT_Storage.DataAccess.BucketPolicyManager import BucketPolicyManager
 
 class ParamValidationFault(Exception):
     """Exception raised when a required parameter is missing."""
@@ -24,7 +25,7 @@ class IsNotExistactionFault(Exception):
 
 class BucketPolicyService(STO):
 
-    def __init__(self, dal: BucketPolicyManager):
+    def __init__(self, dal = BucketPolicyManager()):
         """
         Initializes the BucketPolicyService with a data access layer (DAL).
 
@@ -61,7 +62,7 @@ class BucketPolicyService(STO):
         if not isinstance(actions, list):
             raise ParamValidationFault("actions must be a list.")
         
-        valid_actions = {'READ', 'WRITE', 'DELETE', 'CREATE'}  # Example actions
+        valid_actions = {'READ', 'WRITE', 'DELETE', 'CREATE', 'PUT'}  # Example actions
         for action in actions:
             if action not in valid_actions:
                 raise ParamValidationFault(f"Invalid action: {action}")
@@ -69,6 +70,9 @@ class BucketPolicyService(STO):
         # Ensure allow_versions is boolean
         if not isinstance(allow_versions, bool):
             raise ParamValidationFault("allow_versions must be a boolean value.")
+        
+        if self.dal.getBucketPolicy(bucket_name):
+            raise IsExistactionFault("The bucket alredy exist")
 
         bucket_policy = BucketPolicy(bucket_name, actions=actions, allow_versions=allow_versions)
         
@@ -245,5 +249,17 @@ class BucketPolicyService(STO):
             policy_actions.remove(action)
         
         return policy_actions
+    
+    def is_action_allowed(self, bucket_name, action_name):
+        
+        bucket_policy = self.dal.getBucketPolicy(bucket_name)
+        policy_actions = bucket_policy['actions']
+        return action_name in policy_actions
+    
+    def is_versions_allowed(self, bucket_name):
+        
+        bucket_policy = self.dal.getBucketPolicy(bucket_name)
+        return bucket_policy['allow_versions']
+        
         
         

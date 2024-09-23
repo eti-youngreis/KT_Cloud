@@ -25,10 +25,12 @@ class BucketPolicyManager:
             The base directory where files will be stored (default is "D:/New folder/server").
         """
         self.db_path = os.path.join(base_directory, db_path)
-        self.object_manager = ObjectManager(db_path)
+        self.object_manager = ObjectManager(self.db_path)
         self.object_manager.object_manager.create_management_table(BucketPolicy.object_name, BucketPolicy.table_structure)
         self.policy_path = os.path.join(base_directory, policy_path)
-        self.storage_manager = StorageManager(policy_path)
+        self.storage_manager = StorageManager(base_directory)
+        if not self.storage_manager.is_file_exist(policy_path):
+            self.storage_manager.create_file(policy_path, '{}')
     
     def createInMemoryBucketPolicy(self, bucket_policy: BucketPolicy):
         """
@@ -166,6 +168,7 @@ class BucketPolicyManager:
         
         # Update the in-memory database
         actions = json.dumps(bucket_policy['actions'])
-        updates = f"actions = '{actions}'"
+        allow_versions = json.dumps(bucket_policy['allow_versions'])
+        updates = f"actions = '{actions}', allow_versions = '{allow_versions}'"
         criteria = f"bucket_name = '{bucket_policy['bucket_name']}'"
         self.object_manager.update_in_memory("BucketPolicy", updates=updates, criteria=criteria)
