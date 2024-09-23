@@ -1,0 +1,5 @@
+# Normalize text files
+* text=auto
+
+# Keep binary files as-is
+*.db binary
