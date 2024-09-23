@@ -148,7 +148,7 @@ class EventSubscriptionManager:
         Returns:
             EventSubscription: The converted EventSubscription object.
         """
-        subscription_name, sources, source_type, event_categories, sns_topic_arn = sql_subscription
+        subscription_name, sources, source_type, event_categories, sns_topic = sql_subscription
         sources = json.loads(sources)
         event_categories = json.loads(event_categories)
 
@@ -162,7 +162,7 @@ class EventSubscriptionManager:
             subscription_name=subscription_name,
             sources=sources_list,
             event_categories=event_categories_list,
-            sns_topic_arn=sns_topic_arn,
+            sns_topic=sns_topic,
             source_type=SourceType(source_type)
         )
 

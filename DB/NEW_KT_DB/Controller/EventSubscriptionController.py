@@ -26,11 +26,11 @@ class EventSubscriptionController:
             subscription_name (str): The name of the subscription.
             sources (List[Tuple[SourceType, str]]): List of source types and their identifiers.
             event_categories (List[EventCategory]): List of event categories to subscribe to.
-            sns_topic_arn (str): The ARN of the SNS topic for notifications.
+            sns_topic (str): The ARN of the SNS topic for notifications.
             source_type (SourceType, optional): The type of source. Defaults to SourceType.All.
         """
         self.service.create(subscription_name=subscription_name, sources=sources,
-                            event_categories=event_categories, sns_topic_arn=sns_topic, source_type=source_type)
+                            event_categories=event_categories, sns_topic=sns_topic, source_type=source_type)
 
     def delete_event_subscription(self, subscription_name: str):
         """
@@ -58,18 +58,18 @@ class EventSubscriptionController:
         """
         return self.service.describe(columns, criteria)
 
-    def modify_event_subscription(self, subscription_name: str, event_categories: List[EventCategory], sns_topic_arn: str, source_type: SourceType = SourceType.ALL) -> None:
+    def modify_event_subscription(self, subscription_name: str, event_categories: List[EventCategory], sns_topic: str, source_type: SourceType = SourceType.ALL) -> None:
         """
         Modify an existing event subscription.
 
         Args:
             subscription_name (str): The name of the subscription to modify.
             event_categories (List[EventCategory]): Updated list of event categories to subscribe to.
-            sns_topic_arn (str): Updated ARN of the SNS topic for notifications.
+            sns_topic (str): Updated ARN of the SNS topic for notifications.
             source_type (SourceType, optional): Updated type of source. Defaults to SourceType.ALL.
         """
         self.service.modify(subscription_name=subscription_name,
-                            event_categories=event_categories, sns_topic_arn=sns_topic_arn, source_type=source_type)
+                            event_categories=event_categories, sns_topic=sns_topic, source_type=source_type)
 
     def get_event_subscriptions(self, criteria: Dict[str, Any] = None) -> List[EventSubscription]:
         """
