@@ -209,7 +209,7 @@ def test_modify_db_proxy(create_db_proxy, cleanup_db_and_files):
     """
     role_arn = 'new_arn:aws:iam::account-id:role/my-iam-role'
     proxy_controller.modify_db_proxy(db_proxy_name=db_proxy_name, role_arn=role_arn)
-    content_of_file = storage_manager.get_file_content(files_path + db_proxy_name + '.json')
+    content_of_file = storage_manager.get_file_content(db_proxy_name + '.json')
     dict_content = json.loads(content_of_file)  # Convert file content to a dictionary
     assert dict_content['role_arn'] == role_arn  # Check if the role_arn is updated
     assert dict_content['create_date'] != dict_content['update_date']  # Check if the date has changed
