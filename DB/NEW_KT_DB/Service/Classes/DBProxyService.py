@@ -135,7 +135,7 @@ class DBProxyService(DBO):
         updates['update_date'] = datetime.now().isoformat()
 
         # Load the existing data, update it, and save it back to storage
-        path = 'DB\\Proxies\\' + updates.get('db_proxy_name') + '.json'
+        path = updates.get('db_proxy_name') + '.json'
         old_data = self.storage_manager.get_file_content(path)
         old_data = json.loads(old_data)
         old_data.update(updates)
