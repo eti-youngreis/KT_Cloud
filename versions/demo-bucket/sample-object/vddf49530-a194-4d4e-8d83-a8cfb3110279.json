@@ -1,0 +1,11 @@
+{
+    "pk": "demo-bucketsample-objectvddf49530-a194-4d4e-8d83-a8cfb3110279",
+    "bucket_name": "demo-bucket",
+    "content": "This is a sample number 2 content for version demonstration.",
+    "version_id": "vddf49530-a194-4d4e-8d83-a8cfb3110279",
+    "object_key": "sample-object",
+    "is_latest": true,
+    "last_modified": "2024-09-22T14:57:14.882840",
+    "size": 60,
+    "owner": null
+}

@@ -19,7 +19,7 @@ class Version:
     """
     pk_column = "version_pk"
 
-    def __init__(self,bucket_name: str, object_key: object, content = " ", version_id: object = None, is_latest: object = False, last_modified: object = None, etag: object = None, size: object = None,
+    def __init__(self,bucket_name: str, object_key: object, content:str = " ", version_id: object = None, is_latest: object = False, last_modified: object = None, etag: object = None, size: object = None,
                  storage_class: object = "STANDARD", owner: object = None, checksum_algorithm: object = None, delete_marker: object = False,
                  replication_status: object = None, object_lock_mode: object = None, object_lock_retain_until_date: object = None,
                  pk_value: str = None) -> object:
