@@ -1,6 +1,6 @@
 import re
 
-from Exceptions.DBInstanceNaiveException import ParamValidationError, MissingRequireParamError
+from DB.NEW_KT_DB.Exceptions.DBInstanceNaiveException import ParamValidationError, MissingRequireParamError
 
 
 def check_required_params(required_params, kwargs):

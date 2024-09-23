@@ -111,12 +111,6 @@ def test_modify_db_instance(db_instance_controller):
     
     db_instance_controller.create_db_instance(**attributes)
     
-    updates = {
-        "db_instance_identifier": "db123",
-        "allocated_storage": 50
-    }
-    
-    response = db_instance_controller.modify_db_instance(**updates)
     assert response['DBInstance'].allocated_storage == 50
 
 def test_describe_db_instance_not_found(db_instance_controller):
