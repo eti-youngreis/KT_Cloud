@@ -46,11 +46,9 @@ print('verifying event subscription "example_subscription" creation''')
 try:
     event_subscription_controller.get_event_subscription(
         subscription_name="example_subscription")
-    print(f'''{current_date_time}
-          event subscription "example_subscription" created successfully''')
+    print('event subscription "example_subscription" created successfully')
 except:
-    print(f'''{current_date_time}
-          event subscription "example_subscription" creation failed''')
+    print('event subscription "example_subscription" creation failed')
 
 # Describe
 print(f'''{current_date_time}
@@ -60,19 +58,18 @@ print(event_subscription_controller.describe_event_subscriptions(
 
 # Modify
 print(f'''{current_date_time}
-          modifying event subscription "example_subscription"''')
+      modifying event subscription "example_subscription"''')
 event_subscription_controller.modify_event_subscription(
     subscription_name="example_subscription",
     event_categories=[EventCategory.CREATION,
                       EventCategory.DELETION, EventCategory.FAILURE],
-    sns_topic_arn="example-topic-2",
+    sns_topic="example-topic-2",
     source_type=SourceType.DB_INSTANCE
 )
 print('verifying event subscription "example_subscription" modification')
 print(event_subscription_controller.describe_event_subscription(
     subscription_name="example_subscription"))
-print(f'''{current_date_time}
-          event subscription "example_subscription" modified successfully''')
+print('event subscription "example_subscription" modified successfully')
 
 # Delete
 print(f'''{current_date_time}
@@ -83,13 +80,12 @@ print('verify event subscription "example_subscription" deletion')
 try:
     event_subscription_controller.get_event_subscription(
         subscription_name="example_subscription")
-    print(f'
-          event subscription "example_subscription" deletion failed')
+    print('event subscription "example_subscription" deletion failed')
 except:
     print('event subscription "example_subscription" deleted successfully')
 
 
-print(f'''{current_date_time} deonstration of object EventSubscription ended successfully''')
+print(f'''{current_date_time}
+      deonstration of object EventSubscription ended successfully''')
 print(current_date_time)
 print('''---------------------End Of session----------------------''')
-
