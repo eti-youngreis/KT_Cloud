@@ -32,7 +32,7 @@ time.sleep(15)
 # test create bucket
 print()
 test_name = 'test_create_bucket_valid'
-print(f"Running test: {test_name}:")
+print(f"Running test: {test_name}:\033[0m")
 pytest.main(['-q', f'Storage/NEW_KT_Storage/Test/BucketTest.py::{test_name}'])
 
 
