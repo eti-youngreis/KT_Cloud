@@ -1,8 +1,13 @@
 import uuid
+import os
+from pathlib import Path
+from tornado.gen import sleep
+from DB.NEW_KT_DB.Test.DBSubnetGroupTests import storage_manager
 from Storage.NEW_KT_Storage.Models.VersionModel import Version
 from Storage.NEW_KT_Storage.Service.Abc.STO import STO
 from Storage.NEW_KT_Storage.Validation.GeneralValidations import check_required_params
 from Storage.NEW_KT_Storage.DataAccess.VersionManager import VersionManager
+from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 from typing import Dict
 import difflib
 import networkx as nx
@@ -50,9 +55,8 @@ class VersionService(STO):
             storage_class=storage_class,
             owner=owner
         )
-        self.dal.create_in_memory_version(version, bucket_name, key)
+        return self.dal.create_in_memory_version(version, bucket_name, key)
 
-        return {"status": "success", "message": "Version object created successfully", "version_id": version_id}
 
     def get(self, bucket_name: str, key: str, version_id: str) -> Version:
         '''Get a Version.'''
@@ -64,10 +68,15 @@ class VersionService(STO):
         try:
             version = self.dal.get_version(bucket_name=bucket_name, key=key, version_id=version_id)
             return version
+
         except FileNotFoundError:
             raise ValueError(f"Version object not found for bucket '{bucket_name}', key '{key}', version '{version_id}'.")
 
+        except Exception as e:
+            raise ValueError(f"An unexpected error occurred while retrieving the version: {str(e)}")
+
         return version
+
 
     def delete(self, bucket_name: str, key: str, version_id: str):
         '''Delete an existing Version.'''
@@ -82,6 +91,7 @@ class VersionService(STO):
             raise ValueError(str(e))  # Raise a ValueError if the version does not exist
 
         return {"status": "success", "message": "Version object deleted successfully"}
+
 
     def describe(self, bucket_name: str, key: str, version_id: str) -> Dict:
         '''Describe the details of a Version.'''
@@ -112,23 +122,36 @@ class VersionService(STO):
         return {"status": "success", "message": "Version object updated successfully"}
 
     def analyze_version_changes(self, bucket_name: str, object_key: str, version_id1: str, version_id2: str):
-        
         try:
             version1_data = self.get(bucket_name, object_key, version_id1)
             version2_data = self.get(bucket_name, object_key, version_id2)
         except Exception as e:
-            print("Version didn't found in database:", e)
+            print(f"Error retrieving versions: {e}")
+            return
 
         if not version1_data or not version2_data:
-            raise ValueError("One or both versions not found")
+            print("One or both versions not found")
+            return
 
-        version1_content = version1_data[3] if isinstance(version1_data, list) else version1_data[0]["content"]
-        version2_content = version2_data[3] if isinstance(version2_data, list) else version2_data[0]["content"]
+        version1_path_content = version1_data[3] if isinstance(version1_data, list) else version1_data[0]["content"]
+        version2_path_content = version2_data[3] if isinstance(version2_data, list) else version2_data[0]["content"]
 
-        if not isinstance(version1_content, str):
-            raise ValueError("Version 1 content is not a valid string.")
-        if not isinstance(version2_content, str):
-            raise ValueError("Version 2 content is not a valid string.")
+        storage_manager = StorageManager("C:\\Users\\OWNER\\Desktop")
+        try:
+            full_path1 = os.path.join("C:\\Users\\OWNER\\Desktop", version1_path_content)
+            full_path2 = os.path.join("C:\\Users\\OWNER\\Desktop", version2_path_content)
+            version1_content = self._safe_get_file_content(storage_manager, f"C:\\Users\\OWNER\\Desktop\\{version1_path_content}")
+            sleep(10)
+            version2_content = self._safe_get_file_content(storage_manager,  f"C:\\Users\\OWNER\\Desktop\\{version2_path_content}")
+        except FileNotFoundError as e:
+            print(f"File not found: {e}")
+            return
+        except PermissionError as e:
+            print(f"Permission denied: {e}")
+            return
+        except Exception as e:
+            print(f"Error reading file: {e}")
+            return
 
         content1 = version1_content.splitlines()
         content2 = version2_content.splitlines()
@@ -146,6 +169,16 @@ class VersionService(STO):
                 continue
             else:
                 print(line)
+
+
+    def _safe_get_file_content(self, storage_manager, file_path):
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File does not exist: {file_path}")
+        if not os.access(file_path, os.R_OK):
+            raise PermissionError(f"Permission denied: {file_path}")
+        return storage_manager.get_file_content(file_path)
+
+
     def visualize_version_history(self, bucket_name: str, object_key: str):
         """
         Visualize the version history of an object using a directed graph.
@@ -162,8 +195,7 @@ class VersionService(STO):
         G = nx.DiGraph()
 
         for i, version in enumerate(versions):
-
-            label = f"V{i + 1}\n{version[3]}"
+            label = f"Version ID: {version[3]}\nDate: {version[6]}"
             G.add_node(version[2], label=label)
 
             if i > 0:
@@ -172,13 +204,22 @@ class VersionService(STO):
         pos = nx.circular_layout(G)
 
         plt.figure(figsize=(12, 8))
-        nx.draw(G, pos, with_labels=True, node_color='lightblue', node_size=5000, font_size=10, font_weight='bold',
+
+        nx.draw(G, pos, with_labels=False, node_color='lightblue', node_size=8000, font_size=10, font_weight='bold',
                 arrows=True)
+
         labels = nx.get_node_attributes(G, 'label')
         nx.draw_networkx_labels(G, pos, labels, font_size=8)
+
         plt.title(f"Version History for {object_key} in {bucket_name}")
         plt.axis('off')
-        plt.tight_layout()
 
-        plt.savefig('versions//bucket_name//object_key//version_history.png')
+        manager = VersionManager()
+        original_path = Path(manager.base_directory)
+        parent_path = original_path.parent
+        path_img = os.path.join(parent_path, f'versions\\{bucket_name}\\{object_key}\\version_history.png')
+        plt.savefig(path_img)
         plt.close()
+
+
+

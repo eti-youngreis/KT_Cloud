@@ -10,8 +10,6 @@ def validate_subnet_group_name(name: str):
             name
         )
 
-    
-
 def validate_subnet_group_description(description: str):
     if description and not is_length_in_range(description, 1, 255):
         raise ValueError(

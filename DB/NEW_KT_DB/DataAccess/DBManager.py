@@ -142,14 +142,14 @@ class DBManager:
         try:
             get_columns_query = f"""PRAGMA table_info({table_name});"""
             cols = self.execute_query_with_multiple_results(get_columns_query)
-            print(cols)
             return [col[1] for col in cols]
         except EmptyResultsetError as e:
-            print(f"table {table_name} not found: {e}")
+            raise Exception(f"table {table_name} not found: {e}")
             return []
 
         except Exception as e:
-            print(f"Error occurred while fetching columns from table {table_name}: {e}")
+            raise Exception(f"Error occurred while fetching columns from table {table_name}: {e}")
+
             return []
 
 
@@ -158,7 +158,8 @@ class DBManager:
             get_all_data_query = f"""SELECT * FROM {table_name}"""
             return self.execute_query_with_multiple_results(get_all_data_query)
         except Exception as e:
-            print(f"Error occurred while fetching data from table {table_name}: {e}")
+            raise Exception(f"Error occurred while fetching data from table {table_name}: {e}")
+
             return []
 
 
@@ -172,7 +173,7 @@ class DBManager:
             return self.execute_query_with_multiple_results(get_all_data_query)
         
         except Exception as e:
-            print(f"Error occurred while fetching data from table {table_name}: {e}")
+            raise Exception(f"Error occurred while fetching data from table {table_name}: {e}")
             return []
 
 
@@ -183,8 +184,8 @@ class DBManager:
             if in_memory_object:
                 return True
         except Exception as e:
-            print(Exception(f"Error checking if object {criteria} exists in {table_name}: {e}"))
-            return False
+            raise Exception(f"Error checking if object {criteria} exists in {table_name}: {e}")
+        return False
 
 
     def is_table_exist(self, table_name: str) -> bool:
@@ -198,8 +199,8 @@ class DBManager:
             result = self.execute_query_with_single_result(query)
             return True
         except Exception as e:
-            print(Exception(f"Error checking if table {table_name} exists: {e}"))
-            return False
+            raise Exception(f"Error checking if table {table_name} exists: {e}")
+        return False
 
 
 

@@ -8,14 +8,14 @@ class SNSTopicManager:
     A class to manage SNS topics using ObjectManager.
     """
 
-    def __init__(self, object_manager: ObjectManager):
+    def __init__(self, db_file: str):
         """
         Initialize the SNSTopicManager with an ObjectManager.
 
         Args:
             object_manager (ObjectManager): The ObjectManager instance for data operations.
         """
-        self.object_manager = object_manager
+        self.object_manager = ObjectManager(db_file)
         self.object_manager.create_management_table(
             SNSTopicModel.get_object_name(), SNSTopicModel.table_structure, pk_column_data_type='TEXT')
 
@@ -52,12 +52,13 @@ class SNSTopicManager:
         Raises:
             ValueError: If the topic is not found.
         """
-        sns_topic_list = self.object_manager.get_from_memory(
-            SNSTopicModel.get_object_name(), '*', f'{SNSTopicModel.pk_column} =  "{topic_name}"')
-        if not sns_topic_list:
+        try:
+            sns_topic_list = self.object_manager.get_from_memory(
+                SNSTopicModel.get_object_name(), '*', f'{SNSTopicModel.pk_column} =  "{topic_name}"')
+            topic_name, subscribers = sns_topic_list[0]
+            return SNSTopicModel(topic_name, json.loads(subscribers))
+        except:
             raise ValueError(f"Topic {topic_name} not found")
-        topic_name, subscribers = sns_topic_list[0]
-        return SNSTopicModel(topic_name, json.loads(subscribers))
 
     def update_topic(self, sns_model: SNSTopicModel):
         """

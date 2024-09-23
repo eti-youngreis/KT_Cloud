@@ -1,14 +1,16 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from Service.Classes import BucketPolicyService
+from Service.Classes.BucketPolicyService import BucketPolicyService
+from Models.BucketPolicyModel import BucketPolicyActions
 
 class BucketPolicyController:
-    def __init__(self, service: BucketPolicyService):
+    def __init__(self, service = BucketPolicyService()):
         self.service = service
 
 
-    def create_bucket_policy(self, bucket_name = None, actions = [], allow_versions = True):
+    def create_bucket_policy(self, bucket_name = None, actions = None, allow_versions = False):
+
         return self.service.create(bucket_name, actions, allow_versions)
 
 
@@ -26,6 +28,12 @@ class BucketPolicyController:
 
     def get_bucket_policy(self, bucket_name):
         return self.service.get(bucket_name)
+    
+    def is_action_allowed(self, bucket_name, action_name):
+        return self.service.is_action_allowed(bucket_name, action_name)
+    
+    def is_versions_allowed(self, bucket_name):
+        return self.service.is_versions_allowed(bucket_name)
     
 
         

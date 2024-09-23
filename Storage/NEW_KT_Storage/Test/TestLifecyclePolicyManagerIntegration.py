@@ -7,15 +7,15 @@ from Storage.NEW_KT_Storage.Models.LifecyclePolicyModel import LifecyclePolicy
 def lifecycle_manager():
     return LifecyclePolicyManager(
         object_name="TestObject",
-        path_policy_file="test_lifecycle.json",
-        path_db=":memory:",
-        base_directory="./test_data"
+        policy_file="test_lifecycle.json",
+        db_path=":memory:",
+        base_dir="./test_data"
     )
 
 
 @pytest.fixture
 def sample_policy():
-    return LifecyclePolicy("test_policy", 30, 60, "active", ["prefix1"])
+    return LifecyclePolicy("test_policy", "bucket_name", 60, 30, "active", ["prefix1"])
 
 
 def clean_up_policy(manager, policy_name):
@@ -60,7 +60,7 @@ def test_create_and_get_policy(lifecycle_manager, sample_policy):
 
     assert retrieved_policy.policy_name == sample_policy.policy_name
     assert retrieved_policy.expiration_days == sample_policy.expiration_days
-    assert retrieved_policy.transitions_days_GLACIER == sample_policy.transitions_days_GLACIER
+    assert retrieved_policy.transitions_days_glacier == sample_policy.transitions_days_glacier
     assert retrieved_policy.status == sample_policy.status
     assert retrieved_policy.prefix == sample_policy.prefix
 
@@ -70,12 +70,12 @@ def test_create_update_and_get_policy(lifecycle_manager, sample_policy):
 
     lifecycle_manager.create(sample_policy)
 
-    updated_policy = LifecyclePolicy(sample_policy.policy_name, 45, 90, "inactive", ["prefix2"])
+    updated_policy = LifecyclePolicy(sample_policy.policy_name, "new_bucket_name", 90, 45, "inactive", ["prefix2"])
     lifecycle_manager.update(sample_policy.policy_name, updated_policy)
 
     retrieved_policy = lifecycle_manager.get(sample_policy.policy_name)
     assert retrieved_policy.expiration_days == updated_policy.expiration_days
-    assert retrieved_policy.transitions_days_GLACIER == updated_policy.transitions_days_GLACIER
+    assert retrieved_policy.transitions_days_glacier == updated_policy.transitions_days_glacier
     assert retrieved_policy.status == updated_policy.status
     assert retrieved_policy.prefix == updated_policy.prefix
 

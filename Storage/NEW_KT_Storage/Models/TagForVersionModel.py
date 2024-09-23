@@ -5,24 +5,25 @@ import json
 from datetime import datetime
 
 
-class TagObject:
-    PK_COULMN = "Key"
-    OBJECT_NAME = "Tag"
-    TABLE_STRUCTURE = ", ".join(["Key TEXT PRIMARY KEY", "Value TEXT"])
+class TagForVersion:
+    OBJECT_NAME = "TagForVersion"
+    TABLE_STRUCTURE = ", ".join(
+        ["TagKey TEXT", "VersionId TEXT","PRIMARY KEY (TagKey, VersionId)"]
+    )
 
-    def __init__(self, key: str, value: str):
-        self.key = key
-        self.value = value
+    def __init__(self, tag_key: str, version_id: str) -> None:
+        self.tag_key = tag_key
+        self.version_id = version_id
 
     def to_dict(self) -> Dict:
         """Retrieve the data of the DB cluster as a dictionary."""
         return ObjectManager.convert_object_attributes_to_dictionary(
-            key=self.key,
-            value=self.value,
+            tag_key=self.tag_key,
+            version_id=self.version_id,
         )
 
     def to_sql(self) -> str:
-        """Convert the TagObject instance to a SQL-friendly format."""
+        """Convert the TagForVersion instance to a SQL-friendly format."""
         data_dict = self.to_dict()
         try:
             values = (
@@ -43,7 +44,7 @@ class TagObject:
             return None
 
     def __str__(self) -> str:
-        """Convert the TagObject instance to a JSON string."""
+        """Convert the TagForVersion instance to a JSON string."""
         try:
             return json.dumps(self.to_dict(), indent=4)
         except Exception as e:
