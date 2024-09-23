@@ -20,14 +20,14 @@ class DBProxyController:
         """
         self.service.create(**kwargs)
 
-    def delete_db_proxy(self, id):
+    def delete_db_proxy(self, db_proxy_name):
         """
         Delete a DBProxy by its ID.
 
         Parameters:
         id (str): The ID of the DBProxy to delete.
         """
-        self.service.delete(id)
+        self.service.delete(db_proxy_name)
 
     def modify_db_proxy(self, **kwargs):
         """
@@ -38,7 +38,7 @@ class DBProxyController:
         """
         self.service.modify(**kwargs)
 
-    def describe_db_proxy(self, id):
+    def describe_db_proxy(self, db_proxy_name):
         """
         Retrieve details of a DBProxy by its ID.
 
@@ -48,5 +48,7 @@ class DBProxyController:
         Returns:
         dict: Metadata of the requested DBProxy.
         """
-        return self.service.describe(id)
+        return self.service.describe(db_proxy_name)
 
+    def get(self, db_proxy_name):
+        return self.service.get(db_proxy_name)

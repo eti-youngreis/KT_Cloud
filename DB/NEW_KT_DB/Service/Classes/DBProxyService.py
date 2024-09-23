@@ -2,6 +2,7 @@ from DB.NEW_KT_DB.Service.Abc.DBO import DBO
 from ...DataAccess.DBProxyManager import DBProxyManager
 from DB.NEW_KT_DB.Models.DBProxyModel import DBProxy
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
+from ...Validation.GeneralValidations import validate_tags_structure
 from ...Validation.DBProxyValidations import *
 from ...Exceptions.DBProxyExceptions import *
 from datetime import datetime
@@ -46,7 +47,7 @@ class DBProxyService(DBO):
         validate_db_proxy_name(attributes.get('db_proxy_name'))
 
         # Validate tags if provided
-        if 'tags' in attributes and not validate_tags(attributes.get('tags')):
+        if 'tags' in attributes and not validate_tags_structure(attributes.get('tags')):
             raise ValueError("Tags not valid!")
 
         # Check if the proxy already exists
@@ -156,7 +157,7 @@ class DBProxyService(DBO):
         Returns:
             DBProxy: A DBProxy object with the stored attributes.
         """
-        path = 'DB\\Proxies\\' + db_proxy_name + '.json'
+        path = db_proxy_name + '.json'
         content = self.storage_manager.get_file_content(path)
         dict_content = json.loads(content)
         return DBProxy(**dict_content)
