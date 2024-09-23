@@ -1,14 +1,14 @@
 
-def validate_lifecycle_attributes(policy_name:str, expiration_days:int = None, transitions_days_GLACIER:int=None, status:str=None):
+def validate_lifecycle_attributes(policy_name:str, expiration_days:int = None, transitions_days_glacier:int=None, status:str=None):
     if not policy_name or not isinstance(policy_name, str) or len(policy_name) < 3:
         raise ValueError("Policy name must be at least 3 characters long.")
     if expiration_days and not isinstance(expiration_days, int) or expiration_days <= 0:
         raise ValueError("Expiration days must be a positive integer.")
-    if transitions_days_GLACIER and (not isinstance(transitions_days_GLACIER, int) or transitions_days_GLACIER < 0):
+    if transitions_days_glacier and (not isinstance(transitions_days_glacier, int) or transitions_days_glacier < 0):
         raise ValueError("Transitions days to GLACIER must be a non-negative integer.")
     if status not in ["Enabled", "Disabled"]:
         raise ValueError("Status must be either 'Enabled' or 'Disabled'.")
-    if expiration_days and transitions_days_GLACIER and transitions_days_GLACIER >= expiration_days:
+    if expiration_days and transitions_days_glacier and transitions_days_glacier >= expiration_days:
         raise ValueError("Transition days to GLACIER must be less than expiration days.")
 
 
