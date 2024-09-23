@@ -10,6 +10,7 @@ from DataAccess import ObjectManager
 from Models.DBSubnetGroupModel import DBSubnetGroup
 import Exceptions.DBSubnetGroupExceptions as DBSubnetGroupExceptions
 
+
 class DBSubnetGroupManager:
     def __init__(self, object_manager: ObjectManager):
         self.object_manager = object_manager
@@ -23,13 +24,21 @@ class DBSubnetGroupManager:
         )
 
     def get(self, name: str):
-        data = self.object_manager.get_from_memory(
-            DBSubnetGroup.object_name, criteria=f"{DBSubnetGroup.pk_column} = '{name}'"
-        )
+        try:
+            data = self.object_manager.get_from_memory(
+                DBSubnetGroup.object_name,
+                criteria=f"{DBSubnetGroup.pk_column} = '{name}'",
+            )
+        except Exception:
+            raise DBSubnetGroupExceptions.DBSubnetGroupNotFound(
+                "Subnet group not found"
+            )
         if data:
             return DBSubnetGroup(*data[0])
         else:
-            raise DBSubnetGroupExceptions.DBSubnetGroupNotFound(f"subnet group with name '{name}' not found")
+            raise DBSubnetGroupExceptions.DBSubnetGroupNotFound(
+                f"subnet group with name '{name}' not found"
+            )
 
     def delete(self, name: str):
         exists = self.object_manager.get_from_memory(
@@ -41,8 +50,9 @@ class DBSubnetGroupManager:
                 DBSubnetGroup.object_name, DBSubnetGroup.pk_column, name
             )
         else:
-            raise DBSubnetGroupExceptions.DBSubnetGroupNotFound(f"subnet group with name '{name}' not found")
-
+            raise DBSubnetGroupExceptions.DBSubnetGroupNotFound(
+                f"subnet group with name '{name}' not found"
+            )
 
     def describe(self, name: str):
         # get the object from memory and return it in dictionary form
