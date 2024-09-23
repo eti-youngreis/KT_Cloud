@@ -121,7 +121,22 @@ for i in range(4):
     subnet_group_controller.add_instance_to_subnet_group("load_balance_group", f"i-{i+1}")
 
 load_balanced_group = subnet_group_controller.get_db_subnet_group("load_balance_group")
-print("Final load distribution across subnets:")
+
+print("\nLoad Balancing Details:")
+print(f"Number of subnets: {len(load_balanced_group.subnets)}")
+print("Subnet information:")
+for subnet in load_balanced_group.subnets:
+    print(f"  - Subnet ID: {subnet['subnet_id']}")
+    print(f"    IP Range: {subnet['ip_range']}")
+    print(f"    Availability Zone: {subnet['availability_zone']}")
+
+print("\nResource allocation:")
+for i, subnet in enumerate(load_balanced_group.subnets):
+    print(f"Subnet {i+1} ({subnet['subnet_id']}):")
+    print(f"  Allocated instances: {', '.join(subnet['instances'])}")
+    print(f"  Current load: {subnet['current_load']}")
+
+print("\nFinal load distribution across subnets:")
 print(f"Subnets in load_balance_group: {[[subnet['subnet_id'], subnet['current_load']] for subnet in load_balanced_group.subnets]}")
 print("Load balancing demonstration completed")
 time.sleep(4)
