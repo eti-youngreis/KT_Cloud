@@ -3,6 +3,16 @@ import json
 from typing import Dict, Optional
 import uuid
 
+from enum import Enum
+
+class BucketPolicyActions(Enum):
+    READ = 'READ'
+    WRITE = 'WRITE'
+    DELETE = 'DELETE'
+    CREATE = 'CREATE'
+    PUT = 'PUT'
+
+
 class BucketPolicy:
     """
     A class to represent a bucket policy, which defines actions and
@@ -35,7 +45,7 @@ class BucketPolicy:
                 allow_versions BOOLEAN NOT NULL
             '''
 
-    def __init__(self, bucket_name: str, actions: list = ['READ', 'WRITE', 'DELETE', 'CREATE', 'PUT'], allow_versions=True):
+    def __init__(self, bucket_name: str, actions: list = [], allow_versions=False):
         """
         Initializes a BucketPolicy instance with the given bucket name,
         actions, and versioning option.

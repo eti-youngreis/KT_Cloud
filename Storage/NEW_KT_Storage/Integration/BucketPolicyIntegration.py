@@ -91,7 +91,7 @@ pytest.main(['-q', f'D:/boto3 project/KT_Cloud/Storage/NEW_KT_Storage/Test/test_
 # modify allow_versions actions
 print()
 start_time = log(f"start modify bucket policy:'{bucket_name}'")
-bucket_policy = bucketPolicy_controller.modify_bucket_policy(bucket_name, allow_versions=False)
+bucket_policy = bucketPolicy_controller.modify_bucket_policy(bucket_name, allow_versions=True)
 end_time = log(f"bucket policy {bucket_name} modify successfully")
 total_duration = end_time - start_time
 log(f"total duration of modify bucket policy is: '{total_duration}'")
