@@ -22,15 +22,6 @@ class DBSubnetGroupController:
 
     def list_db_subnet_groups(self):
         return self.service.list_db_subnet_groups()
-    
-    def get_best_subnet(self, db_subnet_group_name: str):
-        """
-        Get the best subnet from a DB subnet group based on current load.
 
-        Args:
-            db_subnet_group_name (str): The name of the DB subnet group.
-
-        Returns:
-            Subnet: The best subnet for new instance placement.
-        """
-        return self.service.get_best_subnet(db_subnet_group_name)
+    def add_instance_to_subnet_group(self, db_subnet_group_name, instance_id):
+        return self.service.assign_instance_to_group(db_subnet_group_name, instance_id)
