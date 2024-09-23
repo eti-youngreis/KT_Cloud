@@ -21,7 +21,7 @@ def mock_db_manager():
     Creates a mock of DBManager suitable for all tests.
     """
     mock_db_manager = MagicMock(spec=DBManager)
-    fixed_key = 'Vd1jRgmAEqZ8EmFl-8a1fy5E4Ew7Xkl-RSG_izqYB5Q='  # Changed from bytes to string
+    fixed_key = 'Vd1jRgmAEqZ8EmFl-8a1fy5E4Ew7Xkl-RSG_izqYB5Q='  
     mock_db_manager.execute_query_with_single_result.return_value = [fixed_key]
     return mock_db_manager
 
@@ -54,13 +54,12 @@ def test_generate_key(encryption_service):
     Tests that the function generates a new key and encrypts it with the master key.
     """
     encrypted_key = encryption_service.generate_key()
-    assert isinstance(encrypted_key, bytes)  # Ensures the output is of type bytes
+    assert isinstance(encrypted_key, bytes)  
 
 def test_generate_key_failer(mock_db_manager, encryption_service):
     """
     Tests handling the failure scenario when generating a new key.
     """
-    # Replace method with error to test behavior
     encryption_service._encrypt_object_key = KeyGenerationError("Failed to generate encryption key")
 
     with pytest.raises(KeyGenerationError):
