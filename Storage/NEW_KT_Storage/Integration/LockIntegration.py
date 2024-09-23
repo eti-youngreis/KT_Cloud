@@ -5,10 +5,23 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 from Storage.NEW_KT_Storage.Controller.LockController import LockController
 
+def print_colored_line(text, color="reset"):
+    colors = {
+        "reset": "\033[0m", 
+        "red": "\033[31m",
+        "green": "\033[32m",
+        "yellow": "\033[33m",
+        "blue": "\033[34m",
+        "white": "\033[37m"
+    }
+    
+    color_code = colors.get(color, colors["reset"]) 
+    print(f"{color_code}{text}{colors['reset']}") 
+
 # demonstrate lock functionality
-print('''---------------------Start Of session----------------------''')
+print_colored_line('''---------------------Start Of session----------------------''')
 start_time_session = datetime.now()
-print(f"\033[33m{start_time_session} demonstration of object: Lock start\033[0m")
+print_colored_line(f"{start_time_session} demonstration of object: Lock start", "yellow")
 
 start_time = datetime.now()
 lock_controller = LockController()
@@ -23,78 +36,78 @@ amount = 10
 unit = "d"  
 lock_id = f"{bucket_key}.{object_key}"
 
-print(f"\033[33m{datetime.now()} start creating lock 'id: {lock_id}'\033[0m")
+print_colored_line(f"{datetime.now()} start creating lock 'id: {lock_id}'", "yellow")
 
 lock_controller.create_lock(bucket_key=bucket_key, object_key=object_key, lock_mode=lock_mode, amount=amount, unit=unit)
-print(f"\033[32m{datetime.now()} lock: '{lock_id}' created successfully\033[0m")
+print_colored_line(f"{datetime.now()} lock: '{lock_id}' created successfully", "green")
 end_time = datetime.now()
 total_duration = end_time - start_time
-print(f"\033[33mtotal duration of create lock is: '{total_duration}'\033[0m")
+print_colored_line(f"total duration of create lock is: '{total_duration}'", "yellow")
 print()
 time.sleep(20)
 
 # get lock
 print()
 start_time = datetime.now()
-print(f"\033[33m{start_time} start getting lock '{lock_id}'\033[0m")
+print_colored_line(f"{start_time} start getting lock '{lock_id}'", "yellow")
 lock_example = lock_controller.get_lock(lock_id)
-print(f"\033[32m{datetime.now()} verify lock 'id: {lock_example.lock_id}, "
+print_colored_line(f"{datetime.now()} verify lock 'id: {lock_example.lock_id}, "
     f"bucket_key: {lock_example.bucket_key}, object_key: {lock_example.object_key}, "
-    f"retain_until = {lock_example.retain_until}, lock_mode: {lock_example.lock_mode}'\033[0m")
+    f"retain_until = {lock_example.retain_until}, lock_mode: {lock_example.lock_mode}'", "green")
 
 end_time = datetime.now()
 total_duration = end_time - start_time
-print(f"\033[33mtotal duration of get lock is: '{total_duration}'\033[0m")
+print_colored_line(f"total duration of get lock is: '{total_duration}'", "yellow")
 print()
 time.sleep(20)
 
 # check if object is updatable
 print()
 start_time = datetime.now()
-print(f"\033[33m{start_time} start checking if object '{object_key}' in bucket '{bucket_key}' is updatable\033[0m")
+print_colored_line(f"{start_time} start checking if object '{object_key}' in bucket '{bucket_key}' is updatable", "yellow")
 is_updatable = lock_controller.is_object_updatable(bucket_key=bucket_key, object_key=object_key)
-print(f"\033[32m{datetime.now()} object '{object_key}' in bucket '{bucket_key}' is updatable: {is_updatable}\033[0m")
+print_colored_line(f"{datetime.now()} object '{object_key}' in bucket '{bucket_key}' is updatable: {is_updatable}", "green")
 end_time = datetime.now()
 total_duration = end_time - start_time
-print(f"\033[33mtotal duration of updatable check is: '{total_duration}'\033[0m")
+print_colored_line(f"total duration of updatable check is: '{total_duration}'", "yellow")
 print()
 time.sleep(20)
 
 # check if object is deletable
 print()
 start_time = datetime.now()
-print(f"\033[33m{start_time} start checking if object '{object_key}' in bucket '{bucket_key}' is deletable\033[0m")
+print_colored_line(f"{start_time} start checking if object '{object_key}' in bucket '{bucket_key}' is deletable", "yellow")
 is_deletable = lock_controller.is_object_deletable(bucket_key=bucket_key, object_key=object_key)
-print(f"\033[32m{datetime.now()} object '{object_key}' in bucket '{bucket_key}' is deletable: {is_deletable}\033[0m")
+print_colored_line(f"{datetime.now()} object '{object_key}' in bucket '{bucket_key}' is deletable: {is_deletable}", "green")
 end_time = datetime.now()
 total_duration = end_time - start_time
-print(f"\033[33mtotal duration of deletable check is: '{total_duration}'\033[0m")
+print_colored_line(f"total duration of deletable check is: '{total_duration}'", "yellow")
 print()
 time.sleep(20)
 
 # delete lock
 print()
 start_time = datetime.now()
-print(f"\033[33m{start_time} start deleting lock '{lock_id}'\033[0m")
+print_colored_line(f"{start_time} start deleting lock '{lock_id}'", "yellow")
 lock_controller.delete_lock(lock_id)
-print(f"\033[32m{datetime.now()} lock: '{lock_id}' deleted successfully\033[0m")
+print_colored_line(f"{datetime.now()} lock: '{lock_id}' deleted successfully", "green")
 
 end_time = datetime.now()
 total_duration = end_time - start_time
-print(f"\033[33mtotal duration of delete lock is: '{total_duration}'\033[0m")
+print_colored_line(f"total duration of delete lock is: '{total_duration}'", "yellow")
 
 # test deletion of lock by attempting to get it
 print()
-print(f"{datetime.now()} verify lock '{lock_id}' was deleted by trying to get it")
+print_colored_line(f"{datetime.now()} verify lock '{lock_id}' was deleted by trying to get it", "reset")
 try:
     lock_controller.get_lock(lock_id)
 except Exception as e:
-    print(f"\033[31mError as expected: {e}\033[0m")
+    print_colored_line(f"Error as expected: {e}", "red")
 print()
 
 # end of session
 end_time_session = datetime.now()
-print(f"\033[33m{end_time_session} demonstration of object lock ended successfully\033[0m")
+print_colored_line(f"{end_time_session} demonstration of object lock ended successfully", "yellow")
 total_duration_session = end_time_session - start_time_session
-print(f"\033[33mthe total duration of session lock is: '{total_duration_session}'\033[0m")
+print_colored_line(f"the total duration of session lock is: '{total_duration_session}'", "yellow")
 print('''---------------------End Of session----------------------''')
