@@ -48,7 +48,7 @@ class DBClusterService:
     
     def _validate_parameters(self, **kwargs):
         # Perform validations
-        if 'db_cluster_identifier' in kwargs and self.dal.is_db_instance_exist(kwargs.get('db_cluster_identifier')):
+        if 'db_cluster_identifier' in kwargs and self.dal.is_db_cluster_exist(kwargs.get('db_cluster_identifier')):
             raise DBClusterExceptions.DBClusterAlreadyExists(kwargs.get('db_cluster_identifier'))
         
         if 'db_cluster_identifier' in kwargs :
@@ -73,7 +73,8 @@ class DBClusterService:
         '''Create a new DBCluster.'''
 
         # Validate required parameters
-        required_params = ['db_cluster_identifier', 'engine', 'db_subnet_group_name', 'allocated_storage']
+        # required_params = ['db_cluster_identifier', 'engine', 'db_subnet_group_name', 'allocated_storage']
+        required_params = ['db_cluster_identifier', 'engine', 'allocated_storage']
         check_required_params(required_params, **kwargs)
         self._validate_parameters(**kwargs)
 
@@ -115,7 +116,7 @@ class DBClusterService:
     def delete(self,instance_controller, cluster_identifier:str):
         '''Delete an existing DBCluster.'''
         
-        if not self.dal.is_db_instance_exist(cluster_identifier):
+        if not self.dal.is_db_cluster_exist(cluster_identifier):
             raise DBClusterExceptions.DBClusterNotFoundException(cluster_identifier)
           
         file_path = self.get_file_path(cluster_identifier+"_configurations")
@@ -146,7 +147,7 @@ class DBClusterService:
 
     def describe(self, cluster_id):
         '''Describe the details of DBCluster.'''
-        if not self.dal.is_db_instance_exist(cluster_id):
+        if not self.dal.is_db_cluster_exist(cluster_id):
             raise DBClusterExceptions.DBClusterNotFoundException(cluster_id)
         
         return self.dal.describeDBCluster(cluster_id)
@@ -155,7 +156,7 @@ class DBClusterService:
     def modify(self, cluster_id: str, **kwargs):
         '''Modify an existing DBCluster.'''
 
-        if not self.dal.is_db_instance_exist(cluster_id):
+        if not self.dal.is_db_cluster_exist(cluster_id):
             raise DBClusterExceptions.DBClusterNotFoundException(cluster_id)
         
         self._validate_parameters(**kwargs)

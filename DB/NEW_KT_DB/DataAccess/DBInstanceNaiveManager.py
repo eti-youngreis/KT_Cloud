@@ -69,8 +69,13 @@ class DBInstanceManager:
         
         Return: True if the DBInstance exists, otherwise False.
         """
-        # Check if the object exists by its primary key in the management table
-        return bool(self.object_manager.db_manager.is_object_exist(
+        # Check if the object exists by its primary key in the management table    
+        try:
+            res =  bool(self.object_manager.db_manager.is_object_exist(
             self.object_manager._convert_object_name_to_management_table_name(DBInstance.object_name), 
             criteria=f"{DBInstance.pk_column} = '{db_instance_identifier}'"
         ))
+            return res
+        except Exception as e:  # Catch specific exceptions or use Exception for general errors
+            # print(f"Error checking DB cluster existence: {e}")
+            return False
