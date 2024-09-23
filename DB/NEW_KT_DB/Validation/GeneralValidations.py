@@ -32,13 +32,17 @@ def is_valid_optionGroupName(option_group_name: str) -> bool:
     pattern = r'^[\w-]{1,255}$'
     return bool(re.match(pattern, option_group_name))
 
-def validate_tags(tags: Optional[Dict]) -> bool:
-    '''Check if the tags are valid. Tags should be a dictionary with string keys and values.'''
-    if tags is None:
-        return True
-    if not isinstance(tags, dict):
+def validate_tags_structure(tags):
+    if not isinstance(tags, list):
         return False
-    return all(isinstance(k, str) and isinstance(v, str) for k, v in tags.items())
+    for tag in tags:
+        if not isinstance(tag, dict):
+            return False
+        if 'Key' not in tag or 'Value' not in tag:
+            return False
+        if not isinstance(tag['Key'], str) or not isinstance(tag['Value'], str):
+            return False
+    return True
 
 def check_required_params(required_params, kwargs):
 

@@ -1,11 +1,12 @@
 import os
 import sys
-from Models.BucketPolicyModel import BucketPolicy
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from typing import Dict, Optional
 from Abc.STO import STO
+from Storage.NEW_KT_Storage.Models.BucketPolicyModel import BucketPolicy, BucketPolicyActions
 # from Validation import Validation
-from DataAccess.BucketPolicyManager import BucketPolicyManager
+from Storage.NEW_KT_Storage.DataAccess.BucketPolicyManager import BucketPolicyManager
 
 class ParamValidationFault(Exception):
     """Exception raised when a required parameter is missing."""
@@ -24,7 +25,7 @@ class IsNotExistactionFault(Exception):
 
 class BucketPolicyService(STO):
 
-    def __init__(self, dal: BucketPolicyManager):
+    def __init__(self, dal = BucketPolicyManager()):
         """
         Initializes the BucketPolicyService with a data access layer (DAL).
 
@@ -35,7 +36,7 @@ class BucketPolicyService(STO):
         """
         self.dal = dal
 
-    def create(self, bucket_name, actions=[], allow_versions=True) -> bool:
+    def create(self, bucket_name, actions=None, allow_versions=True) -> bool:
         """
         Create a new bucket policy.
 
@@ -58,17 +59,23 @@ class BucketPolicyService(STO):
             raise ParamValidationFault("Bucket name must be a valid non-empty string.")
         
         # Ensure actions is a list and contains valid action strings
-        if not isinstance(actions, list):
+        if actions is None:
+            actions = list(action.value for action in BucketPolicyActions)
+        elif not isinstance(actions, list):
             raise ParamValidationFault("actions must be a list.")
-        
-        valid_actions = {'READ', 'WRITE', 'DELETE', 'CREATE'}  # Example actions
-        for action in actions:
-            if action not in valid_actions:
-                raise ParamValidationFault(f"Invalid action: {action}")
+        else:
+            valid_action_values = {action.value for action in BucketPolicyActions}  # Use a set for O(1) lookups
+
+            for action1 in actions:
+                if action1 not in valid_action_values:
+                    raise ParamValidationFault(f"Invalid action: {action1}. Must be one of {list(valid_action_values)}.")
 
         # Ensure allow_versions is boolean
         if not isinstance(allow_versions, bool):
             raise ParamValidationFault("allow_versions must be a boolean value.")
+        
+        if self.dal.getBucketPolicy(bucket_name):
+            raise IsExistactionFault("The bucket alredy exist")
 
         bucket_policy = BucketPolicy(bucket_name, actions=actions, allow_versions=allow_versions)
         
@@ -146,7 +153,7 @@ class BucketPolicyService(STO):
             raise IsNotExistFault(f"Bucket policy for '{bucket_name}' does not exist.")
         return self.dal.describeBucketPolicy(bucket_name)
 
-    def modify(self, bucket_name: str, update_actions: list = [], allow_versions=None, action = None) -> bool:
+    def modify(self, bucket_name: str, update_actions: list = None, allow_versions=None, action = None) -> bool:
         """
         Update an existing bucket policy.
 
@@ -217,10 +224,12 @@ class BucketPolicyService(STO):
         bucket_policy = self.dal.getBucketPolicy(bucket_name)
         policy_actions = bucket_policy['actions']
         
+        valid_action_values = {action.value for action in BucketPolicyActions}  # Use a set for O(1) lookups
+
         for action1 in update_actions:
-            valid_actions = {'READ', 'WRITE', 'DELETE', 'CREATE'}
-            if action1 not in valid_actions:
-                raise ParamValidationFault(f"action {action1} already exists in the bucket policy.")
+            if action1 not in valid_action_values:
+                raise ParamValidationFault(f"Invalid action: {action1}. Must be one of {list(valid_action_values)}.")
+
 
         if action == "add":
             return self._add_actions(policy_actions, update_actions)
@@ -245,5 +254,17 @@ class BucketPolicyService(STO):
             policy_actions.remove(action)
         
         return policy_actions
+    
+    def is_action_allowed(self, bucket_name, action_name):
+        
+        bucket_policy = self.dal.getBucketPolicy(bucket_name)
+        policy_actions = bucket_policy['actions']
+        return action_name in policy_actions
+    
+    def is_versions_allowed(self, bucket_name):
+        
+        bucket_policy = self.dal.getBucketPolicy(bucket_name)
+        return bucket_policy['allow_versions']
+        
         
         

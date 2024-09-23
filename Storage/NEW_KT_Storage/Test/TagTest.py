@@ -6,18 +6,20 @@ sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 )
 
-from Storage.NEW_KT_Storage.Service.Classes.TagObjectService import TagObjectService
-from Models.TagObjectModel import TagObject
+from Storage.NEW_KT_Storage.Service.Classes.TagService import TagService
+from Models.TagModel import Tag
+
 
 @pytest.fixture(scope="function")
 def tag_service():
-    """Fixture to provide a TagObjectService instance with a test tag."""
-    tag_service = TagObjectService(db_file=":memory:")
+    """Fixture to provide a TagService instance with a test tag."""
+    tag_service = TagService(db_file=":memory:")
     # Create a default tag for testing
     default_key = "test_key"
     default_value = "test_value"
     tag_service.create(default_key, default_value)
     return tag_service, default_key, default_value
+
 
 def test_create_tag(tag_service):
     """Test the creation of a new tag."""
@@ -32,6 +34,7 @@ def test_create_tag(tag_service):
     assert tag.key == new_key
     assert tag.value == new_value
 
+
 def test_get_tag(tag_service):
     """Test retrieving a tag by key."""
     tag_service, key, value = tag_service
@@ -42,11 +45,13 @@ def test_get_tag(tag_service):
     assert tag.key == key
     assert tag.value == value
 
+
 def test_raise_KeyError_where_get_not_exist_tag(tag_service):
     tag_service, _, _ = tag_service
     key_that_not_exist = "key_that_not_exist"
     with pytest.raises(KeyError):
         tag_service.get(key_that_not_exist)
+
 
 def test_modify_tag(tag_service):
     """Test modifying an existing tag."""
@@ -63,6 +68,7 @@ def test_modify_tag(tag_service):
     assert modified_tag.key == new_key
     assert modified_tag.value == new_value
 
+
 def test_modify_tag_key_to_existing_key(tag_service):
     """Test modifying a tag's key to an already existing key."""
     tag_service, key1, value1 = tag_service
@@ -74,6 +80,7 @@ def test_modify_tag_key_to_existing_key(tag_service):
     with pytest.raises(Exception):  # Adjust based on how your system handles this
         tag_service.modify(old_key=key1, key=key2)
 
+
 def test_get_after_modify_key(tag_service):
     """Test that the original key is no longer accessible after modifying the key."""
     tag_service, key, value = tag_service
@@ -83,6 +90,7 @@ def test_get_after_modify_key(tag_service):
     # The old key should raise a KeyError
     with pytest.raises(KeyError):
         tag_service.get(key)
+
 
 def test_delete_tag(tag_service):
     """Test deleting an existing tag."""
@@ -94,6 +102,7 @@ def test_delete_tag(tag_service):
     with pytest.raises(KeyError):
         tag_service.get(key)
 
+
 def test_delete_non_existent_tag(tag_service):
     """Test attempting to delete a non-existent tag."""
     tag_service, _, _ = tag_service
@@ -103,6 +112,7 @@ def test_delete_non_existent_tag(tag_service):
     with pytest.raises(KeyError):
         tag_service.delete(non_existent_key)
 
+
 def test_modify_non_existent_tag(tag_service):
     """Test modifying a tag that does not exist."""
     tag_service, _, _ = tag_service
@@ -111,6 +121,7 @@ def test_modify_non_existent_tag(tag_service):
     # Modifying a non-existent tag should raise an error
     with pytest.raises(KeyError):
         tag_service.modify(old_key=non_existent_key, key="new_key", value="new_value")
+
 
 def test_create_duplicate_tag(tag_service):
     """Test creating a tag with a duplicate key."""
@@ -123,8 +134,11 @@ def test_create_duplicate_tag(tag_service):
     tag_service.create(duplicate_key, value1)
 
     # Creating a second tag with the same key should raise an error or overwrite
-    with pytest.raises(Exception):  # Modify this according to how duplicates are handled
+    with pytest.raises(
+        Exception
+    ):  # Modify this according to how duplicates are handled
         tag_service.create(duplicate_key, value2)
+
 
 def test_create_with_empty_key(tag_service):
     """Test creating a tag with an empty key."""
@@ -132,13 +146,14 @@ def test_create_with_empty_key(tag_service):
     with pytest.raises(ValueError):  # Adjust based on the actual exception
         tag_service.create("", "value_with_empty_key")
 
+
 def test_create_with_empty_value(tag_service):
     """Test creating a tag with an empty value."""
     tag_service, key, _ = tag_service
 
     with pytest.raises(ValueError):
         tag_service.create(key, "")
-    
+
 
 def test_get_tag_case_sensitivity(tag_service):
     """Test the case sensitivity of tag keys."""
@@ -159,6 +174,7 @@ def test_get_tag_case_sensitivity(tag_service):
     assert tag_upper.value == value_upper
     assert tag_lower.key != tag_upper.key
 
+
 def test_modify_only_key(tag_service):
     """Test modifying only the key of an existing tag."""
     tag_service, key, value = tag_service
@@ -171,6 +187,7 @@ def test_modify_only_key(tag_service):
     modified_tag = tag_service.get(new_key)
     assert modified_tag.key == new_key
     assert modified_tag.value == value
+
 
 def test_modify_only_value(tag_service):
     """Test modifying only the value of an existing tag."""
@@ -185,6 +202,7 @@ def test_modify_only_value(tag_service):
     assert modified_tag.key == key
     assert modified_tag.value == new_value
 
+
 def test_describe_empty(tag_service):
     """Test describing tags when no tags exist."""
     tag_service, _, _ = tag_service
@@ -192,15 +210,17 @@ def test_describe_empty(tag_service):
     result = tag_service.describe()
     assert result == []
 
+
 def test_create_tag_with_special_characters(tag_service):
     """Test creating a tag with special characters in the key and value."""
     tag_service, _, _ = tag_service
     key = "key_with_special_!@#$%^&*()"
     value = "value_with_special_{}[]<>"
-    
+
     # Verify that the tag was created with the special characters
     with pytest.raises(ValueError):
         tag_service.create(key, value)
+
 
 def test_create_tag_with_long_key(tag_service):
     """Test creating a tag with a very long key."""
@@ -210,6 +230,7 @@ def test_create_tag_with_long_key(tag_service):
     with pytest.raises(ValueError):
         tag_service.create(long_key, value)
 
+
 def test_create_tag_with_long_value(tag_service):
     """Test creating a tag with a very long value."""
     tag_service, key, _ = tag_service
@@ -218,14 +239,13 @@ def test_create_tag_with_long_value(tag_service):
         tag_service.create(key, long_value)
 
 
-
-
 def test_modify_with_invalid_old_key(tag_service):
     """Test modifying a tag with an invalid original key."""
     tag_service, _, _ = tag_service
     invalid_key = "invalid_key"
     with pytest.raises(KeyError):
         tag_service.modify(old_key=invalid_key, key="new_key", value="new_value")
+
 
 def test_delete_all_tags(tag_service):
     """Test deleting all tags and ensuring the memory is empty."""
@@ -243,6 +263,7 @@ def test_delete_all_tags(tag_service):
     # Describe should return an empty list
     assert tag_service.describe() == []
 
+
 def test_modify_tag_to_empty_key(tag_service):
     """Test modifying a tag's key to an empty key, which should raise an error."""
     tag_service, key, value = tag_service
@@ -250,11 +271,13 @@ def test_modify_tag_to_empty_key(tag_service):
     with pytest.raises(ValueError):  # Adjust based on your system's behavior
         tag_service.modify(old_key=key, key="")
 
+
 def test_create_tag_with_whitespace_key(tag_service):
     """Test creating a tag with a key containing only whitespace."""
     tag_service, _, _ = tag_service
     with pytest.raises(ValueError):  # Adjust based on your system's behavior
         tag_service.create("   ", "value_with_whitespace_key")
+
 
 def test_modify_tag_to_whitespace_key(tag_service):
     """Test modifying a tag's key to a key containing only whitespace."""

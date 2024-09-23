@@ -1,9 +1,11 @@
 from Storage.NEW_KT_Storage.Service.Classes.BucketObjectService import BucketObjectService
-
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..','..','..')))
 
 class BucketObjectController:
-    def __init__(self, service: BucketObjectService):
-        self.service = service
+    def __init__(self):
+        self.service = BucketObjectService("C:\\Users\\user1\\Desktop\\server")
 
     def create_bucket_object(self, bucket_name, object_key,content=''):
         self.service.create(bucket_name, object_key, content)
