@@ -6,10 +6,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from KT_Cloud.Storage.NEW_KT_Storage.DataAccess import StorageManager
 from Service.Classes.DBClusterService import DBClusterService
 from DataAccess import DBClusterManager
-from Controller import DBInstanceController
-from Service.Classes.DBInstanceService import DBInstanceService
-from DataAccess import DBInstanceManager
-from DataAccess import ObjectManager
+from Controller.DBInstanceNaiveController import DBInstanceController
+from Service.Classes.DBInstanceNaiveService import DBInstanceService
 class DBClusterController:
     def __init__(self, service: DBClusterService, instance_controller:DBInstanceController):
         self.service = service

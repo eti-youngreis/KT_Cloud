@@ -3,9 +3,9 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from Exceptions.GeneralExeptions import ObjectNotFoundException
 
-class DBClusterNotFoundException(ObjectNotFoundException):
+class DBClusterNotFoundException(Exception):
     def __init__(self, object_name: str):
-        super().__init__(f'DBCluster {object_name}')
+        super().__init__(f'DBCluster {object_name} does not exist')
 
 class DBClusterAlreadyExists(Exception):
     def __init__(self, object_name: str):
