@@ -61,3 +61,4 @@ class DBSubnetGroupManager:
     def list_db_subnet_groups(self):
         results = self.object_manager.get_from_memory(DBSubnetGroup.object_name)
         return [DBSubnetGroup(*result) for result in results]
+    

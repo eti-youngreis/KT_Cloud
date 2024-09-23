@@ -1,7 +1,6 @@
 import sys
 import os
 
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -11,6 +10,7 @@ from DataAccess.DBSubnetGroupManager import DBSubnetGroupManager
 from DataAccess.ObjectManager import ObjectManager
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 from datetime import datetime
+from Models.Subnet import Subnet
 
 object_manager = ObjectManager('../DBs/mainDB.db')
 storage_manager = StorageManager('../../s3')
@@ -30,7 +30,7 @@ print('''___________________________________________________________''')
 print(f'''{datetime.now()} creating a DBSubnetGroup with name: \'subnet_group_1\'''')
 subnet_group_controller.create_db_subnet_group(
         db_subnet_group_name="subnet_group_1",
-        subnets=[{"subnet_id": "subnet-12345678"}, {"subnet_id": "subnet-87654321"}],
+        subnets=[Subnet(subnet_id="subnet-12345678", ip_range="10.0.1.0/24"), Subnet(subnet_id="subnet-87654321", ip_range="10.0.2.0/24")],
         db_subnet_group_description="Test subnet group",
         vpc_id="vpc-12345678",
         db_subnet_group_arn="arn:aws:rds:us-west-2:123456789012:subgrp:subnet_group_1")
@@ -66,7 +66,7 @@ print('''___________________________________________________________''')
 print(f'''{start_time} updating \'subnet_group_1\'''')
 updated_subnet_group = subnet_group_controller.modify_db_subnet_group(
     name="subnet_group_1",
-    subnets=[{"subnet_id": "subnet-11111111"}, {"subnet_id": "subnet-22222222"}],
+    subnets=[Subnet(subnet_id="subnet-11111111", ip_range="10.0.3.0/24"), Subnet(subnet_id="subnet-22222222", ip_range="10.0.4.0/24")],
     db_subnet_group_description="Updated test subnet group"
 )
 

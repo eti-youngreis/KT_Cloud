@@ -8,6 +8,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from .Subnet import Subnet
 import Exceptions.DBSubnetGroupExceptions as DBSubnetGroupExceptions
 
 class DBSubnetGroup:
@@ -56,8 +57,8 @@ class DBSubnetGroup:
                 self.subnets = ast.literal_eval(self.subnets)
             # if subnets were received as a list of strings
             try:
-                if len(self.subnets) > 0 and type(self.subnets[0]) is not dict:
-                    self.subnets = [ast.literal_eval(subnet) for subnet in self.subnets]
+                if len(self.subnets) > 0 and type(self.subnets[0]) is not Subnet:
+                    self.subnets = [Subnet(**subnet) for subnet in self.subnets]
             except TypeError:
                 raise ValueError("Invalid subnets format")
 
@@ -78,7 +79,7 @@ class DBSubnetGroup:
             "db_subnet_group_name": self.db_subnet_group_name,
             "db_subnet_group_description": self.db_subnet_group_description,
             "vpc_id": self.vpc_id,
-            "subnets": self.subnets,
+            "subnets": [subnet.to_dict() for subnet in self.subnets],
             "db_subnet_group_arn": self.db_subnet_group_arn,
             "status": self.status,
         }

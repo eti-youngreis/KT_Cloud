@@ -22,6 +22,7 @@ class DBSubnetGroupService:
         self.storage_manager = storage_manager
         self.storage_manager.create_directory(self.bucket)
         self.subnet_groups = dict()
+        self.load_balancer = LoadBalancer()
 
     def create_db_subnet_group(self, **kwargs):
         # validate the arguments
@@ -117,3 +118,76 @@ class DBSubnetGroupService:
 
     def list_db_subnet_groups(self):
         return self.manager.list_db_subnet_groups()
+
+    
+    def get_preferable_subnet_from_group(self, db_subnet_group_name):
+        # get the subnets in this group
+        subnet_group = self.manager.get(db_subnet_group_name)
+        if not subnet_group:
+            raise DBSubnetGroupExceptions.DBSubnetGroupNotFound
+        
+        best_subnet = self.load_balancer.select_best_subnet(subnet_group["subnets"])
+        
+        return best_subnet
+
+    def assign_instance_to_subnet(self, db_subnet_group_name, subnet_id, instance_id):
+        
+        # Get the subnet group by name
+        subnet_group = self.get_db_subnet_group(db_subnet_group_name)
+        if not subnet_group:
+            raise DBSubnetGroupExceptions.DBSubnetGroupNotFound
+
+        # Find the subnet within the group
+        target_subnet = None
+        for subnet in subnet_group.subnets:
+            if subnet.subnet_id == subnet_id:
+                target_subnet = subnet
+                break
+
+        if not target_subnet:
+            raise DBSubnetGroupExceptions.SubnetNotFoundInGroup(f"Subnet {subnet_id} not found in group {db_subnet_group_name}")
+
+        # Assign the instance to the subnet
+        target_subnet.assign_instance(instance_id)
+
+        # Update the subnet group in the manager
+        self.manager.modify(subnet_group)
+
+        # Update the storage
+        self.storage_manager.write_to_file(
+            self.bucket + '/' + db_subnet_group_name, subnet_group.to_str()
+        )
+
+        return target_subnet   
+
+    def unassign_instance_from_subnet(self, db_subnet_group_name, subnet_id, instance_id):
+        db_subnet_group = self.get_db_subnet_group(db_subnet_group_name)
+        if db_subnet_group:
+            subnet = next((s for s in db_subnet_group.subnets if s.subnet_id == subnet_id), None)
+            if subnet:
+                if instance_id in subnet.instances:
+                    subnet.remove_instance(instance_id)
+                else:
+                    raise ValueError(f"Instance {instance_id} is not assigned to subnet {subnet_id}")
+            else:
+                raise ValueError(f"Subnet {subnet_id} not found in DB subnet group {db_subnet_group_name}")
+        else:
+            raise ValueError(f"DB subnet group {db_subnet_group_name} not found")
+        return False
+    
+class LoadBalancer:
+    def __init__(self):
+        pass
+
+    def select_best_subnet(self, subnets):
+        # Evaluate each subnet based on load (e.g., number of active instances)
+        best_subnet = None
+        lowest_load = float('inf')
+
+        for subnet in subnets:
+            load = subnet.get_load()
+            if load < lowest_load:
+                lowest_load = load
+                best_subnet = subnet
+
+        return best_subnet
