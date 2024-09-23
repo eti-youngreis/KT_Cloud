@@ -19,7 +19,7 @@ class Version:
     """
     pk_column = "version_pk"
 
-    def __init__(self,bucket_name: str, object_key: object, content = " ", version_id: object = None, is_latest: object = False, last_modified: object = None, etag: object = None, size: object = None,
+    def __init__(self,bucket_name: str, object_key: object, content:str = " ", version_id: object = None, is_latest: object = False, last_modified: object = None, etag: object = None, size: object = None,
                  storage_class: object = "STANDARD", owner: object = None, checksum_algorithm: object = None, delete_marker: object = False,
                  replication_status: object = None, object_lock_mode: object = None, object_lock_retain_until_date: object = None,
                  pk_value: str = None) -> object:
@@ -38,10 +38,9 @@ class Version:
         self.replication_status = replication_status
         self.object_lock_mode = object_lock_mode
         self.object_lock_retain_until_date = object_lock_retain_until_date
-
-        # attributes for memory  management in database
         self.pk_column = Version.pk_column
         self.pk_value = pk_value
+
 
     def to_dict(self) -> Dict:
         '''Retrieve the data of the version object as a dictionary.'''
@@ -60,7 +59,6 @@ class Version:
 
     def to_sql(self):
 
-        # Convert the model instance to a dictionary
         data_dict = self.to_dict()
         values = '(' + ", ".join(f'\'{json.dumps(v)}\'' if isinstance(v, dict) or isinstance(v, list) else f'\'{v}\'' if isinstance(v, str) else f'\'{str(v)}\''
                            for v in data_dict.values()) + ')'

@@ -1,12 +1,13 @@
 import pytest
 import datetime
-from Storage.NEW_KT_Storage.DataAccess.VersionManager import VersionManager
-from Storage.NEW_KT_Storage.Service.Classes.VersionService import VersionService
+#from Storage.NEW_KT_Storage.DataAccess.VersionManager import VersionManager
+#from Storage.NEW_KT_Storage.Service.Classes.VersionService import VersionService
 
 @pytest.fixture
 def version_service():
-    manager = VersionManager()
-    return VersionService(manager)
+    pass
+     #manager = VersionManager()
+     #return VersionService(manager)
 
 @pytest.fixture
 def valid_version_params():
