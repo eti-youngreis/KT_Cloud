@@ -2,6 +2,7 @@ from typing import Dict, Any, Optional, List
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 from DB.NEW_KT_DB.Models.DBProxyEndpointModel import DBProxyEndpoint
 import json
+import ast
 class DBProxyEndpointManager:
     
     # Static functions
@@ -61,7 +62,7 @@ class DBProxyEndpointManager:
             """
             if not cols:
                 cols = DBProxyEndpointManager.convert_table_structure_to_columns_arr(DBProxyEndpoint.table_structure)
-            data_mapping = {col: val for col, val in zip(cols, data)}
+            data_mapping = {col: ast.literal_eval(val) if (isinstance(val, str) and val[0] == '[' and val[-1] == ']') else val for col, val in zip(cols, data)}
             return data_mapping
         
         # cast columns arr to str for query
@@ -110,7 +111,9 @@ class DBProxyEndpointManager:
             description = self.get_object_attributes_dict()
         # If there are filters return only objects that in conditions of all filters
         if Filters:
-            description = [obj for obj in description if [col for col in obj.keys() if col not in Filters or obj[col] in Filters[col]] != []]
+            for Filter in Filters:
+                description = [obj for obj in description if all(col not in Filter['Name'] or obj[col] in Filter['Values'] for col in obj.keys())]
+
         return {DBProxyEndpoint.object_name: description}
             
     

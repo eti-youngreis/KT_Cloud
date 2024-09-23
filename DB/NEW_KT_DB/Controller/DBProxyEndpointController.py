@@ -5,9 +5,11 @@ class DBProxyEndpointController:
         self.service = service
 
 
-    def create_db_proxy_endpoint(self, DBProxyName:str, DBProxyEndpointName:str, TargetRole:str = 'READ_WRITE', Tags:Optional[List[Dict[str, str]]] = None):
+    def create_db_proxy_endpoint(self, DBProxyName:str, DBProxyEndpointName:str, VpcSubnetIds:List[str],
+                VpcSecurityGroupIds:Optional[List[str]] = None, TargetRole:str = 'READ_WRITE', Tags:Optional[List[Dict[str, str]]] = None):
         """Create a db proxy endpoint"""
-        return self.service.create(DBProxyName, DBProxyEndpointName, TargetRole, Tags)
+        return self.service.create(DBProxyName, DBProxyEndpointName,VpcSubnetIds,
+                VpcSecurityGroupIds, TargetRole, Tags)
 
 
     def delete_db_proxy_endpoint(self, DBProxyEndpointName:str):
@@ -15,9 +17,10 @@ class DBProxyEndpointController:
         return self.service.delete(DBProxyEndpointName)
 
 
-    def modify_db_proxy_endpoint(self, DBProxyEndpointName:str, NewDBProxyEndpointName:Optional[str] =  None):
+    def modify_db_proxy_endpoint(self, DBProxyEndpointName:str, NewDBProxyEndpointName:Optional[str] =  None, 
+                                 VpcSubnetIds:Optional[List[str]] =  None):
         """Modify a db proxy endpoint"""
-        return self.service.modify(DBProxyEndpointName, NewDBProxyEndpointName)
+        return self.service.modify(DBProxyEndpointName, NewDBProxyEndpointName, VpcSubnetIds)
     
     
     def describe_db_proxy_endpoint(self, 

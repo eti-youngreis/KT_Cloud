@@ -25,6 +25,7 @@ endpoint_controller = DBProxyEndpointController(endpoint_service)
 
 DB_PROXY_ENDPOINT_NAME = "endpoint"
 DB_PROXY_NAME = "my-proxy"
+VPC_SUBNET_IDS = ['subnet-12345678', 'subnet-87654321']
 TARGET_ROLE = "READ_WRITE"
 
 # Demonstrate all dbproxy endpoint functionallity
@@ -40,7 +41,7 @@ print("----------------------------------------------------------------")
 # create
 start_time = datetime.now()
 print(f'''{start_time} going to create db proxy endpoint names "endpoint" in db proxy "my proxy"''')
-res = endpoint_controller.create_db_proxy_endpoint(DB_PROXY_NAME, DB_PROXY_ENDPOINT_NAME, TARGET_ROLE)
+res = endpoint_controller.create_db_proxy_endpoint(DB_PROXY_NAME, DB_PROXY_ENDPOINT_NAME, VPC_SUBNET_IDS, TARGET_ROLE)
 end_time = datetime.now()
 print(f'''{end_time} db proxy endpoint "endpoint" created successfully''')
 duration = end_time - start_time
@@ -78,7 +79,7 @@ print("----------------------------------------------------------------")
 
 
 # Modify
-endpoint_before_modify = endpoint_controller.create_db_proxy_endpoint(DB_PROXY_NAME, DB_PROXY_ENDPOINT_NAME, TARGET_ROLE)
+endpoint_before_modify = endpoint_controller.create_db_proxy_endpoint(DB_PROXY_NAME, DB_PROXY_ENDPOINT_NAME, VPC_SUBNET_IDS, TARGET_ROLE)
 start_time = datetime.now()
 print(f'''{start_time} going to modify db proxy endpoint "endpoint" to name "our-endpoint"''')
 endpoint_after_modify = endpoint_controller.modify_db_proxy_endpoint(DB_PROXY_ENDPOINT_NAME, "our-endpoint")

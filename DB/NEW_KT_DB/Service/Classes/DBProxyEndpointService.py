@@ -33,7 +33,8 @@ class DBProxyEndpointService(DBO):
         return object_json
 
 
-    def create(self, DBProxyName:str, DBProxyEndpointName:str, TargetRole:str = 'READ_WRITE', Tags:Optional[List[Dict[str, str]]] = None, IsDefault:bool = False):
+    def create(self, DBProxyName:str, DBProxyEndpointName:str, VpcSubnetIds:List[str],
+                VpcSecurityGroupIds:Optional[List[str]] = None, TargetRole:str = 'READ_WRITE', Tags:Optional[List[Dict[str, str]]] = None, IsDefault:bool = False):
         '''Create a new DBProxy endpoint.'''
         # Validations
         if not validate_name(DBProxyName):
@@ -50,7 +51,7 @@ class DBProxyEndpointService(DBO):
             raise DBProxyEndpointAlreadyExistsException(DBProxyEndpointName)
         
         # create object
-        db_proxy_endpoint:DBProxyEndpoint = DBProxyEndpoint(DBProxyEndpointName, DBProxyName, TargetRole, Tags, IsDefault=IsDefault)
+        db_proxy_endpoint:DBProxyEndpoint = DBProxyEndpoint(DBProxyEndpointName, DBProxyName, VpcSubnetIds, VpcSecurityGroupIds, TargetRole, Tags, IsDefault=IsDefault)
     
         # create physical object as described in task
         file_name = self._convert_endpoint_name_to_endpoint_file_name(DBProxyEndpointName)
@@ -107,7 +108,7 @@ class DBProxyEndpointService(DBO):
     
 
 
-    def modify(self, DBProxyEndpointName:str, NewDBProxyEndpointName:Optional[str] = None,
+    def modify(self, DBProxyEndpointName:str, NewDBProxyEndpointName:Optional[str] = None, VpcSubnetIds:Optional[List[str]] = None,
                TargetRole:Optional[str] = None, Tags:Optional[str] = None, Status:Optional[str] = None):
         '''Modify an existing DBProxy endpoint.'''
         
@@ -123,7 +124,7 @@ class DBProxyEndpointService(DBO):
         if endpoint_state != 'available':
             raise InvalidDBProxyEndpointStateException(DBProxyEndpointName, endpoint_state)
         
-        updates = {key: val for key in ['TargetRole', 'Tags', 'Status'] for val in [TargetRole, Tags, Status] if val is not None}
+        updates = {key: val for key in ['VpcSubnetIds','TargetRole', 'Tags', 'Status'] for val in [VpcSubnetIds, TargetRole, Tags, Status] if val is not None}
         # If need to change the name:
         if NewDBProxyEndpointName:
             
