@@ -27,8 +27,9 @@ class TestDBInstanceController:
 
     def test_delete_db_instance(self, db_instance_controller):
         db_instance_controller.delete_db_instance("test-instance")
-        with pytest.raises(ValueError):
+        with pytest.raises(Exception) as excinfo:
             db_instance_controller.get_db_instance("test-instance")
+        assert "Error occurred while fetching data from table" in str(excinfo.value)    
 
     def test_describe_db_instance(self, db_instance_controller):
         description = db_instance_controller.describe_db_instance("test-instance")
@@ -43,8 +44,10 @@ class TestDBInstanceController:
             db_instance_controller.create_db_instance(db_instance_identifier="", allocated_storage=-1)
 
     def test_get_non_existent_db_instance(self, db_instance_controller):
-        with pytest.raises(ValueError):
+        with pytest.raises(Exception) as excinfo:
             db_instance_controller.get_db_instance("non-existent-instance")
+        assert "Error occurred while fetching data from table" in str(excinfo.value)
+
 
     def test_modify_db_instance_boundary(self, db_instance_controller):
         with pytest.raises(ValueError):
