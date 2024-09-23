@@ -13,6 +13,9 @@ def storage_manager():
 def assert_file_exist(storage_manager, file_name):
     assert storage_manager.is_file_exist(file_name), f"Expected file {file_name} was not created."
 
+def is_file_exist(storage_manager, file_name):
+    return storage_manager.is_file_exist(file_name)
+
 # Generic function to load JSON file and assert its content
 def assert_json_content(storage_manager, file_name, expected_data):
     '''Validates the content of a JSON file stored in the storage manager's base directory.

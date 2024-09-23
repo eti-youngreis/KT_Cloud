@@ -24,6 +24,7 @@ endpoint_service = DBProxyEndpointService(endpoint_manager, storage_manager, db_
 endpoint_controller = DBProxyEndpointController(endpoint_service)
 
 DB_PROXY_ENDPOINT_NAME = "endpoint"
+NEW_DB_PROXY_ENDPOINT_NAME = "our-endpoint"
 DB_PROXY_NAME = "my-proxy"
 VPC_SUBNET_IDS = ['subnet-12345678', 'subnet-87654321']
 TARGET_ROLE = "READ_WRITE"
@@ -82,7 +83,7 @@ print("----------------------------------------------------------------")
 endpoint_before_modify = endpoint_controller.create_db_proxy_endpoint(DB_PROXY_NAME, DB_PROXY_ENDPOINT_NAME, VPC_SUBNET_IDS, TARGET_ROLE)
 start_time = datetime.now()
 print(f'''{start_time} going to modify db proxy endpoint "endpoint" to name "our-endpoint"''')
-endpoint_after_modify = endpoint_controller.modify_db_proxy_endpoint(DB_PROXY_ENDPOINT_NAME, "our-endpoint")
+endpoint_after_modify = endpoint_controller.modify_db_proxy_endpoint(DB_PROXY_ENDPOINT_NAME, NEW_DB_PROXY_ENDPOINT_NAME)
 end_time = datetime.now()
 print(f'''{end_time} db db proxy endpoint "endpoint" modified successfully''')
 duration = end_time - start_time
@@ -101,7 +102,7 @@ pytest.main(['-q', 'DB/NEW_KT_DB/Test/test_DBProxyEndpointTests.py::test_modify_
 # Describe
 start_time = datetime.now()
 print(f'''{start_time} going to describe db proxy endpoint "our-endpoint"''')
-print(endpoint_controller.describe_db_proxy_endpoint("our-endpoint"))
+print(endpoint_controller.describe_db_proxy_endpoint(NEW_DB_PROXY_ENDPOINT_NAME))
 end_time = datetime.now()
 duration = end_time - start_time
 print(f'''{end_time} db proxy endpoint "our-endpoint" was described successfully''')
@@ -116,5 +117,9 @@ pytest.main(['-q', 'DB/NEW_KT_DB/Test/test_DBProxyEndpointTests.py::test_describ
 
 print(f'''{datetime.now()} deonstration of object db proxy endpoint ended successfully''')
 print('''---------------------End Of session----------------------''')
+
+# delete from memory all integration leftovers
+endpoint_controller.delete_db_proxy_endpoint(NEW_DB_PROXY_ENDPOINT_NAME)
+
 
 
