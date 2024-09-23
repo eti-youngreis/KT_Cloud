@@ -5,8 +5,8 @@ from Storage.NEW_KT_Storage.Service.Classes.LockService import LockService
 
 
 class LockController:
-    def __init__(self, service: LockService):
-        self.service = service
+    def __init__(self):
+        self.service = LockService()
         
     def create_lock(self, bucket_key: str, lock_mode: str, amount: int, unit: str, object_key: str = '*'):
         return self.service.create_lock(bucket_key= bucket_key, object_key=object_key, lock_mode=lock_mode, amount=amount, unit=unit)
@@ -21,7 +21,7 @@ class LockController:
     def is_object_updatable(self, bucket_key: str, object_key: str):
         return self.service.is_object_updatable(bucket_key, object_key)
     
-    def is_object_deleteable(self, bucket_key: str, object_key: str):
+    def is_object_deletable(self, bucket_key: str, object_key: str):
         return self.service.is_object_deletable(bucket_key, object_key)
     
 

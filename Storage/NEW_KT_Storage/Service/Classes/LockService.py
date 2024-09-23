@@ -20,7 +20,7 @@ class LockService:
         self.locks_IDs_list = SortedList([(lock.lock_id, lock.retain_until) for lock in existing_locks], key=lambda x: x[1])
         # Initialize lock_map with existing locks-> lock_id : LockModel
         self.lock_map = {lock.lock_id: lock for lock in existing_locks}
-        
+        print(f"\033[36mBackground process:\033[0m starting lock cleanup scheduler")
         self.start_lock_cleanup_scheduler()
 
 
@@ -99,7 +99,6 @@ class LockService:
     def remove_expired_locks(self):
         """Remove locks that have expired."""        
         now = datetime.now()
-        
         expired_locks = []
         
         while self.locks_IDs_list and self.locks_IDs_list[0][1] < now:
@@ -111,14 +110,14 @@ class LockService:
         # Use delete_lock to remove 
         for lock_id in expired_locks:
             self.delete_lock(lock_id)
-        
+        print(f"\033[36mBackground process:\033[0m completed successfully with {len(expired_locks)} expired locks removed.")
+
         
     def start_lock_cleanup_scheduler(self):
         """Start a background thread that checks for expired locks every minute."""        
         def run_cleanup():
             while True:
                 self.remove_expired_locks()
-                print("Lock cleanup completed.")
                 time.sleep(10)  # Check every minute
 
         cleanup_thread = threading.Thread(target=run_cleanup)
@@ -150,10 +149,3 @@ class LockService:
         """Check if an object is locked."""        
         lock_id = f"{bucket_key}.{object_key}"
         return lock_id in self.lock_map
-
-
-    def print_locks_by_retain(self):
-        """Print the locks sorted by retain_until."""        
-        print("Locks sorted by retain_until:")
-        for idx, (lock_id, retain_until) in enumerate(self.locks_IDs_list):
-            print(f"Position {idx}: {lock_id}, Retain until: {retain_until}")
