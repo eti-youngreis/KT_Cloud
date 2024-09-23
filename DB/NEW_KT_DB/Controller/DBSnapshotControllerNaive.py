@@ -4,7 +4,7 @@ from DB.NEW_KT_DB.Validation.DBSnapshotValidationsNaive import (
     is_valid_db_snapshot_description, 
     is_valid_progress
 )
-class DBSnapshotController:
+class DBSnapshotControllerNaive:
     def create_db_snapshot(self, db_instance_identifier: str, description: str = None, progress: str = None):
         # Validate parameters
         if not is_valid_db_instance_id(db_instance_identifier):

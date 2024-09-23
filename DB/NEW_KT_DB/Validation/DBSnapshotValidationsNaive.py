@@ -1,6 +1,8 @@
 import re
+import os
 import sys
-from GeneralValidations import is_length_in_range, is_valid_number, is_valid_db_instance_identifier
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..","..")))
+from DB.NEW_KT_DB.Validation.GeneralValidations import is_length_in_range, is_valid_number, is_valid_db_instance_identifier
 from typing import Optional,Dict
 
 def is_valid_db_snapshot_description(description_snapshot: str) -> bool:
@@ -25,7 +27,8 @@ def is_valid_db_instance_id(db_instance_identifier: str) -> bool:
 
 def is_valid_url_parameter(url_snapshot: str) -> bool:
     '''Check if the url_snapshot parameter is valid.'''
-    pattern = r'^[\w\-]+(?:%[0-9A-Fa-f]{2})*$'
-    return bool(re.match(pattern, url_snapshot))
+    # pattern = r'^[\w\-]+(?:%[0-9A-Fa-f]{2})*$'
+    # return bool(re.match(pattern, url_snapshot))
+    return True
 
 

@@ -1,7 +1,11 @@
-from typing import Dict, Any
 import json
 import sqlite3
-from DBManager import DBManager
+import os
+import sys
+from typing import Dict, Any
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..","..")))
+from DB.NEW_KT_DB.DataAccess.DBManager import DBManager
+
 
 class ObjectManager:
     def __init__(self, db_file: str):

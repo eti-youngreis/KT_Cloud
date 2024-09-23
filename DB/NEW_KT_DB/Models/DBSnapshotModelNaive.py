@@ -1,10 +1,20 @@
+import os
+import sys
 from datetime import datetime
 from typing import Dict, Optional
-from DataAccess import ObjectManager
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..","..")))
+from DB.NEW_KT_DB.DataAccess import ObjectManager
 from DB.NEW_KT_DB.Validation.DBSnapshotValidationsNaive import is_valid_db_instance_id, is_valid_db_snapshot_description, is_valid_progress, is_valid_date, is_valid_url_parameter
 
-class Snapshot:
-
+class SnapshotNaive:
+    BASE_PATH = "db_snapshot"
+    object_name = "db_snapshot_naive"
+    pk_column = "db_snapshot_id"
+    pk_column_data_type = 'TEXT'
+    table_structure = f'''
+        db_instance_identifier TEXT PRIMARY KEY,
+        metadata TEXT NOT NULL
+        '''
     def __init__(self, db_instance_identifier: str, creation_date: datetime, owner_alias: str, status: str,
                  description: Optional[str] = None, progress: Optional[str] = None, url_snapshot: Optional[str] = None):
         
