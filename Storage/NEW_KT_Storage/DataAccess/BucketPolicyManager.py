@@ -4,17 +4,14 @@ import json
 import sqlite3
 import os
 import sys
-
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from DataAccess.ObjectManager import ObjectManager
 from DataAccess.StorageManager import StorageManager
 from Models.BucketPolicyModel import BucketPolicy
 
-
 class BucketPolicyManager:
 
-    def __init__(self, policy_path: str = "Bucket_policy.json", db_path: str = "BucketPolicyDB.db",
-                 base_directory: str = "D:/New folder/server"):
+    def __init__(self, policy_path: str = "Bucket_policy.json", db_path:str = "BucketPolicyDB.db", base_directory: str = "D:/New folder/server"):
         """
         Initializes the BucketPolicyManager with paths for the policy JSON file and the in-memory database.
 
@@ -29,13 +26,12 @@ class BucketPolicyManager:
         """
         self.db_path = os.path.join(base_directory, db_path)
         self.object_manager = ObjectManager(self.db_path)
-        self.object_manager.object_manager.create_management_table(BucketPolicy.object_name,
-                                                                   BucketPolicy.table_structure)
+        self.object_manager.object_manager.create_management_table(BucketPolicy.object_name, BucketPolicy.table_structure)
         self.policy_path = os.path.join(base_directory, policy_path)
         self.storage_manager = StorageManager(base_directory)
         if not self.storage_manager.is_file_exist(policy_path):
             self.storage_manager.create_file(policy_path, '{}')
-
+    
     def createInMemoryBucketPolicy(self, bucket_policy: BucketPolicy):
         """
         Stores the bucket policy in the in-memory database.
@@ -46,7 +42,7 @@ class BucketPolicyManager:
             The bucket policy to be saved in-memory.
         """
         self.object_manager.save_in_memory("BucketPolicy", bucket_policy.to_sql())
-
+    
     def createPolicy(self, bucket_policy: BucketPolicy) -> bool:
         """
         Saves the bucket policy to a physical JSON file.
@@ -68,11 +64,11 @@ class BucketPolicyManager:
             data = {}
 
         data[bucket_policy.bucket_name] = bucket_policy.to_dict()
-
+        
         with open(self.policy_path, 'w') as file:
             json.dump(data, file, indent=4, ensure_ascii=False)
         return True
-
+    
     def getBucketPolicy(self, bucket_name: str) -> Optional[Dict]:
         """
         Retrieve a bucket policy by its bucket name from physical storage.
@@ -94,7 +90,7 @@ class BucketPolicyManager:
             data = json.load(file)
 
         return data.get(bucket_name, None)
-
+    
     def deleteInMemoryBucketPolicy(self, bucket_name: str):
         """
         Deletes the bucket policy from the in-memory database.
@@ -106,7 +102,7 @@ class BucketPolicyManager:
         """
         criteria = f"bucket_name = '{bucket_name}'"
         self.object_manager.delete_from_memory_by_criteria("BucketPolicy", criteria=criteria)
-
+    
     def deletePolicy(self, bucket_name: str) -> bool:
         """
         Deletes the bucket policy from the physical JSON file.
@@ -132,7 +128,7 @@ class BucketPolicyManager:
             with open(self.policy_path, 'w') as file:
                 json.dump(data, file, indent=4, ensure_ascii=False)
             return True
-
+        
         return False
 
     def describeBucketPolicy(self, bucket_name: str) -> Optional[Dict]:
@@ -169,7 +165,7 @@ class BucketPolicyManager:
 
             with open(self.policy_path, 'w') as file:
                 json.dump(data, file, indent=4, ensure_ascii=False)
-
+        
         # Update the in-memory database
         actions = json.dumps(bucket_policy['actions'])
         allow_versions = json.dumps(bucket_policy['allow_versions'])
