@@ -10,7 +10,7 @@ from DataAccess.DBSubnetGroupManager import DBSubnetGroupManager
 from DataAccess.ObjectManager import ObjectManager
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 from datetime import datetime
-from Models.Subnet import Subnet
+from DB.NEW_KT_DB.Models.SubnetModel import Subnet
 
 object_manager = ObjectManager("../DBs/mainDB.db")
 storage_manager = StorageManager("../../s3")

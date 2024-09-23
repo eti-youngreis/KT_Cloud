@@ -15,7 +15,7 @@ from Controller.DBSubnetGroupController import DBSubnetGroupController
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 from DataAccess.ObjectManager import ObjectManager
 from Models.DBSubnetGroupModel import DBSubnetGroup
-from Models.Subnet import Subnet
+from DB.NEW_KT_DB.Models.SubnetModel import Subnet
 import Exceptions.DBSubnetGroupExceptions as DBSubnetGroupExceptions
 import sqlite3
 

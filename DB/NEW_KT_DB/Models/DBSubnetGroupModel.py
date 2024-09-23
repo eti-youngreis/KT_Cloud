@@ -8,7 +8,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from .Subnet import Subnet
+from .SubnetModel import Subnet
 import Exceptions.DBSubnetGroupExceptions as DBSubnetGroupExceptions
 
 
