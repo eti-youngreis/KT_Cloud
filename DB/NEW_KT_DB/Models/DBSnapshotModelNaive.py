@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 from datetime import datetime
 from typing import Dict, Optional
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..","..")))
@@ -15,7 +16,7 @@ class SnapshotNaive:
         db_instance_identifier TEXT PRIMARY KEY,
         metadata TEXT NOT NULL
         '''
-    def __init__(self, db_instance_identifier: str, creation_date: datetime, owner_alias: str, status: str,
+    def __init__(self, db_snapshot_identifier, db_instance_identifier: str, creation_date: datetime, owner_alias: str, status: str,
                  description: Optional[str] = None, progress: Optional[str] = None, url_snapshot: Optional[str] = None):
         
         # Validate parameters
@@ -32,7 +33,7 @@ class SnapshotNaive:
         if url_snapshot:
             if not is_valid_url_parameter(url_snapshot):
                 raise ValueError(f"Invalid url_snapshot: {url_snapshot}")
-
+        self.db_snapshot_identifier = db_snapshot_identifier
         self.db_instance_identifier = db_instance_identifier
         self.creation_date = creation_date
         self.owner_alias = owner_alias
@@ -47,6 +48,7 @@ class SnapshotNaive:
         '''Retrieve the data of the DB snapshot as a dictionary.'''
         
         return ObjectManager.convert_object_attributes_to_dictionary(
+            db_snapshot_identifier = self.db_snapshot_identifier,
             db_instance_identifier = self.db_instance_identifier,
             creation_date = self.creation_date,
             owner_alias = self.owner_alias,
@@ -58,5 +60,11 @@ class SnapshotNaive:
             table_structure = self.table_structure
         )
 
+    def to_sql(self):
+        # Convert the model snapshot to a dictionary
+        data_dict = self.to_dict()
+        values = '(' + ", ".join(f'\'{json.dumps(v)}\'' if isinstance(v, dict) or isinstance(v, list) else f'\'{v}\'' if isinstance(v, str) else f'\'{str(v)}\''
+                                 for v in data_dict.values()) + ')'
+        return values
 
 

@@ -40,45 +40,82 @@ class DBSnapshotServiceNaive(DBO):
         if not os.path.exists("../snapshot/"):
             os.makedirs("../snapshot/")
 
-        self.db_snapshot = SnapshotNaive(db_instance_identifier, creation_date=datetime.now(), owner_alias=owner_alias, status='inital',
+        db_snapshot = SnapshotNaive(db_instance_identifier, creation_date=datetime.now(), owner_alias=owner_alias, status='inital',
                                     description=description, progress=progress, url_snapshot=snapshot_db_path)
 
         assert self.db_snapshot is not None, "SnapshotNaive object was not created."
 
-        # shutil.copytree(db_instance_directory, snapshot_db_path)
-        print('!--!!!!!!!!!!!!--!!!!!!!!!!!!--!!!!!!!!!!')
+        shutil.copytree(db_instance_directory, snapshot_db_path)
 
-        return self.dal.createInMemoryDBSnapshot()
+        self.dal.createInMemoryDBSnapshot(db_snapshot)
+        return {'DBSnapshot': db_snapshot.to_dict()}
 
-    def delete(self, snapshot_name: str):
+    def delete(self, db_snapshot_identifier: str):
         '''Delete an existing DBCluster.'''
         # Validate snapshot_name
-        if not is_valid_db_instance_id(snapshot_name):
-            raise ValueError(f"Invalid snapshot_name: {snapshot_name}")
+        if not is_valid_db_instance_id(db_snapshot_identifier):
+            raise ValueError(f"Invalid snapshot_name: {db_snapshot_identifier}")
 
         # Delete physical object
-        snapshot_path = f"../snapshot/{snapshot_name}.db"
+        snapshot_path = f"../snapshot/{db_snapshot_identifier}.db"
+        db_snapshot = self.get(db_snapshot_identifier)
         if os.path.exists(snapshot_path):
             os.remove(snapshot_path)
         else:
-            print(f"Snapshot {snapshot_name} does not exist.")
+            print(f"Snapshot {db_snapshot_identifier} does not exist.")
             # Handle an error
 
         # Delete from memory
-        return self.dal.deleteInMemoryDBSnapshot()
+        self.dal.deleteInMemoryDBSnapshot(db_snapshot_identifier)
 
-    def describe(self, db_instance_identifier: str):
+    def describe(self, db_snapshot_identifier: str):
         '''Describe the details of the DB snapshot.'''
-        return self.dal.describeDBSnapshot(db_instance_identifier)
+        if not self.dal.is_db_snapshot_exist(db_snapshot_identifier):
+            # raise DBSnapshotNotFoundError('This DB instance identifier does not exist')
+            pass
+        
+        describe_db_snapshot = self.dal.describeDBSnapshot(db_snapshot_identifier)[0]
+        describe_db_snapshot_dict = {
+            'db_instance_identifier': describe_db_snapshot[0],
+            'creation_date': describe_db_snapshot[1],
+            'owner_alias': describe_db_snapshot[2],
+            'status': describe_db_snapshot[3],
+            'description': describe_db_snapshot[4],
+            'progress': describe_db_snapshot[5],
+            'url_snapshot': describe_db_snapshot[6],
+            'object_name': describe_db_snapshot[7],
+            'table_structure': describe_db_snapshot[8]
+        }
+        return {'DBSnapshot': describe_db_snapshot_dict}
 
-    def modify(self, owner_alias: Optional[str] = None, status: Optional[str] = None,
+        
+
+ 
+
+    def modify(self, db_snapshot_identifier: str, owner_alias: Optional[str] = None, status: Optional[str] = None,
                description: Optional[str] = None, progress: Optional[str] = None):
         '''Modify an existing DBCluster.'''
-        # Validate parameters
+        updates = {
+            'db_snapshot_identifier': db_snapshot_identifier,
+            'owner_alias': owner_alias,
+            'status': status,
+            'description': description,
+            'progress': progress
+        }
+        
+        # Validate specific parameters
         if description and not is_valid_db_snapshot_description(description):
             raise ValueError(f"Invalid description: {description}")
         if progress and not is_valid_progress(progress):
             raise ValueError(f"Invalid progress: {progress}")
+
+        required_params = ['db_snapshot_identifier']
+        all_params = ['owner_alias', 'status', 'description', 'progress']
+        all_params.extend(required_params)
+
+        filtered_updates = {key: value for key, value in updates.items() if key != 'db_snapshot_identifier'}
+        set_clause = ', '.join([f"{key} = '{value}'" for key, value in filtered_updates.items()])     
+
 
         if owner_alias is not None:
             self.owner_alias = owner_alias
@@ -89,7 +126,30 @@ class DBSnapshotServiceNaive(DBO):
         if progress is not None:
             self.progress = progress
 
-    def get(self):
+        self.dal.modifyDBSnapshot(db_snapshot_identifier, set_clause)
+
+    def get(self, db_snapshot_indentifier):
         '''Get code object.'''
         # Return real-time object
-        return self.db_snapshot.to_dict() if self.db_snapshot else None
+
+        describe_result = self.describe(db_snapshot_indentifier)
+        if describe_result:
+            describe_result = describe_result['DBSnapshot']
+            return SnapshotNaive(
+                describe_result['db_snapshot_identifier'],
+                describe_result['db_instance_identifier'],
+                describe_result['creation_date'],
+                describe_result['owner_alias'],
+                describe_result['status'],
+                describe_result['description'],
+                describe_result['progress'],
+                describe_result['url_snapshot']
+            )
+
+        return None
+    
+
+
+     
+               
+        
