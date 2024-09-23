@@ -3,9 +3,9 @@ import sys
 import pytest
 import sqlite3
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
-from Service.Classes.DBInstanceService import DBInstanceManager,DBInstanceService,AlreadyExistsError,ParamValidationError,DBInstanceNotFoundError
-from Exception.exception import MissingRequireParamError
-from Controller.DBInstanceController import DBInstanceController
+from Service.Classes.DBInstanceNaiveService import DBInstanceManager,DBInstanceService,AlreadyExistsError,ParamValidationError,DBInstanceNotFoundError
+from Exceptions.DBInstanceNaiveException import MissingRequireParamError
+from Controller.DBInstanceNaiveController import DBInstanceController
 from DataAccess.ObjectManager import ObjectManager
 
 @pytest.fixture

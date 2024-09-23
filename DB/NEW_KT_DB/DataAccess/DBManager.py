@@ -14,8 +14,7 @@ class EmptyResultsetError(Exception):
 class DBManager:
     def __init__(self, db_file: str):
         '''Initialize the database connection and create tables if they do not exist.'''
-        self.connection = sqlite3.connect(db_file)
-
+        self.db_path = db_file
 
     def _is_resultset_empty(self, resultset):
         if resultset == None or not resultset:
@@ -25,7 +24,8 @@ class DBManager:
     def execute_query_with_multiple_results(self, query: str):
         '''Execute a given query and return the results.'''
         try:
-            c = self.connection.cursor()
+            connection = sqlite3.connect(self.db_path)
+            c = connection.cursor()
             c.execute(query)
             results = c.fetchall()
 
@@ -33,17 +33,18 @@ class DBManager:
                 raise EmptyResultsetError('''Error: No records found.
                 execute_query_with_multiple_results should return one or more records as a result.
                 try to fix your query or use execute_query_without_results() instead.''', query)
-
-            self.connection.commit() 
+            connection.commit()
             return results if results else None
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
-
+        finally:
+            self._close_connection(connection)
 
     def execute_query_with_single_result(self, query: str):
         '''Execute a given query and return a single result.'''
         try:
-            c = self.connection.cursor()
+            connection = sqlite3.connect(self.db_path)
+            c = connection.cursor()
             c.execute(query)
             result = c.fetchone()
             # Check if more than one result exists
@@ -59,35 +60,43 @@ class DBManager:
                 execute_query_with_single_result should return exactly one record as a result.
                 try to fix your query or use execute_query_with_multiple_results() instead.''')
 
-            self.connection.commit()
+            connection.commit()
             return result if result else None
         
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
+        finally:
+            self._close_connection(connection)
 
 
     def execute_query_without_results(self, query: str):
         '''Execute a given query without waiting for any result.'''
         try:
-            c = self.connection.cursor()
+            connection = sqlite3.connect(self.db_path)
+            c = connection.cursor()
             c.execute(query)
-            self.connection.commit()
+            connection.commit()
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
+        finally:
+            self._close_connection(connection)
 
 
     def _execute_query_with_or_without_results(self, query: str):
         try:
-            c = self.connection.cursor()
+            connection = sqlite3.connect(self.db_path)
+            c = connection.cursor()
             c.execute(query)
             if not c.fetchall():
                 optional_results = None
             else:
                 optional_results = c.fetchall()
-            self.connection.commit()
+            connection.commit()
             return optional_results
         except OperationalError as e:
             raise Exception(f'Error executing query {query}: {e}')
+        finally:
+            self._close_connection(connection)
 
 
     def create_table(self, table_name, table_structure):
@@ -133,14 +142,14 @@ class DBManager:
         try:
             get_columns_query = f"""PRAGMA table_info({table_name});"""
             cols = self.execute_query_with_multiple_results(get_columns_query)
-            print(cols)
             return [col[1] for col in cols]
         except EmptyResultsetError as e:
-            print(f"table {table_name} not found: {e}")
+            raise Exception(f"table {table_name} not found: {e}")
             return []
 
         except Exception as e:
-            print(f"Error occurred while fetching columns from table {table_name}: {e}")
+            raise Exception(f"Error occurred while fetching columns from table {table_name}: {e}")
+
             return []
 
 
@@ -149,7 +158,8 @@ class DBManager:
             get_all_data_query = f"""SELECT * FROM {table_name}"""
             return self.execute_query_with_multiple_results(get_all_data_query)
         except Exception as e:
-            print(f"Error occurred while fetching data from table {table_name}: {e}")
+            raise Exception(f"Error occurred while fetching data from table {table_name}: {e}")
+
             return []
 
 
@@ -163,7 +173,7 @@ class DBManager:
             return self.execute_query_with_multiple_results(get_all_data_query)
         
         except Exception as e:
-            print(f"Error occurred while fetching data from table {table_name}: {e}")
+            raise Exception(f"Error occurred while fetching data from table {table_name}: {e}")
             return []
 
 
@@ -174,8 +184,8 @@ class DBManager:
             if in_memory_object:
                 return True
         except Exception as e:
-            print(Exception(f"Error checking if object {criteria} exists in {table_name}: {e}"))
-            return False
+            raise Exception(f"Error checking if object {criteria} exists in {table_name}: {e}")
+        return False
 
 
     def is_table_exist(self, table_name: str) -> bool:
@@ -189,8 +199,8 @@ class DBManager:
             result = self.execute_query_with_single_result(query)
             return True
         except Exception as e:
-            print(Exception(f"Error checking if table {table_name} exists: {e}"))
-            return False
+            raise Exception(f"Error checking if table {table_name} exists: {e}")
+        return False
 
 
 
@@ -205,3 +215,9 @@ class DBManager:
                 raise Exception(f'table {table_name} not found')
         except OperationalError as e:
             raise Exception(f'Error describing table {table_name}: {e}')
+        
+        
+    def _close_connection(self, connection = None) -> None:
+        """Close the database connection if it is open."""
+        if connection:
+            connection.close()
