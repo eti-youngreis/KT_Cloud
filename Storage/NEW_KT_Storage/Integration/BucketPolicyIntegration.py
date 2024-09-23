@@ -105,7 +105,12 @@ pytest.main(['-q', f'D:/boto3 project/KT_Cloud/Storage/NEW_KT_Storage/Test/test_
 # delete
 print()
 start_time = log(f'going to delete bucket {bucket_name}''')
-bucketPolicy_controller.delete_bucket_policy(bucket_name)   
+bucketPolicy_controller.delete_bucket_policy(bucket_name) 
+try:
+    bucketPolicy_controller.get_bucket_policy(bucket_name)
+    print(f"Error: Bucket Policy {bucket_name} still exists after deletion")
+except Exception as e:
+    print(f"Success: Unable to get deleted BucketPolicy {bucket_name}. Error: {str(e)}")  
 end_time = log(f"bucket policy {bucket_name} deleted successfully")
 total_duration = end_time - start_time
 log(f"total duration of modify bucket policy is: '{total_duration}'")
