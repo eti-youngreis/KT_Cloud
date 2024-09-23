@@ -19,9 +19,8 @@ class TestDBSnapshotController:
         assert "test-snapshot" not in snapshots
 
     def test_create_snapshot_non_existent_instance(self, db_snapshot_controller):
-        with pytest.raises(Exception) as excinfo:
+        with pytest.raises(ValueError):
             db_snapshot_controller.create_snapshot("non-existent-instance", "test-snapshot")
-        assert "Error occurred while fetching data from table" in str(excinfo.value)
 
     def test_delete_non_existent_snapshot(self, db_snapshot_controller):
         with pytest.raises(DbSnapshotIdentifierNotFoundError):
@@ -29,6 +28,5 @@ class TestDBSnapshotController:
 
     def test_restore_to_non_existent_instance(self, db_instance_controller, db_snapshot_controller):
         db_instance_controller.delete_db_instance("test-instance")
-        with pytest.raises(Exception) as excinfo:
+        with pytest.raises(ValueError):
             db_snapshot_controller.restore_snapshot("non-existent-instance", "test-snapshot")
-        assert "Error occurred while fetching data from table" in str(excinfo.value)    
