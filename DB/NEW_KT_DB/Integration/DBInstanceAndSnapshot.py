@@ -11,7 +11,6 @@ import time
 
 # Add these constants at the top of your file
 PINK = '\033[95m'
-WHITE = '\033[97m'
 RESET = '\033[0m'
 BLUE = '\033[94m'
 GREEN = '\033[92m'
