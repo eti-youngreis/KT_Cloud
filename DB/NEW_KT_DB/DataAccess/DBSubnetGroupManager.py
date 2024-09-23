@@ -23,9 +23,12 @@ class DBSubnetGroupManager:
         )
 
     def get(self, name: str):
-        data = self.object_manager.get_from_memory(
-            DBSubnetGroup.object_name, criteria=f"{DBSubnetGroup.pk_column} = '{name}'"
-        )
+        try:
+            data = self.object_manager.get_from_memory(
+                DBSubnetGroup.object_name, criteria=f"{DBSubnetGroup.pk_column} = '{name}'"
+            )
+        except Exception:
+            raise DBSubnetGroupExceptions.DBSubnetGroupNotFound('Subnet group not found')
         if data:
             return DBSubnetGroup(*data[0])
         else:

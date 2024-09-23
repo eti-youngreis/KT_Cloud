@@ -19,7 +19,7 @@ from Models.Subnet import Subnet
 import Exceptions.DBSubnetGroupExceptions as DBSubnetGroupExceptions
 import sqlite3
 
-object_manager = ObjectManager("../object_management_db.db")
+object_manager = ObjectManager("../DBs/mainDB.db")
 
 manager = DBSubnetGroupManager(object_manager=object_manager)
 storage_manager = StorageManager("DB/s3")
@@ -30,7 +30,7 @@ controller = DBSubnetGroupController(service)
 @pytest.fixture
 def clear_table():
     # Connect to the SQLite database
-    conn = conn = sqlite3.connect("../object_management_db.db")
+    conn = conn = sqlite3.connect("../DBs/mainDB.db")
     cursor = conn.cursor()
 
     # Clear the table if it exists
