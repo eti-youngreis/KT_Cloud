@@ -1,3 +1,16 @@
+def print_colored_line(text, color="reset"):
+    colors = {
+        "reset": "\033[0m", 
+        "red": "\033[31m",
+        "green": "\033[32m",
+        "yellow": "\033[33m",
+        "blue": "\033[34m",
+        "white": "\033[37m"
+    }
+    
+    color_code = colors.get(color, colors["reset"]) 
+    print(f"{color_code}{text}{colors['reset']}") 
+
 ### Execution Flow for S3 Storage Task Demonstration
 
 # 1. **Step 1: Create a Bucket (Malki)**
