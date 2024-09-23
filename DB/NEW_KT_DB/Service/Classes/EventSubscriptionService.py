@@ -35,7 +35,7 @@ class EventSubscriptionService(DBO):
             self.storage_manager.create_directory(directory)
 
     def create(self, subscription_name: str, sources: List[Tuple[SourceType, str]],
-               event_categories: List[EventCategory], sns_topic_arn: str, source_type: SourceType):
+               event_categories: List[EventCategory], sns_topic: str, source_type: SourceType):
         """
         Create a new event subscription.
 
@@ -43,11 +43,11 @@ class EventSubscriptionService(DBO):
             subscription_name (str): The name of the subscription.
             sources (List[Tuple[SourceType, str]]): The list of sources for the subscription.
             event_categories (List[EventCategory]): The list of event categories.
-            sns_topic_arn (str): The ARN of the SNS topic.
+            sns_topic (str): The ARN of the SNS topic.
             source_type (SourceType): The type of the source.
         """
         event_subscription = EventSubscription(
-            subscription_name, sources, event_categories, sns_topic_arn, source_type)
+            subscription_name, sources, event_categories, sns_topic, source_type)
 
         self.dal.createInMemoryEventSubscription(event_subscription)
 
@@ -64,14 +64,14 @@ class EventSubscriptionService(DBO):
         self.dal.deleteInMemoryEventSubscription(subscription_name)
         self.storage_manager.delete_file(self.get_file_path(subscription_name))
 
-    def modify(self, subscription_name: str, event_categories: List[EventCategory] = None, sns_topic_arn: str = None, source_type: SourceType = None):
+    def modify(self, subscription_name: str, event_categories: List[EventCategory] = None, sns_topic: str = None, source_type: SourceType = None):
         """
         Modify an existing event subscription.
 
         Args:
             subscription_name (str): The name of the subscription to modify.
             event_categories (List[EventCategory], optional): The new list of event categories.
-            sns_topic_arn (str, optional): The new ARN of the SNS topic.
+            sns_topic (str, optional): The new ARN of the SNS topic.
             source_type (SourceType, optional): The new type of the source.
         """
         event_subscription = self.dal.get_by_id(
@@ -79,8 +79,8 @@ class EventSubscriptionService(DBO):
 
         if event_categories is not None:
             event_subscription.event_categories = event_categories
-        if sns_topic_arn is not None:
-            event_subscription.sns_topic_arn = sns_topic_arn
+        if sns_topic is not None:
+            event_subscription.sns_topic = sns_topic
         if source_type is not None:
             event_subscription.source_type = source_type
 

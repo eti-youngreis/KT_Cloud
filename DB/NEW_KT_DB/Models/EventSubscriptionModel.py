@@ -1,6 +1,9 @@
+from collections import defaultdict
 from enum import Enum
 import json
 from typing import Dict, List, Tuple
+
+from traitlets import default
 
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 
@@ -47,14 +50,14 @@ class EventSubscription:
         sources TEXT,
         source_type TEXT,
         event_categories TEXT,
-        sns_topic_arn TEXT"""
+        sns_topic TEXT"""
 
     def __init__(
         self,
         subscription_name: str,
         sources: List[Tuple[SourceType, str]],
         event_categories: List[EventCategory],
-        sns_topic_arn: str,
+        sns_topic: str,
         source_type: SourceType
     ) -> None:
         """
@@ -64,18 +67,18 @@ class EventSubscription:
             subscription_name (str): The name of the subscription.
             sources (List[Tuple[SourceType, str]]): List of source types and their IDs.
             event_categories (List[EventCategory]): List of event categories.
-            sns_topic_arn (str): The SNS topic to which notifications will be sent.
+            sns_topic (str): The SNS topic to which notifications will be sent.
             source_type (SourceType): The type of source for which notifications will be received.
         """
         self.subscription_name = subscription_name
         self.source_type = source_type
-        self.sources = {source_type.value: set() for source_type in SourceType}
+        self.sources = defaultdict(set)
 
         for source_type, source_id in sources:
             self.sources[source_type.value].add(source_id)
 
         self.event_categories = event_categories
-        self.sns_topic_arn = sns_topic_arn
+        self.sns_topic = sns_topic
 
         self.pk_value = self.subscription_name
 
@@ -101,7 +104,7 @@ class EventSubscription:
             source_type=self.source_type.value,
             event_categories=[
                 ec.value for ec in self.event_categories],
-            sns_topic_arn=self.sns_topic_arn)
+            sns_topic=self.sns_topic)
 
     def to_sql(self) -> str:
         """
@@ -116,7 +119,7 @@ class EventSubscription:
             f"'{json.dumps(data['sources'])}'",
             f"'{data['source_type']}'",
             f"'{json.dumps(data['event_categories'])}'",
-            f"'{data['sns_topic_arn']}'"
+            f"'{data['sns_topic']}'"
         ]
         return f"({', '.join(values)})"
 
@@ -131,7 +134,7 @@ class EventSubscription:
         return __class__.__name__.removesuffix('Model')
 
     @staticmethod
-    def values_to_dict(subscription_name, sources, source_type, event_categories, sns_topic_arn) -> Dict:
+    def values_to_dict(subscription_name, sources, source_type, event_categories, sns_topic) -> Dict:
         """
         Convert database values to a dictionary.
 
@@ -140,7 +143,7 @@ class EventSubscription:
             sources (str): JSON string of sources.
             source_type (str): The type of the source.
             event_categories (str): JSON string of event categories.
-            sns_topic_arn (str): The ARN of the SNS topic.
+            sns_topic (str): The ARN of the SNS topic.
 
         Returns:
             Dict: A dictionary representation of the EventSubscription.
@@ -150,5 +153,5 @@ class EventSubscription:
             'sources': json.loads(sources),
             'source_type': source_type,
             'event_categories': json.loads(event_categories),
-            'sns_topic_arn': sns_topic_arn
+            'sns_topic': sns_topic
         }

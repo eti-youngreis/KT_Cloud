@@ -37,14 +37,14 @@ def event_subscription(event_subscription_service: EventSubscriptionService):
         'test_subscription',
         sources,
         [EventCategory.CREATION, EventCategory.DELETION],
-        'test_sns_topic_arn',
+        'test_sns_topic',
         SourceType.DB_INSTANCE
     )
     event_subscription_service.create(
         event_subscription.subscription_name,
         sources,  # Pass sources directly, not event_subscription.sources
         event_subscription.event_categories,
-        event_subscription.sns_topic_arn,
+        event_subscription.sns_topic,
         event_subscription.source_type
     )
     yield event_subscription
@@ -63,8 +63,9 @@ def test_create(event_subscription_service: EventSubscriptionService, event_subs
 def test_delete(event_subscription_service: EventSubscriptionService, event_subscription: EventSubscription):
     event_subscription_service.delete(event_subscription.subscription_name)
 
-    assert not event_subscription_service.get_by_id(
-        event_subscription.subscription_name)
+    with pytest.raises(Exception):
+        event_subscription_service.get_by_id(
+            event_subscription.subscription_name)
 
     assert not event_subscription_service.storage_manager.is_file_exist(
         event_subscription_service.get_file_path(event_subscription.subscription_name))
@@ -73,7 +74,7 @@ def test_delete(event_subscription_service: EventSubscriptionService, event_subs
 def test_modify(event_subscription_service: EventSubscriptionService, event_subscription: EventSubscription):
 
     updated_event_subscription = EventSubscription('test_subscription', [(SourceType.DB_INSTANCE, 'test_instance'), (
-        SourceType.DB_CLUSTER, 'db_cluster')], [EventCategory.BACKUP, EventCategory.DELETION, EventCategory.CREATION], 'test_sns_topic_arn', SourceType.DB_INSTANCE)
+        SourceType.DB_CLUSTER, 'db_cluster')], [EventCategory.BACKUP, EventCategory.DELETION, EventCategory.CREATION], 'test_sns_topic', SourceType.DB_INSTANCE)
     event_subscription_service.modify(
         event_subscription.subscription_name, event_categories=updated_event_subscription.event_categories)
 
@@ -81,9 +82,9 @@ def test_modify(event_subscription_service: EventSubscriptionService, event_subs
     assert updated_event_subscription == event_subscription_service.get_by_id(
         event_subscription.subscription_name)
 
-    updated_event_subscription.sns_topic_arn = 'new_sns_topic_arn'
+    updated_event_subscription.sns_topic = 'new_sns_topic'
     event_subscription_service.modify(
-        event_subscription.subscription_name, sns_topic_arn=updated_event_subscription.sns_topic_arn)
+        event_subscription.subscription_name, sns_topic=updated_event_subscription.sns_topic)
     # Assuming that __eq__ is implemented for EventSubscription
     assert updated_event_subscription == event_subscription_service.get_by_id(
         event_subscription.subscription_name)

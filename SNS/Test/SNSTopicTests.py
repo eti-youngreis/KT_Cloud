@@ -1,23 +1,19 @@
-import os
+
 import pytest
 
 
-from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
-from DB.NEW_KT_DB.Test.GeneralTests import is_file_exist
 from SNS.DataAccess.SNSManager import SNSTopicManager
 from SNS.Model.SNSModel import Protocol, SNSTopicModel
 from SNS.Service.SNSService import SNSTopicService
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 
-@pytest.fixture
-def sns_object_manager():
-    return ObjectManager('sns_test_db.db')
-
+def is_file_exist(storage_manager, file_name):
+    return storage_manager.is_file_exist(file_name)
 
 @pytest.fixture
-def sns_topic_manager(sns_object_manager: ObjectManager):
-    return SNSTopicManager(sns_object_manager)
+def sns_topic_manager():
+    return SNSTopicManager('test_sns_topic_manager.db')
 
 
 @pytest.fixture
@@ -161,7 +157,7 @@ def test_notify_subscribers(test_sns_topic: SNSTopicModel, sns_topic_service: SN
         test_sns_topic.topic_name, Protocol.EMAIL.value, test_email1)
     sns_topic_service.subscribe(
         test_sns_topic.topic_name, Protocol.EMAIL.value, test_email2)
-    sns_topic_service.notify_subscribers(
+    sns_topic_service.notify(
         test_sns_topic.topic_name, 'Test message')
 
 
@@ -169,6 +165,6 @@ def test_send_email(sns_topic_service: SNSTopicService):
     """
     Verify sending an email to multiple recipients works.
     """
-    test_email = 'test@example.com'
-    test_email2 = 'test2@example.com'
+    test_email = 'test@gmail.com'
+    test_email2 = 'test2@gmail.com'
     sns_topic_service._send_email([test_email, test_email2], 'Test message')
