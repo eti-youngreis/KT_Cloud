@@ -1,6 +1,6 @@
-from typing import List, Tuple
+from typing import Any, Dict, List, Tuple
 from DB.NEW_KT_DB.Models.EventSubscriptionModel import EventCategory, EventSubscription, SourceType
-from Service.Classes.EventSubscriptionService import EventSubscriptionService
+from DB.NEW_KT_DB.Service.Classes.EventSubscriptionService import EventSubscriptionService
 
 
 class EventSubscriptionController:
@@ -18,7 +18,7 @@ class EventSubscriptionController:
         self.service = service
 
     def create_event_subscription(self, subscription_name: str, sources: List[Tuple[SourceType, str]],
-                                  event_categories: List[EventCategory], sns_topic_arn: str, source_type: SourceType = SourceType.All) -> None:
+                                  event_categories: List[EventCategory], sns_topic: str, source_type: SourceType = SourceType.ALL) -> None:
         """
         Create a new event subscription.
 
@@ -30,7 +30,7 @@ class EventSubscriptionController:
             source_type (SourceType, optional): The type of source. Defaults to SourceType.All.
         """
         self.service.create(subscription_name=subscription_name, sources=sources,
-                            event_categories=event_categories, sns_topic_arn=sns_topic_arn, source_type=source_type)
+                            event_categories=event_categories, sns_topic_arn=sns_topic, source_type=source_type)
 
     def delete_event_subscription(self, subscription_name: str):
         """
@@ -41,16 +41,22 @@ class EventSubscriptionController:
         """
         self.service.delete(subscription_name=subscription_name)
 
-    def describe_event_subscriptions(self, columns = None, criteria = None) -> None:
+    def describe_event_subscription(self, subscription_name: str) -> Dict:
+        """
+        Describe an event subscription.
+        """
+        return self.service.describe_by_id(subscription_name)
+
+    def describe_event_subscriptions(self, columns: List[str] = '*', criteria: Dict[str, Any] = None) -> List[Dict]:
         """
         Describe event subscriptions.
 
         Args:
-            marker (str): The pagination token for the next set of results.
-            max_records (int, optional): The maximum number of records to return. Defaults to 100.
             subscription_name (str, optional): The name of a specific subscription to describe. Defaults to ''.
+            columns (List[str], optional): List of columns to include in the description. Defaults to ['*'].
+            criteria (Dict[str, Any], optional): Criteria for filtering subscriptions. Defaults to None.
         """
-        self.service.describe(columns, criteria)
+        return self.service.describe(columns, criteria)
 
     def modify_event_subscription(self, subscription_name: str, event_categories: List[EventCategory], sns_topic_arn: str, source_type: SourceType = SourceType.ALL) -> None:
         """
@@ -65,11 +71,24 @@ class EventSubscriptionController:
         self.service.modify(subscription_name=subscription_name,
                             event_categories=event_categories, sns_topic_arn=sns_topic_arn, source_type=source_type)
 
-    def get(self) -> List[EventSubscription]:
+    def get_event_subscriptions(self, criteria: Dict[str, Any] = None) -> List[EventSubscription]:
         """
-        Retrieve a list of all event subscriptions.
-
+        Get a list of all event subscriptions that match the given criteria.
+        Args:
+            criteria (Dict[str, Any], optional): Criteria for filtering subscriptions. Defaults to None.
         Returns:
-            List[EventSubscription]: A list of EventSubscription objects representing all current event subscriptions.
+            List[EventSubscription]: List of event subscriptions that match the criteria.
         """
-        return self.service.get()
+
+        return self.service.get(criteria)
+
+    def get_event_subscription(self, subscription_name: str) -> EventSubscription:
+        """
+        Retrieve a specific event subscription by its name.
+        Args:
+            subscription_name (str): The name of the subscription to retrieve.
+        Returns:
+            EventSubscription: The event subscription with the specified name.
+        """
+
+        return self.service.get_by_id(subscription_name)
