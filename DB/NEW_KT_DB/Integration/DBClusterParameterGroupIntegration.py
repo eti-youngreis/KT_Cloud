@@ -11,7 +11,6 @@ from NEW_KT_DB.Service.Classes.DBClusterParameterGroupService import DBClusterPa
 from NEW_KT_DB.DataAccess.DBClusterParameterGroupManager import DBClusterParameterGroupManager
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
-# from GeneralTests import *
 from datetime import datetime
 init(autoreset=True)
 
@@ -25,7 +24,6 @@ parameter_group_controller = DBClusterParameterGroupController(parameter_group_s
 print('''---------------------Start Of session----------------------''')
 start_time = datetime.now()
 print(start_time)
-
 print(f'''{datetime.now()} demonstration of DBClusterParameterGroups''')
 
 # create
@@ -53,7 +51,6 @@ print('''___________________________________________________________''')
 print(Fore.YELLOW+f'''{start_time} retrieving \'parameter_group_1\''''+ Style.RESET_ALL)
 parameter_group_1 = parameter_group_service.get('parameter_group_1')
 print(parameter_group_1)
-
 print(f'''{datetime.now()} retrieving \'parameter_group_1\' passed with no exceptions, valid object returned''')
 print(datetime.now() - start_time_get)
 
@@ -109,10 +106,6 @@ try:
     print(parameter_group_1)
 except Exception as e:   
     print(e) 
-
-# print(f'''{datetime.now()} retrieving \'parameter_group_1\' passed with no exceptions, valid object returned''')
-# print(datetime.now() - start_time_get)
-
 
 print(f'''{datetime.now()} demonstration of DBClusterParameterGroup ended successfully''')
 print(datetime.now())
