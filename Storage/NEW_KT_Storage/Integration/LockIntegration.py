@@ -2,23 +2,11 @@ from datetime import datetime
 import time
 import os
 import sys
+from Storage.NEW_KT_Storage.Integration.MainIntegration import print_colored_line
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 from Storage.NEW_KT_Storage.Controller.LockController import LockController
 
-def print_colored_line(text, color="reset"):
-    colors = {
-        "reset": "\033[0m", 
-        "red": "\033[31m",
-        "green": "\033[32m",
-        "yellow": "\033[33m",
-        "blue": "\033[34m",
-        "white": "\033[37m"
-    }
-    
-    color_code = colors.get(color, colors["reset"]) 
-    print(f"{color_code}{text}{colors['reset']}") 
 
-# demonstrate lock functionality
 print_colored_line('''---------------------Start Of session----------------------''')
 start_time_session = datetime.now()
 print_colored_line(f"{start_time_session} demonstration of object: Lock start", "yellow")
