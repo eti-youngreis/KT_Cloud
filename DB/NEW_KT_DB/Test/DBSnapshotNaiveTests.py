@@ -6,28 +6,29 @@ import shutil
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 
-from DB.NEW_KT_DB.DataAccess.DBSnapshotNaiveManager import DBSnapshotManagerNaive
-from DB.NEW_KT_DB.Service.Classes.DBSnapshotNaiveService import DBSnapshotServiceNaive
+from DB.NEW_KT_DB.DataAccess.DBSnapshotNaiveManager import DBSnapshotNaiveManager
+from DB.NEW_KT_DB.Service.Classes.DBSnapshotNaiveService import DBSnapshotNaiveService
 
 class TestDBSnapshotService(unittest.TestCase):
     def setUp(self):
-        self.dal_mock = MagicMock(spec=DBSnapshotManagerNaive)
-        self.service = DBSnapshotServiceNaive(self.dal_mock)
+        self.dal_mock = MagicMock(spec=DBSnapshotNaiveManager)
+        self.service = DBSnapshotNaiveService(self.dal_mock)
 
     @patch('os.getlogin', return_value='test_user')
     @patch('shutil.copytree')
-    @patch('DB.NEW_KT_DB.Service.Classes.DBSnapshotServiceNaive.DBSnapshotServiceNaive.describe', return_value=MagicMock(BASE_PATH='path', endpoint='endpoint'))
+    @patch('DB.NEW_KT_DB.Service.Classes.DBSnapshotNaiveService.DBSnapshotNaiveService.describe', return_value=MagicMock(BASE_PATH='path', endpoint='endpoint'))
     # def test_create(self, describe_mock, copytree_mock, getlogin_mock):
     def test_create(self, describe_mock, copytree_mock, getlogin_mock):
+        db_snapshot_identifier = 'test-snapshot-id'
         db_instance_identifier = 'test-db-id'
         description = 'Test snapshot'
         progress = '50%'
         
-        with patch('DB.NEW_KT_DB.Models.DBSnapshotModelNaive.SnapshotNaive') as snapshot_mock:
+        with patch('DB.NEW_KT_DB.Models.DBSnapshotNaiveModel.SnapshotNaive') as snapshot_mock:
             snapshot_instance = snapshot_mock.return_value
             self.dal_mock.createInMemoryDBSnapshot.return_value = True
             
-            result = self.service.create(db_instance_identifier, description, progress)
+            result = self.service.create(db_snapshot_identifier, db_instance_identifier, description, progress)
             
             snapshot_mock.assert_called_once_with(
                 db_instance_identifier=db_instance_identifier,

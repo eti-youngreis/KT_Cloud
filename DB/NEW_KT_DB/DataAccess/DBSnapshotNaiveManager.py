@@ -8,7 +8,7 @@ from DB.NEW_KT_DB.Validation.DBSnapshotNaiveValidations import is_valid_db_insta
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 from DB.NEW_KT_DB.Models.DBSnapshotNaiveModel import SnapshotNaive
 
-class DBSnapshotManagerNaive:
+class DBSnapshotNaiveManager:
     
     def __init__(self, object_manager: ObjectManager):
         self.object_manager = object_manager

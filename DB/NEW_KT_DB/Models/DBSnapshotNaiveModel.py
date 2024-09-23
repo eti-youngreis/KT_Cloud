@@ -5,6 +5,8 @@ from datetime import datetime
 from typing import Dict, Optional
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..","..")))
 from DB.NEW_KT_DB.DataAccess import ObjectManager
+from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
+
 from DB.NEW_KT_DB.Validation.DBSnapshotNaiveValidations import is_valid_db_instance_id, is_valid_db_snapshot_description, is_valid_progress, is_valid_date, is_valid_url_parameter
 
 class SnapshotNaive:
@@ -46,7 +48,7 @@ class SnapshotNaive:
 
     def to_dict(self) -> Dict:
         '''Retrieve the data of the DB snapshot as a dictionary.'''
-        
+
         return ObjectManager.convert_object_attributes_to_dictionary(
             db_snapshot_identifier = self.db_snapshot_identifier,
             db_instance_identifier = self.db_instance_identifier,

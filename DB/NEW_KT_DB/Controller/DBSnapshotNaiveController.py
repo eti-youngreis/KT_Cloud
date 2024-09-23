@@ -1,14 +1,14 @@
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..","..")))
-from DB.NEW_KT_DB.Service.Classes.DBSnapshotNaiveService import DBSnapshotServiceNaive
+from DB.NEW_KT_DB.Service.Classes.DBSnapshotNaiveService import DBSnapshotNaiveService
 from DB.NEW_KT_DB.Validation.DBSnapshotNaiveValidations import (
     is_valid_db_instance_id, 
     is_valid_db_snapshot_description, 
     is_valid_progress
 )
-class DBSnapshotControllerNaive:
-    def __init__(self, service: DBSnapshotServiceNaive):
+class DBSnapshotNaiveController:
+    def __init__(self, service: DBSnapshotNaiveService):
         self.service = service
 
     def create_db_snapshot(self, db_instance_identifier: str, description: str = None, progress: str = None):

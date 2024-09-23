@@ -8,13 +8,13 @@ from datetime import datetime
 from DB.NEW_KT_DB.Models.DBSnapshotNaiveModel import SnapshotNaive
 from DB.NEW_KT_DB.Service.Abc.DBO import DBO
 from DB.NEW_KT_DB.Validation.DBSnapshotNaiveValidations import is_valid_db_instance_id, is_valid_db_snapshot_description, is_valid_progress
-from DB.NEW_KT_DB.DataAccess.DBSnapshotNaiveManager import DBSnapshotManagerNaive
+from DB.NEW_KT_DB.DataAccess.DBSnapshotNaiveManager import DBSnapshotNaiveManager
 
-class DBSnapshotServiceNaive(DBO):
-    def __init__(self, dal: DBSnapshotManagerNaive):
+class DBSnapshotNaiveService(DBO):
+    def __init__(self, dal: DBSnapshotNaiveManager):
         self.dal = dal
     
-    def create(self, db_instance_identifier: str, description: str, progress: str):
+    def create(self,db_snapshot_identifier: str, db_instance_identifier: str, description: str, progress: str):
         '''Create a new DBSnapshot.'''
         # Validate parameters\
         print('Enter to create')
@@ -40,10 +40,10 @@ class DBSnapshotServiceNaive(DBO):
         if not os.path.exists("../snapshot/"):
             os.makedirs("../snapshot/")
 
-        db_snapshot = SnapshotNaive(db_instance_identifier, creation_date=datetime.now(), owner_alias=owner_alias, status='inital',
+        db_snapshot = SnapshotNaive(db_snapshot_identifier, db_instance_identifier, creation_date=datetime.now(), owner_alias=owner_alias, status='inital',
                                     description=description, progress=progress, url_snapshot=snapshot_db_path)
 
-        assert self.db_snapshot is not None, "SnapshotNaive object was not created."
+        # assert self.db_snapshot is not None, "SnapshotNaive object was not created."
 
         shutil.copytree(db_instance_directory, snapshot_db_path)
 
