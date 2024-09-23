@@ -11,7 +11,7 @@ from Models.BucketPolicyModel import BucketPolicy
 
 class BucketPolicyManager:
 
-    def __init__(self, policy_path: str = "Bucket_policy.json", db_path:str = "BucketPolicyDB.db", base_directory: str = "D:/New folder/server"):
+    def __init__(self, policy_path: str = "Bucket_policy.json", db_path:str = "BucketPolicyDB.db", base_directory: str = "C:\\Users\\User\\Documents"):
         """
         Initializes the BucketPolicyManager with paths for the policy JSON file and the in-memory database.
 

@@ -12,13 +12,14 @@
     },
     "test_policy": {
         "policy_name": "test_policy",
-        "status": "inactive",
+        "bucket_name": "bucket_name",
+        "status": "active",
         "prefix": [
-            "prefix2"
+            "prefix1"
         ],
-        "expiration_days": 45,
-        "transitions_days_GLACIER": 90,
-        "creation_date": "2024-09-21",
+        "expiration_days": 60,
+        "transitions_days_glacier": 30,
+        "creation_date": "2024-09-23",
         "lifecycle_policy_id": null
     }
 }
