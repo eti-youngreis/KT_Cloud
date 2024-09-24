@@ -85,10 +85,12 @@ class StorageManager:
         if os.path.exists(full_path):
             os.remove(full_path)
 
+
     def read_json_file(self,file_path:str):
         full_path = os.path.join(self.base_directory, file_path)
         with open(full_path, 'r') as file:
             return json.load(file)
+        
 
     def write_to_json_file(self, file_path: str, data: Dict, default_converter: Callable = None):
         """
@@ -106,6 +108,7 @@ class StorageManager:
                 json.dump(data, file, indent=4, ensure_ascii=False, default=default_converter)
             else:
                 json.dump(data, file, indent=4, ensure_ascii=False)
+                
 
     def write_to_file(self, file_path: str, content: str = '', mode: str = 'w'):
         """

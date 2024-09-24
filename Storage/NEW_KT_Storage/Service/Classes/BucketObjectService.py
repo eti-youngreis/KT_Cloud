@@ -79,16 +79,20 @@ class BucketObjectService(STO):
         self.validation_for_object(bucket_name, object_key)
 
         if version_id is None:
+
             # Deletes the old object if it exists
             full_path = os.path.join(bucket_name, object_key)
+
             # Check for policy perrmission
             if not self.policy.is_action_allowed(bucket_name, "PUT"):
                 raise ValueError(f'The {bucket_name} bucket does not allow PUT action')
+            
             # Check if object is updatable based on lock
             if self.locks.is_object_updatable(bucket_name, object_key):
                 raise ValueError("Object is locked")
             if self.storage_manager.is_file_exist(full_path):
                 self.delete(bucket_name, object_key)
+                
             # Add the object
             self.storage_manager.create_file(full_path, content)
             bucket_object = BucketObject(bucket_name, object_key)

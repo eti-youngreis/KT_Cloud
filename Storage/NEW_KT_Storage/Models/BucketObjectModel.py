@@ -11,7 +11,6 @@ class BucketObject:
     pk_column = "object_id"
 
 
-
     def __init__(self, bucket_name, object_key, encryption_id=None, lock_id=None, content=None):
         # attributes related to S3
         self.bucket_name = bucket_name
@@ -36,6 +35,7 @@ class BucketObject:
             lock_id=self.lock_id,
             created_at=self.created_at
         )
+    
 
     def to_sql(self):
         # Convert the model instance to a dictionary
