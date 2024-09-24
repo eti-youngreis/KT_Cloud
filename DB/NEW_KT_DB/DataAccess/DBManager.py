@@ -150,8 +150,6 @@ class DBManager:
         except Exception as e:
             raise Exception(f"Error occurred while fetching columns from table {table_name}: {e}")
 
-            return []
-
 
     def get_all_data_from_table(self, table_name):
         try:
@@ -159,8 +157,6 @@ class DBManager:
             return self.execute_query_with_multiple_results(get_all_data_query)
         except Exception as e:
             raise Exception(f"Error occurred while fetching data from table {table_name}: {e}")
-
-            return []
 
 
     def get_data_from_table(self, table_name, columns='*', criteria=None):
@@ -174,7 +170,6 @@ class DBManager:
         
         except Exception as e:
             raise Exception(f"Error occurred while fetching data from table {table_name}: {e}")
-            return []
 
 
     def is_object_exist(self, table_name:str, criteria:str):
