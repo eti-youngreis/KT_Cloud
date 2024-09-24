@@ -1,6 +1,7 @@
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager as ObjectManagerDB
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
+
 class ObjectManager:
 
 
@@ -9,7 +10,7 @@ class ObjectManager:
         self.object_manager = ObjectManagerDB(db_file)
 
 
-    # for outer use:
+    # ---- ObjectManagerDB methods ---- #
     def save_in_memory(self, object_name, object_info, columns=None):
 
         self.object_manager.save_in_memory(object_name, object_info, columns)
