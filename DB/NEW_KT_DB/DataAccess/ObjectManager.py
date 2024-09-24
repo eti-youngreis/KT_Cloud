@@ -117,5 +117,5 @@ class ObjectManager:
             if result is None:
                 return False
             return True 
-        except sqlite3.OperationalError as e:
+        except sqlite3.OperationalError:
             return False 
