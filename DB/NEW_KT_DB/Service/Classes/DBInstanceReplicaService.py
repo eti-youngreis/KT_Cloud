@@ -30,11 +30,11 @@ Methods:
 import copy
 from datetime import datetime
 import shutil
-from DB.NEW_KT_DB.DataAccess.DBInstanceManagerReplica import DBInstanceManager
+from KT_Cloud.DB.NEW_KT_DB.DataAccess.DBInstanceReplicaManager import DBInstanceManager
 from DB.NEW_KT_DB.Exceptions.DBInstanceExceptions import DbSnapshotIdentifierNotFoundError, InvalidQueryError, DatabaseNotFoundError, AlreadyExistsError, DatabaseCreationError
-from DB.NEW_KT_DB.Models.DBInstanceModelReplica import DBInstanceModel, Node_SubSnapshot
+from KT_Cloud.DB.NEW_KT_DB.Models.DBInstanceReplicaModel import DBInstanceModel, Node_SubSnapshot
 from DB.NEW_KT_DB.Service.Abc.DBO import DBO
-from DB.NEW_KT_DB.Validation.DBInstanceValiditionsReplica import validate_allocated_storage, validate_master_user_password, validate_port, validate_status,validate_master_user_name
+from KT_Cloud.DB.NEW_KT_DB.Validation.DBInstanceReplicaValiditions import validate_allocated_storage, validate_master_user_password, validate_port, validate_status,validate_master_user_name
 from collections import deque
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 from DB.NEW_KT_DB.DataAccess.SQLCommandManager import SQLCommandManager
@@ -220,7 +220,7 @@ class DBInstanceService(DBO):
         Returns:
         - `read_replica` (DBInstanceModel): The newly created read replica DB instance.
         """
-                if 'source_db_instance_identifier' not in kwargs:
+        if 'source_db_instance_identifier' not in kwargs:
             raise MissingRequireParamError('missing the param source_db_instance_identifier')
         required_params = ['source_db_instance_identifier','db_instance_identifier', 'master_username', 'master_user_password']
         all_params = ['port', 'allocated_storage','db_cluster_identifier','availability_zone']
@@ -281,7 +281,7 @@ class DBInstanceService(DBO):
         Returns:
         - `new_snapshot` (Snapshot): The copied snapshot object with the new file paths.
         """
-                new_snapshot = copy.deepcopy(snapshot)
+        new_snapshot = copy.deepcopy(snapshot)
         if not os.path.exists(os.path.join(target_directory, str(new_snapshot.id_snapshot))):
             os.makedirs(os.path.join(target_directory, str(new_snapshot.id_snapshot)))
 
@@ -314,7 +314,7 @@ class DBInstanceService(DBO):
         Raises:
         - `Exception`: If the instance is a read replica or if its status is not available, or if the last node of the current version has pending changes.
         '''
-                db_instance = self.get(db_instance_identifier)
+        db_instance = self.get(db_instance_identifier)
         if db_instance.is_replica:
             raise Exception("Switchover is not supported for read replicas.")
         if db_instance.status != 'available':
@@ -339,7 +339,7 @@ class DBInstanceService(DBO):
         Raises:
         - `Exception`: If the instance is not a replica or if its status is not available.
         '''
-                db_instance = self.get(db_instance_identifier)
+        db_instance = self.get(db_instance_identifier)
         if not db_instance.is_replica:
             raise Exception("failover is not supported for master instances.")
         if db_instance.status != 'available':
@@ -403,7 +403,7 @@ class DBInstanceService(DBO):
         Raises:
         - `DbSnapshotIdentifierNotFoundError`: If the specified snapshot identifier is not found.
         '''
-                if db_instance is None:
+        if db_instance is None:
             db_instance = self.get(db_instance_identifier)
         if db_snapshot_identifier not in db_instance._node_subSnapshot_name_to_id:
             raise DbSnapshotIdentifierNotFoundError(f"Snapshot '{db_snapshot_identifier}' not found for instance '{db_instance.db_instance_identifier}'")
@@ -611,7 +611,7 @@ class DBInstanceService(DBO):
         Returns:
             DBInstanceModel: The updated target DB instance after the snapshot copy.
         """
-                target_db_instance = self.get(target_db_instance_identifier)
+        target_db_instance = self.get(target_db_instance_identifier)
         if not target_db_instance.is_replica:
             raise Exception("copy snapshot is not supported for master instances.")
         # Create a new Node_SubSnapshot for the target instance

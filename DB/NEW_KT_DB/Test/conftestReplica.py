@@ -3,10 +3,10 @@ from tempfile import TemporaryDirectory
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
-from DB.NEW_KT_DB.Controller.DBInstanceControllerReplica import DBInstanceController
-from DB.NEW_KT_DB.Controller.DBSnapshotControllerReplica import DBSnapshotController
-from DB.NEW_KT_DB.Service.Classes.DBInstanceServiceReplica import DBInstanceService
-from DB.NEW_KT_DB.DataAccess.DBInstanceManagerReplica import DBInstanceManager
+from KT_Cloud.DB.NEW_KT_DB.Controller.DBInstanceReplicaController import DBInstanceController
+from KT_Cloud.DB.NEW_KT_DB.Controller.DBSnapshotReplicaController import DBSnapshotController
+from KT_Cloud.DB.NEW_KT_DB.Service.Classes.DBInstanceReplicaService import DBInstanceService
+from KT_Cloud.DB.NEW_KT_DB.DataAccess.DBInstanceReplicaManager import DBInstanceManager
 import time
 
 # Shared setup fixture for both controllers

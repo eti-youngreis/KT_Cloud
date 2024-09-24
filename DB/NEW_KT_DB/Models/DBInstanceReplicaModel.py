@@ -32,7 +32,7 @@ import os
 import sqlite3
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
 import uuid
-from DB.NEW_KT_DB.Validation.DBInstanceValiditionsReplica import validate_allocated_storage, validate_master_user_name, validate_master_user_password, validate_port, validate_status
+from KT_Cloud.DB.NEW_KT_DB.Validation.DBInstanceReplicaValiditions import validate_allocated_storage, validate_master_user_name, validate_master_user_password, validate_port, validate_status
 from DB.NEW_KT_DB.Validation.GeneralValidations import is_valid_db_instance_identifier
 
 class DBInstanceModel:
@@ -219,7 +219,7 @@ class Node_SubSnapshot:
         Returns:
             dict: A dictionary mapping the new database names to their cloned paths.
         """
-        from DB.NEW_KT_DB.Service.Classes.DBInstanceServiceReplica import SQLCommandHelper
+        from KT_Cloud.DB.NEW_KT_DB.Service.Classes.DBInstanceReplicaService import SQLCommandHelper
 
         dbs_paths_new_dic = {}  # Dictionary to store the new database paths.
         for db, db_path in dbs_paths_dic.items():

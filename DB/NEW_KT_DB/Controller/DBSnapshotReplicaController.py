@@ -46,7 +46,7 @@ operations such as:
 
 """
 
-from DB.NEW_KT_DB.Service.Classes.DBInstanceServiceReplica import DBInstanceService
+from KT_Cloud.DB.NEW_KT_DB.Service.Classes.DBInstanceReplicaService import DBInstanceService
 
 class DBSnapshotController:
     """

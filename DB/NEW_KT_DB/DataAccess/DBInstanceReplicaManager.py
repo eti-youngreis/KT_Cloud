@@ -48,7 +48,7 @@ The manager handles operations such as creating, modifying, describing, and dele
 from typing import Dict, Any
 import json
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager
-from DB.NEW_KT_DB.Models.DBInstanceModelReplica import DBInstanceModel
+from KT_Cloud.DB.NEW_KT_DB.Models.DBInstanceReplicaModel import DBInstanceModel
 
 
 class DBInstanceManager:
