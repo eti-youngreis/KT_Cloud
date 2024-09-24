@@ -145,7 +145,6 @@ class DBManager:
             return [col[1] for col in cols]
         except EmptyResultsetError as e:
             raise Exception(f"table {table_name} not found: {e}")
-            return []
 
         except Exception as e:
             raise Exception(f"Error occurred while fetching columns from table {table_name}: {e}")
