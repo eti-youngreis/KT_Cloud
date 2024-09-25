@@ -25,9 +25,9 @@ class DBSubnetGroup(Base):
     db_subnet_group_name = Column(String, primary_key = True)
     db_subnet_group_description = Column(String)
     vpc_id = Column(String)
-    subnets = relationship("Subnet", secondary=association_table)
     status = Column(String)
     db_subnet_group_arn = Column(String)
+    subnets = relationship("Subnet", secondary=association_table)
     
 class Subnet(Base):
     __tablename__ = 'subnets'
