@@ -1,28 +1,12 @@
-<<<<<<< HEAD
-from typing import List, Tuple
-import json
-import os
-
-
-from DB.NEW_KT_DB.DataAccess.EventSubscriptionManager import EventSubscriptionManager
-from DB.NEW_KT_DB.Models.EventSubscriptionModel import EventSubscription, SourceType, EventCategory
-from DB.NEW_KT_DB.Service.Abc.DBO import DBO
-from DB.NEW_KT_DB.Validation.EventSubscriptionValidations import validate_subscription_name_exist
-=======
 import json
 from typing import Any, Dict, List, Tuple
 from DB.NEW_KT_DB.DataAccess.EventSubscriptionManager import EventSubscriptionManager
 from DB.NEW_KT_DB.Models.EventSubscriptionModel import EventCategory, EventSubscription, SourceType
 from DB.NEW_KT_DB.Service.Abc.DBO import DBO
->>>>>>> fe49bffeff811509c9dbc52c0399d1d6a288665e
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 
 class EventSubscriptionService(DBO):
-<<<<<<< HEAD
-
-    def __init__(self, dal: EventSubscriptionManager, storage_manager: StorageManager, directory: str):
-=======
     """
     A service class for managing event subscriptions.
 
@@ -44,80 +28,12 @@ class EventSubscriptionService(DBO):
             storage_manager (StorageManager): The storage manager for file operations.
             directory (str): The directory path for storing event subscription files.
         """
->>>>>>> fe49bffeff811509c9dbc52c0399d1d6a288665e
         self.dal = dal
         self.storage_manager = storage_manager
         self.directory = directory
         if not self.storage_manager.is_directory_exist(directory):
             self.storage_manager.create_directory(directory)
 
-<<<<<<< HEAD
-    def get_file_path(self, subscription_name: str):
-        return os.path.join(self.directory, subscription_name + '.json')
-
-    def create(self, subscription_name: str, sources: List[Tuple[SourceType, str]], event_categories: List[EventCategory],
-               sns_topic_arn: str, source_type: SourceType):
-        '''Create a new EventSubscription.'''
-
-        # validate input
-
-        # create object in code using EventSubscriptionModel.init()- assign all attributes
-        event_subscription = EventSubscription(subscription_name=subscription_name, sources=sources,
-                                               event_categories=event_categories, sns_topic_arn=sns_topic_arn, source_type=source_type)
-
-        # create physical object as described in task
-        json_object = json.dumps(event_subscription.to_dict())
-        file_path = self.get_file_path(subscription_name)
-        self.storage_manager.create_file(
-            file_path=file_path, content=json_object)
-
-        # save in memory using EventSubscriptionManager.createInMemoryEventSubscription() function
-        self.dal.createInMemoryEventSubscription(
-            event_subscription=event_subscription)
-
-    def delete(self, subscription_name: str):
-        '''Delete an existing EventSubscription.'''
-
-        # validate input
-
-        # delete physical object
-        file_path = self.get_file_path(subscription_name)
-        self.storage_manager.delete_file(file_path=file_path)
-
-        # delete from memory using EventSubscriptionManager.deleteInMemoryEventSubscription() function- send criteria using self attributes
-        self.dal.deleteInMemoryEventSubscription(subscription_name)
-
-    def describe(self, subscription_name: str, columns=['*']):
-        '''Describe the details of EventSubscription.'''
-        return self.dal.describeEventSubscription(subscription_name=subscription_name, columns=columns)
-
-    def modify(self, subscription_name: str, **updates):
-        '''Modify an existing EventSubscription.'''
-
-        # Get the current subscription
-        current_subscription = self.dal.describeEventSubscription()
-
-        # Update the subscription object
-        for key, value in updates.items():
-            setattr(current_subscription, key, value)
-
-        # Update in-memory representation
-        self.dal.modifyEventSubscription(current_subscription)
-
-        # Update physical JSON file
-        json_data = current_subscription.to_dict()
-        file_path = self.get_file_path(subscription_name)
-        self.storage_manager.update_file(file_path, json.dumps(json_data))
-
-        self.storage_manager.delete_file(file_path)
-        self.storage_manager.create_file(file_path, json.dumps(json_data))
-
-    def get(self, subscription_name: str, columns=['*']) -> EventSubscription:
-        '''get code object.'''
-        validate_subscription_name_exist(self.dal, subscription_name)
-        # return real time object
-        return self.dal.describeEventSubscriptionById(subscription_name=subscription_name, columns=columns)
-=======
     def create(self, subscription_name: str, sources: List[Tuple[SourceType, str]],
                event_categories: List[EventCategory], sns_topic: str, source_type: SourceType):
         """
@@ -234,4 +150,3 @@ class EventSubscriptionService(DBO):
             str: The file path for the subscription.
         """
         return f'{self.directory}/{subscription_name}.json'
->>>>>>> fe49bffeff811509c9dbc52c0399d1d6a288665e
