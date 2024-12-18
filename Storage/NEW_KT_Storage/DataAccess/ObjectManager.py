@@ -1,6 +1,7 @@
 from DB.NEW_KT_DB.DataAccess.ObjectManager import ObjectManager as ObjectManagerDB
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
+
 class ObjectManager:
 
 
@@ -9,7 +10,7 @@ class ObjectManager:
         self.object_manager = ObjectManagerDB(db_file)
 
 
-    # for outer use:
+    # ---- ObjectManagerDB methods ---- #
     def save_in_memory(self, object_name, object_info, columns=None):
 
         self.object_manager.save_in_memory(object_name, object_info, columns)
@@ -42,9 +43,9 @@ class ObjectManager:
             return self.object_manager.get_from_memory(object_name, columns, criteria)
 
 
-    def convert_object_attributes_to_dictionary(self, **kwargs):
-
-        return self.object_manager.convert_object_attributes_to_dictionary(**kwargs)
+    @staticmethod
+    def convert_object_attributes_to_dictionary(**kwargs):        
+        return ObjectManagerDB.convert_object_attributes_to_dictionary(**kwargs)
 
 
     def get_all_objects_from_memory(self, object_name):

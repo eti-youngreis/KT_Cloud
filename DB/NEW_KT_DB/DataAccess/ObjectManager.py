@@ -1,7 +1,12 @@
 from typing import Dict, Any, Optional
 import json
 import sqlite3
+<<<<<<< HEAD
 from DBManager import DBManager
+=======
+
+from DB.NEW_KT_DB.DataAccess.DBManager import DBManager
+>>>>>>> fe49bffeff811509c9dbc52c0399d1d6a288665e
  
 class ObjectManager:
     def __init__(self, db_file: str):
@@ -101,10 +106,20 @@ class ObjectManager:
         return self.db_manager.get_all_data_from_table(table_name)
 
 
-    def convert_object_attributes_to_dictionary(self, **kwargs):
-
+    @staticmethod
+    def convert_object_attributes_to_dictionary(**kwargs):
         dict = {}
         for key, value in kwargs.items():
             dict[key] = value
-
         return dict
+
+    def is_exists(self, object):
+        table_name = convert_object_name_to_management_table_name(object.object_name)
+        try:
+            query=f'select * from {table_name} where {object.pk_column} = {object.pk_value}'
+            result=self.db_manager.execute_query_with_single_result(query)
+            if result is None:
+                return False
+            return True 
+        except sqlite3.OperationalError:
+            return False 

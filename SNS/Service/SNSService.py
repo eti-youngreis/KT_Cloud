@@ -1,11 +1,19 @@
 from email.mime.text import MIMEText
 import json
 import os
+<<<<<<< HEAD
+=======
+from dotenv import load_dotenv
+>>>>>>> fe49bffeff811509c9dbc52c0399d1d6a288665e
 import smtplib
 from typing import Dict, List
 from SNS.DataAccess.SNSManager import SNSTopicManager
 from SNS.Model.SNSModel import Protocol, SNSTopicModel
+<<<<<<< HEAD
 from SNS.Validation.SNSValidation import validate_protocol, validate_topic_name, validate_topic_name_exist, validate_endpoint
+=======
+from SNS.Validation.SNSValidation import validate_endpoint_exist, validate_protocol, validate_topic_name, validate_topic_name_exist, validate_endpoint
+>>>>>>> fe49bffeff811509c9dbc52c0399d1d6a288665e
 from Storage.NEW_KT_Storage.DataAccess.StorageManager import StorageManager
 
 
@@ -51,23 +59,42 @@ class SNSTopicService:
 
         # add subscriber to sns topic
         sns_topic = self.get(topic_name)
+<<<<<<< HEAD
+=======
+
+        if protocol not in sns_topic.subscribers:
+            sns_topic.subscribers[protocol] = []
+
+>>>>>>> fe49bffeff811509c9dbc52c0399d1d6a288665e
         sns_topic.subscribers[protocol].append(endpoint)
 
         # update physical object
         self.storage_manager.delete_file(self.get_file_path(topic_name))
+<<<<<<< HEAD
         print(type(list(sns_topic.subscribers.keys())[0]), sns_topic.topic_name)
         self.storage_manager.create_file(
             file_path=self.get_file_path(topic_name),
             content=sns_topic.to_dict()
         )
 
+=======
+        self.storage_manager.create_file(
+            file_path=self.get_file_path(topic_name),
+            content=json.dumps(sns_topic.to_dict())
+        )
+>>>>>>> fe49bffeff811509c9dbc52c0399d1d6a288665e
         self.sns_manager.update_topic(sns_topic)
 
     def unsubscribe(self, topic_name: str, protocol: Protocol, endpoint: str):
         '''Unsubscribe from an SNS topic.'''
         # validations
         validate_protocol(protocol)
+<<<<<<< HEAD
         validate_endpoint(protocol, endpoint)
+=======
+        validate_endpoint_exist(
+            self.sns_manager, topic_name, protocol, endpoint)
+>>>>>>> fe49bffeff811509c9dbc52c0399d1d6a288665e
         validate_topic_name_exist(self.sns_manager, topic_name)
 
         # remove subscriber from sns topic
@@ -82,17 +109,27 @@ class SNSTopicService:
         self.storage_manager.delete_file(self.get_file_path(topic_name))
         self.storage_manager.create_file(
             file_path=self.get_file_path(topic_name),
+<<<<<<< HEAD
             content=sns_topic.to_dict()
+=======
+            content=json.dumps(sns_topic.to_dict())
+>>>>>>> fe49bffeff811509c9dbc52c0399d1d6a288665e
         )
 
         self.sns_manager.update_topic(sns_topic)
 
     def get_subscribers(self, topic_name: str) -> Dict[Protocol, List[str]]:
         '''Get subscribers of an existing SNS topic.'''
+<<<<<<< HEAD
+=======
+
+        validate_topic_name_exist(self.sns_manager, topic_name)
+>>>>>>> fe49bffeff811509c9dbc52c0399d1d6a288665e
         return self.get(topic_name).subscribers
 
     def get(self, topic_name: str) -> SNSTopicModel:
         '''Get an existing SNS topic.'''
+<<<<<<< HEAD
         validate_topic_name_exist(self.sns_manager, topic_name)
         return self.sns_manager.get_topic(topic_name)
 
@@ -107,6 +144,26 @@ class SNSTopicService:
         '''Send an email to subscribers of an SNS topic.'''
         from dotenv import load_dotenv
 
+=======
+
+        validate_topic_name_exist(self.sns_manager, topic_name)
+        return self.sns_manager.get_topic(topic_name)
+
+    def notify(self, topic_name: str, message: str):
+        '''Notify subscribers of an SNS topic.'''
+
+        validate_topic_name_exist(self.sns_manager, topic_name)
+        subscribers = self.get_subscribers(topic_name)
+        for protocol, endpoints in subscribers.items():
+            if len(endpoints) > 0:
+                SNSTopicService.notification_functions[protocol](
+                    self, endpoints, message)
+
+    def _send_email(self, endpoints: List[str], message: str):
+        '''Send an email to subscribers of an SNS topic.'''
+
+        
+>>>>>>> fe49bffeff811509c9dbc52c0399d1d6a288665e
         load_dotenv()
 
         for endpoint in endpoints:
@@ -129,6 +186,11 @@ class SNSTopicService:
             except Exception as e:
                 print(f"Failed to send email to {endpoint}: {str(e)}")
 
+<<<<<<< HEAD
     notificate_functions = {
         Protocol.EMAIL: _send_email,
+=======
+    notification_functions = {
+        Protocol.EMAIL.value: _send_email,
+>>>>>>> fe49bffeff811509c9dbc52c0399d1d6a288665e
     }
