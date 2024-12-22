@@ -14,30 +14,45 @@ class SourceType(Enum):
     """
     DB_INSTANCE = 'db-instance'
     DB_CLUSTER = 'db-cluster'
-    DB_PARAMETER_GROUP = 'db-parameter-group'
-    DB_SECURITY_GROUP = 'db-security-group'
-    DB_SNAPSHOT = 'db-snapshot'
-    DB_CLUSTER_SNAPSHOT = 'db-cluster-snapshot'
-    DB_PROXY = 'db-proxy'
-    ZERO_ETL = 'zero-etl'
-    CUSTOM_ENGINE_VERSION = 'custom-engine-version'
-    BLUE_GREEN_DEPLOYMENT = 'blue-green-deployment'
     ALL = 'all'
-
 
 class EventCategory(Enum):
     """
     Enumeration of possible event categories for event subscriptions.
     """
-    RECOVERY = 'recovery'
-    READ_REPLICA = 'read replica'
     FAILURE = 'failure'
     FAILOVER = 'failover'
     DELETION = 'deletion'
     CREATION = 'creation'
-    CONFIGURATION_CHANGE = 'configuration change'
     BACKUP = 'backup'
+    ALL = 'all'
 
+events_for_source_type = {
+    SourceType.DB_INSTANCE: [
+        EventCategory.FAILURE,
+        EventCategory.FAILOVER,
+        EventCategory.DELETION,
+        EventCategory.CREATION,
+        EventCategory.BACKUP,
+        EventCategory.ALL
+    ],
+    SourceType.DB_CLUSTER: [
+        EventCategory.FAILURE,
+        EventCategory.FAILOVER,
+        EventCategory.DELETION,
+        EventCategory.CREATION,
+        EventCategory.BACKUP,
+        EventCategory.ALL
+    ],
+    SourceType.ALL: [
+        EventCategory.FAILURE,
+        EventCategory.FAILOVER,
+        EventCategory.DELETION,
+        EventCategory.CREATION,
+        EventCategory.BACKUP,
+        EventCategory.ALL
+    ]
+}
 
 class EventSubscription:
     """
