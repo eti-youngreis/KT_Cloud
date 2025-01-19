@@ -18,7 +18,11 @@ class EventSubscriptionManager:
         """
         self.object_manager = ObjectManager(db_file)
         self.object_manager.create_management_table(
-            EventSubscription.get_object_name(), EventSubscription.table_structure, pk_column_data_type='TEXT')
+            EventSubscription.sources_table_name, EventSubscription.sources_table_structure, pk_column_data_type='TEXT')
+        self.object_manager.create_management_table(
+            EventSubscription.events_table_name, EventSubscription.events_table_structure, pk_column_data_type='TEXT')
+        self.object_manager.create_management_table(
+            EventSubscription.subscriptions_table_name, EventSubscription.subscriptions_table_structure, pk_column_data_type='TEXT')
 
     def createInMemoryEventSubscription(self, event_subscription: EventSubscription) -> None:
         """
@@ -27,6 +31,10 @@ class EventSubscriptionManager:
         Args:
             event_subscription (EventSubscription): The event subscription to create.
         """
+
+        for source in event_subscription.sources:
+            self.object_manager.save_in_memory(
+                EventSubscription.sources_table_name, source.to_sql())
         self.object_manager.save_in_memory(
             event_subscription.get_object_name(), event_subscription.to_sql())
 
@@ -38,7 +46,7 @@ class EventSubscriptionManager:
             subscription_name (str): The name of the subscription to delete.
         """
         self.object_manager.delete_from_memory_by_pk(
-            EventSubscription.get_object_name(), EventSubscription.pk_column, subscription_name)
+            EventSubscription.get_object_name(), EventSubscription.subscriptions_pk_column, subscription_name)
 
     def describeEventSubscriptionById(self, subscription_name: str) -> Dict:
         """
@@ -52,7 +60,8 @@ class EventSubscriptionManager:
         """
         event_subscription = self.object_manager.get_from_memory(
             EventSubscription.get_object_name(),
-            criteria=f'{EventSubscription.pk_column} = "{subscription_name}"'
+            criteria=f'{EventSubscription.subscriptions_pk_column} = "{
+                subscription_name}"'
         )
         if not event_subscription:
             return None
@@ -79,7 +88,8 @@ class EventSubscriptionManager:
         self.object_manager.update_in_memory(
             EventSubscription.get_object_name(),
             updates,
-            f'{EventSubscription.pk_column} = "{event_subscription.pk_value}"'
+            f'{EventSubscription.subscriptions_pk_column} = "{
+                event_subscription.pk_value}"'
         )
 
     def describeEventSubscriptionByCriteria(self, columns: Optional[List[str]] = '*', criteria: Dict[str, Any] = None) -> List[Dict]:
@@ -130,13 +140,22 @@ class EventSubscriptionManager:
             EventSubscription: The EventSubscription object, or None if not found.
         """
         event_subscriptions_data = self.object_manager.get_from_memory(
-            EventSubscription.get_object_name(), criteria=f'{EventSubscription.pk_column} = "{subscription_name}"')
+            EventSubscription.get_object_name(), criteria=f'{EventSubscription.subscriptions_pk_column} = "{subscription_name}"')
 
         if not event_subscriptions_data:
             return None
 
         return EventSubscriptionManager.sql_to_object(event_subscriptions_data[0])
 
+    def event_subscription_exists(self, event_category: EventCategory, source_id: str, source_type: SourceType):
+        """
+        Check if an event subscription exists.
+        """
+
+        return self.object_manager.get_from_memory(
+            EventSubscription.get_object_name(),
+
+        )
 
     @staticmethod
     def sql_to_object(sql_subscription: Tuple[str]) -> EventSubscription:

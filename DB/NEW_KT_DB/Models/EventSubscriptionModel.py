@@ -16,6 +16,7 @@ class SourceType(Enum):
     DB_CLUSTER = 'db-cluster'
     ALL = 'all'
 
+
 class EventCategory(Enum):
     """
     Enumeration of possible event categories for event subscriptions.
@@ -26,6 +27,7 @@ class EventCategory(Enum):
     CREATION = 'creation'
     BACKUP = 'backup'
     ALL = 'all'
+
 
 events_for_source_type = {
     SourceType.DB_INSTANCE: [
@@ -54,17 +56,35 @@ events_for_source_type = {
     ]
 }
 
+
 class EventSubscription:
     """
     Represents an event subscription in the database.
     """
 
-    pk_column = 'subscription_name'
-    table_structure = """
+    subscription_table_name = 'subscriptions'
+    subscriptions_pk_column = 'subscription_name'
+    
+    events_table_name = 'events'
+    sources_table_name = 'sources'
+    
+    sources_table_structure = f"""
+    source_id TEXT,
+    {subscriptions_pk_column} TEXT,
+    CONSTRAINT pk_source_subscription PRIMARY KEY (source_id, {subscriptions_pk_column}),
+    CONSTRAINT fk_source_subscription FOREIGN KEY ({subscriptions_pk_column}) REFERENCES {subscription_table_name}({subscriptions_pk_column})
+    """
+
+    events_table_structure = f"""
+    event_category TEXT,
+    {subscriptions_pk_column} TEXT,
+    CONSTRAINT pk_event_subscription PRIMARY KEY (event_category, {subscriptions_pk_column}),
+    CONSTRAINT fk_event_subscription FOREIGN KEY ({subscriptions_pk_column}) REFERENCES {subscription_table_name}({subscriptions_pk_column})
+    """
+
+    subscriptions_table_structure = """
         subscription_name TEXT PRIMARY KEY,
-        sources TEXT,
         source_type TEXT,
-        event_categories TEXT,
         sns_topic TEXT"""
 
     def __init__(
