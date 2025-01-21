@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 from DB.NEW_KT_DB.DataAccess.EventSubscriptionManager import EventSubscriptionManager
 from DB.NEW_KT_DB.Models.EventSubscriptionModel import EventCategory, EventSubscription, SourceType
 from DB.NEW_KT_DB.Service.Abc.DBO import DBO
@@ -34,14 +34,14 @@ class EventSubscriptionService(DBO):
         if not self.storage_manager.is_directory_exist(directory):
             self.storage_manager.create_directory(directory)
 
-    def create(self, subscription_name: str, sources: List[Tuple[SourceType, str]],
+    def create(self, subscription_name: str, sources: List[str],
                event_categories: List[EventCategory], sns_topic: str, source_type: SourceType):
         """
         Create a new event subscription.
 
         Args:
             subscription_name (str): The name of the subscription.
-            sources (List[Tuple[SourceType, str]]): The list of sources for the subscription.
+            sources (List[str]): The list of sources for the subscription.
             event_categories (List[EventCategory]): The list of event categories.
             sns_topic (str): The ARN of the SNS topic.
             source_type (SourceType): The type of the source.

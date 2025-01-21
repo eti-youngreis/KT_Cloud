@@ -17,14 +17,14 @@ class EventSubscriptionController:
         """
         self.service = service
 
-    def create_event_subscription(self, subscription_name: str, sources: List[Tuple[SourceType, str]],
+    def create_event_subscription(self, subscription_name: str, sources: List[str],
                                   event_categories: List[EventCategory], sns_topic: str, source_type: SourceType = SourceType.ALL) -> None:
         """
         Create a new event subscription.
 
         Args:
             subscription_name (str): The name of the subscription.
-            sources (List[Tuple[SourceType, str]]): List of source types and their identifiers.
+            sources (List[str]): List of source identifiers.
             event_categories (List[EventCategory]): List of event categories to subscribe to.
             sns_topic (str): The ARN of the SNS topic for notifications.
             source_type (SourceType, optional): The type of source. Defaults to SourceType.All.

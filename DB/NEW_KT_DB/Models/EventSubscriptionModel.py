@@ -62,24 +62,24 @@ class EventSubscription:
     Represents an event subscription in the database.
     """
 
-    subscription_table_name = 'subscriptions'
+    subscriptions_table_name = 'subscriptions'
     subscriptions_pk_column = 'subscription_name'
-    
+
     events_table_name = 'events'
     sources_table_name = 'sources'
-    
+
     sources_table_structure = f"""
     source_id TEXT,
     {subscriptions_pk_column} TEXT,
     CONSTRAINT pk_source_subscription PRIMARY KEY (source_id, {subscriptions_pk_column}),
-    CONSTRAINT fk_source_subscription FOREIGN KEY ({subscriptions_pk_column}) REFERENCES {subscription_table_name}({subscriptions_pk_column})
+    CONSTRAINT fk_source_subscription FOREIGN KEY ({subscriptions_pk_column}) REFERENCES {subscriptions_table_name}({subscriptions_pk_column})
     """
 
     events_table_structure = f"""
     event_category TEXT,
     {subscriptions_pk_column} TEXT,
     CONSTRAINT pk_event_subscription PRIMARY KEY (event_category, {subscriptions_pk_column}),
-    CONSTRAINT fk_event_subscription FOREIGN KEY ({subscriptions_pk_column}) REFERENCES {subscription_table_name}({subscriptions_pk_column})
+    CONSTRAINT fk_event_subscription FOREIGN KEY ({subscriptions_pk_column}) REFERENCES {subscriptions_table_name}({subscriptions_pk_column})
     """
 
     subscriptions_table_structure = """
@@ -90,7 +90,7 @@ class EventSubscription:
     def __init__(
         self,
         subscription_name: str,
-        sources: List[Tuple[SourceType, str]],
+        sources: List[str],
         event_categories: List[EventCategory],
         sns_topic: str,
         source_type: SourceType
@@ -100,17 +100,14 @@ class EventSubscription:
 
         Args:
             subscription_name (str): The name of the subscription.
-            sources (List[Tuple[SourceType, str]]): List of source types and their IDs.
+            sources (List[str]): List of source types and their IDs.
             event_categories (List[EventCategory]): List of event categories.
             sns_topic (str): The SNS topic to which notifications will be sent.
             source_type (SourceType): The type of source for which notifications will be received.
         """
         self.subscription_name = subscription_name
         self.source_type = source_type
-        self.sources = defaultdict(set)
-
-        for source_type, source_id in sources:
-            self.sources[source_type.value].add(source_id)
+        self.sources = sources
 
         self.event_categories = event_categories
         self.sns_topic = sns_topic
@@ -134,8 +131,7 @@ class EventSubscription:
         """
         return ObjectManager.convert_object_attributes_to_dictionary(
             subscription_name=self.subscription_name,
-            sources={
-                k: list(v) for k, v in self.sources.items()},
+            sources=self.sources,
             source_type=self.source_type.value,
             event_categories=[
                 ec.value for ec in self.event_categories],
