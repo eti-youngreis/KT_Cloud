@@ -147,15 +147,15 @@ class EventSubscriptionManager:
 
         return EventSubscriptionManager.sql_to_object(event_subscriptions_data[0])
 
-    def event_subscription_exists(self, event_category: EventCategory, source_id: str, source_type: SourceType):
-        """
-        Check if an event subscription exists.
-        """
+    # def event_subscription_exists(self, event_category: EventCategory, source_id: str, source_type: SourceType):
+    #     """
+    #     Check if an event subscription exists.
+    #     """
 
-        return self.object_manager.get_from_memory(
-            EventSubscription.get_object_name(),
+    #     return self.object_manager.get_from_memory(
+    #         EventSubscription.get_object_name(),
 
-        )
+    #     )
 
     @staticmethod
     def sql_to_object(sql_subscription: Tuple[str]) -> EventSubscription:
